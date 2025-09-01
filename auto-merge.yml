@@ -1,4 +1,5 @@
 name: auto-merge
+
 on:
   pull_request:
     types: [opened, reopened, synchronize, labeled, ready_for_review]
