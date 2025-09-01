@@ -1,10 +1,7 @@
-name: Create test-automerge-pr
+name: test-automerge-pr
 
 on:
-  workflow_dispatch:
-  push:
-    branches:
-      - main
+  workflow_dispatch: {}
 
 permissions:
   contents: write
@@ -16,54 +13,30 @@ jobs:
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Make a dummy change
         run: |
-          echo "# Test auto-merge $(date)" >> test-automerge.md
+          echo "# Test auto-merge $(date -u +'%FT%TZ')" >> .ci/AUTOMERGE_SMOKE.md
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git checkout -b test-automerge-branch
-          git add test-automerge.md
-          git commit -m "chore: test automerge"
-          git push origin test-automerge-branch
+          git checkout -b bot/automerge-smoke
+          git add .ci/AUTOMERGE_SMOKE.md
+          git commit -m "chore(ci): automerge smoke"
+          git push -u origin bot/automerge-smoke
 
-      - name: Create PR
-        uses: peter-evans/create-pull-request@v6
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          branch: test-automerge-branch
-          title: "chore: test automerge"
-          body: "This is a test PR to validate automerge workflow."
-          labels: automerge
-
-name: test-automerge-pr
-on:
-  workflow_dispatch: {}
-permissions:
-  contents: write
-  pull-requests: write
-
-jobs:
-  create-pr:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - name: Make tiny change
-        run: |
-          mkdir -p .ci
-          echo "- automerge smoke: $(date -u +'%FT%TZ')" >> .ci/AUTOMERGE_SMOKE.md
       - name: Create PR
         id: cpr
         uses: peter-evans/create-pull-request@v6
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          commit-message: "chore(ci): automerge smoke"
-          title: "chore(ci): automerge smoke"
-          body: "Automated smoke PR."
           branch: bot/automerge-smoke
           base: main
+          title: "chore(ci): automerge smoke"
+          body: "Automated smoke PR to validate auto-merge."
           labels: automerge
-      - name: PR URL
-        run: echo "${{ steps.cpr.outputs.pull-request-url }}"
+
+      - name: Echo PR URL
+        run: echo "PR → ${{ steps.cpr.outputs.pull-request-url }}"
+
