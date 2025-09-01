@@ -1,3 +1,41 @@
+name: Create test-automerge-pr
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  create-pr:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Make a dummy change
+        run: |
+          echo "# Test auto-merge $(date)" >> test-automerge.md
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git checkout -b test-automerge-branch
+          git add test-automerge.md
+          git commit -m "chore: test automerge"
+          git push origin test-automerge-branch
+
+      - name: Create PR
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          branch: test-automerge-branch
+          title: "chore: test automerge"
+          body: "This is a test PR to validate automerge workflow."
+          labels: automerge
+
 name: test-automerge-pr
 on:
   workflow_dispatch: {}
