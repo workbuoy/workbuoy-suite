@@ -1,0 +1,31 @@
+name: test-automerge-pr
+on:
+  workflow_dispatch: {}
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  create-pr:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Make tiny change
+        run: |
+          mkdir -p .ci
+          echo "- automerge smoke: $(date -u +'%FT%TZ')" >> .ci/AUTOMERGE_SMOKE.md
+      - name: Create PR
+        id: cpr
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "chore(ci): automerge smoke"
+          title: "chore(ci): automerge smoke"
+          body: "Automated smoke PR."
+          branch: bot/automerge-smoke
+          base: main
+          labels: automerge
+      - name: PR URL
+        run: echo "${{ steps.cpr.outputs.pull-request-url }}"
