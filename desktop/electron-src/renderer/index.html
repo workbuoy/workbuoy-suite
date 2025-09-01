@@ -1,0 +1,55 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8"/>
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'">
+    <title>WorkBuoy Desktop</title>
+    <style>
+      body { font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; margin: 24px; }
+      .row { display: flex; gap: 12px; align-items: center; }
+      .badge { padding: 4px 8px; border-radius: 999px; background: #eee; }
+      button { padding: 8px 12px; border-radius: 8px; border: 1px solid #ddd; cursor: pointer; }
+      #logs { white-space: pre-wrap; background: #fafafa; border: 1px solid #eee; padding: 8px; height: 200px; overflow: auto; }
+    </style>
+  </head>
+  <body>
+    <h1>WorkBuoy Desktop</h1>
+    <div class="row">
+      <div>Status: <span id="status" class="badge">online</span></div>
+      <button id="notify">Test notification</button>
+    </div>
+
+    <h3>Auto-update</h3>
+    <div class="row">
+      <button id="check">Check for updates</button>
+      <button id="download">Download update</button>
+      <button id="install">Install & restart</button>
+    </div>
+    <h4>Events</h4>
+    <div id="logs"></div>
+
+    <script type="module">
+      const statusEl = document.getElementById('status');
+      const logs = document.getElementById('logs');
+      function log(msg){ logs.textContent += msg + "\n"; logs.scrollTop = logs.scrollHeight; }
+
+      function updateStatus(){
+        const online = navigator.onLine;
+        statusEl.textContent = online ? 'online' : 'offline';
+        statusEl.style.background = online ? '#d1fae5' : '#fee2e2';
+      }
+      window.addEventListener('online', updateStatus);
+      window.addEventListener('offline', updateStatus);
+      updateStatus();
+
+      document.getElementById('notify').addEventListener('click', () => {
+        window.wb.notify('WorkBuoy Desktop', 'Notifications are working');
+      });
+
+      window.wb.updater.onEvent((e) => log(JSON.stringify(e)));
+      document.getElementById('check').addEventListener('click', async () => { const r = await window.wb.updater.check(); log('check:' + JSON.stringify(r)); });
+      document.getElementById('download').addEventListener('click', async () => { const r = await window.wb.updater.download(); log('download:' + JSON.stringify(r)); });
+      document.getElementById('install').addEventListener('click', async () => { const r = await window.wb.updater.install(); log('install:' + JSON.stringify(r)); });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,22 @@
+name: CI
+on: [push, pull_request]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - run: npm ci
+      - run: npm run build
+      - run: npm start &
+      - run: |
+          for i in $(seq 1 30); do
+            curl -sf http://localhost:3000/api/metrics && break || true
+            sleep 2
+          done
+      - run: npm run ci:metrics:smoke
+      - run: npm test -- --coverage
+      - name: Enforce coverage >=80%
+        run: |
+          node -e "const s=require('./coverage/coverage-summary.json').total.statements.pct; if(s<80){console.error('Coverage fail',s); process.exit(1)} else {console.log('Coverage OK',s)}"

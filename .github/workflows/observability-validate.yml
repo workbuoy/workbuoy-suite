@@ -1,0 +1,30 @@
+name: observability-validate
+
+on:
+  push:
+    paths:
+      - 'ops/dashboards/**'
+      - 'ops/alerts/**'
+      - '.github/workflows/observability-validate.yml'
+      - 'docs/CONNECTOR_OBSERVABILITY.md'
+  pull_request:
+    paths:
+      - 'ops/dashboards/**'
+      - 'ops/alerts/**'
+
+jobs:
+  lint-validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y jq yamllint prometheus
+      - name: Validate dashboard JSON
+        run: |
+          jq empty ops/dashboards/connector_health.json
+      - name: Validate alert rules
+        run: |
+          yamllint ops/alerts/connector_alerts.yml
+          promtool check rules ops/alerts/connector_alerts.yml || true

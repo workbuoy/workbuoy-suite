@@ -1,0 +1,50 @@
+
+enum DealStage {
+  Lead
+  Qualification
+  Proposal
+  Negotiation
+  Won
+  Lost
+}
+
+model Task {
+  id        String   @id @default(cuid())
+  title     String
+  status    String   @default("open")
+  dueAt     DateTime?
+  deal      Deal?    @relation(fields: [dealId], references: [id])
+  dealId    String?
+  contact   Contact? @relation(fields: [contactId], references: [id])
+  contactId String?
+  company   Company? @relation(fields: [companyId], references: [id])
+  companyId String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  createdAt DateTime @default(now())
+  groups    GroupMember[]
+}
+
+model Group {
+  id        String   @id @default(cuid())
+  displayName String @unique
+  createdAt DateTime @default(now())
+  members   GroupMember[]
+}
+
+model GroupMember {
+  id        String   @id @default(cuid())
+  userId    String
+  groupId   String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  group     Group    @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, groupId])
+}

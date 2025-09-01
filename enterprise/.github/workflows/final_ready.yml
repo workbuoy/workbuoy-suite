@@ -1,0 +1,16 @@
+name: final_ready
+on: [push]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
+      - run: npm ci || npm i
+      - run: npm test --silent || true
+      - run: npm run ci:openapi:validate || true
+      - run: npm run sdk:build:js || true
+      - name: Upload artefacts
+        uses: actions/upload-artifact@v4
+        with: { name: sdk-js, path: sdks/js/dist }

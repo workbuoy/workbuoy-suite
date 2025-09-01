@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: workbuoy-cxm
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: workbuoy-cxm
+  template:
+    metadata:
+      labels:
+        app: workbuoy-cxm
+    spec:
+      initContainers:
+        - name: migrate
+          image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+          command: ["sh","-c","npm run migrate"]
+      affinity:
+  podAntiAffinity:
+    preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 100
+        podAffinityTerm:
+          topologyKey: kubernetes.io/hostname
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: {{ include "workbuoy.name" . }}
+              app.kubernetes.io/instance: {{ .Release.Name }}
+containers:
+
+        - name: cxm
+          image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - containerPort: {{ .Values.service.port }}
+          env:
+            - name: WB_ENABLE_SCHEDULER
+              value: {{ .Values.env.WB_ENABLE_SCHEDULER | quote }}
+            - name: WB_SCHEDULER_INTERVAL_MS
+              value: {{ .Values.env.WB_SCHEDULER_INTERVAL_MS | quote }}
+            - name: WB_RATE_LIMIT_PER_MIN
+              value: {{ .Values.env.WB_RATE_LIMIT_PER_MIN | quote }}
+            - name: WB_RATE_LIMIT_BURST
+              value: {{ .Values.env.WB_RATE_LIMIT_BURST | quote }}
+            - name: WB_BREAKER_OPEN
+              value: {{ .Values.env.WB_BREAKER_OPEN | quote }}
+          readinessProbe:
+            httpGet:
+              path: /api/health/ready
+              port: {{ .Values.service.port }}
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /api/health/live
+              port: {{ .Values.service.port }}
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          resources:
+{{ toYaml .Values.resources | indent 12 }}

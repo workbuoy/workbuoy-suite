@@ -1,0 +1,94 @@
+
+stages:
+  - setup
+  - saas
+  - crm
+  - desktop
+  - observe
+
+variables:
+  GIT_STRATEGY: fetch
+
+.setup_flags:
+  stage: setup
+  script:
+    - |
+      MODS="${MODULES:-saas,crm,desktop}"
+      echo "run_saas=$([[ $MODS == *saas* ]] && echo true || echo false)" >> flags.env
+      echo "run_crm=$([[ $MODS == *crm* ]] && echo true || echo false)" >> flags.env
+      echo "run_desktop=$([[ $MODS == *desktop* ]] && echo true || echo false)" >> flags.env
+  artifacts:
+    reports:
+      dotenv: flags.env
+
+helm_apply:
+  stage: saas
+  needs: [".setup_flags"]
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "web" || $CI_PIPELINE_SOURCE == "pipeline"'
+  script:
+    - if [ "$(grep run_saas flags.env | cut -d= -f2 | head -n1)" != "true" ]; then echo "skip saas"; exit 0; fi
+    - mkdir -p ~/.kube && echo "$KUBE_CONFIG" | base64 -d > ~/.kube/config
+    - ENV="${ENVIRONMENT:-stage}"
+    - VALUES="release/values/values.${ENV}.yaml"
+    - helm upgrade --install workbuoy-enterprise ops/helm/workbuoy -f "$VALUES" --namespace workbuoy --create-namespace
+    - BASE="${API_BASE_URL}"
+    - curl -f "$BASE/api/healthz"
+    - curl -f "$BASE/api/readyz"
+    - curl -f "$BASE/api-docs/openapi.yaml"
+
+crm_migrations_import:
+  stage: crm
+  needs: ["helm_apply"]
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "web" || $CI_PIPELINE_SOURCE == "pipeline"'
+  script:
+    - if [ "$(grep run_crm flags.env | cut -d= -f2 | sed -n '2p')" != "true" ]; then echo "skip crm"; exit 0; fi
+    - psql "$DATABASE_URL" -f crm/migrations/2025_add_geo.sql
+    - bash scripts/import_contacts.sh ./samples/contacts.csv "$API_BASE_URL" "$API_KEY"
+
+buoy_ai_smoke:
+  stage: crm
+  needs: ["crm_migrations_import"]
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "web" || $CI_PIPELINE_SOURCE == "pipeline"'
+  script:
+    - node scripts/ai_smoke.js
+
+desktop_build_sign:
+  stage: desktop
+  needs: [".setup_flags"]
+  image: node:20-bullseye
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "web" || $CI_PIPELINE_SOURCE == "pipeline"'
+  before_script:
+    - apt-get update && apt-get install -y sqlcipher libsqlcipher-dev python3 g++ make
+  script:
+    - if [ "$(grep run_desktop flags.env | cut -d= -f2 | tail -n1)" != "true" ]; then echo "skip desktop"; exit 0; fi
+    - cd desktop && npm ci || npm install
+    - npm rebuild better-sqlite3 --build-from-source
+    - node scripts/sqlcipher_probe.js
+    - npm run build
+  artifacts:
+    paths:
+      - desktop/dist/
+
+desktop_e2e:
+  stage: desktop
+  needs: ["desktop_build_sign"]
+  services:
+    - name: redis:7-alpine
+      alias: redis
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "web" || $CI_PIPELINE_SOURCE == "pipeline"'
+  script:
+    - bash scripts/e2e_conflict_load.sh
+  artifacts:
+    paths:
+      - reports/e2e_conflict_load.json
+
+dashboards_compliance:
+  stage: observe
+  needs: ["helm_apply"]
+  script:
+    - echo "Apply Grafana dashboards & DSR smoke in ops pipeline"

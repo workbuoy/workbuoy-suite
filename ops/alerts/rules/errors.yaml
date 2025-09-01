@@ -1,0 +1,26 @@
+groups:
+- name: connector-error-rate
+  interval: 1m
+  rules:
+  - alert: SFHighErrorRate
+    expr: (sum by (env) (rate(sf_errors_total[10m])) / clamp_min(sum by (env) (rate(sf_upsert_total[10m])), 1e-9)) > 0.05
+    for: 10m
+    labels:
+      severity: critical
+      team: integrations
+      provider: salesforce
+    annotations:
+      summary: "High error rate in Salesforce connector ({{ $labels.env }})"
+      description: "Error ratio > 5% over 10m window"
+      runbook: "docs/ALERT_HYGIENE.md#high-error-rate"
+  - alert: DynHighErrorRate
+    expr: (sum by (env) (rate(dyn_errors_total[10m])) / clamp_min(sum by (env) (rate(dyn_upsert_total[10m])), 1e-9)) > 0.05
+    for: 10m
+    labels:
+      severity: critical
+      team: integrations
+      provider: dynamics
+    annotations:
+      summary: "High error rate in Dynamics connector ({{ $labels.env }})"
+      description: "Error ratio > 5% over 10m window"
+      runbook: "docs/ALERT_HYGIENE.md#high-error-rate"

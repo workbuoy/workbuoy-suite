@@ -1,0 +1,27 @@
+name: e2e-desktop-conflict-load
+on: [workflow_dispatch]
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    services:
+      redis:
+        image: redis:7-alpine
+        ports: ['6379:6379']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
+      - name: Install desktop
+        run: |
+          cd desktop
+          npm ci || npm install
+      - name: Run conflict+load E2E
+        env:
+          LOAD_OPS: 5000
+        run: |
+          bash scripts/e2e_conflict_load.sh
+      - name: Upload report
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e_conflict_load_report
+          path: reports/e2e_conflict_load.json

@@ -1,0 +1,52 @@
+name: Release
+on:
+  push:
+    tags: ['v*']
+jobs:
+  release:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest, windows-latest, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - name: Verify secrets (prod)
+        run: |
+          if [ -z "${{ secrets.WB_SECRETS_KEY }}" ]; then
+            echo "WB_SECRETS_KEY required for release"; exit 1;
+          fi
+      - name: Install deps
+        run: npm ci || npm i
+      - name: Build all
+        run: npm run desktop:build
+      - name: Sign (stubs)
+        if: matrix.os == 'windows-latest'
+        run: echo "Signing stub - replace with signtool and cert from secrets"
+      - name: Upload artifacts
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/*.dmg
+            dist/*.exe
+            dist/*.AppImage
+            dist/*.deb
+            dist/*.rpm
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Generate checksums
+        run: |
+          mkdir -p dist/manifest
+          if [ -d integrations/manifest ]; then cp integrations/manifest/*.json dist/manifest/ || true; fi
+          (cd dist && sha256sum *.dmg *.exe *.AppImage *.deb *.rpm 2>/dev/null | tee checksums.txt || true)
+      - name: Upload manifests & checksums
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/manifest/*.json
+            dist/checksums.txt
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

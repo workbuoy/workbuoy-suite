@@ -1,0 +1,43 @@
+# PR Preview Template (static/non-executable)
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: wb-pr-<PR_NUMBER>
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: workbuoy-web
+  namespace: wb-pr-<PR_NUMBER>
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app: workbuoy-web }
+  template:
+    metadata:
+      labels: { app: workbuoy-web }
+    spec:
+      containers:
+        - name: web
+          image: ghcr.io/workbuoy/web:<PR_SHA>
+          env:
+            - name: API_BASE_URL
+              value: "https://wb-pr-<PR_NUMBER>.stage.workbuoy.io"
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: workbuoy-web
+  namespace: wb-pr-<PR_NUMBER>
+spec:
+  rules:
+    - host: wb-pr-<PR_NUMBER>.stage.workbuoy.io
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: workbuoy-web
+                port:
+                  number: 80

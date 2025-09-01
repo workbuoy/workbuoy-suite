@@ -1,0 +1,27 @@
+{
+  "role": "sales",
+  "navi": [
+    {
+      "type": "next_action",
+      "label": "Drive to Acme Corp \u2013 QBR",
+      "time": "09:00",
+      "map_route": true
+    },
+    {
+      "type": "next_action",
+      "label": "Demo at BetaTech",
+      "time": "11:30",
+      "map_route": true
+    }
+  ],
+  "log": [
+    {
+      "time": "08:55",
+      "event": "Buoy suggested earlier departure due to traffic"
+    },
+    {
+      "time": "09:45",
+      "event": "Meeting notes captured for Acme Corp"
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "title": "WB AI Insights",
+  "panels": [
+    {
+      "type": "graph",
+      "title": "AI Jobs (success)",
+      "targets": [
+        {
+          "expr": "sum(increase(wb_desktop_ai_jobs_total{status='success'}[1h]))"
+        }
+      ]
+    },
+    {
+      "type": "graph",
+      "title": "AI Jobs (error)",
+      "targets": [
+        {
+          "expr": "sum(increase(wb_desktop_ai_jobs_total{status='error'}[1h]))"
+        }
+      ]
+    }
+  ]
+}

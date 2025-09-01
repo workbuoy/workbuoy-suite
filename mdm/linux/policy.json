@@ -1,0 +1,8 @@
+{
+  "ApiBaseUrl": "https://api.workbuoy.local",
+  "AutoUpdateChannel": "stable",
+  "TelemetryEnabled": true,
+  "ProxyURL": "",
+  "OTELExporterEndpoint": "http://otel-collector.example:4318",
+  "SSOBaseUrl": "https://sso.workbuoy.local"
+}

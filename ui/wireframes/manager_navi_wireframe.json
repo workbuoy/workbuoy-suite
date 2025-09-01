@@ -1,0 +1,24 @@
+{
+  "role": "manager",
+  "navi": [
+    {
+      "type": "next_action",
+      "label": "Review weekly report",
+      "time": "09:00"
+    },
+    {
+      "type": "feed",
+      "label": "KPI dashboard updated"
+    }
+  ],
+  "log": [
+    {
+      "time": "08:30",
+      "event": "Team standup auto-synced"
+    },
+    {
+      "time": "12:00",
+      "event": "Budget proposal approved"
+    }
+  ]
+}

@@ -1,0 +1,62 @@
+[
+  {
+    "id": 1,
+    "title": "Prod Stripe webhook flow",
+    "estimate": "1-3d",
+    "DoD": "Defined"
+  },
+  {
+    "id": 2,
+    "title": "Logs shipping",
+    "estimate": "1-3d",
+    "DoD": "Defined"
+  },
+  {
+    "id": 3,
+    "title": "Policy hot-reload",
+    "estimate": "1-3d",
+    "DoD": "Defined"
+  },
+  {
+    "id": 4,
+    "title": "CXM data adapters",
+    "estimate": "1-3d",
+    "DoD": "Defined"
+  },
+  {
+    "id": 5,
+    "title": "Kraken stub",
+    "estimate": "1-3d",
+    "DoD": "Defined"
+  },
+  {
+    "id": 6,
+    "title": "Tsunami overlay stub",
+    "estimate": "1-3d",
+    "DoD": "Defined"
+  },
+  {
+    "id": 7,
+    "title": "Job board connector stub",
+    "estimate": "1-3d",
+    "DoD": "Defined"
+  },
+  {
+    "id": 8,
+    "title": "BI metrics panel",
+    "estimate": "1-3d",
+    "DoD": "Defined"
+  },
+  {
+    "id": 9,
+    "title": "Secure masking rules",
+    "estimate": "1-3d",
+    "DoD": "Defined"
+  },
+  {
+    "id": 10,
+    "title": "PDF robustness",
+    "estimate": "1-3d",
+    "DoD": "Defined"
+  }
+]

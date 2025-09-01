@@ -1,0 +1,39 @@
+
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>WorkBuoy — Data Quality Approvals</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="/css/styles.css">
+  <style>
+    /* Locked design: 86% width, 72vh height table */
+    .container { width: 86%; margin: 20px auto; }
+    .table-wrap { height: 72vh; overflow:auto; border:1px solid #ddd; border-radius:8px; }
+    table { width:100%; border-collapse: collapse; }
+    th, td { padding: 10px; border-bottom: 1px solid #eee; text-align:left; }
+    th { position: sticky; top:0; background:#fafafa; }
+    .badge { display:inline-block; padding:2px 8px; border-radius:12px; font-size:12px; background:#eee; }
+    .stale { background:#ffe8cc; color:#8a5a00; }
+    .controls { margin-bottom:10px; display:flex; gap:8px; align-items:center; }
+    .why { color:#666; font-size:12px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Data Quality Suggestions <span id="stale" class="badge" style="display:none;">STALE</span></h2>
+    <div class="controls">
+      <button id="refresh">Refresh</button>
+      <button id="approve">Approve Selected</button>
+      <span id="status"></span>
+    </div>
+    <div class="table-wrap">
+      <table id="suggestions">
+        <thead><tr><th><input type="checkbox" id="all"/></th><th>ID</th><th>Confidence</th><th>Why</th><th>Before</th><th>After</th><th>Status</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+  <script src="/js/admin/data-quality.js"></script>
+</body>
+</html>

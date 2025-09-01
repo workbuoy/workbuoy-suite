@@ -1,0 +1,94 @@
+{
+  "title": "Connector Health (Salesforce & Dynamics)",
+  "tags": [
+    "workbuoy",
+    "connectors"
+  ],
+  "timezone": "browser",
+  "schemaVersion": 38,
+  "version": 1,
+  "panels": [
+    {
+      "type": "timeseries",
+      "title": "Ingest rate \u2013 Salesforce (records/s)",
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "rate(sf_ingest_total[5m])"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Ingest rate \u2013 Dynamics (records/s)",
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "rate(dyn_ingest_total[5m])"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Error rate \u2013 Salesforce (%)",
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "100 * rate(sf_errors_total[5m]) / clamp_min(rate(sf_ingest_total[5m]) + rate(sf_errors_total[5m]), 1e-9)"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Error rate \u2013 Dynamics (%)",
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "100 * rate(dyn_errors_total[5m]) / clamp_min(rate(dyn_ingest_total[5m]) + rate(dyn_errors_total[5m]), 1e-9)"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "DLQ in (5m) \u2013 Salesforce",
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "increase(sf_dlq_total[5m])"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "DLQ in (5m) \u2013 Dynamics",
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "increase(dyn_dlq_total[5m])"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Ingest latency p95 (placeholder)",
+      "description": "Viser p95 dersom histogrammet wb_connector_ingest_latency_seconds_bucket er tilgjengelig.",
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "histogram_quantile(0.95, sum(rate(wb_connector_ingest_latency_seconds_bucket[5m])) by (le, provider))"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Retry activity",
+      "description": "Hvis wb_connector_retries_total er eksponert.",
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "rate(wb_connector_retries_total[5m])"
+        }
+      ]
+    }
+  ]
+}

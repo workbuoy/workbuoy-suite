@@ -1,0 +1,28 @@
+{{- if .Values.networkPolicy.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "workbuoy.fullname" . }}
+spec:
+  podSelector:
+    matchLabels:
+      app: {{ include "workbuoy.fullname" . }}
+  policyTypes: ["Ingress","Egress"]
+  ingress:
+    - from:
+      {{- range .Values.networkPolicy.allowNamespaces }}
+        - namespaceSelector:
+            matchLabels:
+              name: {{ . | quote }}
+      {{- end }}
+      ports:
+        - protocol: TCP
+          port: {{ .Values.service.targetPort }}
+  egress:
+    - to: []
+      ports:
+        - protocol: TCP
+          port: 443
+        - protocol: TCP
+          port: 80
+{{- end }}

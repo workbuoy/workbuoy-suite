@@ -1,0 +1,2 @@
+redisUrl: ${REDIS_URL}
+otlpEndpoint: ${OTEL_EXPORTER_OTLP_ENDPOINT}

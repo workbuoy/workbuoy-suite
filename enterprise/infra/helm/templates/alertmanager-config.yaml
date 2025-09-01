@@ -1,0 +1,26 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "workbuoy.fullname" . }}-alertmanager
+  labels:
+    app: {{ include "workbuoy.fullname" . }}
+data:
+  alertmanager.yml: |
+    route:
+      receiver: team-slack
+      routes:
+        - matchers:
+          - severity = "page"
+          receiver: pagerduty
+        - matchers:
+          - severity = "ticket"
+          receiver: team-slack
+    receivers:
+      - name: team-slack
+        slack_configs:
+          - send_resolved: true
+            api_url: {{ .Values.alertmanager.slackWebhookUrl | quote }}
+            channel: "#workbuoy-alerts"
+      - name: pagerduty
+        pagerduty_configs:
+          - routing_key: {{ .Values.alertmanager.pagerdutyRoutingKey | quote }}

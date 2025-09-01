@@ -1,0 +1,12 @@
+# Allowlist of methods+paths Buoy AI is allowed to call via the action layer.
+# Format: ["GET /api/v1/crm/contacts", "POST /api/v1/crm/opportunities", ...]
+allow:
+  - "GET /api/v1/crm/contacts"
+  - "POST /api/v1/crm/contacts"
+  - "PATCH /api/v1/crm/contacts"
+  - "GET /api/v1/crm/opportunities"
+  - "POST /api/v1/crm/opportunities"
+  - "PATCH /api/v1/crm/opportunities"
+  - "GET /api/v1/crm/pipelines"
+  - "GET /api/v1/crm/import"
+  - "POST /api/v1/crm/export"

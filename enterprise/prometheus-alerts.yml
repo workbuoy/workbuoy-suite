@@ -1,0 +1,68 @@
+groups:
+  - name: workbuoy-connectors
+    rules:
+      - alert: ConnectorErrorsHigh
+        expr: increase(wb_connector_err_total[5m]) > 0
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Connector errors detected"
+          description: "Errors observed in the last 5m."
+      - alert: CircuitBreakerOpen
+        expr: increase(wb_circuit_opens_total[5m]) > 0
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Circuit breaker opened"
+          description: "Breaker opened for one or more connectors."
+      - alert: SchedulerFailures
+        expr: increase(wb_scheduler_errors_total[10m]) > 0
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Scheduler errors"
+          description: "Scheduler encountered errors."
+
+  - name: workbuoy-scoring-feedback
+    rules:
+      - alert: ScoringLatencyHigh
+        expr: wb_scoring_p95_ms > 1000
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High scoring p95 latency"
+          description: "wb_scoring_p95_ms above threshold."
+      - alert: FeedbackVerificationDrop
+        expr: wb_feedback_verified_ratio < 0.5
+        for: 30m
+        labels:
+          severity: info
+        annotations:
+          summary: "Feedback verification ratio low"
+          description: "wb_feedback_verified_ratio below 0.5"
+---
+groups:
+  - name: workbuoy-connectors
+    rules:
+      - alert: WorkBuoyConnectorHighP95
+        expr: wb_connector_p95_ms > 5000
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Connector p95 latency high"
+          description: "wb_connector_p95_ms over 5s for 10m"
+
+
+  - alert: WorkBuoySearchErrorsHigh
+    expr: increase(wb_search_err_total[5m]) > 10
+    for: 10m
+    labels:
+      severity: warning
+    annotations:
+      summary: "Search errors elevated"
+      description: "High error volume on search API"

@@ -1,0 +1,39 @@
+openapi: 3.1.0
+info: { title: Buoy CRM API, version: 1.0.0 }
+servers: [ { url: http://localhost:3000 } ]
+paths:
+  /api/contacts:
+    get: { summary: List contacts, responses: { '200': { description: OK } } }
+    post:
+      summary: Create contact
+      requestBody: { required: true, content: { application/json: { schema: { type: object, properties: { name: { type: string }, email: { type: string, format: email } }, required: [name] } } } }
+      responses: { '201': { description: Created }, '400': { description: Bad Request } }
+  /api/contacts/{id}:
+    get: { summary: Get contact, parameters: [{ in: path, name: id, required: true, schema: { type: string } }], responses: { '200': { description: OK }, '404': { description: Not Found } } }
+    put: { summary: Update contact, parameters: [{ in: path, name: id, required: true, schema: { type: string } }], requestBody: { required: true, content: { application/json: { schema: { type: object } } } }, responses: { '200': { description: OK }, '400': { description: Bad Request } } }
+  /api/deals:
+    get: { summary: List deals, responses: { '200': { description: OK } } }
+    post:
+      summary: Create deal
+      requestBody: { required: true, content: { application/json: { schema: { type: object, properties: { name: { type: string } }, required: [name] } } } }
+      responses: { '201': { description: Created }, '400': { description: Bad Request } }
+  /api/deals/{id}:
+    get: { summary: Get deal, parameters: [{ in: path, name: id, required: true, schema: { type: string } }], responses: { '200': { description: OK }, '404': { description: Not Found } } }
+    put: { summary: Update deal, parameters: [{ in: path, name: id, required: true, schema: { type: string } }], requestBody: { required: true, content: { application/json: { schema: { type: object } } } }, responses: { '200': { description: OK }, '400': { description: Bad Request } } }
+  /api/tasks:
+    get: { summary: List tasks, responses: { '200': { description: OK } } }
+    post:
+      summary: Create task
+      requestBody: { required: true, content: { application/json: { schema: { type: object, properties: { title: { type: string } }, required: [title] } } } }
+      responses: { '201': { description: Created }, '400': { description: Bad Request } }
+  /api/crm/summarize:
+    post: { summary: AI summary stub, responses: { '200': { description: OK } } }
+  /api/ingest/run:
+    post:
+      summary: Run ingest
+      parameters: [ { in: query, name: source, required: false, schema: { type: string } } ]
+      responses: { '200': { description: OK } }
+  /api/webhooks/enterprise:
+    post:
+      summary: Enterprise webhook (HMAC: X-Signature sha256=<hex>, X-Timestamp)
+      responses: { '200': { description: OK }, '401': { description: Unauthorized } }

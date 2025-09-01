@@ -1,0 +1,21 @@
+channels:
+  stable:
+    percent: 30           # % av klienter som får oppdatering
+    allow_os:             # OS-målretting
+      windows: true
+      mac: true
+      linux: true
+    min_version: "1.0.0"  # min klientversjon som kan oppdatere
+    max_version: null
+    hold: false           # killswitch
+    revoked: []           # liste over versjoner som er trukket tilbake
+  beta:
+    percent: 100
+    allow_os:
+      windows: true
+      mac: true
+      linux: true
+    min_version: "1.0.0"
+    max_version: null
+    hold: false
+    revoked: []

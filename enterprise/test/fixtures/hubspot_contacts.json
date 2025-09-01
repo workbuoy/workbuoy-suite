@@ -1,0 +1,28 @@
+{
+  "results": [
+    {
+      "id": "1",
+      "properties": {
+        "firstname": "Ada",
+        "lastname": "Lovelace",
+        "email": "ada@example.com"
+      }
+    },
+    {
+      "id": "2",
+      "properties": {
+        "firstname": "Grace",
+        "lastname": "Hopper",
+        "email": "grace@example.com"
+      }
+    },
+    {
+      "id": "3",
+      "properties": {
+        "firstname": "Linus",
+        "lastname": "Torvalds",
+        "email": "linus@example.com"
+      }
+    }
+  ]
+}

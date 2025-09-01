@@ -1,0 +1,11 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: workbuoy-cxm
+spec:
+  selector:
+    matchLabels:
+      app: workbuoy-cxm
+  podMetricsEndpoints:
+    - path: /api/metrics
+      interval: 30s

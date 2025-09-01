@@ -1,0 +1,42 @@
+name: release-seal
+
+on:
+  workflow_dispatch: {}
+  push:
+    tags:
+      - 'v*.*.*'
+
+jobs:
+  seal:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+      - name: Build seal manifest
+        run: |
+          python3 scripts/release_seal_build.py
+          ls -l reports
+      - name: Gate on critical workflows
+        run: |
+          jq -r '.gate_workflows[]' release_config.json | xargs scripts/check_workflows.sh
+      - name: Sign checksums (optional GPG)
+        env:
+          GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
+        run: |
+          if [[ -n "${GPG_PRIVATE_KEY}" ]]; then
+            echo "$GPG_PRIVATE_KEY" | base64 -d | gpg --batch --import
+            gpg --batch --yes --armor --detach-sign -o reports/seal.SHA256SUMS.asc reports/seal.SHA256SUMS
+          else
+            echo "No GPG key provided; skipping signature"
+          fi
+      - name: Upload seal artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-seal
+          path: |
+            reports/seal.json
+            reports/seal.SHA256SUMS
+            reports/seal.SHA256SUMS.asc

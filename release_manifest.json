@@ -1,0 +1,33 @@
+{
+  "version": "v1-enterprise",
+  "paths": [
+    ".github/workflows/desktop-encryption-tests.yml",
+    ".github/workflows/desktop-signing.yml",
+    ".github/workflows/update-feed-smoke.yml",
+    ".github/workflows/desktop-e2e-load.yml",
+    ".github/workflows/salesforce-connector-tests.yml",
+    ".github/workflows/dynamics-connector-tests.yml",
+    ".github/workflows/alert-hygiene-lint.yml",
+    ".github/workflows/update-rollout-smoke.yml",
+    ".github/workflows/desktop-telemetry-smoke.yml",
+    ".github/workflows/release-seal.yml",
+    "ops/alerts/rules/ingest.yaml",
+    "ops/alerts/rules/errors.yaml",
+    "alertmanager/config.yaml",
+    "grafana/dashboards/ops_overview.json",
+    "grafana/dashboards/desktop_stability.json",
+    "grafana/dashboards/connector_dynamics.json",
+    "connectors/salesforce/mapping.yaml",
+    "connectors/dynamics/mapping.yaml",
+    "docs/DESKTOP_SIGNING.md",
+    "docs/DESKTOP_AUTO_UPDATE.md",
+    "docs/AUTO_UPDATE_ROLLOUT.md",
+    "docs/DESKTOP_TESTS_E2E.md",
+    "docs/CONNECTOR_SALESFORCE.md",
+    "docs/CONNECTOR_DYNAMICS.md",
+    "docs/ALERT_HYGIENE.md",
+    "docs/DESKTOP_TELEMETRY.md",
+    "docs/RELEASE_NOTES_v1_enterprise.md",
+    "docs/RELEASE_SEAL.md"
+  ]
+}

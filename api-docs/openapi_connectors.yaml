@@ -1,0 +1,22 @@
+paths:
+  /api/v1/connectors/{provider}/webhook:
+    post:
+      summary: Provider webhook ingest
+      parameters:
+        - in: path
+          name: provider
+          required: true
+          schema: { type: string, enum: [salesforce, hubspot, dynamics] }
+        - in: header
+          name: x-api-key
+          required: true
+          schema: { type: string }
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json: { schema: { type: object } }
+      responses: { '200': { description: OK } }

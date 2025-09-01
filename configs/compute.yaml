@@ -1,0 +1,8 @@
+# Where inference/training should run
+inference:
+  llm: api   # api | local
+  ml:  local # local | api
+  dl:  local # local | api
+training:
+  enabled: false
+  backend: local  # local | k8s | cloud

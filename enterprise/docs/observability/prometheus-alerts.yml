@@ -1,0 +1,24 @@
+
+groups:
+- name: workbuoy-cxm
+  rules:
+  - alert: SlowScoringP95
+    expr: wb_scoring_p95_ms > 100
+    for: 5m
+    labels: { severity: warning }
+    annotations: { summary: 'Scoring p95 above 100ms' }
+  - alert: LowFeedbackVerified
+    expr: wb_feedback_verified_ratio < 0.6
+    for: 24h
+    labels: { severity: warning }
+    annotations: { summary: 'Low verified feedback ratio — gaming risk' }
+  - alert: SignalsMutedSpike
+    expr: increase(wb_signals_muted_total[1h]) > 100
+    for: 10m
+    labels: { severity: info }
+    annotations: { summary: 'Spike in muted signals — budget too restrictive' }
+  - alert: IntegrationCircuitOpen
+    expr: sum by (connector) (increase(wb_integration_circuit_open[15m])) > 0
+    for: 15m
+    labels: { severity: critical }
+    annotations: { summary: 'Integration degraded — circuit open' }

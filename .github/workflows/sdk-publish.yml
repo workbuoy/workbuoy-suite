@@ -1,0 +1,53 @@
+name: sdk-publish
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  build-and-publish-sdks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install backend deps
+        run: npm ci
+        working-directory: backend
+      - name: Validate OpenAPI
+        run: npm run validate:openapi
+        working-directory: backend
+      - name: Generate TS SDK
+        run: npm run gen:sdk:ts
+        working-directory: backend
+      - name: Prepare TS SDK package
+        run: |
+          mkdir -p sdk/ts
+          cp sdk/ts-gen/index.ts sdk/ts/index.d.ts
+          cp sdk/ts/package.json sdk/ts/README.md || true
+          jq '.version = "${{ github.ref_name }}"' sdk/ts/package.json > sdk/ts/package.json.tmp && mv sdk/ts/package.json.tmp sdk/ts/package.json || true
+      - name: Publish TS SDK to npm
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          cd sdk/ts
+          echo "//registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}" > .npmrc
+          npm publish --access public || true
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install openapi-python-client & build tools
+        run: pip install build twine openapi-python-client
+      - name: Generate Python SDK
+        run: npm run gen:sdk:py
+        working-directory: backend
+      - name: Publish Python SDK to PyPI
+        env:
+          TWINE_USERNAME: __token__
+          TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
+        run: |
+          cd sdk/python-gen
+          python -m build
+          twine upload dist/* || true

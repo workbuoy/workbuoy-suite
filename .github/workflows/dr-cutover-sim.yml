@@ -1,0 +1,34 @@
+name: dr-cutover-sim
+
+on:
+  push:
+    paths:
+      - 'ops/helm/**'
+      - 'scripts/dr_cutover.sh'
+      - '.github/workflows/dr-cutover-sim.yml'
+      - 'docs/DR_RUNBOOK.md'
+      - 'ops/dashboards/dr_overview.json'
+  workflow_dispatch: {}
+
+jobs:
+  cutover:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Kind
+        uses: helm/kind-action@v1.8.0
+        with:
+          cluster_name: wb-dr-sim
+      - name: Setup Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: v3.14.4
+      - name: Apply cutover
+        run: |
+          chmod +x scripts/dr_cutover.sh
+          ./scripts/dr_cutover.sh
+      - name: Upload DR report
+        uses: actions/upload-artifact@v4
+        with:
+          name: dr-report
+          path: reports/dr_cutover.json

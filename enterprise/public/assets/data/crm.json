@@ -1,0 +1,28 @@
+{
+  "accounts": [
+    {
+      "id": "ACME",
+      "name": "ACME Inc.",
+      "city": "Bergen",
+      "status": "Warm",
+      "renewal_days": 30,
+      "mrr": 10000
+    },
+    {
+      "id": "NORTH",
+      "name": "Northwind",
+      "city": "Oslo",
+      "status": "AtRisk",
+      "renewal_days": 12,
+      "mrr": 7200
+    },
+    {
+      "id": "CONT",
+      "name": "Contoso",
+      "city": "Trondheim",
+      "status": "Stable",
+      "renewal_days": 58,
+      "mrr": 5400
+    }
+  ]
+}

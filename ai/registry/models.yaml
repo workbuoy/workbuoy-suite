@@ -1,0 +1,14 @@
+default: openai-llm
+models:
+  openai-llm:
+    adapter: ai.adapters.llm_openai.OpenAILLMAdapter
+    config:
+      api: env:OPENAI_API_KEY
+  sklearn-classifier:
+    adapter: ai.adapters.sklearn_stub.SklearnClassifierAdapter
+    config:
+      path: data/models/sklearn/latest.pkl
+  torch-dl:
+    adapter: ai.adapters.torch_stub.TorchDLAdapter
+    config:
+      path: data/models/torch/latest.pt

@@ -1,0 +1,14 @@
+{{- if .Values.serviceMonitor.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ include "workbuoy.fullname" . }}
+spec:
+  selector:
+    matchLabels:
+      app: {{ include "workbuoy.fullname" . }}
+  endpoints:
+    - port: http
+      path: /api/metrics
+      interval: 30s
+{{- end }}

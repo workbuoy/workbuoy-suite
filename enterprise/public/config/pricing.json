@@ -1,0 +1,26 @@
+{
+  "core": {
+    "individual": {
+      "monthly": 900
+    },
+    "team": {
+      "monthly": 2900
+    },
+    "business": {
+      "monthly": 4900
+    }
+  },
+  "flex": {
+    "temp": {
+      "min": 1500,
+      "max": 2500
+    },
+    "tempest": {
+      "min": 9900,
+      "max": 29900
+    }
+  },
+  "secure": {
+    "contact": true
+  }
+}

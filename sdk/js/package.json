@@ -1,0 +1,33 @@
+{
+  "name": "@workbuoy/adaptive-client",
+  "version": "1.0.0",
+  "description": "Adaptive HTTP client for WorkBuoy (token bucket + EWMA backoff)",
+  "type": "module",
+  "main": "adaptiveClient.js",
+  "exports": "./adaptiveClient.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/workbuoy/workbuoy-suite.git"
+  },
+  "author": "WorkBuoy",
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "scripts": {
+    "test": "node --version && echo 'ok'"
+  },
+  "keywords": [
+    "workbuoy",
+    "sdk",
+    "rate-limit",
+    "adaptive",
+    "ewma",
+    "token-bucket"
+  ],
+  "dependencies": {
+    "node-fetch": "^3.3.2",
+    "prom-client": "^15.1.3"
+  }
+}

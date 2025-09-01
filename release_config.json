@@ -1,0 +1,12 @@
+{
+  "gate_workflows": [
+    ".github/workflows/desktop-encryption-tests.yml",
+    ".github/workflows/update-feed-smoke.yml",
+    ".github/workflows/desktop-e2e-load.yml",
+    ".github/workflows/salesforce-connector-tests.yml",
+    ".github/workflows/dynamics-connector-tests.yml",
+    ".github/workflows/alert-hygiene-lint.yml",
+    ".github/workflows/update-rollout-smoke.yml",
+    ".github/workflows/desktop-telemetry-smoke.yml"
+  ]
+}

@@ -1,0 +1,1 @@
+DROP TABLE IF EXISTS ai_actions_log; DROP TABLE IF EXISTS ai_tasks;

@@ -1,0 +1,105 @@
+
+trigger: none
+pr: none
+
+parameters:
+  - name: modules
+    type: string
+    default: 'saas,crm,desktop'
+  - name: environment
+    type: string
+    default: 'stage'
+
+variables:
+  - group: WorkBuoy-Secrets
+
+stages:
+- stage: SaaS
+  condition: contains('${{ parameters.modules }}', 'saas')
+  jobs:
+  - job: HelmApply
+    pool:
+      vmImage: 'ubuntu-latest'
+    steps:
+    - checkout: self
+    - script: |
+        mkdir -p ~/.kube
+        echo "$(KUBE_CONFIG)" | base64 -d > ~/.kube/config
+        ENV='${{ parameters.environment }}'
+        VALUES="release/values/values.${ENV}.yaml"
+        helm upgrade --install workbuoy-enterprise ops/helm/workbuoy -f "$VALUES" --namespace workbuoy --create-namespace
+        BASE="$(API_BASE_URL)"
+        curl -f "$BASE/api/healthz"
+        curl -f "$BASE/api/readyz"
+        curl -f "$BASE/api-docs/openapi.yaml"
+      displayName: Helm apply & verify
+
+- stage: CRM
+  dependsOn: SaaS
+  condition: contains('${{ parameters.modules }}', 'crm')
+  jobs:
+  - job: MigrateAndImport
+    pool:
+      vmImage: 'ubuntu-latest'
+    steps:
+    - checkout: self
+    - script: |
+        psql "$(DATABASE_URL)" -f crm/migrations/2025_add_geo.sql
+        bash scripts/import_contacts.sh ./samples/contacts.csv "$(API_BASE_URL)" "$(API_KEY)"
+      displayName: Migrations + Import
+  - job: BuoySmoke
+    pool:
+      vmImage: 'ubuntu-latest'
+    steps:
+    - checkout: self
+    - script: node scripts/ai_smoke.js
+      displayName: Buoy AI smoke
+
+- stage: Desktop
+  dependsOn: SaaS
+  condition: contains('${{ parameters.modules }}', 'desktop')
+  jobs:
+  - job: BuildSQLCipher
+    pool:
+      vmImage: 'ubuntu-latest'
+    steps:
+    - checkout: self
+    - task: NodeTool@0
+      inputs:
+        versionSpec: '20.x'
+    - script: |
+        sudo apt-get update && sudo apt-get install -y sqlcipher libsqlcipher-dev python3 g++ make
+        cd desktop && npm ci || npm install
+        npm rebuild better-sqlite3 --build-from-source
+        node scripts/sqlcipher_probe.js
+        npm run build
+      displayName: Build + SQLCipher probe
+    - publish: desktop/dist
+      artifact: desktop_dist
+  - job: E2E
+    pool:
+      vmImage: 'ubuntu-latest'
+    services:
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+    steps:
+    - checkout: self
+    - script: bash scripts/e2e_conflict_load.sh
+      displayName: Desktop E2E
+    - publish: reports/e2e_conflict_load.json
+      artifact: e2e_report
+
+- stage: Observe
+  dependsOn: SaaS
+  jobs:
+  - job: DashboardsCompliance
+    pool:
+      vmImage: 'ubuntu-latest'
+    steps:
+    - checkout: self
+    - script: |
+        echo "Apply Grafana dashboards/alerts with kubectl in ops pipeline"
+        echo "Run DSR smoke against stage API"
+      displayName: Dashboards + DSR smoke (record)

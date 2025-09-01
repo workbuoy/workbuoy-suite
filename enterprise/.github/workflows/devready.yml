@@ -1,0 +1,16 @@
+name: DevReady CI
+
+
+  security-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: github/codeql-action/init@v3
+        with: { languages: javascript }
+      - uses: github/codeql-action/analyze@v3
+      - name: Trivy scan
+        uses: aquasecurity/trivy-action@0.22.0
+        with: { scan-type: 'fs', format: 'table', exit-code: '0', ignore-unfixed: true, severity: 'HIGH,CRITICAL' }
+      - name: ZAP Baseline
+        uses: zaproxy/action-baseline@v0.11.0
+        with: { target: 'http://localhost:3000' }

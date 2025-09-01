@@ -1,0 +1,10 @@
+[
+  {
+    "type": "contact",
+    "external_id": "wb-ct-1001",
+    "name": "Ada Lovelace",
+    "email": "ada@example.com",
+    "phone": "+4711223344",
+    "account_id": "001xx000003DGbQ"
+  }
+]

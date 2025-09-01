@@ -1,0 +1,7 @@
+# DSR Smoke (template) — define your DSR endpoints before running
+# Required env: API_BASE_URL, DSR_TOKEN (if needed)
+steps:
+  - name: subject export (placeholder)
+    run: curl -fsSL -H "Authorization: Bearer $DSR_TOKEN" "$API_BASE_URL/api/dsr/export?subject=me"
+  - name: subject delete (dry-run)
+    run: curl -fsSL -H "Authorization: Bearer $DSR_TOKEN" "$API_BASE_URL/api/dsr/delete?subject=me&dryRun=true"

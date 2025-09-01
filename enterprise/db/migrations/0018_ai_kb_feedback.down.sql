@@ -1,0 +1,1 @@
+DROP TABLE IF EXISTS kb_documents; DROP TABLE IF EXISTS ai_feedback; DROP TABLE IF EXISTS tickets;

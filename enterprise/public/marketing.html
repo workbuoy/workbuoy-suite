@@ -1,0 +1,1281 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WorkBuoy - Agentic AI Assistant for Enterprise</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            line-height: 1.6;
+            color: #1a1a1a;
+            background: #ffffff;
+        }
+
+        /* Header */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid #e5e7eb;
+            z-index: 1000;
+            padding: 1rem 0;
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #2563eb;
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: #374151;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+        .nav-links a:hover {
+            color: #2563eb;
+        }
+
+        .cta-button {
+            background: #2563eb;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .cta-button:hover {
+            background: #1d4ed8;
+            transform: translateY(-1px);
+        }
+
+        /* Hero Section */
+        .hero {
+            padding: 8rem 2rem 6rem;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            margin-top: 80px;
+        }
+
+        .hero-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: center;
+        }
+
+        .hero-content h1 {
+            font-size: 3.5rem;
+            font-weight: 700;
+            line-height: 1.1;
+            margin-bottom: 1.5rem;
+            color: #1a1a1a;
+        }
+
+        .hero-content .highlight {
+            color: #2563eb;
+        }
+
+        .hero-content p {
+            font-size: 1.25rem;
+            color: #6b7280;
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .btn-primary {
+            background: #2563eb;
+            color: white;
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s;
+        }
+
+        .btn-primary:hover {
+            background: #1d4ed8;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(37, 99, 235, 0.3);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #374151;
+            padding: 1rem 2rem;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .btn-secondary:hover {
+            border-color: #2563eb;
+            color: #2563eb;
+        }
+
+        /* Hero Demo - Buoy Chat */
+        .hero-demo {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .demo-header {
+            background: #f9fafb;
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .demo-avatar {
+            width: 32px;
+            height: 32px;
+            background: #2563eb;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+        }
+
+        .demo-info h4 {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #1f2937;
+        }
+
+        .demo-info p {
+            font-size: 0.8rem;
+            color: #6b7280;
+        }
+
+        .demo-content {
+            padding: 1.5rem;
+            height: 400px;
+            overflow-y: auto;
+        }
+
+        .message {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .message.user {
+            flex-direction: row-reverse;
+        }
+
+        .message-avatar {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .ai-avatar {
+            background: #2563eb;
+            color: white;
+        }
+
+        .user-avatar {
+            background: #6b7280;
+            color: white;
+        }
+
+        .message-bubble {
+            background: #f3f4f6;
+            padding: 0.75rem 1rem;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            max-width: 80%;
+        }
+
+        .message.user .message-bubble {
+            background: #2563eb;
+            color: white;
+        }
+
+        .typing {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #6b7280;
+            font-style: italic;
+            font-size: 0.85rem;
+        }
+
+        .typing-dots {
+            display: flex;
+            gap: 0.25rem;
+        }
+
+        .typing-dot {
+            width: 4px;
+            height: 4px;
+            background: #6b7280;
+            border-radius: 50%;
+            animation: typing 1.4s infinite ease-in-out;
+        }
+
+        .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+        .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+
+        @keyframes typing {
+            0%, 80%, 100% { transform: scale(0.8); opacity: 0.5; }
+            40% { transform: scale(1); opacity: 1; }
+        }
+
+        /* Navi Section - Full Width */
+        .navi-section {
+            padding: 6rem 0;
+            background: white;
+            position: relative;
+        }
+
+        .navi-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            text-align: center;
+        }
+
+        .navi-header h2 {
+            font-size: 3rem;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 1rem;
+        }
+
+        .navi-header p {
+            font-size: 1.3rem;
+            color: #6b7280;
+            margin-bottom: 4rem;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* Navi Mode Slider */
+        .navi-slider-container {
+            background: #f8fafc;
+            border-radius: 20px;
+            padding: 3rem;
+            margin: 4rem 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .navi-modes {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 3rem;
+            position: relative;
+        }
+
+        .mode-step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.3s;
+            flex: 1;
+        }
+
+        .mode-step:hover {
+            transform: translateY(-5px);
+        }
+
+        .mode-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+            transition: all 0.3s;
+            border: 3px solid transparent;
+        }
+
+        .mode-step.active .mode-icon {
+            border-color: #2563eb;
+            box-shadow: 0 0 20px rgba(37, 99, 235, 0.3);
+            transform: scale(1.1);
+        }
+
+        .mode-title {
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 0.5rem;
+            font-size: 1rem;
+        }
+
+        .mode-subtitle {
+            font-size: 0.8rem;
+            color: #6b7280;
+        }
+
+        /* Mode-specific colors */
+        .mode-step:nth-child(1) .mode-icon { background: linear-gradient(135deg, #f3f4f6, #e5e7eb); }
+        .mode-step:nth-child(2) .mode-icon { background: linear-gradient(135deg, #ddd6fe, #c4b5fd); }
+        .mode-step:nth-child(3) .mode-icon { background: linear-gradient(135deg, #93c5fd, #60a5fa); }
+        .mode-step:nth-child(4) .mode-icon { background: linear-gradient(135deg, #34d399, #10b981); }
+        .mode-step:nth-child(5) .mode-icon { background: linear-gradient(135deg, #f59e0b, #d97706); }
+
+        .mode-description {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            text-align: left;
+        }
+
+        .mode-description h3 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 1rem;
+        }
+
+        .mode-description p {
+            color: #6b7280;
+            margin-bottom: 1.5rem;
+        }
+
+        .mode-features {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .mode-feature {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #374151;
+            font-size: 0.9rem;
+        }
+
+        .mode-feature::before {
+            content: '→';
+            color: #2563eb;
+            font-weight: bold;
+        }
+
+        /* Platform Architecture */
+        .architecture-section {
+            padding: 6rem 2rem;
+            background: #f8fafc;
+        }
+
+        .architecture-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+
+        .section-header h2 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 1rem;
+        }
+
+        .section-header p {
+            font-size: 1.1rem;
+            color: #6b7280;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .architecture-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+        }
+
+        .architecture-card {
+            background: white;
+            padding: 2.5rem 2rem;
+            border-radius: 16px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            text-align: center;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .architecture-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--card-color);
+        }
+
+        .architecture-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .architecture-card:nth-child(1) { --card-color: #2563eb; }
+        .architecture-card:nth-child(2) { --card-color: #10b981; }
+        .architecture-card:nth-child(3) { --card-color: #f59e0b; }
+
+        .architecture-icon {
+            width: 64px;
+            height: 64px;
+            margin: 0 auto 1.5rem;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            background: var(--card-color);
+            color: white;
+        }
+
+        .architecture-card h3 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 1rem;
+        }
+
+        .architecture-card p {
+            color: #6b7280;
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+        }
+
+        .architecture-features {
+            list-style: none;
+            text-align: left;
+        }
+
+        .architecture-features li {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+            color: #374151;
+            font-size: 0.9rem;
+        }
+
+        .architecture-features li::before {
+            content: '✓';
+            background: var(--card-color);
+            color: white;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+
+        /* Working Modes */
+        .working-modes {
+            padding: 6rem 2rem;
+            background: white;
+        }
+
+        .working-modes-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .modes-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+        }
+
+        .mode-card {
+            background: #f8fafc;
+            padding: 2rem;
+            border-radius: 12px;
+            transition: all 0.3s;
+            border-left: 4px solid transparent;
+        }
+
+        .mode-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            border-left-color: #2563eb;
+        }
+
+        .mode-card-icon {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .mode-card h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 0.75rem;
+        }
+
+        .mode-card p {
+            color: #6b7280;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        /* Observability Section */
+        .observability-section {
+            padding: 6rem 2rem;
+            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+            color: white;
+        }
+
+        .observability-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: center;
+        }
+
+        .observability-content h2 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+        }
+
+        .observability-content p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+
+        .metrics-preview {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 2rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .metrics-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .metrics-icon {
+            width: 40px;
+            height: 40px;
+            background: #10b981;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+
+        .metric-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .metric-item:last-child {
+            border-bottom: none;
+        }
+
+        .metric-label {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        .metric-value {
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .metric-trend {
+            font-size: 0.8rem;
+            color: #10b981;
+        }
+
+        /* CTA Section */
+        .cta-section {
+            padding: 6rem 2rem;
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            color: white;
+            text-align: center;
+        }
+
+        .cta-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .cta-section h2 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .cta-section p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            margin-bottom: 2rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .modes-grid,
+            .architecture-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .navi-modes {
+                flex-wrap: wrap;
+                gap: 2rem;
+            }
+            
+            .mode-step {
+                flex: none;
+                width: calc(50% - 1rem);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .hero-container,
+            .observability-container {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+
+            .hero-content h1 {
+                font-size: 2.5rem;
+            }
+
+            .navi-header h2 {
+                font-size: 2rem;
+            }
+
+            .modes-grid,
+            .architecture-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .nav-links {
+                display: none;
+            }
+            
+            .mode-features {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="nav-container">
+            <a href="#" class="logo">WorkBuoy</a>
+            <nav class="nav-links">
+                <a href="#platform">Plattform</a>
+                <a href="#navi">Navi</a>
+                <a href="#use-cases">Bruksområder</a>
+                <a href="#resources">Ressurser</a>
+                <a href="#pricing">Priser</a>
+                <a href="#" class="cta-button">Start gratis prøveperiode</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-container">
+            <div class="hero-content">
+                <h1>Én <span class="highlight">agentisk AI-assistent</span> for hele organisasjonen</h1>
+                <p>WorkBuoy med Navi gir deg en intelligent arbeidsassistent som lærer av dine rutiner og prioriterer det som virkelig betyr noe for din suksess.</p>
+                <div class="hero-buttons">
+                    <a href="#" class="btn-primary">
+                        Se demo 
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M8 5v14l11-7z"/>
+                        </svg>
+                    </a>
+                    <a href="#" class="btn-secondary">Start gratis</a>
+                </div>
+            </div>
+            
+            <!-- Buoy Chat Preview -->
+            <div class="hero-demo">
+                <div class="demo-header">
+                    <div class="demo-avatar">B</div>
+                    <div class="demo-info">
+                        <h4>Buoy</h4>
+                        <p>Din AI-arbeidsassistent</p>
+                    </div>
+                </div>
+                <div class="demo-content" id="demoContent">
+                    <div class="message">
+                        <div class="message-avatar ai-avatar">B</div>
+                        <div class="message-bubble">
+                            Hei! Jeg har oppdaget at Q4-salget trenger oppmerksomhet. Navi har identifisert 3 kritiske områder. Skal vi se på dem?
+                        </div>
+                    </div>
+                    
+                    <div class="message user">
+                        <div class="message-avatar user-avatar">Du</div>
+                        <div class="message-bubble">
+                            Ja, vis meg hva som er mest kritisk.
+                        </div>
+                    </div>
+                    
+                    <div class="message">
+                        <div class="message-avatar ai-avatar">B</div>
+                        <div class="message-bubble">
+                            Jeg fant en feil i KPI-formelen som påvirket tallene. Har rettet opp - faktisk performance er bedre enn først antatt. Skal jeg forberede møtet med Nordic Industries i morgen?
+                        </div>
+                    </div>
+
+                    <div class="typing" id="typing" style="display: none;">
+                        <div class="message-avatar ai-avatar">B</div>
+                        <span>Buoy analyserer...</span>
+                        <div class="typing-dots">
+                            <div class="typing-dot"></div>
+                            <div class="typing-dot"></div>
+                            <div class="typing-dot"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Working Modes -->
+    <section class="working-modes">
+        <div class="working-modes-container">
+            <div class="section-header">
+                <h2>Hvordan Buoy hjelper deg i hverdagen</h2>
+                <p>Seks arbeidsmoduser som dekker hele spekteret av moderne kunnskapsarbeid.</p>
+            </div>
+            
+            <div class="modes-grid">
+                <div class="mode-card">
+                    <div class="mode-card-icon">🔍</div>
+                    <h3>Explore</h3>
+                    <p>Søk på tvers av alle dine datakilder, få sammenhenger forklart og oppdag innsikter du ikke visste du trengte.</p>
+                </div>
+                
+                <div class="mode-card">
+                    <div class="mode-card-icon">🤝</div>
+                    <h3>Assist</h3>
+                    <p>Få hjelp med daglige oppgaver, fra e-post til rapporter. Buoy forstår kontekst og foreslår neste steg.</p>
+                </div>
+                
+                <div class="mode-card">
+                    <div class="mode-card-icon">⚡</div>
+                    <h3>Resolve</h3>
+                    <p>Løs problemer raskt med AI som kan analysere, diagnostisere og foreslå konkrete løsninger.</p>
+                </div>
+                
+                <div class="mode-card">
+                    <div class="mode-card-icon">📚</div>
+                    <h3>Learn</h3>
+                    <p>Lær nye ferdigheter og forstå komplekse emner med personlig tilpasset veiledning fra Buoy.</p>
+                </div>
+                
+                <div class="mode-card">
+                    <div class="mode-card-icon">🌐</div>
+                    <h3>Connect</h3>
+                    <p>Koble sammen systemer, mennesker og ideer. Buoy hjelper deg å finne rette ressurser og kontakter.</p>
+                </div>
+                
+                <div class="mode-card">
+                    <div class="mode-card-icon">🛡️</div>
+                    <h3>Guard</h3>
+                    <p>Beskytt sensitive data og overvåk compliance. Buoy sørger for at alt skjer innenfor trygge rammer.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Observability & Metrics -->
+    
+
+    <!-- Integrations -->
+    <section class="stats" style="background: #f8fafc;">
+        <div class="stats-container">
+            <h2 style="margin-bottom: 2rem;">Integrerer med verktøyene du allerede bruker</h2>
+            <p style="color: #6b7280; font-size: 1.1rem; margin-bottom: 3rem; max-width: 600px; margin-left: auto; margin-right: auto;">
+                WorkBuoy kobler seg sømløst til ditt eksisterende teknologi-økosystem via 200+ ferdigbygde integrasjoner.
+            </p>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 2rem; max-width: 800px; margin: 0 auto;">
+                <div style="background: white; padding: 1.5rem; border-radius: 8px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    <div style="font-size: 2rem; margin-bottom: 0.5rem;">📊</div>
+                    <div style="font-size: 0.9rem; font-weight: 600;">Power BI</div>
+                </div>
+                <div style="background: white; padding: 1.5rem; border-radius: 8px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    <div style="font-size: 2rem; margin-bottom: 0.5rem;">🏢</div>
+                    <div style="font-size: 0.9rem; font-weight: 600;">Salesforce</div>
+                </div>
+                <div style="background: white; padding: 1.5rem; border-radius: 8px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    <div style="font-size: 2rem; margin-bottom: 0.5rem;">💼</div>
+                    <div style="font-size: 0.9rem; font-weight: 600;">Microsoft 365</div>
+                </div>
+                <div style="background: white; padding: 1.5rem; border-radius: 8px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    <div style="font-size: 2rem; margin-bottom: 0.5rem;">📋</div>
+                    <div style="font-size: 0.9rem; font-weight: 600;">Jira</div>
+                </div>
+                <div style="background: white; padding: 1.5rem; border-radius: 8px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    <div style="font-size: 2rem; margin-bottom: 0.5rem;">💬</div>
+                    <div style="font-size: 0.9rem; font-weight: 600;">Slack</div>
+                </div>
+                <div style="background: white; padding: 1.5rem; border-radius: 8px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    <div style="font-size: 2rem; margin-bottom: 0.5rem;">📈</div>
+                    <div style="font-size: 0.9rem; font-weight: 600;">Tableau</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Trust & Security -->
+    <section style="padding: 6rem 2rem; background: white;">
+        <div style="max-width: 1200px; margin: 0 auto; text-align: center;">
+            <h2 style="font-size: 2.5rem; font-weight: 700; color: #1a1a1a; margin-bottom: 1rem;">
+                Enterprise-sikkerhet du kan stole på
+            </h2>
+            <p style="font-size: 1.1rem; color: #6b7280; margin-bottom: 3rem; max-width: 600px; margin-left: auto; margin-right: auto;">
+                Vi tar sikkerhet og personvern på alvor. WorkBuoy er bygget for norske virksomheter med høye krav til datasikkerhet.
+            </p>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem;">
+                <div style="text-align: left; padding: 2rem; background: #f8fafc; border-radius: 12px;">
+                    <div style="font-size: 2rem; margin-bottom: 1rem;">🔒</div>
+                    <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem;">GDPR Compliance</h3>
+                    <p style="color: #6b7280;">Full etterlevelse av norske personvernregler og GDPR. Data behandles trygt med transparente prosesser.</p>
+                </div>
+                
+                <div style="text-align: left; padding: 2rem; background: #f8fafc; border-radius: 12px;">
+                    <div style="font-size: 2rem; margin-bottom: 1rem;">🏰</div>
+                    <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem;">Zero Trust Architecture</h3>
+                    <p style="color: #6b7280;">Verifiserer alle tilganger kontinuerlig. Ingen automatisk tillit, selv innenfor nettverket.</p>
+                </div>
+                
+                <div style="text-align: left; padding: 2rem; background: #f8fafc; border-radius: 12px;">
+                    <div style="font-size: 2rem; margin-bottom: 1rem;">📋</div>
+                    <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem;">Audit & Compliance</h3>
+                    <p style="color: #6b7280;">Komplett logging av alle handlinger. </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing -->
+    <section style="padding: 6rem 2rem; background: #f8fafc;">
+        <div style="max-width: 1200px; margin: 0 auto;">
+            <div class="section-header">
+                <h2>Velg riktig plan for din organisasjon</h2>
+                <p>Fra oppstart til enterprise - WorkBuoy skalerer med dine behov. Kraken og Tsunami-moduser kun tilgjengelig i Enterprise.</p>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; margin-top: 3rem;">
+                <!-- Starter Plan -->
+                <div style="background: white; padding: 2.5rem 2rem; border-radius: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); text-align: center; position: relative;">
+                    <h3 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 1rem;">Starter</h3>
+                    <div style="font-size: 3rem; font-weight: 700; color: #2563eb; margin-bottom: 0.5rem;">kr 299</div>
+                    <div style="color: #6b7280; margin-bottom: 2rem;">per bruker/måned</div>
+                    
+                    <ul style="text-align: left; list-style: none; margin-bottom: 2rem; line-height: 2;">
+                        <li style="display: flex; align-items: center; gap: 0.5rem;"><span style="color: #10b981;">✓</span> Core plattform</li>
+                        <li style="display: flex; align-items: center; gap: 0.5rem;"><span style="color: #10b981;">✓</span> Buoy chat-assistent</li>
+                        <li style="display: flex; align-items: center; gap: 0.5rem;"><span style="color: #10b981;">✓</span> Navi (Usynlig, Passiv, Aktiv)</li>
+                        <li style="display: flex; align-items: center; gap: 0.5rem;"><span style="color: #10b981;">✓</span> 10 standard integrasjoner</li>
+                        <li style="display: flex; align-items: center; gap: 0.5rem;"><span style="color: #10b981;">✓</span> Grunnleggende support</li>
+                    </ul>
+                    
+                    <a href="#" class="btn-secondary" style="width: 100%; justify-content: center;">Kom i gang</a>
+                </div>
+                
+                <!-- Growth Plan -->
+                <div style="background: white; padding: 2.5rem 2rem; border-radius: 16px; box-shadow: 0 8px 25px rgba(37,99,235,0.15); text-align: center; position: relative; border: 2px solid #2563eb;">
+                    <div style="position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: #2563eb; color: white; padding: 0.5rem 1rem; border-radius: 20px; font-size: 0.8rem; font-weight: 600;">Mest populær</div>
+                    
+                    <h3 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 1rem;">Growth</h3>
+                    <div style="font-size: 3rem; font-weight: 700; color: #2563eb; margin-bottom: 0.5rem;">kr 799</div>
+                    <div style="color: #6b7280; margin-bottom: 2rem;">per bruker/måned</div>
+                    
+                    <ul style="text-align: left; list-style: none; margin-bottom: 2rem; line-height: 2;">
+                        <li style="display: flex; align-items: center; gap: 0.5rem;"><span style="color: #10b981;">✓</span> Alt i Starter</li>
+                        <li style="display: flex; align-items: center; gap: 0.5rem;"><span style="color: #10b981;">✓</span> Flex moduler</li>
+                        <li style="display: flex; align-items: center; gap: 0.5rem;"><span style="color: #10b981;">✓</span> 50+ integrasjoner</li>
+                        <li style="display: flex; align-items: center; gap: 0.5rem;"><span style="color: #10b981;">✓</span> Avanserte analytics</li>
+                        <li style="display: flex; align-items: center; gap: 0.5rem;"><span style="color: #10b981;">✓</span> Prioritert support</li>
+                    </ul>
+                    
+                    <a href="#" class="btn-primary" style="width: 100%; justify-content: center;">Start gratis prøveperiode</a>
+                </div>
+                
+                <!-- Enterprise Plan -->
+                <div style="background: linear-gradient(135deg, #1f2937, #374151); color: white; padding: 2.5rem 2rem; border-radius: 16px; text-align: center; position: relative;">
+                    <h3 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 1rem;">Enterprise</h3>
+                    <div style="font-size: 3rem; font-weight: 700; margin-bottom: 0.5rem;">Kontakt oss</div>
+                    <div style="opacity: 0.8; margin-bottom: 2rem;">Tilpasset prisPrisme</div>
+                    
+                    <ul style="text-align: left; list-style: none; margin-bottom: 2rem; line-height: 2;">
+                        <li style="display: flex; align-items: center; gap: 0.5rem;"><span style="color: #10b981;">✓</span> Alt i Growth</li>
+                        <li style="display: flex; align-items: center; gap: 0.5rem;"><span style="color: #10b981;">✓</span> Full Secure modul</li>
+                        <li style="display: flex; align-items: center; gap: 0.5rem;"><span style="color: #f59e0b;">⚡</span> <strong>Kraken & Tsunami moduser</strong></li>
+                        <li style="display: flex; align-items: center; gap: 0.5rem;"><span style="color: #10b981;">✓</span> Ubegrensede integrasjoner</li>
+                        <li style="display: flex; align-items: center; gap: 0.5rem;"><span style="color: #10b981;">✓</span> Dedicated support</li>
+                    </ul>
+                    
+                    <a href="#" style="background: white; color: #374151; padding: 1rem 2rem; border-radius: 8px; text-decoration: none; font-weight: 600; display: inline-block; width: 100%; text-align: center;">Snakk med ekspert</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta-section">
+        <div class="cta-container">
+            <h2>Klar til å transformere din organisasjon?</h2>
+            <p>Bli med 350+ ledende bedrifter som bruker WorkBuoy til å øke produktivitet og forbedre ansattes arbeidsopplevelse.</p>
+            <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+                <a href="#" class="btn-primary">Start gratis prøveperiode</a>
+                <a href="#" class="btn-secondary" style="background: rgba(255,255,255,0.1); color: white; border-color: rgba(255,255,255,0.3);">Book demo</a>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        // Demo animation - Fixed duplicate declaration issue
+        const messages = [
+            "Jeg fant en feil i KPI-formelen i 'Q4_Sales_Report.xlsx' - revenue per customer var feil beregnet. Har rettet opp og oppdatert dashbordet.",
+            "Du har møte med TechCorp i morgen kl 10. Jeg ser også at nye kunde InnoStart ligger på ruten, og Global Industries (som har 12% nedgang) kan besøkes samme dag. Skal jeg omorganisere?",
+            "Acme Corp ba nettopp om oppdaterte tall på CloudPlatform-salget. Har laget draft-svar med Q4-rapporten - vil du sende den eller gjøre endringer først?",
+            "Dagens levering til Nordic Systems mangler ServerRack-komponenter. Har opprettet bestilling, informert kunden om backup-løsning og ny leveringsdato 15. desember.",
+            "Navi oppdaget at 3 kunder har samme behov som du løste for MegaCorp i går. Skal jeg lage tilbud til dem basert på samme løsning?"
+        ];
+
+        const userResponses = [
+            "Perfekt! Send den til Nordic Industries.",
+            "Hvorfor prioriterer Navi akkurat disse signalene?", 
+            "Kan du vise meg hele rapporten først?",
+            "Ja, gjør det. Lag også en påminnelse for oppfølging.",
+            "Hvordan lærer WorkBuoy mine arbeidsrutiner?"
+        ];
+
+        let messageIndex = 0;
+        const demoContent = document.getElementById('demoContent');
+        const typing = document.getElementById('typing');
+
+        function addMessage() {
+            if (messageIndex >= messages.length) {
+                messageIndex = 0;
+                // Reset demo
+                const messagesToRemove = demoContent.querySelectorAll('.message:nth-child(n+4)');
+                messagesToRemove.forEach(msg => msg.remove());
+                setTimeout(addMessage, 2000);
+                return;
+            }
+
+            // Show typing
+            typing.style.display = 'flex';
+            demoContent.scrollTop = demoContent.scrollHeight;
+
+            setTimeout(() => {
+                // Hide typing
+                typing.style.display = 'none';
+                
+                // Add AI message
+                const messageDiv = document.createElement('div');
+                messageDiv.className = 'message';
+                messageDiv.innerHTML = `
+                    <div class="message-avatar ai-avatar">B</div>
+                    <div class="message-bubble">${messages[messageIndex]}</div>
+                `;
+                demoContent.insertBefore(messageDiv, typing);
+                
+                demoContent.scrollTop = demoContent.scrollHeight;
+                
+                // Add user response after delay
+                setTimeout(() => {
+                    const userMessage = document.createElement('div');
+                    userMessage.className = 'message user';
+                    userMessage.innerHTML = `
+                        <div class="message-avatar user-avatar">Du</div>
+                        <div class="message-bubble">${userResponses[messageIndex % userResponses.length]}</div>
+                    `;
+                    demoContent.insertBefore(userMessage, typing);
+                    demoContent.scrollTop = demoContent.scrollHeight;
+                    
+                    // Add follow-up response for platform questions
+                    if (userResponses[messageIndex % userResponses.length].includes('prioriterer') || 
+                        userResponses[messageIndex % userResponses.length].includes('lærer')) {
+                        setTimeout(() => {
+                            typing.style.display = 'flex';
+                            demoContent.scrollTop = demoContent.scrollHeight;
+                            
+                            setTimeout(() => {
+                                typing.style.display = 'none';
+                                
+                                let followUp = '';
+                                if (userResponses[messageIndex % userResponses.length].includes('prioriterer')) {
+                                    followUp = 'Navi bruker din arbeidskontext, historikk og bedriftsmål til scoring. Nordic Industries får høy score fordi: 1) Du jobber med lignende kunder nå (+0.15), 2) De har €2M potensial, 3) Timing matcher din møtekalender. Du kan justere vektingen i innstillingene.';
+                                } else if (userResponses[messageIndex % userResponses.length].includes('lærer')) {
+                                    followUp = 'WorkBuoy lærer av dine handlinger: hvilke signaler du handler på, når på dagen du er mest produktiv, hvilke kunder du prioriterer. Hver gang du gir feedback (✅ ❌ 🫰) justerer Navi vektingen. Over tid reduseres støy og relevansen øker med 40-60%.';
+                                }
+                                
+                                const followUpDiv = document.createElement('div');
+                                followUpDiv.className = 'message';
+                                followUpDiv.innerHTML = `
+                                    <div class="message-avatar ai-avatar">B</div>
+                                    <div class="message-bubble">${followUp}</div>
+                                `;
+                                demoContent.insertBefore(followUpDiv, typing);
+                                demoContent.scrollTop = demoContent.scrollHeight;
+                            }, 1500);
+                        }, 1000);
+                    }
+                    
+                    messageIndex++;
+                    setTimeout(addMessage, 4000);
+                }, 1000);
+            }, 2000);
+        }
+
+        // Navi Mode Selector
+        const modeDescriptions = {
+            usynlig: {
+                title: "Usynlig Modus",
+                description: "WorkBuoy observerer dine arbeidsrutiner og lærer i bakgrunnen uten å avbryte din arbeidsflyt. Perfekt for oppstart og tilvenning.",
+                features: ["Stille datainnsamling", "Mønstergjenkjenning", "Nullforstyrrelse", "Grunnleggende sikkerhet"]
+            },
+            passiv: {
+                title: "Passiv Modus", 
+                description: "Systemet overvåker aktivt og bygger profil av dine arbeidsmønstre. Gir deg innsikt uten å gripe inn i prosessene dine.",
+                features: ["Aktiv overvåking", "Intelligent analyse", "Diskrete varsler", "Trendrapporter"]
+            },
+            aktiv: {
+                title: "Aktiv Modus",
+                description: "Buoy kommer med forslag og hjelper deg proaktivt. AI-assistenten deltar aktivt i arbeidsstrømmen din med smarte anbefalinger.",
+                features: ["Proaktive forslag", "Intelligente varslinger", "Kontekstuell hjelp", "Automatiske oppfølginger"]
+            },
+            kraken: {
+                title: "Kraken Modus",
+                description: "Omfattende automatisering på tvers av systemer. WorkBuoy tar kontroll over rutineoppgaver og optimaliserer arbeidsstrømmer automatisk.",
+                features: ["Massiv automasjon", "Tverrsystem-integrasjon", "Proaktiv problemløsing", "Avanserte workflows"]
+            },
+            tsunami: {
+                title: "Tsunami Modus", 
+                description: "Full automasjon med minimal menneskelig tilsyn. Systemet håndterer komplekse forretningsprosesser autonomt og rapporterer kun unntak.",
+                features: ["Autonom operasjon", "Minimal tilsyn", "Selvkorrigerende", "Enterprise-skalering"]
+            }
+        };
+
+        function updateModeDescription(mode) {
+            const description = modeDescriptions[mode];
+            const descElement = document.getElementById('modeDescription');
+            
+            const featuresHTML = description.features.map(feature => 
+                `<div class="mode-feature">${feature}</div>`
+            ).join('');
+            
+            descElement.innerHTML = `
+                <h3>${description.title}</h3>
+                <p>${description.description}</p>
+                <div class="mode-features">${featuresHTML}</div>
+            `;
+        }
+
+        // Mode step click handlers
+        document.querySelectorAll('.mode-step').forEach(step => {
+            step.addEventListener('click', () => {
+                // Remove active class from all steps
+                document.querySelectorAll('.mode-step').forEach(s => s.classList.remove('active'));
+                
+                // Add active class to clicked step
+                step.classList.add('active');
+                
+                // Update description
+                const mode = step.getAttribute('data-mode');
+                updateModeDescription(mode);
+            });
+        });
+
+        // Start demo animation
+        setTimeout(addMessage, 3000);
+    </script>
+<footer style="font-size:12px;text-align:center;margin-top:24px;color:#666;">Workbuoy kan gjøre feil. Sjekk viktig informasjon før du handler.</footer></body>
+</html>
+
+    <!-- Navi Section - Full Width -->
+    <section class="navi-section" id="navi">
+        <div class="navi-container">
+            <div class="navi-header">
+                <h2>Navi: Navigatøren som styrer WorkBuoy</h2>
+                <p>Navi setter hele plattformen i modus – fra stille observatør til tsunami av automasjon. Dra for å utforske hvordan intelligensen tilpasser seg dine behov.</p>
+            </div>
+            
+            <div class="navi-slider-container">
+                <div class="navi-modes">
+                    <div class="mode-step active" data-mode="usynlig">
+                        <div class="mode-icon">👻</div>
+                        <div class="mode-title">Usynlig</div>
+                        <div class="mode-subtitle">Observerer stille</div>
+                    </div>
+                    <div class="mode-step" data-mode="passiv">
+                        <div class="mode-icon">👁️</div>
+                        <div class="mode-title">Passiv</div>
+                        <div class="mode-subtitle">Overvåker og lærer</div>
+                    </div>
+                    <div class="mode-step" data-mode="aktiv">
+                        <div class="mode-icon">🧠</div>
+                        <div class="mode-title">Aktiv</div>
+                        <div class="mode-subtitle">Foreslår og hjelper</div>
+                    </div>
+                    <div class="mode-step" data-mode="kraken">
+                        <div class="mode-icon">🐙</div>
+                        <div class="mode-title">Kraken</div>
+                        <div class="mode-subtitle">Automatiserer mye</div>
+                    </div>
+                    <div class="mode-step" data-mode="tsunami">
+                        <div class="mode-icon">🌊</div>
+                        <div class="mode-title">Tsunami</div>
+                        <div class="mode-subtitle">Full automasjon</div>
+                    </div>
+                </div>
+                
+                <div class="mode-description" id="modeDescription">
+                    <h3>Usynlig Modus</h3>
+                    <p>WorkBuoy observerer dine arbeidsrutiner og lærer i bakgrunnen uten å avbryte din arbeidsflyt. Perfekt for oppstart og tilvenning.</p>
+                    <div class="mode-features">
+                        <div class="mode-feature">Stille datainnsamling</div>
+                        <div class="mode-feature">Mønstergjenkjenning</div>
+                        <div class="mode-feature">Nullforstyrrelse</div>
+                        <div class="mode-feature">Grunnleggende sikkerhet</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Platform Architecture -->
+    <section class="architecture-section" id="platform">
+        <div class="architecture-container">
+            <div class="section-header">
+                <h2>Plattform-arkitektur: Core • Flex • Secure</h2>
+                <p>Tre lag som jobber sammen for å gi deg en sømløs, trygg og skalerbar AI-opplevelse.</p>
+            </div>
+            
+            <div class="architecture-grid">
+                <div class="architecture-card">
+                    <div class="architecture-icon">🔧</div>
+                    <h3>Core</h3>
+                    <p>Grunnmuren i WorkBuoy med essensielle AI-tjenester, brukergrensesnitt og databehandling.</p>
+                    <ul class="architecture-features">
+                        <li>Buoy Chat Interface</li>
+                        <li>Navi Intelligence Engine</li>
+                        <li>Grunnleggende integrasjoner</li>
+                        <li>Standard dashbord</li>
+                        <li>Responsiv design</li>
+                    </ul>
+                </div>
+                
+                <div class="architecture-card">
+                    <div class="architecture-icon">⚡</div>
+                    <h3>Flex</h3>
+                    <p>Utvidelsesmoduler som tilpasser WorkBuoy til dine spesifikke forretningsbehov og arbeidsflyt.</p>
+                    <ul class="architecture-features">
+                        <li>Tilpassede API-integrasjoner</li>
+                        <li>Bransjespesifikke moduler</li>
+                        <li>Avanserte automations</li>
+                        <li>Custom workflows</li>
+                        <li>Tredjepartskobling</li>
+                    </ul>
+                </div>
+                
+                <div class="architecture-card">
+                    <div class="architecture-icon">🛡️</div>
+                    <h3>Secure</h3>
+                    <p>Enterprise-grade sikkerhet, compliance og governance for trygg AI i organisasjonen.</p>
+                    <ul class="architecture-features">
+                        <li>RBAC tilgangskontroll</li>
+                        <li>GDPR/DSGVO compliance</li>
+                        <li>End-to-end kryptering</li>
+                        <li>Audit logging</li>
+                        <li>Data residency</li>

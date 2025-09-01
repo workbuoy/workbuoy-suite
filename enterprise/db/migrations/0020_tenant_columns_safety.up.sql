@@ -1,0 +1,1 @@
+ALTER TABLE audit_logs_worm ADD COLUMN tenant_id TEXT;ALTER TABLE subscriptions ADD COLUMN tenant_id TEXT;ALTER TABLE usage_events ADD COLUMN tenant_id TEXT;ALTER TABLE ai_actions_log ADD COLUMN tenant_id TEXT;ALTER TABLE ai_tasks ADD COLUMN tenant_id TEXT;ALTER TABLE tickets ADD COLUMN tenant_id TEXT;

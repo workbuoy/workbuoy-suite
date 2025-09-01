@@ -1,0 +1,16 @@
+{{- if and .Values.prometheus.serviceMonitor.enabled .Values.crmApi.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: workbuoy-crm-api
+  labels:
+{{ toYaml .Values.prometheus.serviceMonitor.labels | indent 4 }}
+spec:
+  selector:
+    matchLabels:
+      app: workbuoy-crm-api
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: {{ .Values.prometheus.serviceMonitor.scrapeInterval }}
+{{- end }}

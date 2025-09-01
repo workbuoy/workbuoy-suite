@@ -1,0 +1,15 @@
+{
+  "mode_restrictions": {
+    "Tsunami": {
+      "allow_write": false
+    },
+    "Kraken": {
+      "require_explicit_approval": true
+    }
+  },
+  "secure_defaults": {
+    "global": {
+      "force_read_only": true
+    }
+  }
+}

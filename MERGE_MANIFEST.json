@@ -1,0 +1,21 @@
+{
+  "created": "2025-08-29T20:48:43.271364Z",
+  "merged": [
+    "/mnt/data/workbuoy_suite_meta_branch.zip",
+    "/mnt/data/workbuoy_suite_meta_musthave.zip",
+    "/mnt/data/suite_meta_f9.zip",
+    "/mnt/data/suite_meta_complete.zip"
+  ],
+  "missing": [
+    "/mnt/data/workbuoy_suite_kraken_step1_4.zip",
+    "/mnt/data/suite_meta_f1.zip",
+    "/mnt/data/suite_meta_f2.zip",
+    "/mnt/data/suite_meta_f3.zip",
+    "/mnt/data/suite_meta_f4.zip",
+    "/mnt/data/suite_meta_f5.zip",
+    "/mnt/data/suite_meta_f6.zip",
+    "/mnt/data/suite_meta_f7.zip",
+    "/mnt/data/suite_meta_f8.zip"
+  ],
+  "notes": "Merged sequentially; later items override earlier on path conflicts."
+}

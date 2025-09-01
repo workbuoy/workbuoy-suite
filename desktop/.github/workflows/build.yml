@@ -1,0 +1,50 @@
+name: Desktop CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+  schedule:
+    - cron: "0 2 * * *"  # nightly build
+
+jobs:
+  build-matrix:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [macos-14, windows-latest, ubuntu-22.04]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install Playwright (Linux only deps)
+        if: matrix.os == 'ubuntu-22.04'
+        run: |
+          npx playwright install --with-deps
+      - name: Install deps
+        run: npm ci
+      - name: Build
+        run: npm run build
+      - name: E2E smoke
+        run: npm run test:ci
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist-${{ matrix.os }}
+          path: dist/**
+
+  release-draft:
+    needs: build-matrix
+    if: github.ref_type == 'tag'
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: echo "Creating draft release for ${{ github.ref_name }}"
+      - uses: softprops/action-gh-release@v2
+        with:
+          draft: true

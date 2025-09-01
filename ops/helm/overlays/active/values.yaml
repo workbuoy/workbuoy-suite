@@ -1,0 +1,7 @@
+replicaCount: 2
+region:
+  name: "active"
+  primary: true
+env:
+  redisUrl: "redis://active-redis:6379"
+  postgresUrl: "postgres://active-postgres:5432/workbuoy"

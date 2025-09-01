@@ -1,0 +1,1 @@
+import { wbInfoPageViews } from '../../lib/metrics/registry.js'; test('info page metric exists', ()=>{ expect(wbInfoPageViews).toBeTruthy(); });

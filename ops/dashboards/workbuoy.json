@@ -1,0 +1,59 @@
+{
+  "id": null,
+  "uid": "workbuoy-main",
+  "title": "WorkBuoy \u2013 CRM, Connectors & Desktop",
+  "schemaVersion": 39,
+  "version": 4,
+  "refresh": "10s",
+  "panels": [
+    {
+      "type": "row",
+      "title": "RBAC & Security"
+    },
+    {
+      "type": "stat",
+      "title": "RBAC denied (5m)",
+      "targets": [
+        {
+          "expr": "sum(increase(rbac_denied_total[5m]))"
+        }
+      ],
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 0,
+        "y": 1
+      }
+    },
+    {
+      "type": "stat",
+      "title": "Policy changes (5m)",
+      "targets": [
+        {
+          "expr": "sum(increase(rbac_policy_change_total[5m]))"
+        }
+      ],
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 6,
+        "y": 1
+      }
+    },
+    {
+      "type": "graph",
+      "title": "RBAC denied rate",
+      "targets": [
+        {
+          "expr": "rate(rbac_denied_total[5m])"
+        }
+      ],
+      "gridPos": {
+        "h": 8,
+        "w": 18,
+        "x": 0,
+        "y": 5
+      }
+    }
+  ]
+}

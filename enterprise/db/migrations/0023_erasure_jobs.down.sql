@@ -1,0 +1,1 @@
+DROP TABLE IF EXISTS erasure_jobs; DROP TABLE IF EXISTS erasure_tokens;

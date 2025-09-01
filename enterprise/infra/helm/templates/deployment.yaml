@@ -1,0 +1,64 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "workbuoy.fullname" . }}
+  labels:
+    app.kubernetes.io/name: {{ include "workbuoy.name" . }}
+    helm.sh/chart: {{ include "workbuoy.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+spec:
+  replicas: {{ .Values.replicas }}
+  selector:
+    matchLabels:
+      app: {{ include "workbuoy.fullname" . }}
+  template:
+    metadata:
+      labels:
+        app: {{ include "workbuoy.fullname" . }}
+    spec:
+      serviceAccountName: {{ include "workbuoy.serviceAccountName" . }}
+      containers:
+        - name: app
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 3000
+          env:
+            - name: NODE_ENV
+              value: production
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "workbuoy.secretName" . }}
+                  key: databaseUrl
+            - name: REDIS_URL
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "workbuoy.secretName" . }}
+                  key: redisUrl
+            - name: SIEM_ENDPOINT
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "workbuoy.secretName" . }}
+                  key: siemEndpoint
+            - name: SIEM_HMAC_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "workbuoy.secretName" . }}
+                  key: siemHmacSecret
+          readinessProbe:
+            httpGet: { path: /api/health/ready, port: 3000 }
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            httpGet: { path: /api/health/live, port: 3000 }
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
+      terminationGracePeriodSeconds: 30

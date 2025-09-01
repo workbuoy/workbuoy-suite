@@ -1,0 +1,28 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: workbuoy-alerts
+  labels:
+    release: kube-prometheus-stack
+spec:
+  groups:
+  - name: workbuoy-crm
+    rules:
+    - alert: WorkBuoyHighImportFailureRate
+      expr: (sum(rate(wb_import_failed_total[5m])) / clamp_min(sum(rate(wb_import_processed_total[5m])), 1)) > 0.05
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: "CRM import failure rate > 5% (5m)"
+        description: "Investigate DLQ and recent imports."
+  - name: workbuoy-connectors
+    rules:
+    - alert: WorkBuoyConnectorErrors
+      expr: sum(increase(wb_connector_errors_total[10m])) > 0
+      for: 10m
+      labels:
+        severity: critical
+      annotations:
+        summary: "Connector errors detected (10m)"
+        description: "Check connector logs and retries."

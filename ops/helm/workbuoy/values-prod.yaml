@@ -1,0 +1,32 @@
+ingress:
+  enabled: true
+  className: nginx
+  hosts:
+    - host: workbuoy.company
+      crmApiPath: /
+      desktopUpdatePath: /updates
+  tls:
+    enabled: true
+    secretName: prod-wb-tls
+
+crmApi:
+  replicas: 4
+  hpa:
+    enabled: true
+    minReplicas: 4
+    maxReplicas: 20
+    targetCPUUtilizationPercentage: 60
+  env:
+    NODE_ENV: "production"
+    API_KEY_DEV: "prod-rotate-me"
+    RBAC_ENFORCE: "true"
+    OTEL_EXPORTER_OTLP_ENDPOINT: "http://otel-collector:4318"
+
+connectorsWorker:
+  replicas: 3
+  env:
+    CRM_BASE_URL: "http://workbuoy-crm-api:3000"
+    API_KEY_DEV: "prod-rotate-me"
+
+desktopUpdate:
+  replicas: 2

@@ -1,0 +1,7 @@
+- `npm i && npm run dev` (or your existing scripts), set `.env.local` using `.env.example`.
+- Open **/register.html** → pick a module, select/type a role, create account → redirected to **/pricing.html**.
+- On **/pricing.html**:
+  - Click a Core plan → should go to Stripe Checkout URL with 7‑day trial (in dev it returns mocked URL in tests).
+  - Click **Try First Task Free** (Flex) → one‑off payment URL. After payment it routes to `/app/flex/task/:id` (stub page).
+  - Click **Request Demo** (Secure) → lead stored and confirmation page shown.
+- Hit **/api/metrics** and confirm counters like `wb_onboarding_*` and `wb_trial_started_total` are present.

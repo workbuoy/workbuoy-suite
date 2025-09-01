@@ -1,0 +1,33 @@
+{
+  "title": "Buoy CRM \u2013 Pipelines & Ingest",
+  "panels": [
+    {
+      "type": "stat",
+      "title": "Pipeline events",
+      "targets": [
+        {
+          "expr": "sum(wb_crm_pipeline_events_total)"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Sync errors",
+      "targets": [
+        {
+          "expr": "sum(wb_crm_sync_errors_total)"
+        }
+      ]
+    },
+    {
+      "type": "graph",
+      "title": "HTTP duration",
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(wb_http_request_duration_seconds_bucket[5m])) by (le))"
+        }
+      ]
+    }
+  ],
+  "schemaVersion": 39
+}

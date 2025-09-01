@@ -1,0 +1,23 @@
+{
+  "title": "WB Plugins",
+  "panels": [
+    {
+      "type": "stat",
+      "title": "Plugins Enabled",
+      "targets": [
+        {
+          "expr": "wb_desktop_plugins_enabled_total"
+        }
+      ]
+    },
+    {
+      "type": "graph",
+      "title": "Plugin Health Failures",
+      "targets": [
+        {
+          "expr": "wb_desktop_plugin_health_failures_total"
+        }
+      ]
+    }
+  ]
+}

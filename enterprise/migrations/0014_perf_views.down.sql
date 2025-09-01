@@ -1,0 +1,1 @@
+DROP TABLE IF EXISTS signals_perf_view;

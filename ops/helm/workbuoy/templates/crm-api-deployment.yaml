@@ -1,0 +1,68 @@
+{{- if .Values.crmApi.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: workbuoy-crm-api
+  labels: {{- include "workbuoy.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.crmApi.replicas }}
+  selector: { matchLabels: { app: workbuoy-crm-api } }
+  template:
+    metadata:
+      labels:
+        app: workbuoy-crm-api
+        {{- include "workbuoy.labels" . | nindent 8 }}
+    spec:
+      serviceAccountName: {{ include "workbuoy.fullname" . }}
+      containers:
+      - name: crm-api
+        image: "{{ .Values.crmApi.image.repository }}:{{ .Values.crmApi.image.tag }}"
+        imagePullPolicy: {{ .Values.crmApi.image.pullPolicy }}
+        ports: [ { name: http, containerPort: 3000 } ]
+        env:
+        {{- range $k, $v := .Values.crmApi.env }}
+        - name: {{ $k }}
+          value: {{ $v | quote }}
+        {{- end }}
+        readinessProbe:
+          httpGet: { path: /healthz, port: http }
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        resources:
+{{ toYaml .Values.crmApi.resources | indent 10 }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: workbuoy-crm-api
+  labels: {{- include "workbuoy.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.crmApi.service.type }}
+  selector: { app: workbuoy-crm-api }
+  ports:
+    - name: http
+      port: {{ .Values.crmApi.service.port }}
+      targetPort: http
+{{- if .Values.crmApi.hpa.enabled }}
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: workbuoy-crm-api-hpa
+  labels: {{- include "workbuoy.labels" . | nindent 4 }}
+spec:
+  minReplicas: {{ .Values.crmApi.hpa.minReplicas }}
+  maxReplicas: {{ .Values.crmApi.hpa.maxReplicas }}
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: workbuoy-crm-api
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.crmApi.hpa.targetCPUUtilizationPercentage }}
+{{- end }}
+{{- end }}

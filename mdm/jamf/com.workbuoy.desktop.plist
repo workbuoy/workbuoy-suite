@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>WB_UPDATE_URL</key><string>https://updates.company.com/workbuoy/stable</string>
+  <key>WB_UPDATE_CHANNEL</key><string>stable</string>
+  <key>WB_AUTOUPDATE</key><true/>
+</dict>
+</plist>

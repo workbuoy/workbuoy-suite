@@ -1,0 +1,26 @@
+{
+  "title": "Executive Deck",
+  "slides": [
+    {
+      "title": "Intro \u2014 {{brand}}",
+      "bullets": [
+        "What we do",
+        "Why now",
+        "Impact"
+      ]
+    },
+    {
+      "title": "Case Study",
+      "bullets": [
+        "Before/After",
+        "ROI",
+        "Next steps"
+      ]
+    }
+  ],
+  "branding": {
+    "badge": "{{badge}}",
+    "pricing": "{{pricing}}"
+  },
+  "ts": "{{timestamp}}"
+}

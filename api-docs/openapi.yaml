@@ -1,0 +1,259 @@
+openapi: 3.0.3
+info:
+  title: WorkBuoy Suite API
+  version: 1.0.0
+servers:
+  - url: http://localhost:3000
+components:
+  securitySchemes:
+    ApiKey:
+      type: apiKey
+      in: header
+      name: x-api-key
+  schemas:
+    Pagination:
+      type: object
+      properties:
+        items:
+          type: array
+          items: { type: object }
+        next_cursor:
+          type: string
+          nullable: true
+    Contact:
+      type: object
+      required: [id, tenant_id, name]
+      properties:
+        id: { type: string }
+        tenant_id: { type: string }
+        organization_id: { type: string, nullable: true }
+        owner_id: { type: string, nullable: true }
+        name: { type: string }
+        email: { type: string, nullable: true }
+        phone: { type: string, nullable: true }
+        tags: { type: array, items: { type: string } }
+        created_at: { type: string, format: date-time }
+        updated_at: { type: string, format: date-time }
+    Opportunity:
+      type: object
+      required: [id, tenant_id, pipeline_id, stage_id, title]
+      properties:
+        id: { type: string }
+        tenant_id: { type: string }
+        pipeline_id: { type: string }
+        stage_id: { type: string }
+        organization_id: { type: string, nullable: true }
+        owner_id: { type: string, nullable: true }
+        title: { type: string }
+        value_cents: { type: integer, nullable: true }
+        currency: { type: string, default: USD }
+        status: { type: string, enum: [open, won, lost], default: open }
+        tags: { type: array, items: { type: string } }
+        created_at: { type: string, format: date-time }
+        updated_at: { type: string, format: date-time }
+    Pipeline:
+      type: object
+      required: [id, tenant_id, name]
+      properties:
+        id: { type: string }
+        tenant_id: { type: string }
+        name: { type: string }
+        description: { type: string, nullable: true }
+        created_at: { type: string, format: date-time }
+        updated_at: { type: string, format: date-time }
+    Stage:
+      type: object
+      required: [id, tenant_id, pipeline_id, name, order]
+      properties:
+        id: { type: string }
+        tenant_id: { type: string }
+        pipeline_id: { type: string }
+        name: { type: string }
+        order: { type: integer }
+        created_at: { type: string, format: date-time }
+        updated_at: { type: string, format: date-time }
+    Organization:
+      type: object
+      required: [id, tenant_id, name]
+      properties:
+        id: { type: string }
+        tenant_id: { type: string }
+        name: { type: string }
+        domain: { type: string, nullable: true }
+        created_at: { type: string, format: date-time }
+        updated_at: { type: string, format: date-time }
+security:
+  - ApiKey: []
+paths:
+  /api/v1/crm/contacts:
+    get:
+      summary: List contacts
+      parameters:
+        - in: query
+          name: limit
+          schema: { type: integer, default: 50 }
+        - in: query
+          name: cursor
+          schema: { type: string }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Pagination"
+    post:
+      summary: Create contact
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name: { type: string }
+                email: { type: string }
+                phone: { type: string }
+                organization_id: { type: string }
+                owner_id: { type: string }
+                tags: { type: array, items: { type: string } }
+      responses: { "201": { description: Created, content: { application/json: { schema: { $ref: "#/components/schemas/Contact" } } } } }
+  /api/v1/crm/contacts/{id}:
+    patch:
+      summary: Update contact
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/Contact" }
+      responses: { "200": { description: OK, content: { application/json: { schema: { $ref: "#/components/schemas/Contact" } } } } }
+  /api/v1/crm/opportunities:
+    get:
+      summary: List opportunities
+      parameters:
+        - in: query
+          name: limit
+          schema: { type: integer, default: 50 }
+        - in: query
+          name: cursor
+          schema: { type: string }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Pagination" }
+    post:
+      summary: Create opportunity
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [pipeline_id, stage_id, title]
+              properties:
+                pipeline_id: { type: string }
+                stage_id: { type: string }
+                title: { type: string }
+                value_cents: { type: integer }
+                currency: { type: string }
+                status: { type: string }
+                organization_id: { type: string }
+                owner_id: { type: string }
+                tags: { type: array, items: { type: string } }
+      responses: { "201": { description: Created, content: { application/json: { schema: { $ref: "#/components/schemas/Opportunity" } } } } }
+  /api/v1/crm/opportunities/{id}:
+    patch:
+      summary: Patch opportunity
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/Opportunity" }
+      responses: { "200": { description: OK, content: { application/json: { schema: { $ref: "#/components/schemas/Opportunity" } } } } }
+  /api/v1/crm/pipelines:
+    get:
+      summary: List pipelines
+      responses: { "200": { description: OK, content: { application/json: { schema: { type: object, properties: { items: { type: array, items: { $ref: "#/components/schemas/Pipeline" } } } } } } } }
+    post:
+      summary: Create/Upsert pipeline
+      requestBody:
+        required: true
+        content: { application/json: { schema: { type: object, properties: { name: { type: string }, description: { type: string } } } } }
+      responses: { "201": { description: Created, content: { application/json: { schema: { $ref: "#/components/schemas/Pipeline" } } } } }
+  /api/v1/crm/import:
+    post:
+      summary: Batch import (CSV/JSON)
+      parameters:
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                entity: { type: string, enum: [contacts, opportunities] }
+                dry_run: { type: boolean }
+                file: { type: string, format: binary }
+      responses: { "200": { description: OK } }
+  /api/v1/crm/export:
+    get:
+      summary: Export entities
+      parameters:
+        - in: query
+          name: entity
+          schema: { type: string, enum: [contacts, opportunities] }
+        - in: query
+          name: format
+          schema: { type: string, enum: [csv, json] }
+      responses: { "200": { description: OK } }
+  /api/v1/crm/dlq:
+    get:
+      summary: Fetch DLQ items
+      parameters:
+        - in: query
+          name: entity
+          schema: { type: string }
+        - in: query
+          name: n
+          schema: { type: integer }
+      responses: { "200": { description: OK } }
+  /api/v1/connectors/{provider}/config:
+    post:
+      summary: Configure connector
+      parameters:
+        - in: path
+          name: provider
+          schema: { type: string, enum: [salesforce, hubspot, dynamics] }
+          required: true
+      requestBody:
+        required: true
+        content: { application/json: { schema: { type: object, additionalProperties: true } } }
+      responses: { "200": { description: OK } }
+  /api/v1/connectors/{provider}/webhook:
+    post:
+      summary: Ingest webhook from provider
+      parameters:
+        - in: path
+          name: provider
+          schema: { type: string, enum: [salesforce, hubspot, dynamics] }
+          required: true
+      requestBody:
+        required: true
+        content: { application/json: { schema: { type: object, additionalProperties: true } } }
+      responses: { "202": { description: Accepted } }

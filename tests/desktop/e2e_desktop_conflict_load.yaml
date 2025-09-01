@@ -1,0 +1,12 @@
+# Desktop E2E Conflict/Load Test (template)
+# To be hooked into your existing script: scripts/e2e_conflict_load.sh
+setup:
+  - ensure_sqlcipher: "sqlcipher --version || echo 'sqlcipher not installed (CI installs)'"
+  - install_deps: "cd desktop && npm ci || npm install"
+  - rebuild_native: "cd desktop && npm rebuild better-sqlite3 --build-from-source"
+run:
+  - probe: "node scripts/sqlcipher_probe.js"
+  - build: "cd desktop && npm run build"
+  - e2e: "bash scripts/e2e_conflict_load.sh"
+artifacts:
+  - "reports/e2e_conflict_load.json"

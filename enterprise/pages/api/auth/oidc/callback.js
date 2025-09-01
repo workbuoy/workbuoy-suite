@@ -1,0 +1,1 @@
+// OIDC callback endpoint placeholder

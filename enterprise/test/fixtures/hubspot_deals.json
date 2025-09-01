@@ -1,0 +1,20 @@
+{
+  "results": [
+    {
+      "id": "d1",
+      "properties": {
+        "dealname": "Pilot - ACME",
+        "amount": "12000",
+        "dealstage": "appointmentscheduled"
+      }
+    },
+    {
+      "id": "d2",
+      "properties": {
+        "dealname": "Renewal - Globex",
+        "amount": "34000",
+        "dealstage": "qualifiedtobuy"
+      }
+    }
+  ]
+}

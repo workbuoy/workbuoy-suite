@@ -1,0 +1,43 @@
+{
+  "id": null,
+  "uid": "workbuoy-main",
+  "title": "WorkBuoy \u2013 CRM & Connectors & Desktop",
+  "panels": [
+    {
+      "type": "stat",
+      "title": "Desktop sync successes (5m)",
+      "targets": [
+        {
+          "expr": "sum(increase(wb_desktop_sync_success_total[5m]))"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Desktop sync errors (5m)",
+      "targets": [
+        {
+          "expr": "sum(increase(wb_desktop_sync_error_total[5m]))"
+        }
+      ]
+    },
+    {
+      "type": "graph",
+      "title": "Avg flush duration",
+      "targets": [
+        {
+          "expr": "rate(wb_desktop_sync_flush_duration_seconds_sum[5m]) / rate(wb_desktop_sync_flush_duration_seconds_count[5m])"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Desktop crash rate (placeholder)",
+      "targets": [
+        {
+          "expr": "0"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,86 @@
+{
+  "services/builder/proposals/patch.diff": {
+    "sha256": "5954c3ea09bd16f426d81186f8bfa554afb86b2776a17b7d952b32bd2eecadd0",
+    "size": 126
+  },
+  "docs/auto/README.generated.md": {
+    "sha256": "abc82dbc297f8343edd3e931080b47d4e9a092610fd249f4450ee9c91936d288",
+    "size": 52
+  },
+  "docs/auto/release_playbook.md": {
+    "sha256": "8453f95c56715e5ce0b09748c5fb16c931694902c79a5f41fb71ad6a7fc9c762",
+    "size": 899
+  },
+  "reports/roles/validation_summary.json": {
+    "sha256": "7fe17b1aedeb9a58666b44fa6631d98312b01f504ddfd5e6984fbe360cb861f4",
+    "size": 66
+  },
+  "reports/roles/duplicates.json": {
+    "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "size": 2
+  },
+  "reports/roles/missing_required.json": {
+    "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "size": 2
+  },
+  "reports/roles/validation_report.md": {
+    "sha256": "688238aa4389e5382e6bfdaa314358a1bad3ce76057a277003eeec766240315d",
+    "size": 137
+  },
+  "manifests/pr-preview.yaml": {
+    "sha256": "a7ea2d0798477f8daa3344a5c7f5e43098ed79072a44133fc7871e3960dc7a6b",
+    "size": 941
+  },
+  "ui/schemas/sales_route.schema.json": {
+    "sha256": "da18824f63feba715c7ba1f3c4d972db1b8b8c53f0203b5431df080dba4aed73",
+    "size": 1230
+  },
+  "ui/samples/sales_route_sample.json": {
+    "sha256": "c1b832f42ac6ae8c213c1334d13903b105ea76cf96eb60d4debd1acd204fa8c2",
+    "size": 936
+  },
+  "ui/wireframes/sales_navi_wireframe.json": {
+    "sha256": "c35a45d8675dd9a6f5f88bc1ef28167fdb8eda8168db38e5b4054633fdfdff7d",
+    "size": 504
+  },
+  "ui/wireframes/manager_navi_wireframe.json": {
+    "sha256": "f8b5fe45a213c56bdd2b3e17baa816d9991c856c45fe5a6d482de6b5fb2d79d1",
+    "size": 387
+  },
+  "tools/roles/normalize_roles.py": {
+    "sha256": "856d60cea3f9a47b62122b9a50eca9ea9808187d407fdda17b04a710d02db0b6",
+    "size": 1278
+  },
+  "tools/testrunner/run_tests.py": {
+    "sha256": "8b14120992154376236659c6a58e6d7b7503597a4b96079bf533a2087c1fa372",
+    "size": 854
+  },
+  "tests/README.md": {
+    "sha256": "05b83915b894474d83e95f4d45f604c19f1dbbef6df71290e1e92837fe50af24",
+    "size": 644
+  },
+  "tests/roles/test_roles_schema.py": {
+    "sha256": "ca97c542aadd08d9339a84e81927ffc00513c70e955b97ffaa07fd551362a10f",
+    "size": 1781
+  },
+  "tests/saas/smoke_saas.yaml": {
+    "sha256": "24d1bdcbcd2651392406a2d34ad9df50f6c91fbbdd7d2d46a4a7e2324f4d64b3",
+    "size": 331
+  },
+  "tests/crm/smoke_crm.yaml": {
+    "sha256": "4843d8fb5b5a34426d3c8a57d4d7079c04bd3395ef790eced2ef4d221e2262d1",
+    "size": 465
+  },
+  "tests/desktop/e2e_desktop_conflict_load.yaml": {
+    "sha256": "6d684b49cdee42550286dba56f889e1483d44ed3d3411bde46e85e6a63479221",
+    "size": 537
+  },
+  "scripts/publish_npm.sh": {
+    "sha256": "11cd430f63de60ccee8c2a7ed567bc63b13e707cb0e7726af7e36b9c9635d0ee",
+    "size": 237
+  },
+  "scripts/publish_pypi.sh": {
+    "sha256": "64f2bfccb937cee1851277b637716e59f4e40a196adf4bd0c232a1d10437e104",
+    "size": 264
+  }
+}

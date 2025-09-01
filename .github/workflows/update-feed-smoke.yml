@@ -1,0 +1,41 @@
+name: update-feed-smoke
+
+on:
+  push:
+    paths:
+      - 'scripts/**'
+      - 'desktop/update/**'
+      - '.github/workflows/update-feed-smoke.yml'
+      - 'docs/DESKTOP_AUTO_UPDATE.md'
+  workflow_dispatch: {}
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Create mock repo
+        run: |
+          ./scripts/create_mock_updates.sh update_repo http://127.0.0.1:45900
+      - name: Start update server
+        run: |
+          UPDATE_REPO=update_repo PORT=45900 node scripts/update_server.js &
+          echo $! > server.pid
+          sleep 1
+      - name: Check stable channel
+        run: |
+          node scripts/update_check.js --channel stable --expect-version 1.0.0 | tee /dev/stderr | grep -q '"okVersion": true'
+      - name: Check beta channel
+        run: |
+          node scripts/update_check.js --channel beta --expect-version 1.0.1-beta.1 | tee /dev/stderr | grep -q '"okChannel": true'
+      - name: Upload feed snapshots
+        uses: actions/upload-artifact@v4
+        with:
+          name: update-feed
+          path: update_repo/**
+      - name: Stop server
+        if: always()
+        run: kill $(cat server.pid) || true

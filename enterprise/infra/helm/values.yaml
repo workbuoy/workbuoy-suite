@@ -1,0 +1,26 @@
+replicas: 2
+image:
+  repository: ghcr.io/workbuoy/app
+  tag: latest
+ingress:
+  enabled: true
+  className: nginx
+  clusterIssuer: letsencrypt
+  host: app.workbuoy.example.com
+hpa:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 6
+serviceMonitor:
+  enabled: true
+externalSecrets:
+  enabled: true
+  storeName: aws-secrets
+  keys:
+    databaseUrl: prod/workbuoy/DATABASE_URL
+    redisUrl: prod/workbuoy/REDIS_URL
+    siemEndpoint: prod/workbuoy/SIEM_ENDPOINT
+    siemHmacSecret: prod/workbuoy/SIEM_HMAC_SECRET
+alertmanager:
+  slackWebhookUrl: https://hooks.slack.com/services/T000/B000/XXXX
+  pagerdutyRoutingKey: PD_ROUTING_KEY_PLACEHOLDER

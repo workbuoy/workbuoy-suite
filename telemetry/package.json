@@ -1,0 +1,12 @@
+{
+  "name": "@workbuoy/telemetry",
+  "version": "1.0.0-pr-aw",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "smoke": "node ../scripts/telemetry_smoke.js"
+  },
+  "dependencies": {
+    "prom-client": "^15.1.3"
+  }
+}

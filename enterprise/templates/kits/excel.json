@@ -1,0 +1,25 @@
+{
+  "title": "Excel Power Kit",
+  "sheets": [
+    {
+      "name": "Pipeline",
+      "columns": [
+        "Account",
+        "Stage",
+        "MRR",
+        "Owner"
+      ]
+    },
+    {
+      "name": "MRR Trend",
+      "columns": [
+        "Month",
+        "MRR"
+      ]
+    }
+  ],
+  "brand": "{{brand}}",
+  "badge": "{{badge}}",
+  "pricing": "{{pricing}}",
+  "ts": "{{timestamp}}"
+}

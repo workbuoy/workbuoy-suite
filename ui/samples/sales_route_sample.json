@@ -1,0 +1,40 @@
+{
+  "date": "2025-09-01",
+  "stops": [
+    {
+      "time": "09:00",
+      "title": "Acme Corp \u2013 QBR",
+      "location": {
+        "address": "Karl Johans gate 1, Oslo",
+        "lat": 59.9139,
+        "lng": 10.7522
+      },
+      "customer_id": "acme-001",
+      "crm_link": "/crm/customers/acme-001",
+      "notes": "Parking in back lot"
+    },
+    {
+      "time": "11:30",
+      "title": "BetaTech \u2013 Demo",
+      "location": {
+        "address": "Dronning Eufemias gate 16, Oslo",
+        "lat": 59.91,
+        "lng": 10.759
+      },
+      "customer_id": "beta-442",
+      "crm_link": "/crm/customers/beta-442"
+    },
+    {
+      "time": "14:00",
+      "title": "Contoso \u2013 Pricing review",
+      "location": {
+        "address": "Lysaker Torg 2",
+        "lat": 59.9093,
+        "lng": 10.635
+      },
+      "customer_id": "cont-893",
+      "crm_link": "/crm/customers/cont-893",
+      "notes": "Bring NDA"
+    }
+  ]
+}

@@ -1,0 +1,31 @@
+name: desktop-crash-telemetry
+
+on:
+  push:
+    paths: ['desktop/**', '.github/workflows/desktop-crash-telemetry.yml']
+  pull_request:
+    paths: ['desktop/**']
+
+jobs:
+  crash:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install deps
+        run: npm ci
+        working-directory: desktop
+      - name: Build
+        run: npm run build
+        working-directory: desktop
+      - name: Crash smoke
+        run: npm run test:crash
+        working-directory: desktop
+      - name: Upload crash logs
+        uses: actions/upload-artifact@v4
+        with:
+          name: desktop-crashlogs
+          path: desktop/crashlogs/*.json
+          if-no-files-found: warn

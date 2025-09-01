@@ -1,0 +1,15 @@
+{
+  "contacts": [
+    {
+      "id": "c1",
+      "email": "alice@example.com"
+    }
+  ],
+  "deals": [
+    {
+      "id": "d1",
+      "name": "Pilot",
+      "amount": 5000
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+title: "Docgen: add Services matrix to ARCHITECTURE.md"
+acceptance:
+  - "ARCHITECTURE.md contains generated Services matrix"
+risk: "low"
+targets:
+  - "tools/docgen/**"
+  - "ARCHITECTURE.md"

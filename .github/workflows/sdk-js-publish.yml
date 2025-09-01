@@ -1,0 +1,38 @@
+name: sdk-js-publish
+
+on:
+  push:
+    tags:
+      - 'sdk-js-v*'
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write   # for npm provenance
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          registry-url: 'https://registry.npmjs.org'
+      - name: Derive version from tag
+        id: v
+        run: |
+          TAG="${GITHUB_REF_NAME}"
+          echo "tag=${TAG}" >> $GITHUB_OUTPUT
+          VERSION="${TAG#sdk-js-v}"
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+      - name: Set package version
+        run: |
+          npm pkg set version=${{ steps.v.outputs.version }}
+        working-directory: sdk/js
+      - name: Install (noop)
+        run: npm ci --ignore-scripts || true
+        working-directory: sdk/js
+      - name: Publish to NPM (with provenance)
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npm publish --access public --provenance
+        working-directory: sdk/js

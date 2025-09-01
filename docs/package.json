@@ -1,0 +1,10 @@
+{
+  "name": "workbuoy-docs",
+  "private": true,
+  "scripts": {
+    "links": "bash -lc \"find docs -name '*.md' -print0 | xargs -0 -n1 npx markdown-link-check -q -c docs/.mlc.json\""
+  },
+  "devDependencies": {
+    "markdown-link-check": "^3.12.2"
+  }
+}

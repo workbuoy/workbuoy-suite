@@ -1,0 +1,193 @@
+
+openapi: 3.0.3
+info:
+  title: WorkBuoy API
+  version: "1.0"
+servers:
+  - url: /api/v1
+paths:
+  /audit/logs:
+    get:
+      summary: List audit logs
+      responses: { '200': { description: OK } }
+  /systems/status:
+    get:
+      summary: Connector status
+      responses: { '200': { description: OK } }
+  /systems/resync:
+    post:
+      summary: Enqueue resync
+      responses: { '200': { description: OK } }
+  /scim/v2/Users:
+    get: { summary: List users, responses: { '200': { description: OK } } }
+    post: { summary: Create user, responses: { '201': { description: Created } } }
+  /scim/v2/Groups:
+    get: { summary: List groups, responses: { '200': { description: OK } } }
+    post: { summary: Create group, responses: { '201': { description: Created } } }
+
+
+/auth/sso-login:
+  get:
+    summary: Start OIDC login
+    parameters: [{ name: provider, in: query, schema: { type: string } }]
+    responses: { '302': { description: Redirect } }
+/auth/sso-callback:
+  get:
+    summary: OIDC callback
+    responses: { '302': { description: Redirect } }
+/auth/saml/metadata:
+  get:
+    summary: SAML metadata
+    responses: { '200': { description: XML metadata } }
+/auth/saml/acs:
+  post:
+    summary: SAML assertion consumer
+    responses: { '302': { description: Redirect } }
+
+/scim/v2/Users:
+  get: { summary: List users (SCIM), responses: { '200': { description: OK } } }
+  post: { summary: Create user (SCIM), responses: { '201': { description: Created } } }
+/scim/v2/Groups:
+  get: { summary: List groups (SCIM), responses: { '200': { description: OK } } }
+  post: { summary: Create group (SCIM), responses: { '201': { description: Created } } }
+/scim/v2/groups/members:
+  get: { summary: List group members, responses: { '200': { description: OK } } }
+  post: { summary: Add member, responses: { '201': { description: Created } } }
+  delete: { summary: Remove member, responses: { '204': { description: No Content } } }
+
+/systems/status:
+  get: { summary: Connector status, responses: { '200': { description: OK } } }
+/systems/resync:
+  post: { summary: Enqueue connector resync, responses: { '200': { description: OK } } }
+
+/admin/retention/run:
+  post: { summary: Run retention job, responses: { '200': { description: OK } } }
+
+/dsr/erase:
+  post: { summary: Enqueue data subject erasure, responses: { '200': { description: OK } } }
+/dsr/status:
+  get: { summary: Check erasure status, responses: { '200': { description: OK } } }
+
+
+/v1/admin/api-keys:
+  get:
+    summary: List API keys
+    responses: { '200': { description: OK, content: { application/json: { example: { items: [ { id: "k_123", name:"Key", scope:"public", active:true } ] } } } } }
+  post:
+    summary: Create API key
+    responses: { '201': { description: Created, content: { application/json: { example: { id:"k_abc", secret:"wb_xxx", scope:"public" } } } } }
+/v1/admin/api-keys/{id}:
+  delete:
+    summary: Revoke API key
+    responses: { '204': { description: No Content } }
+/v1/webhooks/endpoints:
+  get:
+    summary: List webhook endpoints
+    responses: { '200': { description: OK, content: { application/json: { example: { items: [] } } } } }
+  post:
+    summary: Create webhook endpoint
+    responses: { '201': { description: Created, content: { application/json: { example: { id:"we_1", secret:"<once>" } } } } }
+/v1/webhooks/test:
+  post:
+    summary: Trigger test delivery
+    responses: { '200': { description: OK, content: { application/json: { example: { ok:true, status:200 } } } } }
+
+
+components:
+  schemas:
+    Problem:
+      type: object
+      properties:
+        type: { type: string }
+        title: { type: string }
+        status: { type: integer }
+        detail: { type: string }
+        instance: { type: string }
+  responses:
+    ProblemResponse:
+      description: Error
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/Problem' }
+
+x-api-version: '1'
+x-deprecated-aliases:
+  - /api/systems/status
+
+paths:
+  /v1/scim/v2/Users:
+    get:
+      summary: SCIM Users list
+      responses: { '200': { description: OK } , '4XX': { $ref: '#/components/responses/ProblemResponse' } }
+    post:
+      summary: SCIM Create user
+      responses: { '201': { description: Created } , '4XX': { $ref: '#/components/responses/ProblemResponse' } }
+  /v1/scim/v2/Groups:
+    get:
+      summary: SCIM Groups list
+      responses: { '200': { description: OK } }
+    post:
+      summary: SCIM Create group
+      responses: { '201': { description: Created } }
+  /v1/audit/snapshot:
+    post:
+      summary: Generate audit snapshot
+      responses: { '200': { description: OK } }
+  /v1/systems/status:
+    get:
+      summary: Systems status
+      responses: { '200': { description: OK } }
+  /v1/systems/resync:
+    post:
+      summary: Enqueue resync
+      responses: { '200': { description: OK } }
+  /v1/retention/run:
+    post:
+      summary: Run retention job
+      responses: { '200': { description: OK } }
+  /v1/dsr/erase:
+    post:
+      summary: Enqueue data subject erasure
+      responses: { '200': { description: OK } }
+
+
+x-notes: Deprecated legacy endpoints are documented for migration only.
+
+
+# --- Final polish additions ---
+components:
+  responses:
+    ProblemResponse:
+      description: Error
+      content:
+        application/problem+json:
+          schema:
+            type: object
+            properties:
+              type: { type: string }
+              title: { type: string }
+              status: { type: integer }
+              detail: { type: string }
+              instance: { type: string }
+paths:
+  /v1/audit/logs:
+    get:
+      summary: Hent audit-logger
+      parameters:
+        - in: query; name: from; schema: { type: string }
+        - in: query; name: to; schema: { type: string }
+      responses:
+        '200': { description: OK, content: { application/json: { example: { items: [] } } } }
+        '4XX': { $ref: '#/components/responses/ProblemResponse' }
+  /v1/dsr/status:
+    get:
+      summary: Sjekk status for erasure-jobb
+      responses: { '200': { description: OK, content: { application/json: { example: { ok:true, status:'queued' } } } } }
+  /v1/connectors/status:
+    get:
+      summary: Status for connectors
+      responses: { '200': { description: OK, content: { application/json: { example: { items: [ { name:'NetSuite', lastSync:'2025-08-20T10:00:00Z'} ] } } } } }
+  /v1/onboarding/steps:
+    get:
+      summary: Hent onboardingsteg
+      responses: { '200': { description: OK, content: { application/json: { example: { steps:[ 'demo-data','systemer','godkjenning','ferdig' ] } } } } }

@@ -1,0 +1,35 @@
+
+name: pg-integration
+on:
+  pull_request:
+  push:
+    branches: [ main ]
+jobs:
+  pg-tests:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: workbuoy
+          POSTGRES_PASSWORD: workbuoy
+          POSTGRES_DB: workbuoy
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U workbuoy" --health-interval=10s --health-timeout=5s --health-retries=5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - run: npm ci
+      - name: Create schema
+        env:
+          DATABASE_URL: postgres://workbuoy:workbuoy@localhost:5432/workbuoy
+        run: node -e "require('fs').readdirSync('db/pg/migrations').filter(f=>f.endsWith('.sql')).sort().forEach(f=>{console.log('apply',f);require('child_process').execSync('psql "$DATABASE_URL" -f db/pg/migrations/'+f,{stdio:'inherit'});});"
+      - name: Integration tests (PG)
+        env:
+          NODE_ENV: production
+          DATABASE_URL: postgres://workbuoy:workbuoy@localhost:5432/workbuoy
+          DB_SSL: 'false'
+        run: npm test

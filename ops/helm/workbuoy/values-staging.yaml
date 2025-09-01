@@ -1,0 +1,26 @@
+ingress:
+  enabled: true
+  className: nginx
+  hosts:
+    - host: staging.workbuoy.company
+      crmApiPath: /
+      desktopUpdatePath: /updates
+  tls:
+    enabled: true
+    secretName: staging-wb-tls
+
+crmApi:
+  replicas: 2
+  env:
+    NODE_ENV: "production"
+    API_KEY_DEV: "staging-key"
+    RBAC_ENFORCE: "true"
+
+connectorsWorker:
+  replicas: 1
+  env:
+    CRM_BASE_URL: "http://workbuoy-crm-api:3000"
+    API_KEY_DEV: "staging-key"
+
+desktopUpdate:
+  replicas: 1

@@ -1,0 +1,1 @@
+DROP TABLE IF EXISTS crm_notes; DROP TABLE IF EXISTS project_tasks;

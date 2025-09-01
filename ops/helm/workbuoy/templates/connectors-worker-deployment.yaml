@@ -1,0 +1,29 @@
+{{- if .Values.connectorsWorker.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: workbuoy-connectors-worker
+  labels: {{- include "workbuoy.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.connectorsWorker.replicas }}
+  selector: { matchLabels: { app: workbuoy-connectors-worker } }
+  template:
+    metadata:
+      labels:
+        app: workbuoy-connectors-worker
+        {{- include "workbuoy.labels" . | nindent 8 }}
+    spec:
+      serviceAccountName: {{ include "workbuoy.fullname" . }}
+      containers:
+      - name: worker
+        image: "{{ .Values.connectorsWorker.image.repository }}:{{ .Values.connectorsWorker.image.tag }}"
+        imagePullPolicy: {{ .Values.connectorsWorker.image.pullPolicy }}
+        command: {{ toYaml .Values.connectorsWorker.command | nindent 10 }}
+        env:
+        {{- range $k, $v := .Values.connectorsWorker.env }}
+        - name: {{ $k }}
+          value: {{ $v | quote }}
+        {{- end }}
+        resources:
+{{ toYaml .Values.connectorsWorker.resources | indent 10 }}
+{{- end }}

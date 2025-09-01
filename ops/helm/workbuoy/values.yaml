@@ -1,0 +1,29 @@
+replicaCount: 1
+image:
+  repository: nginx
+  tag: stable-alpine
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 80
+
+ingress:
+  enabled: false
+  className: ""
+  hosts: []
+  annotations: {}
+  tls: []
+
+region:
+  name: "active"
+  primary: true
+
+env:
+  redisUrl: "redis://prod-redis:6379"
+  postgresUrl: "postgres://prod-postgres:5432/workbuoy"
+
+resources: {}
+nodeSelector: {}
+tolerations: []
+affinity: {}

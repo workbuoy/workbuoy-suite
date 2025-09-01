@@ -1,0 +1,43 @@
+{
+  "info": {
+    "name": "WorkBuoy CRM API",
+    "_postman_id": "abc123",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "List Pipelines",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "x-api-key",
+            "value": "{{API_KEY}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/v1/crm/pipelines"
+      }
+    },
+    {
+      "name": "Create Pipeline",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "x-api-key",
+            "value": "{{API_KEY}}"
+          },
+          {
+            "key": "Idempotency-Key",
+            "value": "test1"
+          }
+        ],
+        "url": "{{baseUrl}}/api/v1/crm/pipelines",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"tenant_id\": \"t1\", \"name\": \"Sales\"}"
+        }
+      }
+    }
+  ]
+}

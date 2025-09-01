@@ -1,0 +1,5 @@
+DROP TABLE IF EXISTS policies;
+DROP TABLE IF EXISTS purchases;
+DROP TABLE IF EXISTS audit_logs;
+DROP TABLE IF EXISTS users;
+DROP TABLE IF EXISTS _migrations;

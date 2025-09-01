@@ -1,0 +1,43 @@
+appId: com.workbuoy.desktop
+productName: WorkBuoy Desktop
+directories:
+  output: dist_electron
+  buildResources: build/resources
+files:
+  - "dist/**"
+  - "!**/*.map"
+
+publish:
+  - provider: generic
+    url: ${env.WB_UPDATE_URL:-https://updates.workbuoy.io/workbuoy/stable}
+    url: "https://updates.example.com/workbuoy/${env.WB_UPDATE_CHANNEL:-stable}"
+
+mac:
+  notarize: true
+  category: public.app-category.productivity
+  target: [dmg, zip]
+  # differential updates (blockmap) are enabled by default for dmg/zip via latest-mac.yml
+  artifactName: "WorkBuoy-Desktop-${version}-mac.${ext}"
+
+win:
+  target:
+    - target: nsis
+      arch: [x64]
+    - target: msi
+      arch: [x64]
+  # nsis builds support differential updates via blockmap + latest.yml
+  artifactName: "WorkBuoy-Desktop-${version}-win.${ext}"
+
+linux:
+  target: [AppImage, deb, rpm]
+  artifactName: "WorkBuoy-Desktop-${version}-linux.${ext}"
+  category: Utility
+
+nsis:
+  oneClick: true
+  perMachine: true
+  allowElevation: true
+  differentialPackage: true
+
+# Generate update files for all channels on demand
+generateUpdatesFilesForAllChannels: true

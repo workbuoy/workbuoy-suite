@@ -1,0 +1,28 @@
+{
+  "channels": {
+    "stable": {
+      "percent": 30,
+      "allow_os": {
+        "windows": true,
+        "mac": true,
+        "linux": true
+      },
+      "min_version": "1.0.0",
+      "max_version": null,
+      "hold": false,
+      "revoked": []
+    },
+    "beta": {
+      "percent": 100,
+      "allow_os": {
+        "windows": true,
+        "mac": true,
+        "linux": true
+      },
+      "min_version": "1.0.0",
+      "max_version": null,
+      "hold": false,
+      "revoked": []
+    }
+  }
+}

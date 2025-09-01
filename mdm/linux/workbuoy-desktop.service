@@ -1,0 +1,14 @@
+[Unit]
+Description=WorkBuoy Desktop
+After=network-online.target
+
+[Service]
+Type=simple
+Environment=WB_UPDATE_URL=https://updates.company.com/workbuoy/stable
+Environment=WB_UPDATE_CHANNEL=stable
+Environment=WB_AUTOUPDATE=true
+ExecStart=/opt/workbuoy-desktop/workbuoy-desktop
+Restart=on-failure
+
+[Install]
+WantedBy=default.target

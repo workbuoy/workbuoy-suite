@@ -1,0 +1,25 @@
+{
+  "name": "workbuoy-desktop",
+  "version": "1.0.0-pr-ah",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test:conflict": "node dist/tests/e2e_conflict.js",
+    "test:telemetry": "node dist/tests/telemetry_verify.js",
+    "test:redisblast": "node dist/tools/load/redis_blast.js",
+    "test": "npm run build && npm run test:conflict && npm run test:telemetry && WB_REDIS_N=5000 npm run test:redisblast",
+    "migrate:encrypt": "node src/migrations/migrate_to_encrypted.js ./workbuoy.sqlite"
+  },
+  "dependencies": {
+    "better-sqlite3": "^9.4.5",
+    "express": "^4.19.2",
+    "ioredis": "^5.4.1",
+    "node-fetch": "^3.3.2",
+    "keytar": "^7.9.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.5",
+    "@types/node": "^20.11.30"
+  }
+}

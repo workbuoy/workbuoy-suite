@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>PayloadContent</key>
+  <array>
+    <dict>
+      <key>PayloadType</key>
+      <string>com.apple.ManagedClient.preferences</string>
+      <key>PayloadVersion</key>
+      <integer>1</integer>
+      <key>PayloadIdentifier</key>
+      <string>com.workbuoy.desktop.config</string>
+      <key>PayloadUUID</key>
+      <string>11111111-1111-1111-1111-111111111111</string>
+      <key>PayloadEnabled</key>
+      <true/>
+      <key>PayloadDisplayName</key>
+      <string>WorkBuoy Desktop Config</string>
+      <key>PayloadContent</key>
+      <dict>
+        <key>com.workbuoy.desktop</key>
+        <dict>
+          <key>Forced</key>
+          <array>
+            <dict>
+              <key>mcx_preference_settings</key>
+              <dict>
+                <key>ApiBaseUrl</key><string>https://api.workbuoy.local</string>
+                <key>AutoUpdateChannel</key><string>stable</string>
+                <key>TelemetryEnabled</key><true/>
+                <key>ProxyURL</key><string></string>
+                <key>OTELExporterEndpoint</key><string>http://otel-collector.example:4318</string>
+                <key>SSOBaseUrl</key><string>https://sso.workbuoy.local</string>
+              </dict>
+            </dict>
+          </array>
+        </dict>
+      </dict>
+    </dict>
+  </array>
+  <key>PayloadType</key><string>Configuration</string>
+  <key>PayloadVersion</key><integer>1</integer>
+  <key>PayloadIdentifier</key><string>com.workbuoy.desktop.profile</string>
+  <key>PayloadUUID</key><string>22222222-2222-2222-2222-222222222222</string>
+  <key>PayloadDisplayName</key><string>WorkBuoy Desktop</string>
+  <key>PayloadDescription</key><string>MDM profile for WorkBuoy Desktop settings.</string>
+  <key>PayloadOrganization</key><string>WorkBuoy</string>
+</dict>
+</plist>

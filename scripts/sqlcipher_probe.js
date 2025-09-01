@@ -1,0 +1,1 @@
+const Database=require('better-sqlite3');const db=new Database(':memory:');try{const v=db.pragma('cipher_version',{simple:true});if(!v){console.error('SQLCipher not detected');process.exit(2)}console.log('SQLCipher:',v);process.exit(0)}catch(e){console.error('Probe error:',e.message);process.exit(2)}

@@ -1,0 +1,16 @@
+name: sqlcipher-probe
+on: [workflow_dispatch]
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
+      - name: Install desktop deps
+        run: |
+          cd desktop
+          npm ci || npm install
+      - name: Probe SQLCipher linkage
+        run: |
+          node scripts/sqlcipher_probe.js || (echo '❌ SQLCipher not linked' && exit 1)

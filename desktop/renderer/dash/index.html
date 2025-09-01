@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+
+<html>
+<head><meta content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self' data:; connect-src 'self' http://localhost:* https://*; frame-ancestors 'none'; base-uri 'none'; form-action 'none'" http-equiv="Content-Security-Policy"/>
+<meta charset="utf-8"/>
+
+<title>WorkBuoy Dash</title>
+<link href="./dash.css" rel="stylesheet"/>
+<link href="../styles/tokens.css" rel="stylesheet"/><link href="../styles/base.css" rel="stylesheet"/></head>
+<body>
+<header class="header hstack">
+<div class="brand-logo"><span class="brand-dot"></span>Workbuoy</div>
+<div style="flex:1"></div>
+<button class="cta" onclick="window.wbDesktop?.openSettings?.()">Innstillinger</button>
+</header>
+<section class="section">
+<div class="wrap">
+<h2>Dashboards</h2>
+<div class="panel">
+<h3>Metrics snapshot</h3>
+<pre id="metrics">loading…</pre>
+</div>
+</div>
+<script src="./dash.js"></script>
+</section>
+</body>
+</html>

@@ -1,0 +1,1 @@
+CREATE TABLE IF NOT EXISTS tenant_settings(tenant_id TEXT PRIMARY KEY, recognize_other_buoy INTEGER DEFAULT 0);

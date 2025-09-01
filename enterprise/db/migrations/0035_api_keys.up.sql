@@ -1,0 +1,18 @@
+
+CREATE TABLE IF NOT EXISTS api_keys(
+  id TEXT PRIMARY KEY,
+  tenant_id TEXT NOT NULL,
+  name TEXT NOT NULL,
+  key_hash TEXT NOT NULL,
+  scope TEXT DEFAULT 'public',
+  active INTEGER DEFAULT 1,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  last_used_at DATETIME
+);
+CREATE TABLE IF NOT EXISTS api_key_usages(
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  api_key_id TEXT NOT NULL,
+  ts DATETIME DEFAULT CURRENT_TIMESTAMP,
+  path TEXT,
+  status INTEGER
+);

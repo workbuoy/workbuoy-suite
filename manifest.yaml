@@ -1,0 +1,7 @@
+{
+  "pr_id": "AV",
+  "title": "Anti‑Vibe Hardening Pack",
+  "phase": "hardening",
+  "depends_on": [],
+  "checks": {}
+}

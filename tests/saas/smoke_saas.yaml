@@ -1,0 +1,9 @@
+# SaaS Smoke Test (to be executed by your CI runner or a make target)
+# Variables required: API_BASE_URL
+steps:
+  - name: healthz
+    run: curl -fsSL "$API_BASE_URL/api/healthz"
+  - name: readyz
+    run: curl -fsSL "$API_BASE_URL/api/readyz"
+  - name: openapi
+    run: curl -fsSL "$API_BASE_URL/api-docs/openapi.yaml" | head -n 20

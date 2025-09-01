@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="no">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="wb-api-base" content="/api" />
+  <title>WorkBuoy — Full Current</title>
+  <link rel="stylesheet" href="/css/styles.css" />
+</head>
+<body>
+  <div class="container">
+    <header class="hero">
+      <div class="hero-row">
+        <span class="status-dot"></span>
+        <div>Buoy online</div>
+      </div>
+      <h1>Unlock your fastest, smartest, most productive workday.</h1>
+      <div class="ctas">
+        <button class="btn" id="try-demo">Try demo</button>
+        <button class="btn-outline" id="buy-kit">Buy • $9</button>
+      </div>
+    </header>
+    <main class="grid">
+      <section class="panel" id="cxm">
+        <nav class="cxm-tabs" id="cxm-tabs"></nav>
+        <div id="cxm-body"></div>
+        <aside class="focus-card" id="focus-card">
+          <div class="focus-title">Focus — forslag med forklaring</div>
+          <div id="focus-suggestions"></div>
+        </aside>
+      </section>
+      <section class="panel chat-panel" id="chat">
+        <div id="chat-log" aria-live="polite"></div>
+        <div class="input">
+          <textarea id="chat-input" placeholder="Skriv her… (Enter=send, Shift+Enter=linje)"></textarea>
+          <button class="btn" id="send-btn">Send</button>
+        </div>
+        <div class="chips" id="chips"></div>
+      </section>
+    </main>
+    <section class="kits-section">
+      <div class="kits-row">
+        <div class="kit-card">Core</div>
+        <div class="kit-card">Flex</div>
+        <div class="kit-card highlight">Kits • $9</div>
+        <div class="kit-card">Secure</div>
+      </div>
+    </section>
+  </div>
+
+  <!-- Dev toggles -->
+  <div class="dev-toggle">
+    <label for="coreMode">Core‑modus:</label>
+    <select id="coreMode"></select>
+    <label><input type="checkbox" id="secureOn" /> Secure</label>
+  </div>
+
+  <script src="/js/eventBus.js"></script>
+  <script src="/js/flags.js"></script>
+  <script src="/js/policies.js"></script>
+  <script src="/js/secure.js"></script>
+  <script src="/js/roles.js"></script>
+  <script src="/js/overlay.js"></script>
+  <script src="/js/focusCard.js"></script>
+  <script src="/js/commandPalette.js"></script>
+  <script src="/js/kits.js"></script>
+  <script src="/js/stripe.js"></script>
+  <script src="/js/cxm.js"></script>
+  <script src="/js/autonomy.js"></script>
+  <script src="/js/modules/flex.js"></script>
+  <script src="/js/modes/invisible.js"></script>
+  <script src="/js/modes/calm.js"></script>
+  <script src="/js/modes/proactive.js"></script>
+  <script src="/js/modes/ambitious.js"></script>
+  <script src="/js/adapters/graph_excel.js"></script>
+  <script src="/js/adapters/mail.js"></script>
+  <script src="/js/adapters/calendar.js"></script>
+  <script src="/js/adapters/crm.js"></script>
+  <script src="/js/modes/kraken.js"></script>
+  <script src="/js/modes/tsunami.js"></script>
+  <script src="/js/meta/selfAnalysis.js"></script>
+  <script src="/js/meta/documentation.js"></script>
+  <script src="/js/meta/codeGenerator.js"></script>
+  <script src="/js/meta/learningEngine.js"></script>
+  <script src="/js/meta/metaInterface.js"></script>
+  <script src="/js/tests/runner.js"></script>
+  <script src="/js/transparency.js"></script>
+  <script src="/js/chat.js"></script>
+  <script src="/js/onboarding/connectors.js"></script>
+</body>
+</html>

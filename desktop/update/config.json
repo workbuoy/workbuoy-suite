@@ -1,0 +1,6 @@
+{
+  "channels": {
+    "stable": "http://127.0.0.1:45900/feed/stable/latest.json",
+    "beta": "http://127.0.0.1:45900/feed/beta/latest.json"
+  }
+}

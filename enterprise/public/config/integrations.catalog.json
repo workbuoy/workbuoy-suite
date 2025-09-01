@@ -1,0 +1,188 @@
+{
+  "providers": [
+    {
+      "id": "microsoft-graph",
+      "label": "Microsoft 365 (Outlook/Kalender/SharePoint/Teams)",
+      "scopes": [],
+      "category": "email",
+      "requires_admin": true
+    },
+    {
+      "id": "google-workspace",
+      "label": "Google Workspace (Gmail/Kalender/Drive)",
+      "scopes": [],
+      "category": "email",
+      "requires_admin": false
+    },
+    {
+      "id": "slack",
+      "label": "Slack",
+      "scopes": [
+        "channels:read",
+        "users:read"
+      ],
+      "category": "collaboration"
+    },
+    {
+      "id": "jira",
+      "label": "Jira (Atlassian)",
+      "scopes": [],
+      "category": "it",
+      "requires_admin": false
+    },
+    {
+      "id": "github",
+      "label": "GitHub",
+      "scopes": [
+        "repo:read",
+        "read:user"
+      ],
+      "category": "devops"
+    },
+    {
+      "id": "gitlab",
+      "label": "GitLab",
+      "scopes": [
+        "read_api"
+      ],
+      "category": "devops"
+    },
+    {
+      "id": "salesforce",
+      "label": "Salesforce",
+      "scopes": [],
+      "category": "crm",
+      "requires_admin": true
+    },
+    {
+      "id": "hubspot",
+      "label": "HubSpot",
+      "scopes": [],
+      "category": "crm",
+      "requires_admin": false
+    },
+    {
+      "id": "d365",
+      "label": "Dynamics 365",
+      "scopes": [
+        "user.read"
+      ],
+      "category": "crm"
+    },
+    {
+      "id": "qlik",
+      "label": "Qlik Sense/QlikView",
+      "scopes": [],
+      "category": "bi",
+      "requires_admin": true
+    },
+    {
+      "id": "powerbi",
+      "label": "Power BI",
+      "scopes": [
+        "Dataset.Read.All"
+      ],
+      "category": "bi"
+    },
+    {
+      "id": "tableau",
+      "label": "Tableau",
+      "scopes": [
+        "tableau:views:read"
+      ],
+      "category": "bi"
+    },
+    {
+      "id": "zoom",
+      "label": "Zoom",
+      "scopes": [
+        "meeting:read"
+      ],
+      "category": "meetings"
+    },
+    {
+      "id": "teams",
+      "label": "Microsoft Teams",
+      "scopes": [
+        "Calls.AccessMedia.All"
+      ],
+      "category": "meetings"
+    },
+    {
+      "id": "zendesk",
+      "label": "Zendesk",
+      "scopes": [],
+      "category": "support",
+      "requires_admin": true
+    },
+    {
+      "id": "jira-service",
+      "label": "Jira Service Management",
+      "scopes": [],
+      "category": "it",
+      "requires_admin": true
+    },
+    {
+      "id": "google-drive",
+      "label": "Google Drive",
+      "scopes": [],
+      "category": "files",
+      "requires_admin": false
+    },
+    {
+      "id": "sharepoint",
+      "label": "SharePoint",
+      "scopes": [],
+      "category": "files",
+      "requires_admin": true
+    },
+    {
+      "id": "bamboohr",
+      "label": "BambooHR",
+      "scopes": [],
+      "category": "hr",
+      "requires_admin": true
+    },
+    {
+      "id": "workday",
+      "label": "Workday",
+      "scopes": [],
+      "category": "hr",
+      "requires_admin": true
+    },
+    {
+      "id": "sap-s4hana",
+      "label": "SAP S/4HANA",
+      "scopes": [],
+      "category": "erp",
+      "requires_admin": true
+    },
+    {
+      "id": "sap-c4c",
+      "label": "SAP C4C",
+      "scopes": [],
+      "category": "erp",
+      "requires_admin": true
+    },
+    {
+      "id": "infor-m3",
+      "label": "Infor M3",
+      "scopes": [],
+      "category": "erp",
+      "requires_admin": true
+    },
+    {
+      "id": "oracle-netsuite",
+      "label": "Oracle NetSuite",
+      "scopes": [],
+      "category": "erp",
+      "requires_admin": true
+    },
+    {
+      "id": "netsuite",
+      "name": "Oracle NetSuite",
+      "category": "ERP",
+      "status": "stub"
+    }
+  ]
+}

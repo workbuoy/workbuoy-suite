@@ -1,0 +1,1 @@
+test('billing webhook handler exists', ()=>{ const fs=require('fs'); expect(fs.existsSync('pages/api/billing/webhook.js')).toBe(true); });

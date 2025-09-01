@@ -1,0 +1,9 @@
+[
+  {
+    "type": "contact",
+    "external_id": "dyn-ct-1001",
+    "name": "Grace Hopper",
+    "email": "grace@example.com",
+    "phone": "+4799887766"
+  }
+]

@@ -1,0 +1,10 @@
+groups:
+- name: workbuoy-alerts
+  rules:
+  - alert: High5xxRate
+    expr: sum(rate(http_requests_total{status=~"5.."}[5m])) > 1
+    for: 5m
+    labels: { severity: page }
+    annotations:
+      summary: "High 5xx rate"
+      description: "API 5xx rate > 1 rps for 5m"

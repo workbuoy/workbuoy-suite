@@ -1,0 +1,65 @@
+image:
+  repository: ghcr.io/workbuoy/cxm
+  tag: latest
+  pullPolicy: IfNotPresent
+
+service:
+  port: 8080
+
+env:
+  WB_ENABLE_SCHEDULER: "true"
+  WB_SCHEDULER_INTERVAL_MS: "300000"
+  WB_RATE_LIMIT_PER_MIN: "120"
+  WB_RATE_LIMIT_BURST: "60"
+  # Breaker: comma-separated list e.g. "Salesforce,Slack"
+  WB_BREAKER_OPEN: ""
+
+secrets:
+  # All secrets are fetched via getSecret(KEY). Values below are keys/ids to resolve.
+  SF_CLIENT_ID: ""
+  SF_CLIENT_SECRET: ""
+  SF_REFRESH_TOKEN: ""
+  HS_API_KEY: ""
+  ZS_SUBDOMAIN: ""
+  ZS_EMAIL: ""
+  ZS_API_TOKEN: ""
+  SLACK_BOT_TOKEN: ""
+  GOOGLE_CLIENT_EMAIL: ""
+  GOOGLE_PRIVATE_KEY: ""
+  MS_TENANT_ID: ""
+  MS_CLIENT_ID: ""
+  MS_CLIENT_SECRET: ""
+  SAP_C4C_URL: ""
+  SAP_C4C_USER: ""
+  SAP_C4C_PASSWORD: ""
+  SAP_S4_HOST: ""
+  SAP_S4_USER: ""
+  SAP_S4_PASSWORD: ""
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 200m
+    memory: 256Mi
+
+connectors:
+  salesforce: false
+  hubspot: false
+  zendesk: false
+  slack: false
+  google_calendar: false
+  microsoft_graph: false
+  sap_c4c: false
+  sap_s4hana: false
+
+features:
+  real_fetch_salesforce: false
+  real_fetch_hubspot: false
+  real_fetch_zendesk: false
+  real_fetch_slack: false
+  real_fetch_google_calendar: false
+  real_fetch_microsoft_graph: false
+  real_fetch_sap_c4c: false
+  real_fetch_sap_s4hana: false

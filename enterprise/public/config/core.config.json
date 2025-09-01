@@ -1,0 +1,88 @@
+[
+  {
+    "id": "invisible",
+    "label": "Invisible",
+    "description": "Observerer; logger lokalt.",
+    "maxAutoActions": 0,
+    "toolAccess": [],
+    "overlayAllowed": false,
+    "confirmBefore": [
+      "*"
+    ]
+  },
+  {
+    "id": "calm",
+    "label": "Calm",
+    "description": "Svar kun på direkte forespørsel.",
+    "maxAutoActions": 0,
+    "toolAccess": [],
+    "overlayAllowed": false,
+    "confirmBefore": [
+      "*"
+    ]
+  },
+  {
+    "id": "proactive",
+    "label": "Proactive",
+    "description": "Foreslår (chips/nudges), utfører aldri.",
+    "maxAutoActions": 0,
+    "toolAccess": [],
+    "overlayAllowed": true,
+    "confirmBefore": [
+      "*"
+    ]
+  },
+  {
+    "id": "ambitious",
+    "label": "Ambitious",
+    "description": "Forbereder utkast/maler; alltid forhåndsvisning.",
+    "maxAutoActions": 0,
+    "toolAccess": [],
+    "overlayAllowed": true,
+    "confirmBefore": [
+      "*"
+    ]
+  },
+  {
+    "id": "kraken",
+    "label": "Kraken",
+    "description": "API‑drevet; orkestrerer data fra eksterne systemer.",
+    "maxAutoActions": 999,
+    "toolAccess": [
+      "api:calendar",
+      "api:mail_draft",
+      "api:crm",
+      "api:erp",
+      "api:graph_excel"
+    ],
+    "overlayAllowed": false,
+    "confirmBefore": [
+      "send_email",
+      "write_system_high_risk",
+      "payment",
+      "delete",
+      "privacy_sensitive"
+    ]
+  },
+  {
+    "id": "tsunami",
+    "label": "Tsunami",
+    "description": "Mest proaktiv; kan skrive tilbake (alltid med godkjenning).",
+    "maxAutoActions": 999,
+    "toolAccess": [
+      "api:calendar",
+      "api:mail_draft",
+      "api:crm",
+      "api:erp",
+      "api:graph_excel"
+    ],
+    "overlayAllowed": true,
+    "confirmBefore": [
+      "send_email",
+      "write_system_high_risk",
+      "payment",
+      "delete",
+      "privacy_sensitive"
+    ]
+  }
+]

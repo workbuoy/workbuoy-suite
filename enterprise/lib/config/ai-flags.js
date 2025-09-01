@@ -1,0 +1,1 @@
+export const WB_AI_ENABLED=(process.env.WB_AI_ENABLED||'false').toLowerCase()==='true';export const WB_AI_PROVIDER=(process.env.WB_AI_PROVIDER||'stub').toLowerCase();export const WB_AI_CANARY_PERCENT=parseInt(process.env.WB_AI_CANARY_PERCENT||'0',10);export const WB_AI_KB_VERSION=process.env.WB_AI_KB_VERSION||'1.0.0';

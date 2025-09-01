@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: Service
+metadata: { name: workbuoy }
+spec:
+  selector: { app: workbuoy, color: {{ .Values.blueGreen.activeColor }} }
+  ports:
+  - name: http
+    port: 80
+    targetPort: 8080

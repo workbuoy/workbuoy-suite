@@ -1,0 +1,21 @@
+groups:
+- name: workbuoy-slo
+  rules:
+  - alert: HighFailureRate
+    expr: (sum(rate(wb_connector_sync_failure_total[10m])) / (sum(rate(wb_connector_sync_success_total[10m])) + 1)) > 0.005
+    for: 10m
+    labels: { severity: page }
+    annotations:
+      summary: "Connector failure rate > 0.5%"
+  - alert: HighP95Latency
+    expr: histogram_quantile(0.95, sum(rate(wb_connector_sync_seconds_bucket[5m])) by (le)) > 2
+    for: 10m
+    labels: { severity: ticket }
+    annotations:
+      summary: "Connector p95 latency above 2s"
+  - alert: StaleSync
+    expr: (time() - max(wb_connector_last_success_timestamp) by (tenant,connector)) > 3600
+    for: 30m
+    labels: { severity: ticket }
+    annotations:
+      summary: "Sync freshness stale (>60m)"

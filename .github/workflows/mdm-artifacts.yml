@@ -1,0 +1,21 @@
+name: mdm-artifacts
+
+on:
+  push:
+    paths: ['mdm/**', '.github/workflows/mdm-artifacts.yml']
+  pull_request:
+    paths: ['mdm/**']
+
+jobs:
+  upload:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mdm-profiles
+          path: |
+            mdm/intune/*
+            mdm/jamf/*
+            mdm/linux/*
+          if-no-files-found: warn

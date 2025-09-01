@@ -1,0 +1,2 @@
+-- 0026_tenant_settings_extend.down.sql
+-- SQLite cannot drop columns easily; we leave as no-op.

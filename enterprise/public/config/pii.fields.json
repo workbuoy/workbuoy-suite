@@ -1,0 +1,14 @@
+{
+  "tables": {
+    "users": [
+      "email"
+    ],
+    "purchases": [],
+    "customers": [
+      "email",
+      "phone",
+      "address",
+      "national_id"
+    ]
+  }
+}

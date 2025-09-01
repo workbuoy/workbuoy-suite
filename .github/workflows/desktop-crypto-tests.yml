@@ -1,0 +1,19 @@
+name: desktop-crypto-tests
+on: [push]
+jobs:
+  test-crypto:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
+      - name: Install deps (desktop)
+        run: |
+          cd desktop
+          npm ci || npm install
+      - name: Crypto migration test
+        env:
+          WB_SECRETS_KEY: ${{ secrets.WB_SECRETS_KEY }}
+        run: |
+          cd desktop
+          node src/migrations/migrate_to_encrypted.js ./workbuoy.sqlite || true

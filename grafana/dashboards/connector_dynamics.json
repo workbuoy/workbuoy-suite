@@ -1,0 +1,41 @@
+{
+  "title": "Connector \u2013 Dynamics",
+  "panels": [
+    {
+      "type": "stat",
+      "title": "Upserts",
+      "targets": [
+        {
+          "expr": "sum(dyn_upsert_total)"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Errors",
+      "targets": [
+        {
+          "expr": "sum(dyn_errors_total)"
+        }
+      ]
+    },
+    {
+      "type": "graph",
+      "title": "DLQ depth",
+      "targets": [
+        {
+          "expr": "dyn_dlq_depth"
+        }
+      ]
+    }
+  ],
+  "templating": {
+    "list": [
+      {
+        "name": "env",
+        "type": "query",
+        "query": "label_values(env)"
+      }
+    ]
+  }
+}

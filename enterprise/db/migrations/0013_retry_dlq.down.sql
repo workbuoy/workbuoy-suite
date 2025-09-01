@@ -1,0 +1,1 @@
+DROP TABLE IF EXISTS retry_queue; DROP TABLE IF EXISTS dlq;

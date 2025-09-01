@@ -1,0 +1,20 @@
+{
+  "tables": {
+    "sessions": {
+      "keep_days": 30,
+      "ts_column": "last_seen"
+    },
+    "audit_events": {
+      "keep_days": 365,
+      "ts_column": "ts"
+    },
+    "consent_log": {
+      "keep_days": 3650,
+      "ts_column": "ts"
+    },
+    "erasure_tombstones": {
+      "keep_days": 3650,
+      "ts_column": "erased_at"
+    }
+  }
+}

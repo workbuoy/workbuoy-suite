@@ -1,0 +1,6 @@
+- "secrets/**"
+- ".github/**"
+- "core/roles/roles.json"
+- "enterprise/**"
+- "backend/**"
+- "desktop/**"

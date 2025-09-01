@@ -1,0 +1,11 @@
+apiVersion: monitoring.coreos.com/v1alpha1
+kind: AlertmanagerConfig
+metadata:
+  name: workbuoy
+spec:
+  route:
+    groupBy: ['job']
+    groupWait: 30s
+    receiver: 'null'
+  receivers:
+    - name: 'null'

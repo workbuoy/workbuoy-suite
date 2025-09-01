@@ -1,0 +1,28 @@
+name: desktop-encryption-tests
+
+on:
+  push:
+    paths:
+      - 'desktop/**'
+      - 'desktop_demo/**'
+      - 'scripts/migrate_cache_encrypt.js'
+      - '.github/workflows/desktop-encryption-tests.yml'
+      - 'docs/DESKTOP_E2E_ENCRYPTION.md'
+  pull_request:
+    paths:
+      - 'desktop/**'
+      - 'desktop_demo/**'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Tests
+        run: |
+          cd desktop
+          npm ci || true
+          npm test

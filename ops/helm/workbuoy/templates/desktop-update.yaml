@@ -1,0 +1,48 @@
+{{- if .Values.desktopUpdate.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: workbuoy-desktop-update
+  labels: {{- include "workbuoy.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.desktopUpdate.replicas }}
+  selector: { matchLabels: { app: workbuoy-desktop-update } }
+  template:
+    metadata:
+      labels:
+        app: workbuoy-desktop-update
+        {{- include "workbuoy.labels" . | nindent 8 }}
+    spec:
+      serviceAccountName: {{ include "workbuoy.fullname" . }}
+      containers:
+      - name: nginx
+        image: "{{ .Values.desktopUpdate.image.repository }}:{{ .Values.desktopUpdate.image.tag }}"
+        imagePullPolicy: {{ .Values.desktopUpdate.image.pullPolicy }}
+        ports: [ { name: http, containerPort: 80 } ]
+        volumeMounts:
+        - name: updates
+          mountPath: /usr/share/nginx/html/updates
+        resources:
+{{ toYaml .Values.desktopUpdate.resources | indent 10 }}
+      volumes:
+      - name: updates
+        {{- if and .Values.desktopUpdate.volume.enabled .Values.desktopUpdate.volume.existingClaim }}
+        persistentVolumeClaim:
+          claimName: {{ .Values.desktopUpdate.volume.existingClaim }}
+        {{- else }}
+        emptyDir: {}
+        {{- end }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: workbuoy-desktop-update
+  labels: {{- include "workbuoy.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.desktopUpdate.service.type }}
+  selector: { app: workbuoy-desktop-update }
+  ports:
+    - name: http
+      port: {{ .Values.desktopUpdate.service.port }}
+      targetPort: http
+{{- end }}

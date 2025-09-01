@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="nb">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self'; img-src 'self' data:;">
+  <title>WorkBuoy • Offline</title>
+  <style>
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; margin: 0; background: #0b1221; color: #e5f0ff; }
+    header { background:#0e1730; border-bottom:1px solid #1e2a44; padding:10px 14px; }
+    h1 { font-size:18px; margin:0; }
+    h3 { margin: 14px 0 6px; }
+    .wrap { padding: 12px 14px; }
+    .card { background:#0e1730; border:1px solid #1e2a44; padding:12px; border-radius:12px; margin-bottom:10px; }
+    .title { font-weight:600; margin-bottom:4px; }
+    .meta { font-size:12px; opacity:.8; }
+    .empty { opacity:.8; font-style:italic; }
+    #filter { padding:8px;border-radius:8px;border:1px solid #1e2a44;background:#111a35;color:#e5f0ff;width:240px; }
+  </style>
+</head>
+<body>
+  <header><h1>Du er offline</h1></header>
+  <div class="wrap">
+    <p>Vi viser mellomlagret data der det er mulig. Koble til nett for full funksjonalitet.</p>
+    <input id="filter" placeholder="Filter..." />
+    <h3>Meldinger</h3>
+    <div id="list-messages"></div>
+    <h3>Deals</h3>
+    <div id="list-deals"></div>
+    <h3>Tickets</h3>
+    <div id="list-tickets"></div>
+    <h3>Møter</h3>
+    <div id="list-meetings"></div>
+  </div>
+  <script>
+    function renderList(container, items, q) {
+      container.innerHTML='';
+      for (const m of items) {
+        const txt = ((m.title||m.subject||m.name||'') + ' ' + (m.body||m.preview||m.description||'')).toLowerCase();
+        if (q && !txt.includes(q)) continue;
+        const card = document.createElement('div'); card.className='card';
+        const t = document.createElement('div'); t.className='title'; t.textContent = m.title || m.subject || m.name || m.id;
+        const meta = document.createElement('div'); meta.className='meta'; meta.textContent = new Date(m.updated_at || Date.now()).toLocaleString() + (m.conflicted ? ' • KONFLIKT' : '');
+        const b = document.createElement('div'); b.textContent = (m.body || m.preview || m.description || '').slice(0, 240);
+        card.appendChild(t); card.appendChild(meta); card.appendChild(b);
+        container.appendChild(card);
+      }
+      if (!container.children.length) {
+        const p = document.createElement('p'); p.className='empty'; p.textContent='Ingen data i cache ennå.'; container.appendChild(p);
+      }
+    }
+    async function loadAll() {
+      const q = (document.getElementById('filter').value||'').toLowerCase();
+      const tables = ['messages','deals','tickets','meetings'];
+      for (const t of tables) {
+        const el = document.getElementById('list-'+t);
+        try {
+          const res = await window.wbDesktop.getOfflineList(t, 20);
+          const items = res?.items || [];
+          renderList(el, items, q);
+        } catch { renderList(el, [], q); }
+      }
+    }
+    document.getElementById('filter').addEventListener('input', loadAll);
+    loadAll();
+  </script>
+</body>
+</html>

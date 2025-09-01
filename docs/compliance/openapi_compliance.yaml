@@ -1,0 +1,72 @@
+openapi: 3.0.1
+info:
+  title: WorkBuoy Compliance API (Mock)
+  version: 1.0.0
+paths:
+  /api/v1/compliance/export:
+    post:
+      summary: Start user data export
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                userId: { type: string }
+      responses:
+        '202':
+          description: Accepted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  jobId: { type: string }
+                  status: { type: string }
+  /api/v1/compliance/export/{jobId}:
+    get:
+      summary: Get export job status
+      parameters:
+        - in: path
+          name: jobId
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Status
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  jobId: { type: string }
+                  status: { type: string }
+                  url: { type: string }
+  /api/v1/compliance/delete:
+    post:
+      summary: Start user data deletion
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                userId: { type: string }
+                scope: { type: string }
+      responses:
+        '202': { description: Accepted }
+  /api/v1/compliance/portability:
+    post:
+      summary: Generate portability package
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                userId: { type: string }
+      responses:
+        '200': { description: OK }

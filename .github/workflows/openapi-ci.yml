@@ -1,0 +1,21 @@
+name: openapi-ci
+
+on:
+  push:
+    paths: ['api-docs/openapi.yaml', '.github/workflows/openapi-ci.yml']
+  pull_request:
+    paths: ['api-docs/openapi.yaml']
+
+jobs:
+  spectral:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install Spectral
+        run: npm i -g @stoplight/spectral-cli
+      - name: Lint OpenAPI
+        run: spectral lint api-docs/openapi.yaml

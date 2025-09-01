@@ -1,0 +1,50 @@
+{
+  "masking": true,
+  "critical_actions": [
+    "send_email",
+    "write_system_high_risk",
+    "payment",
+    "delete",
+    "privacy_sensitive"
+  ],
+  "confirm_texts": {
+    "send_email": "Vil du sende n\u00e5?",
+    "write_system_high_risk": "Vil du lagre i systemet?",
+    "payment": "Bekreft betaling.",
+    "delete": "Bekreft sletting.",
+    "privacy_sensitive": "Krever eksplisitt samtykke."
+  },
+  "denied_integrations": [
+    "email",
+    "crm",
+    "erp",
+    "cs",
+    "fagsystem",
+    "arkiv"
+  ],
+  "secure_defaults": {
+    "public_sector": {
+      "allow_auto_lite": false,
+      "force_read_only": true,
+      "masking": true
+    },
+    "global": {
+      "force_read_only": true,
+      "disable_automatic_writebacks": true
+    }
+  },
+  "compliance": {
+    "GDPR": true,
+    "HIPAA": true,
+    "SOC2": true
+  },
+  "mode_restrictions": {
+    "Tsunami": {
+      "allow_write": false,
+      "allow_autonomy": false
+    },
+    "Kraken": {
+      "require_explicit_approval": true
+    }
+  }
+}

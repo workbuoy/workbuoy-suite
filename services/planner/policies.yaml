@@ -1,0 +1,6 @@
+deny:
+  - "secrets/**"
+  - ".github/workflows/release*.yml"
+  - "enterprise/runtime/**"
+  - "backend/**"
+  - "desktop/src/**"

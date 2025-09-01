@@ -1,0 +1,34 @@
+{
+  "title": "WorkBuoy SLO Overview",
+  "panels": [
+    {
+      "type": "stat",
+      "title": "Connector p95 <2s SLO",
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(wb_connector_sync_seconds_bucket[5m])) by (le,connector))"
+        }
+      ],
+      "thresholds": "2"
+    },
+    {
+      "type": "stat",
+      "title": "Failure rate <0.5%",
+      "targets": [
+        {
+          "expr": "sum(rate(wb_connector_sync_failure_total[5m])) / (sum(rate(wb_connector_sync_success_total[5m]))+1)"
+        }
+      ],
+      "thresholds": "0.005"
+    },
+    {
+      "type": "graph",
+      "title": "Sync Freshness Age (s)",
+      "targets": [
+        {
+          "expr": "time() - max(wb_connector_sync_last_success{tenant!=\"\"}) by (tenant,connector)"
+        }
+      ]
+    }
+  ]
+}

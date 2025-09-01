@@ -1,0 +1,23 @@
+{
+  "ignorePatterns": [
+    {
+      "pattern": "^http://localhost"
+    },
+    {
+      "pattern": "^https://api.workbuoy.company"
+    },
+    {
+      "pattern": "^sandbox:"
+    }
+  ],
+  "httpHeaders": [
+    {
+      "urls": [
+        "https://updates.company.com/workbuoy/stable"
+      ],
+      "headers": {
+        "User-Agent": "mdlc/1.0"
+      }
+    }
+  ]
+}

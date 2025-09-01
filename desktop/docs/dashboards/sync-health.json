@@ -1,0 +1,23 @@
+{
+  "title": "WB Desktop Sync Health",
+  "panels": [
+    {
+      "type": "graph",
+      "title": "Sync Total",
+      "targets": [
+        {
+          "expr": "wb_desktop_sync_total"
+        }
+      ]
+    },
+    {
+      "type": "graph",
+      "title": "Conflicts",
+      "targets": [
+        {
+          "expr": "wb_desktop_conflicts_total"
+        }
+      ]
+    }
+  ]
+}

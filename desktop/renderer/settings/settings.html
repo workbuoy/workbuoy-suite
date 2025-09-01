@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="nb">
+<head>
+  <meta charset="utf-8">
+  <title>Innstillinger • WorkBuoy</title>
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self'; img-src 'self' data:;">
+  <style>
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; margin: 0; background: #0e1730; color: #e5f0ff; }
+    .wrap { padding: 16px 18px; }
+    h1 { font-size: 18px; margin: 0 0 12px; }
+    .row { margin-bottom: 14px; display: flex; align-items: center; justify-content: space-between; }
+    label { display: block; font-weight: 600; margin-bottom: 6px; }
+    input[type="checkbox"] { transform: scale(1.1); }
+    input[type="number"] { width: 120px; padding: 6px 8px; border-radius: 8px; border: 1px solid #223059; background:#111a35; color:#e5f0ff; }
+    .desc { font-size: 12px; opacity: .8; }
+    .meta { font-size: 12px; opacity: .8; margin-top: 10px; }
+    button { background:#162447; color:#e5f0ff; border:1px solid #223059; padding:8px 12px; border-radius:8px; cursor:pointer; }
+    button:hover { filter: brightness(1.1); }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Innstillinger</h1>
+    <div class="row">
+      <div>
+        <label for="startAtLogin">Start ved innlogging</label>
+        <div class="desc">Åpne appen automatisk når du logger inn (Win/macOS)</div>
+      </div>
+      <input type="checkbox" id="startAtLogin" />
+    </div>
+
+    <div class="row">
+      <div>
+        <label for="syncInterval">Sync-intervall (sekunder)</label>
+        <div class="desc">Mellom 60 og 3600 sekunder</div>
+      </div>
+      <input type="number" id="syncInterval" min="60" max="3600" step="10" />
+    </div>
+
+    <div class="row">
+      <div>
+        <label for="notificationsEnabled">Desktop-varsler</label>
+        <div class="desc">Aktiver/Deaktiver native varsler</div>
+      </div>
+      <input type="checkbox" id="notificationsEnabled" />
+    </div>
+
+    
+    <div class="row">
+      <div>
+        <label for="syncPageSize">Sync page size</label>
+        <div class="desc">Mellom 25 og 500</div>
+      </div>
+      <input type="number" id="syncPageSize" min="25" max="500" step="25" />
+    </div>
+
+    <div class="row">
+      <div>
+        <label for="preferBearer">Prefer bearer token</label>
+        <div class="desc">Bruk kortlivede tokens der mulig</div>
+      </div>
+      <input type="checkbox" id="preferBearer" />
+    </div>
+
+    <div class="row">
+      <div>
+        <label for="externalLinks">Åpne eksterne lenker</label>
+        <div class="desc">Velg system-nettleser eller i app</div>
+      </div>
+      <select id="externalLinks">
+        <option value="system">Systemnettleser</option>
+        <option value="in-app">I appen</option>
+      </select>
+    </div>
+
+    
+    <div class="row">
+      <div>
+        <label for="crmNotifyDeals">Varsler: Deals</label>
+        <div class="desc">Motta varsler for deal-endringer</div>
+      </div>
+      <input type="checkbox" id="crmNotifyDeals" />
+    </div>
+    <div class="row">
+      <div>
+        <label for="crmNotifyTickets">Varsler: Tickets</label>
+        <div class="desc">Motta varsler for tickets</div>
+      </div>
+      <input type="checkbox" id="crmNotifyTickets" />
+    </div>
+    <div class="row">
+      <div>
+        <label for="crmNotifyMeetings">Varsler: Møter</label>
+        <div class="desc">Motta varsler for møter</div>
+      </div>
+      <input type="checkbox" id="crmNotifyMeetings" />
+    </div>
+    <div class="row">
+      <div>
+        <label for="crmNotifyWb2wb">Varsler: wb2wb</label>
+        <div class="desc">Motta wb2wb-varsler</div>
+      </div>
+      <input type="checkbox" id="crmNotifyWb2wb" />
+    </div>
+    
+    
+    <div class="row">
+      <div>
+        <label for="offlineWriteSyncEnabled">Enable offline write-sync</label>
+        <div class="desc">Tillat skriving til CRM mens offline</div>
+      </div>
+      <input type="checkbox" id="offlineWriteSyncEnabled" />
+    </div>
+    <div class="row">
+      <div>
+        <label for="aiWorkflowsEnabled">Enable AI-workflows</label>
+        <div class="desc">Aktiver AI-forslag for CRM</div>
+      </div>
+      <input type="checkbox" id="aiWorkflowsEnabled" />
+    </div>
+    <div class="row">
+      <div>
+        <label for="telemetryOptIn">Telemetry (opt-in)</label>
+        <div class="desc">Del anonymiserte bruksdata (frivillig)</div>
+      </div>
+      <input type="checkbox" id="telemetryOptIn" />
+    </div>
+    
+    
+    <div class="row">
+      <div>
+        <label for="enableEmailIntegration">Enable email integration</label>
+        <div class="desc">Opprett e-postutkast (opt-in)</div>
+      </div>
+      <input type="checkbox" id="enableEmailIntegration" />
+    </div>
+    <div class="row">
+      <div>
+        <label for="enableCalendarIntegration">Enable calendar integration</label>
+        <div class="desc">Opprett kalenderhendelser (opt-in)</div>
+      </div>
+      <input type="checkbox" id="enableCalendarIntegration" />
+    </div>
+    
+    <div class="meta">
+
+      <div>Portal: <span id="portalOrigin"></span></div>
+      <div>Versjon: <span id="appVersion"></span></div>
+    </div>
+
+    <div style="margin-top:16px; display:flex; gap:8px;">
+      <button id="save">Lagre</button>
+      <button id="close">Lukk</button>
+    </div>
+  </div>
+
+  <script src="./settings.js"></script>
+</body>
+</html>

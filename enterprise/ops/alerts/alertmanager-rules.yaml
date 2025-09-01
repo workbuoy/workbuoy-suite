@@ -1,0 +1,16 @@
+
+groups:
+- name: workbuoy
+  rules:
+  - alert: ConnectorErrorsHigh
+    expr: increase(wb_connector_sync_failure[15m]) > 5
+    for: 10m
+    labels: { severity: warning }
+    annotations: { summary: "Høy feilrate på connector" }
+  - alert: LastSyncStale
+    expr: time() - wb_connector_last_sync > 3600
+    for: 20m
+    labels: { severity: warning }
+    annotations: { summary: "Sist synk er eldre enn 1t" }
+
+# Added: webhook DLQ and rate-limit alerts placeholders

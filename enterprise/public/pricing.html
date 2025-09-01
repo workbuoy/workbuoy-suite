@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WorkBuoy – Pricing</title>
+  <style>
+    body{ margin:0; font-family:Inter,system-ui; background:radial-gradient(1200px 600px at 10% -10%, #1e293b, #0b1220); color:#e9eef5;}
+    .wrap{ max-width:1100px; width:86%; margin:32px auto; }
+    .panel{ min-height:72vh; background:rgba(255,255,255,0.06); backdrop-filter: blur(12px); border:1px solid rgba(255,255,255,0.12); border-radius:24px; padding:28px;}
+    .tabs button{ margin-right:8px; padding:10px 14px; border-radius:10px; border:1px solid rgba(255,255,255,0.12); background:rgba(255,255,255,0.05); color:#e9eef5; cursor:pointer;}
+    .tab{ display:none;} .tab.active{ display:block;}
+    .cards{ display:grid; grid-template-columns: repeat(3,1fr); gap:16px;}
+    .card{ background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.12); border-radius:16px; padding:18px;}
+    .cta{ background:#22c55e; color:#0b1220; border:none; padding:12px 16px; border-radius:10px; cursor:pointer; font-weight:600;}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="panel">
+      <h1>Choose the WorkBuoy that fits your work style</h1>
+      <div class="tabs">
+        <button data-tab="core">Continuous Assistant</button>
+        <button data-tab="flex">On‑Demand Expert</button>
+        <button data-tab="secure">Enterprise</button>
+      </div>
+
+      <div id="core" class="tab active">
+        <div class="cards">
+          <div class="card">
+            <h3>Individual</h3>
+            <p>$9 / month</p>
+            <button class="cta" data-core="individual">Start Free Trial</button>
+          </div>
+          <div class="card">
+            <h3>Team</h3>
+            <p>$29 / month</p>
+            <button class="cta" data-core="team">Start Free Trial</button>
+          </div>
+          <div class="card">
+            <h3>Business</h3>
+            <p>$49 / month</p>
+            <button class="cta" data-core="business">Start Free Trial</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="flex" class="tab">
+        <div class="cards">
+          <div class="card">
+            <h3>Temp Task</h3><p>$15‑25 / task</p>
+            <button class="cta" data-flex="temp">Try First Task Free</button>
+          </div>
+          <div class="card">
+            <h3>Tempest Project</h3><p>$99‑299 / project</p>
+            <button class="cta" data-flex="tempest">Start Project</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="secure" class="tab">
+        <div class="card">
+          <h3>Secure Edition</h3>
+          <p>$299+ / user / month</p>
+          <button class="cta" id="enterprise-demo">Request Demo</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="/js/payments/checkout.js"></script>
+</body>
+</html>

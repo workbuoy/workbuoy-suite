@@ -1,0 +1,4 @@
+allowlist: "services/builder/policies/allowlist.yaml"
+denylist: "services/builder/policies/denylist.yaml"
+kill_switch_env: "AI_BUILDER_ENABLED"
+proposal_only: true

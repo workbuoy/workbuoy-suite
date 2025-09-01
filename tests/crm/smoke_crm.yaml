@@ -1,0 +1,8 @@
+# CRM Smoke Test
+# Variables required: API_BASE_URL, API_KEY
+steps:
+  - name: list contacts (should 200)
+    run: curl -fsSL -H "x-api-key: $API_KEY" "$API_BASE_URL/api/crm/contacts?limit=5"
+  - name: import sample (idempotent example)
+    run: |
+      curl -fsS -X POST -H "Content-Type: text/csv"         -H "x-api-key: $API_KEY"         -H "Idempotency-Key: smoke-$(date +%s)"         --data-binary "@samples/contacts.csv"         "$API_BASE_URL/api/crm/import"

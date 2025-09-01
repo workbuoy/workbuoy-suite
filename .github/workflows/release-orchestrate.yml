@@ -1,0 +1,182 @@
+
+name: workbuoy-release-orchestrate
+on:
+  workflow_dispatch:
+    inputs:
+      modules:
+        description: 'saas,crm,desktop (comma-separated)'
+        default: 'saas,crm,desktop'
+        required: true
+      environment:
+        description: 'stage or prod'
+        default: 'stage'
+        required: true
+
+jobs:
+
+roles-validate:
+  runs-on: ubuntu-latest
+  steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-node@v4
+      with: { node-version: '20' }
+    - run: npm i -D ajv ajv-formats
+    - name: Normalize roles (strict array)
+      run: |
+        node -e "const fs=require('fs');let t=fs.readFileSync('core/roles/roles.json','utf8');t=t.replace(/,\\s*(\\]|\\})/g,'$1');try{JSON.parse(t)}catch(e){const a=t.match(/\\[[\\s\\S]*?\\]/g)||[];let out=[];for(const s of a){try{out=out.concat(JSON.parse(s))}catch{}};t=JSON.stringify(out,null,2);fs.writeFileSync('core/roles/roles.json',t)}"
+    - name: Validate schema + duplicates
+      run: node core/roles/validate_roles.js
+    - name: Upload roles artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: roles-core-artifacts
+        path: |
+          core/roles/roles.json
+          core/roles/role.schema.json
+          core/roles/validate_roles.js
+
+  setup:
+    runs-on: ubuntu-latest
+    outputs:
+      run_saas: ${{ steps.flags.outputs.run_saas }}
+      run_crm: ${{ steps.flags.outputs.run_crm }}
+      run_desktop: ${{ steps.flags.outputs.run_desktop }}
+    steps:
+      - id: flags
+        run: |
+          MODS="${{ github.event.inputs.modules }}"
+          echo "run_saas=$([[ $MODS == *saas* ]] && echo true || echo false)" >> $GITHUB_OUTPUT
+          echo "run_crm=$([[ $MODS == *crm* ]] && echo true || echo false)" >> $GITHUB_OUTPUT
+          echo "run_desktop=$([[ $MODS == *desktop* ]] && echo true || echo false)" >> $GITHUB_OUTPUT
+
+  helm-apply:
+    needs: setup
+    if: needs.setup.outputs.run_saas == 'true'
+    runs-on: ubuntu-latest
+    env:
+      ENV: ${{ github.event.inputs.environment }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Write kubeconfig
+        run: |
+          echo "${{ secrets.KUBE_CONFIG }}" | base64 -d > $HOME/.kube/config
+      - name: Helm apply (${{ env.ENV }})
+        run: |
+          VALUES="release/values/values.${{ env.ENV }}.yaml"
+          helm upgrade --install workbuoy-enterprise ops/helm/workbuoy -f "$VALUES"             --namespace workbuoy --create-namespace
+      - name: Verify SaaS endpoints
+        run: |
+          BASE="${{ secrets.API_BASE_URL }}"
+          curl -f "$BASE/api/healthz"
+          curl -f "$BASE/api/readyz"
+          curl -f "$BASE/api-docs/openapi.yaml"
+
+  stripe-saml-scim:
+    needs: helm-apply
+    if: needs.setup.outputs.run_saas == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Stripe webhook bind (record step)
+        run: |
+          echo "Bind Stripe webhook to ${{ secrets.API_BASE_URL }}/api/stripe/webhook"
+      - name: SAML/SCIM config (record step)
+        run: |
+          echo "Set SAML metadata URL: ${{ secrets.SAML_METADATA_URL }}"
+          echo "Set SCIM bearer token."
+
+  crm-migrations-import:
+    needs: [setup, helm-apply]
+    if: needs.setup.outputs.run_crm == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run migrations
+        env: { DATABASE_URL: ${{ secrets.DATABASE_URL }} }
+        run: |
+          psql "$DATABASE_URL" -f crm/migrations/2025_add_geo.sql
+      - name: Import sample contacts
+        env:
+          API_BASE_URL: ${{ secrets.API_BASE_URL }}
+          API_KEY: ${{ secrets.API_KEY }}
+        run: |
+          bash scripts/import_contacts.sh ./samples/contacts.csv "$API_BASE_URL" "$API_KEY"
+
+  buoy-ai-smoke:
+    needs: crm-migrations-import
+    if: needs.setup.outputs.run_crm == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run Buoy AI smoke
+        env:
+          API_BASE_URL: ${{ secrets.API_BASE_URL }}
+          API_KEY: ${{ secrets.API_KEY }}
+          BUOY_OPENAPI_PATH: api-docs/openapi.yaml
+          BUOY_ACTION_ALLOWLIST: ai/policy/tool_allowlist.yaml
+        run: node scripts/ai_smoke.js
+
+  desktop-build-sign:
+    needs: setup
+    if: needs.setup.outputs.run_desktop == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
+      - name: Install sqlcipher
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y sqlcipher libsqlcipher-dev python3 g++ make
+      - name: Install desktop deps
+        run: |
+          cd desktop
+          npm ci || npm install
+          npm rebuild better-sqlite3 --build-from-source
+      - name: SQLCipher probe
+        run: node scripts/sqlcipher_probe.js
+      - name: Build Electron (unsigned)
+        run: cd desktop && npm run build
+      - name: Code-sign / notarize (record step)
+        run: echo "Sign using Apple/Win/Linux secrets (manual/secure runner)."
+      - name: Upload desktop artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: desktop-build
+          path: desktop/dist/**
+
+  desktop-update-feed:
+    needs: desktop-build-sign
+    if: needs.setup.outputs.run_desktop == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Generate latest.json (record step)
+        run: |
+          echo "Fill sha512 and upload to ${{ secrets.WB_UPDATE_URL }}"
+
+  desktop-e2e:
+    needs: desktop-build-sign
+    if: needs.setup.outputs.run_desktop == 'true'
+    runs-on: ubuntu-latest
+    services:
+      redis:
+        image: redis:7-alpine
+        ports: ['6379:6379']
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run desktop conflict/load E2E
+        run: bash scripts/e2e_conflict_load.sh
+      - uses: actions/upload-artifact@v4
+        with:
+          name: e2e_conflict_load_report
+          path: reports/e2e_conflict_load.json
+
+  dashboards-compliance:
+    needs: [helm-apply]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Dashboards/alerts (record step)
+        run: echo "Apply Grafana dashboards and alerts with kubectl."
+      - name: DSR smoke (record step)
+        run: echo "Call DSR endpoints and assert success."

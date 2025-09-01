@@ -1,0 +1,40 @@
+{
+  "modes": [
+    {
+      "id": "temp",
+      "label": "Temp",
+      "description": "On‑demand AI‑vikar (enkeltoppgave)."
+    },
+    {
+      "id": "tempest",
+      "label": "Tempest",
+      "description": "On‑demand AI‑vikar (mini‑prosjekt)."
+    }
+  ],
+  "packages": [
+    {
+      "id": "renewal-prep",
+      "title": "Renewal Prep",
+      "domain": "Sales",
+      "outputs": [
+        "Slides",
+        "Checklist"
+      ],
+      "guardrails": [
+        "preview_required"
+      ]
+    },
+    {
+      "id": "finance-ar-collections",
+      "title": "AR Collections",
+      "domain": "Finance",
+      "outputs": [
+        "EmailDrafts",
+        "StatusPack"
+      ],
+      "guardrails": [
+        "no_send"
+      ]
+    }
+  ]
+}

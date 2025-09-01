@@ -1,0 +1,39 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  lint_build_test:
+    name: Lint, Build, Jest (≥80%), Playwright
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Install
+        run: npm ci
+      - name: Build
+        run: npm run build
+      - name: Migrate (SQLite)
+        run: npm run migrate
+      - name: Unit tests with coverage gate
+        env:
+          NODE_OPTIONS: --experimental-vm-modules
+        run: npm run coverage && node -e "const s=require('fs').readFileSync('./coverage/coverage-summary.json','utf8'); const c=JSON.parse(s).total; const ok=['branches','functions','lines','statements'].every(k=>c[k].pct>=80); if(!ok){console.error('Coverage gate failed',c); process.exit(1);} else {console.log('Coverage OK',c);}"
+      - name: Start app
+        run: npm run start & sleep 5
+      - name: Install Playwright
+        run: npx playwright install --with-deps
+      - name: Run E2E
+        env:
+          BASE_URL: http://localhost:8080
+        run: npx playwright test

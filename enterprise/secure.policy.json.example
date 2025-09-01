@@ -1,0 +1,4 @@
+{
+  "allow_autonomy": false,
+  "notes": "Set allow_autonomy to true to permit autonomous meta operations (experiments, auto-rollback, etc.)."
+}

@@ -1,0 +1,6 @@
+{
+  "class_overrides": {},
+  "project_name_override": "workbuoy-sdk",
+  "package_name_override": "workbuoy_sdk",
+  "additional_dependencies": []
+}

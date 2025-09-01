@@ -1,0 +1,14 @@
+{
+  "name": "@workbuoy/sdk",
+  "version": "0.0.0",
+  "description": "TypeScript SDK for WorkBuoy (generated from OpenAPI)",
+  "types": "index.d.ts",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourorg/workbuoy.git"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

@@ -1,0 +1,7 @@
+# Files the Builder is allowed to modify in phase 1
+- "README.md"
+- "ARCHITECTURE.md"
+- "docs/**"
+- "tools/docgen/**"
+- "tests/**"
+- "scripts/**"

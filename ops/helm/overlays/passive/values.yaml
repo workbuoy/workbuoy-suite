@@ -1,0 +1,7 @@
+replicaCount: 1
+region:
+  name: "passive"
+  primary: false
+env:
+  redisUrl: "redis://passive-redis:6379"
+  postgresUrl: "postgres://passive-postgres:5432/workbuoy"

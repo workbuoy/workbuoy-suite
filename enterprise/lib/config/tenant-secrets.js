@@ -1,0 +1,1 @@
+import path from 'path';import sqlite3 from 'sqlite3';const DB_PATH=process.env.DB_PATH||path.join(process.cwd(),'db','workbuoy.db');export function getRefKeyFor(tenant_id,name){return new Promise(resolve=>{const db=new sqlite3.Database(DB_PATH);db.get(`SELECT ref_key FROM secrets WHERE tenant_id=? AND name=?`,[tenant_id,name],(e,row)=>resolve(row?.ref_key||null));});}

@@ -1,0 +1,47 @@
+groups:
+  - name: connector.alerts
+    rules:
+      - alert: ConnectorHighErrorRateSalesforce
+        expr: rate(sf_errors_total[10m]) / clamp_min(rate(sf_ingest_total[10m]) + rate(sf_errors_total[10m]), 1e-9) > 0.02
+        for: 10m
+        labels:
+          severity: warning
+          provider: salesforce
+        annotations:
+          summary: "Salesforce connector: høy feilrate"
+          description: "Feilrate >2% siste 10m. Sjekk DLQ og provider health."
+      - alert: ConnectorHighErrorRateDynamics
+        expr: rate(dyn_errors_total[10m]) / clamp_min(rate(dyn_ingest_total[10m]) + rate(dyn_errors_total[10m]), 1e-9) > 0.02
+        for: 10m
+        labels:
+          severity: warning
+          provider: dynamics
+        annotations:
+          summary: "Dynamics connector: høy feilrate"
+          description: "Feilrate >2% siste 10m. Sjekk DLQ og provider throttling."
+      - alert: ConnectorDLQNonZeroSalesforce
+        expr: rate(sf_dlq_total[5m]) > 0
+        for: 5m
+        labels:
+          severity: critical
+          provider: salesforce
+        annotations:
+          summary: "Salesforce connector: DLQ fylles"
+          description: "DLQ-økning detektert siste 5m."
+      - alert: ConnectorDLQNonZeroDynamics
+        expr: rate(dyn_dlq_total[5m]) > 0
+        for: 5m
+        labels:
+          severity: critical
+          provider: dynamics
+        annotations:
+          summary: "Dynamics connector: DLQ fylles"
+          description: "DLQ-økning detektert siste 5m."
+      - alert: ConnectorNoIngest30m
+        expr: increase(sf_ingest_total[30m]) + increase(dyn_ingest_total[30m]) == 0
+        for: 30m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Connector ingest stoppet"
+          description: "Ingen ingest observert siste 30m. Vurder å begrense varsel til arbeidstid via Alertmanager time intervals."

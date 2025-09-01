@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "workbuoy.fullname" . }}
+spec:
+  selector:
+    app: {{ include "workbuoy.fullname" . }}
+  ports:
+    - name: http
+      port: 80
+      targetPort: 3000

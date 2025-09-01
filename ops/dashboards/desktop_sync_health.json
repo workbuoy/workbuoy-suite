@@ -1,0 +1,36 @@
+{
+  "title": "Desktop Sync Health",
+  "timezone": "browser",
+  "panels": [
+    {
+      "type": "timeseries",
+      "title": "Sync pushes/sec (mock OTLP spans)",
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana",
+            "uid": "grafana"
+          },
+          "refId": "A",
+          "expr": "sum(increase(otel_span_requests_total{service=\"workbuoy-desktop\"}[5m]))"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Load test throughput (ops/s)",
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana",
+            "uid": "grafana"
+          },
+          "refId": "A",
+          "expr": "workbuoy_desktop_sync_throughput"
+        }
+      ]
+    }
+  ],
+  "schemaVersion": 38,
+  "version": 1
+}

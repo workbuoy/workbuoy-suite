@@ -1,0 +1,187 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Tenant {
+  id        String  @id @default(cuid())
+  slug      String  @unique
+  name      String
+  users     User[]
+  orgs      Organization[]
+  contacts  Contact[]
+  pipelines Pipeline[]
+  opps      Opportunity[]
+  roles     RoleBinding[]
+  audits    AuditLog[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model User {
+  id        String  @id @default(cuid())
+  tenant    Tenant  @relation(fields: [tenantId], references: [id])
+  tenantId  String
+  email     String  @unique
+  displayName String
+  roleBinds RoleBinding[]
+  activities Activity[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Organization {
+  id        String  @id @default(cuid())
+  tenant    Tenant  @relation(fields: [tenantId], references: [id])
+  tenantId  String
+  name      String
+  domain    String?
+  contacts  Contact[]
+  opps      Opportunity[]
+  custom    CustomFieldValue[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@index([tenantId, name])
+}
+
+model Contact {
+  id        String  @id @default(cuid())
+  tenant    Tenant  @relation(fields: [tenantId], references: [id])
+  tenantId  String
+  organization   Organization? @relation(fields: [organizationId], references: [id])
+  organizationId String?
+  owner     User?   @relation(fields: [ownerId], references: [id])
+  ownerId   String?
+  name      String
+  email     String?
+  phone     String?
+  tags      String[]
+  custom    CustomFieldValue[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@index([tenantId, ownerId])
+}
+
+model Pipeline {
+  id        String  @id @default(cuid())
+  tenant    Tenant  @relation(fields: [tenantId], references: [id])
+  tenantId  String
+  name      String
+  description String?
+  stages    Stage[]
+  opps      Opportunity[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@index([tenantId, name])
+}
+
+model Stage {
+  id        String  @id @default(cuid())
+  tenant    Tenant  @relation(fields: [tenantId], references: [id])
+  tenantId  String
+  pipeline  Pipeline @relation(fields: [pipelineId], references: [id])
+  pipelineId String
+  name      String
+  order     Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@index([tenantId, pipelineId, order])
+}
+
+model Opportunity {
+  id        String  @id @default(cuid())
+  tenant    Tenant  @relation(fields: [tenantId], references: [id])
+  tenantId  String
+  pipeline  Pipeline @relation(fields: [pipelineId], references: [id])
+  pipelineId String
+  stage     Stage    @relation(fields: [stageId], references: [id])
+  stageId   String
+  organization   Organization? @relation(fields: [organizationId], references: [id])
+  organizationId String?
+  owner     User?   @relation(fields: [ownerId], references: [id])
+  ownerId   String?
+  title     String
+  valueCents Int?
+  currency  String? @default("USD")
+  status    String  @default("open") // open|won|lost
+  tags      String[]
+  custom    CustomFieldValue[]
+  activities Activity[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@index([tenantId, pipelineId, stageId, ownerId])
+}
+
+model Activity {
+  id        String  @id @default(cuid())
+  tenant    Tenant  @relation(fields: [tenantId], references: [id])
+  tenantId  String
+  user      User?   @relation(fields: [userId], references: [id])
+  userId    String?
+  opportunity Opportunity? @relation(fields: [opportunityId], references: [id])
+  opportunityId String?
+  subject   String
+  note      String?
+  createdAt DateTime @default(now())
+}
+
+model CustomFieldDef {
+  id        String  @id @default(cuid())
+  tenant    Tenant  @relation(fields: [tenantId], references: [id])
+  tenantId  String
+  entity    String  // organization|contact|opportunity
+  key       String
+  type      String  // string|number|boolean|date|json
+  required  Boolean @default(false)
+  createdAt DateTime @default(now())
+  @@unique([tenantId, entity, key])
+}
+
+model CustomFieldValue {
+  id        String  @id @default(cuid())
+  tenant    Tenant  @relation(fields: [tenantId], references: [id])
+  tenantId  String
+  entity    String  // organization|contact|opportunity
+  entityId  String
+  key       String
+  stringVal String?
+  numberVal Float?
+  boolVal   Boolean?
+  dateVal   DateTime?
+  jsonVal   Json?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@index([tenantId, entity, entityId])
+}
+
+model RoleBinding {
+  id        String  @id @default(cuid())
+  tenant    Tenant  @relation(fields: [tenantId], references: [id])
+  tenantId  String
+  user      User?   @relation(fields: [userId], references: [id])
+  userId    String?
+  group     String?
+  role      String  // admin|manager|contributor|viewer
+  resourceKind String? // pipeline|record|org
+  resourceId   String?
+  createdAt DateTime @default(now())
+  @@index([tenantId, userId])
+}
+
+model AuditLog {
+  id        String  @id @default(cuid())
+  tenant    Tenant  @relation(fields: [tenantId], references: [id])
+  tenantId  String
+  actorId   String?
+  action    String
+  entity    String?
+  entityId  String?
+  oldJson   Json?
+  newJson   Json?
+  createdAt DateTime @default(now())
+  @@index([tenantId, entity, entityId, createdAt])
+}

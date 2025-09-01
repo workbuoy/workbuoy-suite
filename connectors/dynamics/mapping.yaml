@@ -1,0 +1,19 @@
+contact:
+  entitySet: "contacts"
+  alternateKey: "workbuoy_externalid"  # pre-defined alternate key attribute in Dataverse
+  keyValue: "external_id"
+  fields:
+    lastname: "name"
+    emailaddress1: "email"
+    telephone1: "phone"
+    # reference fields like accountid can be added as @odata.bind if needed
+
+opportunity:
+  entitySet: "opportunities"
+  alternateKey: "workbuoy_externalid"
+  keyValue: "external_id"
+  fields:
+    name: "title"
+    description: "description"
+    estimatedvalue: "amount"
+    # close date maps to close probability fields or actualclose date depending on stage; simplified here

@@ -1,0 +1,1 @@
+DROP TABLE IF EXISTS api_key_usages; DROP TABLE IF EXISTS api_keys;

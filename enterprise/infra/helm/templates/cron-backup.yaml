@@ -1,0 +1,24 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: workbuoy-backup
+spec:
+  schedule: "0 2 * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          restartPolicy: OnFailure
+          containers:
+          - name: backup
+            image: alpine:3.19
+            command: ["/bin/sh","-lc"]
+            args:
+            - |
+              mkdir -p /backup && cp /data/workbuoy.db /backup/workbuoy-$(date +%F).db
+            volumeMounts:
+            - name: data
+              mountPath: /data
+          volumes:
+          - name: data
+            persistentVolumeClaim: { claimName: workbuoy-data }

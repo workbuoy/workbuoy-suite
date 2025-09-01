@@ -1,0 +1,23 @@
+{
+  "title": "WorkBuoy Overview",
+  "panels": [
+    {
+      "type": "stat",
+      "title": "API 2xx rate",
+      "targets": [
+        {
+          "expr": "sum(rate(http_requests_total{status=~\"2..\"}[5m]))"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "API 5xx rate",
+      "targets": [
+        {
+          "expr": "sum(rate(http_requests_total{status=~\"5..\"}[5m]))"
+        }
+      ]
+    }
+  ]
+}

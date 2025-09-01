@@ -1,0 +1,24 @@
+{
+  "contacts": [
+    {
+      "id": "C-1001",
+      "firstName": "Kari",
+      "lastName": "Nordmann",
+      "email": "kari.nordmann@example.com",
+      "company": "Fjord Telecom",
+      "role": "Head of CX",
+      "city": "Oslo",
+      "country": "NO",
+      "lastActivity": "2025-08-01T10:12:00Z"
+    }
+  ],
+  "customers": [
+    {
+      "id": "ACME-01",
+      "name": "Fjord Telecom",
+      "industry": "Telecom",
+      "arr": 1200000,
+      "segment": "Enterprise"
+    }
+  ]
+}

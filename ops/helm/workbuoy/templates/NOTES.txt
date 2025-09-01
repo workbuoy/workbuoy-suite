@@ -1,0 +1,9 @@
+WorkBuoy deployed.
+* URL (if ingress enabled): http{{ if .Values.ingress.tls }}s{{ end }}://{{ (index .Values.ingress.hosts 0).host }}
+* Metrics at /metrics (scraped via ServiceMonitor if enabled)
+Feature flags:
+  - CRM_API_ENABLED={{ .Values.env.CRM_API_ENABLED }}
+  - CRM_IMPORT_EXPORT_ENABLED={{ .Values.env.CRM_IMPORT_EXPORT_ENABLED }}
+  - CONNECTORS_ENABLED={{ .Values.env.CONNECTORS_ENABLED }}
+  - SYNC_ENABLED={{ .Values.env.SYNC_ENABLED }}
+  - READ_ONLY_MODE={{ .Values.env.READ_ONLY_MODE }}

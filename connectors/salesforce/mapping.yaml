@@ -1,0 +1,21 @@
+contact:
+  object: "Contact"
+  externalIdField: "ExternalId__c"
+  externalIdValue: "external_id"
+  fields:
+    LastName: "name"
+    Email: "email"
+    Phone: "phone"
+    AccountId: "account_id"
+    ExternalId__c: "external_id"
+
+opportunity:
+  object: "Opportunity"
+  externalIdField: "ExternalId__c"
+  externalIdValue: "external_id"
+  fields:
+    Name: "title"
+    Amount: "amount"
+    StageName: "stage"
+    CloseDate: "close_date"
+    ExternalId__c: "external_id"

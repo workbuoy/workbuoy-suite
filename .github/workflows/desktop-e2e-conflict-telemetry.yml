@@ -1,0 +1,49 @@
+name: desktop-e2e-conflict-telemetry
+
+on:
+  push:
+    paths: ['desktop/**', 'docs/DESKTOP_TESTS.md', 'ops/dashboards/desktop_sync_health.json', '.github/workflows/desktop-e2e-conflict-telemetry.yml']
+  pull_request:
+    paths: ['desktop/**']
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping || exit 1"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install deps
+        run: npm ci
+        working-directory: desktop
+      - name: Build
+        run: npm run build
+        working-directory: desktop
+      - name: Conflict E2E
+        run: npm run test:conflict
+        working-directory: desktop
+      - name: Telemetry verify
+        run: npm run test:telemetry
+        working-directory: desktop
+      - name: Redis blast 5k
+        env:
+          WB_REDIS_N: 5000
+          REDIS_URL: redis://localhost:6379
+        run: npm run test:redisblast
+        working-directory: desktop
+      - name: Upload reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: desktop-ah-reports
+          path: reports/*.json

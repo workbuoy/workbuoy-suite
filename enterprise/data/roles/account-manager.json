@@ -1,0 +1,24 @@
+{
+  "role_id": "sales-mid-account-manager",
+  "canonical_title": "Account Manager",
+  "domains": [
+    "Sales"
+  ],
+  "sectors": [
+    "private"
+  ],
+  "summary": "Eier kundeportefølje; fornyelser og vekst.",
+  "ai_assists": [
+    "Lag fornyelses-brief for valgt kunde",
+    "Lag 15-min agenda for fornyelsessamtale",
+    "Utkast til oppfølging etter samtale",
+    "Foreslå kryss-salg basert på historikk",
+    "Oppsummer siste 30 dager i 3 punkter",
+    "Generer 3-slides QBR"
+  ],
+  "event_hooks": [
+    "crm:renewal_due",
+    "crm:deal_stuck",
+    "planner:deadline_today"
+  ]
+}

@@ -1,0 +1,27 @@
+name: docs-check
+
+on:
+  push:
+    paths: ['docs/**', '.github/workflows/docs-check.yml', 'mdm/**']
+  pull_request:
+    paths: ['docs/**']
+
+jobs:
+  links:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install docs deps
+        run: npm ci
+        working-directory: docs
+      - name: Check Markdown links
+        run: npm run links
+        working-directory: docs
+      - name: Upload docs artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: workbuoy-docs
+          path: docs/**

@@ -1,0 +1,17 @@
+alertmanager:
+  config:
+    route:
+      receiver: 'slack-notify'
+      routes:
+        - match:
+            severity: 'page'
+          receiver: 'pagerduty'
+    receivers:
+      - name: 'slack-notify'
+        slack_configs:
+          - channel: '#workbuoy-alerts'
+            send_resolved: true
+            api_url: https://hooks.slack.com/services/T000/B000/XXX
+      - name: 'pagerduty'
+        pagerduty_configs:
+          - service_key: <PAGERDUTY_KEY>

@@ -1,0 +1,42 @@
+{
+  "feature": "Legg til ruteplanlegger for selger",
+  "plan": {
+    "subtasks": [
+      "Analyse behov",
+      "Design forslag",
+      "Kode stub",
+      "Test stub",
+      "Review & merge"
+    ]
+  },
+  "proposal": {
+    "proposed_diff": "// pseudo-code: integrate Mapbox routing"
+  },
+  "decision": {
+    "decision": "approved",
+    "reason": "Stub policy approves"
+  },
+  "role": "seller",
+  "events": [
+    {
+      "component": "planner",
+      "message": "Generated plan"
+    },
+    {
+      "component": "builder",
+      "message": "Proposed diff"
+    },
+    {
+      "component": "policy",
+      "message": "approved"
+    },
+    {
+      "component": "role_linker",
+      "message": "Matched role",
+      "data": {
+        "role": "seller"
+      }
+    }
+  ],
+  "timestamp": "2025-08-29T20:41:14.033757Z"
+}

@@ -1,0 +1,81 @@
+groups:
+- name: wb-saas
+  rules:
+  - alert: HighAIErrors
+    expr: sum(increase(wb_ai_err_by_tenant_total[5m])) > 5
+    for: 10m
+    labels: {severity: warning}
+    annotations:
+      summary: "AI-feilrate høy"
+      description: "AI-feil øker siste 5m."
+  - alert: SlowAI
+    expr: wb_ai_latency_by_tenant_p95_ms > 4000
+    for: 10m
+    labels: {severity: warning}
+    annotations:
+      summary: "AI svar treg"
+      description: "p95 over 4s for en eller flere tenanter."
+  - alert: StripeWebhookErrors
+    expr: increase(wb_stripe_webhook_err_total[15m]) > 0
+    for: 10m
+    labels: {severity: critical}
+    annotations:
+      summary: "Stripe webhook feiler"
+      description: "Minst én Stripe-webhook har feilet siste 15 minutter for en eller flere tenanter."
+  
+
+- alert: RateLimitSpikes
+  expr: increase(wb_search_err_by_tenant_total[5m]) > 50
+  for: 10m
+  labels: { severity: warning }
+  annotations:
+    summary: "Rate limit/feil spike"
+    description: "Feilrate økt siste 5m."
+
+- alert: StripeWebhookErrors
+  expr: increase(wb_webhook_errors_total[10m]) > 3
+  for: 10m
+  labels: { severity: warning }
+  annotations:
+    summary: "Stripe webhook-feil"
+    description: "Webhook-feil observert siste 10m."
+
+- alert: ConnectorSyncFailures
+  expr: increase(wb_connector_sync_total{status="failed"}[10m]) > 0
+  for: 10m
+  labels: { severity: critical }
+  annotations:
+    summary: "Connector sync-feil"
+    description: "En eller flere syncs feilet."
+
+- alert: AIP95High
+  expr: wb_ai_latency_by_tenant_p95_ms > 4000
+  for: 15m
+  labels: { severity: warning }
+  annotations:
+    summary: "AI p95 høy"
+    description: "AI p95 over 4s."
+
+- alert: SearchP95High
+  expr: wb_search_latency_by_tenant_p95_ms > 2000
+  for: 15m
+  labels: { severity: warning }
+  annotations:
+    summary: "Søk p95 høy"
+    description: "Søk p95 over 2s."
+
+- alert: QuotaViolations
+  expr: increase(wb_quota_violation_total[15m]) > 0
+  for: 10m
+  labels: { severity: warning }
+  annotations:
+    summary: "Kvotebrudd"
+    description: "En eller flere kvoter brutt."
+
+- alert: RbacDenies
+  expr: increase(wb_rbac_denied_total[15m]) > 5
+  for: 10m
+  labels: { severity: info }
+  annotations:
+    summary: "RBAC denies"
+    description: "Uvanlig mange 403 pga. RBAC."

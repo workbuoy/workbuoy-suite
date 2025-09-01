@@ -1,0 +1,97 @@
+{
+  "title": "WorkBuoy SLO & Freshness",
+  "time": {
+    "from": "now-24h",
+    "to": "now"
+  },
+  "panels": [
+    {
+      "type": "stat",
+      "title": "SLO target: failure rate < 0.5% (1h)",
+      "targets": [
+        {
+          "expr": "(sum(rate(wb_connector_sync_failure_total[1h])) / (sum(rate(wb_connector_sync_success_total[1h])) + 1)) * 100"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 0.5
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "type": "stat",
+      "title": "SLO target: p95 < 2s (5m)",
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(wb_connector_sync_seconds_bucket[5m])) by (le))"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 2
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "type": "graph",
+      "title": "p95 by connector (s)",
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(wb_connector_sync_seconds_bucket[5m])) by (le,connector))"
+        }
+      ]
+    },
+    {
+      "type": "table",
+      "title": "Failure rate by tenant (15m %)",
+      "targets": [
+        {
+          "expr": "(sum(rate(wb_connector_sync_failure_total[15m])) by (tenant)) / (sum(rate(wb_connector_sync_success_total[15m])) by (tenant) + 1) * 100"
+        }
+      ]
+    },
+    {
+      "type": "table",
+      "title": "Sync freshness (age in minutes)",
+      "targets": [
+        {
+          "expr": "(time() - max(wb_connector_last_success_timestamp) by (tenant,connector)) / 60"
+        }
+      ]
+    },
+    {
+      "type": "graph",
+      "title": "AI mask ratio",
+      "targets": [
+        {
+          "expr": "rate(wb_ai_mask_ratio_sum[5m]) / (rate(wb_ai_mask_ratio_count[5m]) + 1e-9)"
+        }
+      ]
+    }
+  ]
+}

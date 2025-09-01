@@ -1,0 +1,144 @@
+{
+  "uid": "wb-suite",
+  "title": "WorkBuoy \u2013 CRM API & Desktop Sync",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "15s",
+  "panels": [
+    {
+      "type": "row",
+      "title": "CRM API"
+    },
+    {
+      "type": "stat",
+      "title": "Imports (5m)",
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 0,
+        "y": 1
+      },
+      "targets": [
+        {
+          "expr": "sum(increase(wb_import_total[5m]))"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Import failures (5m)",
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 6,
+        "y": 1
+      },
+      "targets": [
+        {
+          "expr": "sum(increase(wb_import_fail_total[5m]))"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Exports (5m)",
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 12,
+        "y": 1
+      },
+      "targets": [
+        {
+          "expr": "sum(increase(wb_export_total[5m]))"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "RBAC denied (5m)",
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 18,
+        "y": 1
+      },
+      "targets": [
+        {
+          "expr": "sum(increase(rbac_denied_total[5m]))"
+        }
+      ]
+    },
+    {
+      "type": "row",
+      "title": "Connectors"
+    },
+    {
+      "type": "stat",
+      "title": "Ingested webhooks (5m)",
+      "gridPos": {
+        "h": 4,
+        "w": 8,
+        "x": 0,
+        "y": 5
+      },
+      "targets": [
+        {
+          "expr": "sum(increase(wb_connector_ingest_total[5m]))"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Connector errors (5m)",
+      "gridPos": {
+        "h": 4,
+        "w": 8,
+        "x": 8,
+        "y": 5
+      },
+      "targets": [
+        {
+          "expr": "sum(increase(wb_connector_errors_total[5m]))"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Retries (5m)",
+      "gridPos": {
+        "h": 4,
+        "w": 8,
+        "x": 16,
+        "y": 5
+      },
+      "targets": [
+        {
+          "expr": "sum(increase(wb_connector_retries_total[5m]))"
+        }
+      ]
+    },
+    {
+      "type": "row",
+      "title": "Desktop Sync"
+    },
+    {
+      "type": "graph",
+      "title": "Sync latency p50/p90 (ms)",
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 9
+      },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.5, sum by (le) (rate(desktop_sync_latency_ms_bucket[5m])))"
+        },
+        {
+          "expr": "histogram_quantile(0.9, sum by (le) (rate(desktop_sync_latency_ms_bucket[5m])))"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,117 @@
+{
+  "title": "Ops \u2013 Connectors & DLQ",
+  "timezone": "browser",
+  "templating": {
+    "list": [
+      {
+        "name": "env",
+        "type": "query",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "PROM"
+        },
+        "query": "label_values(env)",
+        "refresh": 1
+      },
+      {
+        "name": "provider",
+        "type": "custom",
+        "query": "salesforce,dynamics",
+        "current": {
+          "text": "salesforce,dynamics",
+          "value": "salesforce,dynamics"
+        }
+      }
+    ]
+  },
+  "panels": [
+    {
+      "type": "stat",
+      "title": "SF DLQ depth",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PROM"
+      },
+      "targets": [
+        {
+          "expr": "sf_dlq_depth{env=~\"$env\"}"
+        }
+      ],
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 6,
+        "h": 4
+      }
+    },
+    {
+      "type": "stat",
+      "title": "Dyn DLQ depth",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PROM"
+      },
+      "targets": [
+        {
+          "expr": "dyn_dlq_depth{env=~\"$env\"}"
+        }
+      ],
+      "gridPos": {
+        "x": 6,
+        "y": 0,
+        "w": 6,
+        "h": 4
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "Connector error rate (5m)",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PROM"
+      },
+      "targets": [
+        {
+          "expr": "(sum by (env) (rate(sf_errors_total[5m])) / clamp_min(sum by (env) (rate(sf_upsert_total[5m])), 1e-9))",
+          "legendFormat": "SF \u2013 {{env}}"
+        },
+        {
+          "expr": "(sum by (env) (rate(dyn_errors_total[5m])) / clamp_min(sum by (env) (rate(dyn_upsert_total[5m])), 1e-9))",
+          "legendFormat": "Dyn \u2013 {{env}}"
+        }
+      ],
+      "gridPos": {
+        "x": 0,
+        "y": 4,
+        "w": 12,
+        "h": 8
+      }
+    },
+    {
+      "type": "stat",
+      "title": "DLQ trend (\u0394 last 1h)",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PROM"
+      },
+      "targets": [
+        {
+          "expr": "max_over_time(sf_dlq_depth{env=~\"$env\"}[1h]) - min_over_time(sf_dlq_depth{env=~\"$env\"}[1h])",
+          "legendFormat": "SF \u03941h"
+        },
+        {
+          "expr": "max_over_time(dyn_dlq_depth{env=~\"$env\"}[1h]) - min_over_time(dyn_dlq_depth{env=~\"$env\"}[1h])",
+          "legendFormat": "Dyn \u03941h"
+        }
+      ],
+      "gridPos": {
+        "x": 0,
+        "y": 12,
+        "w": 12,
+        "h": 4
+      }
+    }
+  ],
+  "schemaVersion": 38,
+  "version": 1
+}

@@ -1,0 +1,26 @@
+
+/* Base reset + components */
+*{box-sizing:border-box} html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:var(--font)}
+a{color:var(--brand-500);text-decoration:none} a:hover{text-decoration:underline}
+button{border:1px solid var(--border);background:var(--surface);color:var(--text);padding:10px 14px;border-radius:10px;box-shadow:var(--shadow);cursor:pointer}
+button:hover{background:var(--surface-2)} button:focus-visible{outline:none;box-shadow:var(--ring)}
+input,select{background:var(--surface);color:var(--text);border:1px solid var(--border);border-radius:10px;padding:10px 12px}
+.card{background:#fff;border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px}
+@media (prefers-color-scheme: dark){ .card{background:var(--surface)} }
+.badge{padding:2px 8px;border-radius:999px;border:1px solid var(--border);font-size:12px}
+.badge.ok{color:var(--success)} .badge.warn{color:var(--warn)} .badge.err{color:var(--error)}
+.header{position:sticky;top:0;background:rgba(255,255,255,.85);backdrop-filter:blur(10px);border-bottom:1px solid var(--border);padding:12px 16px;z-index:10}
+@media (prefers-color-scheme: dark){ .header{background:rgba(17,26,51,.7)} }
+.hstack{display:flex;gap:12px;align-items:center}
+.vstack{display:flex;flex-direction:column;gap:12px}
+.grid{display:grid;gap:16px} .grid-2{grid-template-columns:repeat(2,minmax(0,1fr))} .grid-3{grid-template-columns:repeat(3,1fr)}
+.kbd{padding:2px 6px;border:1px solid var(--border);border-radius:6px;background:var(--surface-2);font-size:12px;color:var(--dim)}
+.title{font-weight:700}
+.subtitle{color:var(--muted)}
+.cta{background:var(--brand-500);color:white;border:none} .cta:hover{background:var(--brand-600)}
+.brand-logo{display:flex;align-items:center;gap:8px;font-weight:700;color:var(--brand-500)}
+.brand-dot{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--accent-red),var(--accent-orange));position:relative}
+.brand-dot::before{content:'';position:absolute;width:16px;height:16px;border-radius:50%;background:#fff;left:6px;top:6px}
+.brand-dot::after{content:'';position:absolute;width:6px;height:6px;border-radius:50%;background:var(--accent-red);left:11px;top:11px}
+.section{padding:16px}
+.panel{border:1px solid var(--border);border-radius:12px;background:var(--surface);padding:16px}

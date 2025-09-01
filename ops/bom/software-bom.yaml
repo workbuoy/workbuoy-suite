@@ -1,0 +1,24 @@
+apiVersion: wb/v1
+kind: SoftwareBOM
+metadata:
+  name: workbuoy-suite
+  version: "1.0.0"
+components:
+  - name: workbuoy-backend
+    type: container-image
+    version: "1.0.0"
+    license: Apache-2.0
+    gitSha: "${GIT_SHA:-unknown}"
+  - name: workbuoy-desktop
+    type: desktop-app
+    version: "1.0.0"
+    license: Proprietary
+    gitSha: "${GIT_SHA:-unknown}"
+  - name: @workbuoy/adaptive-client
+    type: npm-package
+    version: "1.0.0"
+    license: MIT
+  - name: workbuoy-adaptive
+    type: pypi-package
+    version: "1.0.0"
+    license: MIT

@@ -1,0 +1,1 @@
+test('portal layout banner text', ()=>{ const fs=require('fs'); const s=fs.readFileSync('components/PortalLayout.js','utf-8'); expect(s.includes('Workbuoy kan gjøre feil')).toBe(true); });

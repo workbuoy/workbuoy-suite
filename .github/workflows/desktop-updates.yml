@@ -1,0 +1,46 @@
+name: desktop-updates
+
+on:
+  workflow_dispatch:
+    inputs:
+      channel:
+        description: 'Update channel (stable|beta)'
+        required: true
+        default: 'stable'
+  push:
+    tags:
+      - 'desktop-v*'
+
+jobs:
+  build-and-publish:
+    runs-on: ubuntu-latest
+    env:
+      WB_UPDATE_CHANNEL: ${{ github.event.inputs.channel || 'stable' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install deps
+        run: npm ci
+        working-directory: desktop
+      - name: Build (ts)
+        run: npm run build
+        working-directory: desktop
+      - name: Build artifacts (all OS via electron-builder in docker)
+        uses: felixrieseberg/electron-builder-action@v1
+        with:
+          args: -mwl
+        env:
+          WB_UPDATE_CHANNEL: ${{ env.WB_UPDATE_CHANNEL }}
+      - name: Upload to feed (generic)
+        env:
+          FEED_UPLOAD_URL: ${{ secrets.FEED_UPLOAD_URL }}
+          FEED_UPLOAD_TOKEN: ${{ secrets.FEED_UPLOAD_TOKEN }}
+          WB_UPDATE_CHANNEL: ${{ env.WB_UPDATE_CHANNEL }}
+        run: bash scripts/upload-to-feed.sh
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: desktop-${{ env.WB_UPDATE_CHANNEL }}
+          path: desktop/dist_electron/**

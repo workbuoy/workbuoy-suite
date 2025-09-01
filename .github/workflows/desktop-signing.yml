@@ -1,0 +1,65 @@
+name: desktop-signing
+
+on:
+  workflow_dispatch: {}
+  push:
+    paths:
+      - 'scripts/**'
+      - '.github/workflows/desktop-signing.yml'
+      - 'docs/DESKTOP_SIGNING.md'
+
+jobs:
+  macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build placeholders
+        run: ./scripts/build_desktop_artifacts.sh
+      - name: Codesign & Notarize (if secrets)
+        run: ./scripts/macos_sign_notarize.sh dist/WorkBuoy-Desktop-mac.zip
+        env:
+          MACOS_SIGN_IDENTITY: ${{ secrets.MACOS_SIGN_IDENTITY }}
+          AC_USERNAME: ${{ secrets.AC_USERNAME }}
+          AC_PASSWORD: ${{ secrets.AC_PASSWORD }}
+          TEAM_ID: ${{ secrets.TEAM_ID }}
+          BUNDLE_ID: com.workbuoy.desktop
+      - name: Upload mac artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: desktop-mac
+          path: dist/*mac*.zip
+
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build placeholders
+        shell: pwsh
+        run: ./scripts/build_desktop_artifacts.ps1 -OutDir dist
+      - name: Sign (if secrets)
+        shell: pwsh
+        run: ./scripts/windows_sign.ps1 -Artifact "dist\WorkBuoy-Desktop-win.zip" -ExePath "dist\WorkBuoyDesktop.exe"
+      - name: Upload win artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: desktop-win
+          path: dist/*win*.zip
+
+  linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build placeholders
+        run: ./scripts/build_desktop_artifacts.sh
+      - name: Sign checksums (GPG optional)
+        run: ./scripts/linux_sign.sh dist
+        env:
+          GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
+      - name: Upload linux artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: desktop-linux
+          path: |
+            dist/*.tgz
+            dist/SHA256SUMS.txt
+            dist/SHA256SUMS.txt.asc

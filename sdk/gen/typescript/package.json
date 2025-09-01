@@ -1,0 +1,9 @@
+{
+  "name": "workbuoy-sdk",
+  "version": "1.0.0",
+  "main": "index.js",
+  "types": "index.d.ts",
+  "scripts": {
+    "build": "echo 'generate from openapi.yaml'"
+  }
+}

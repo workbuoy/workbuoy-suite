@@ -1,0 +1,4 @@
+# Require review from core team; ai-proposal PRs labeled must be reviewed
+*       @workbuoy-core
+docs/*  @workbuoy-core @workbuoy-docs
+tests/* @workbuoy-core @workbuoy-qe

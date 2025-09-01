@@ -1,0 +1,1 @@
+# {{brand}} — Sales Outreach Kit\n\n**Account**: {{account}}\n**Contact**: {{contact}}\n\n**Email draft**\nHi {{firstName}}, quick intro from {{brand}}. We help teams like {{account}}...\n\n---\nBadge: {{badge}} • Pricing: {{pricing}} • Generated: {{timestamp}}\n

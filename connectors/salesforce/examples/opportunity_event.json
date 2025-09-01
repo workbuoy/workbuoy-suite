@@ -1,0 +1,10 @@
+[
+  {
+    "type": "opportunity",
+    "external_id": "wb-opp-2001",
+    "title": "Enterprise Expansion",
+    "amount": 125000,
+    "stage": "Qualification",
+    "close_date": "2025-12-31"
+  }
+]

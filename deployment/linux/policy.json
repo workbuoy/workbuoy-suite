@@ -1,0 +1,6 @@
+{
+  "autoUpdateChannel": "stable",
+  "telemetryEnabled": true,
+  "apiBaseUrl": "https://saas.workbuoy.local",
+  "proxy": "http://proxy.local:8080"
+}
