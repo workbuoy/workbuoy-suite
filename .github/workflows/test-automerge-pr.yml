@@ -11,32 +11,56 @@ jobs:
   create-pr:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repo
+      - name: Checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Make a dummy change
+      - name: Make minimal change
         run: |
-          echo "# Test auto-merge $(date -u +'%FT%TZ')" >> .ci/AUTOMERGE_SMOKE.md
+          set -euxo pipefail
+          mkdir -p .ci
+          echo "- automerge smoke $(date -u +'%FT%TZ')" >> .ci/AUTOMERGE_SMOKE.md
+
+      - name: Prepare git user
+        run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git checkout -b bot/automerge-smoke
+
+      - name: Create branch and commit
+        id: mkbranch
+        run: |
+          set -euxo pipefail
+          BR="bot/automerge-smoke-${GITHUB_RUN_ID}"
+          git checkout -b "$BR"
           git add .ci/AUTOMERGE_SMOKE.md
           git commit -m "chore(ci): automerge smoke"
-          git push -u origin bot/automerge-smoke
+          git push -u origin "$BR"
+          echo "BRANCH=$BR" >> "$GITHUB_OUTPUT"
 
-      - name: Create PR
-        id: cpr
-        uses: peter-evans/create-pull-request@v6
+      - name: Open PR via GitHub API (with 'automerge' label)
+        id: openpr
+        uses: actions/github-script@v7
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          branch: bot/automerge-smoke
-          base: main
-          title: "chore(ci): automerge smoke"
-          body: "Automated smoke PR to validate auto-merge."
-          labels: automerge
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const br = '${{ steps.mkbranch.outputs.BRANCH }}';
+            const { data: pr } = await github.rest.pulls.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: "chore(ci): automerge smoke",
+              head: br,
+              base: "main",
+              body: "Automated smoke PR to validate auto-merge."
+            });
+            await github.rest.issues.addLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: pr.number,
+              labels: ["automerge"]
+            });
+            core.setOutput('url', pr.html_url);
+            core.notice(`PR URL: ${pr.html_url}`);
 
       - name: Echo PR URL
-        run: echo "PR → ${{ steps.cpr.outputs.pull-request-url }}"
-
+        run: echo "PR → ${{ steps.openpr.outputs.url }}"
