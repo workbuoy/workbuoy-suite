@@ -1,0 +1,12 @@
+name: required-check
+
+on:
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping
+        run: echo "ok"
