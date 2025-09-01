@@ -1,0 +1,42 @@
+name: test-automerge-pr
+
+on:
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  create-pr:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Make a dummy change
+        run: |
+          echo "# Test auto-merge $(date -u +'%FT%TZ')" >> .ci/AUTOMERGE_SMOKE.md
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git checkout -b bot/automerge-smoke
+          git add .ci/AUTOMERGE_SMOKE.md
+          git commit -m "chore(ci): automerge smoke"
+          git push -u origin bot/automerge-smoke
+
+      - name: Create PR
+        id: cpr
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          branch: bot/automerge-smoke
+          base: main
+          title: "chore(ci): automerge smoke"
+          body: "Automated smoke PR to validate auto-merge."
+          labels: automerge
+
+      - name: Echo PR URL
+        run: echo "PR → ${{ steps.cpr.outputs.pull-request-url }}"
+
