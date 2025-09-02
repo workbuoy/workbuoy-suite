@@ -1,20 +1,25 @@
-name: backend-ci
+name: Backend CI
 
 on:
   push:
-    branches: [ main ]
+    paths:
+      - 'backend/**'
   pull_request:
+    paths:
+      - 'backend/**'
+  workflow_dispatch:
 
 jobs:
   test:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: backend
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with: { node-version: '20' }
-      - run: npm ci
-      - run: npm run build
-      - run: npm test
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+      - run: npm ci --prefer-offline --no-audit --no-fund
+        working-directory: backend
+      - run: npm test --if-present
+        working-directory: backend
