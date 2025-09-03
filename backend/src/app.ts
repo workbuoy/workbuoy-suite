@@ -84,5 +84,15 @@ export function buildApp() {
     res.status(204).end();
   });
 
+  // Buoy AI ping route
+  app.get('/api/v1/ai/ping', (_req, res) => {
+    res.json({ ok: true, ts: Date.now() });
+  });
+
+  // Navi options route
+  app.get('/api/v1/navi/options', (_req, res) => {
+    res.json({ items: ['home', 'crm', 'ai'] });
+  });
+
   return app;
 }
