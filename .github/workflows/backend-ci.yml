@@ -38,3 +38,11 @@ jobs:
       - name: Run smoke tests (temporary)
         working-directory: backend
         run: npx jest --ci --config jest.ci.config.cjs
+
+  - name: Run tests
+    working-directory: backend
+    run: npm test
+
+  - name: Run typecheck
+    working-directory: backend
+    run: npm run typecheck
