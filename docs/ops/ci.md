@@ -1,20 +1,17 @@
-# CI/CD Rails (public-only npm path)
+# CI Rails – Quick Checklist
 
-We only keep 3 workflows:
-- backend-ci
-- auto-merge
-- smoke-open-pr
+## Required settings (GitHub → Settings)
+- Rulesets → `Work`: **Require status checks** = only `backend-ci`
+- Actions → General → Workflow permissions = **Read and write permissions**
+- Branch requires **≥1 approval** (review) and linear history (optional)
 
-## Branch protection
-- Require status checks: backend-ci
-- Require 1 approval
-- Require linear history: on
+## Workflows kept
+- `.github/workflows/backend-ci.yml`
+- `.github/workflows/auto-merge.yml`
+- `.github/workflows/smoke-open-pr.yml`
 
-## Workflow permissions
-Settings → Actions → General → Workflow permissions → **Read and write**
-
-## Troubleshooting
-- 403 on npm install? Make sure .npmrc is public-only:
-  registry=https://registry.npmjs.org/
-  fund=false
-  audit=false
+## End-to-end test
+1) Actions → smoke-open-pr → **Run workflow** (branch: main)
+2) Open PR from log line `PR URL:`
+3) Label `automerge` (already set) → **Approve** PR
+4) Wait for **backend-ci** green → PR auto-merges (squash)
