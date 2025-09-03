@@ -1,0 +1,17 @@
+{
+  "name": "@workbuoy/frontend",
+  "version": "0.1.0",
+  "private": true,
+  "main": "electron.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "dependencies": {
+    "electron": "^36.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.3",
+    "@types/node": "^20.4.0",
+    "@types/electron": "^24.0.0"
+  }
+}
