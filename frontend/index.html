@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Workbuoy CRM</title>
+</head>
+<body>
+  <div id="root"></div>
+  <!-- Load React and ReactDOM via CDN -->
+  <script src="https://unpkg.com/react@17/umd/react.development.js"></script>
+  <sript src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"></script>
+  <script>
+    function App() {
+      const [contacts, setContacts] = React.useState([]);
+
+      React.useEffect(() => {
+        fetch('/api/v1/crm/contacts')
+          .then((res) => res.json())
+          .then((data) => {
+            setContacts(data.items || []);
+          })
+          .catch((err) => console.error('Failed to fetch contacts', err));
+      }, []);
+
+      return React.createElement('div', null,
+        React.createElement('h1', null, 'Kontakter'),
+        React.createElement('ul', null,
+          contacts.map((contact) =>
+            React.createElement('li', { key: contact.id }, contact.name + ' (' + contact.status + ')')
+          )
+        )
+      );
+    }
+
+    ReactDOM.render(
+      React.createElement(App, null, null),
+      document.getElementById('root')
+    );
+  </script>
+</body>
+</html>
