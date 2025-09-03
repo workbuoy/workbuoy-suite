@@ -17,6 +17,14 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20.x'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Force clean npm config (ignore broken repo .npmrc)
+        run: |
+          echo "registry=https://registry.npmjs.org/" > ~/.npmrc
+          npm config set fund false
+          npm config set audit false
+          npm config get registry
 
       - name: Install dependencies
         working-directory: backend
@@ -28,7 +36,6 @@ jobs:
             npm install --no-fund --no-audit
           fi
 
-      # Run a minimal smoke test suite to keep CI green while repo is being stabilized.
-      - name: Run smoke tests
+      - name: Run smoke tests (temporary)
         working-directory: backend
         run: npx jest --ci --config jest.ci.config.cjs
