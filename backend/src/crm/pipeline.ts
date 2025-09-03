@@ -15,5 +15,10 @@ crmRouter.post('/api/v1/crm/pipelines/:pipelineId/transitions', (req, res) => {
 
 // Example GET to exercise latency metric
 crmRouter.get('/api/v1/crm/contacts', (_req, res) => {
-  res.json({ items: [] });
+  const contacts = [
+    { id: 1, name: 'Alice Johnson', email: 'alice@example.com', status: 'Active' },
+    { id: 2, name: 'Bob Smith', email: 'bob@example.com', status: 'Prospect' },
+    { id: 3, name: 'Carol Williams', email: 'carol@example.com', status: 'Inactive' },
+  ];
+  res.json({ items: contacts });
 });
