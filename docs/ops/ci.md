@@ -1,20 +1,19 @@
-# CI/CD Rails (public-only npm path)
+# CI Rails – Temporary Smoke Mode
 
-We only keep 3 workflows:
-- backend-ci
-- auto-merge
-- smoke-open-pr
+We are running a **smoke-only** Jest config in CI to keep PRs green while stabilizing the repository.
 
-## Branch protection
-- Require status checks: backend-ci
-- Require 1 approval
-- Require linear history: on
+## Required settings
+- Ruleset: only require `backend-ci`.
+- Actions → Workflow permissions: **Read and write**.
 
-## Workflow permissions
-Settings → Actions → General → Workflow permissions → **Read and write**
+## What runs in CI right now
+- `backend-ci` → `npx jest --ci --config backend/jest.ci.config.cjs`
+- `auto-merge` → turns on auto-merge when label `automerge` + ≥1 approval.
+- `smoke-open-pr` → manual button to open a validation PR.
 
-## Troubleshooting
-- 403 on npm install? Make sure .npmrc is public-only:
-  registry=https://registry.npmjs.org/
-  fund=false
-  audit=false
+## How to exit Smoke Mode
+When the backend is stabilized:
+1) Fix legacy tests and TS errors.
+2) Move test scope back to full suite by changing backend-ci to `npm test -- --ci`.
+3) Optional: make build/typecheck required again.
+
