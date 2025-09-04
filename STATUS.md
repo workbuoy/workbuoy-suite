@@ -13,6 +13,7 @@
 - Role integration: READY (stub)
 - Meta logging: READY (stub)
 - Meta dashboards: READY (stub)
+
 - Auto-doc: READY (stub)
 - Knowledge base: READY (stub)
 - Kraken simulation: READY (stub)
@@ -28,6 +29,7 @@
 - Navi prototype: READY
 - FocusCard prototype: READY
 - ModeSwitch prototype: READY
+- - UX Vision v1: ✅
 
 
 ## Consolidation
