@@ -18,3 +18,4 @@ Se `.github/workflows/release-orchestrate.yml`. Kjør via Actions → workbuoy�
 
 - GitLab CI: `.gitlab‑ci.yml`
 - Azure DevOps: `azure‑pipelines.yml`
+
