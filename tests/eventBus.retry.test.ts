@@ -1,12 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { emit } from "../src/core/eventBus";
-// we don't import DLQ or on directly in case naming differs; we simulate via emit and local handler registration.
-// If your eventBus exports `on`, this test dynamically requires it.
 const bus: any = require("../src/core/eventBus");
 
 describe("event bus (retry -> DLQ)", () => {
   beforeEach(() => {
     if (Array.isArray(bus.DLQ)) bus.DLQ.length = 0;
+    if (typeof bus.clearHandlers === "function") bus.clearHandlers();
   });
 
   it("retries once then succeeds (no DLQ)", async () => {
