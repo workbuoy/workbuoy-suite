@@ -1,0 +1,11 @@
+# MVP B + C checklist (delta snapshot)
+- [ ] CRM API (GET/POST/DELETE) in-memory with policy guard
+- [ ] Tasks API (CRUD) with events
+- [ ] Log API (append/list) + audit verify endpoint
+- [ ] Explain templates wired; deterministic confidence
+- [ ] Policy cache (LRU 60s) active in guard
+- [ ] Audit batching 50ms; verify still OK
+- [ ] Spans log duration_ms for key rails
+- [ ] OpenAPI updated (crm.yaml, tasks.yaml, log.yaml)
+- [ ] Frontend: slider + tasks + logs + why drawer wired
+- [ ] CI green; coverage ≥80% for new modules

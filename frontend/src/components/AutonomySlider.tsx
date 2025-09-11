@@ -1,6 +1,10 @@
-// AutonomySlider component stub
-import React from 'react';
-
-export const AutonomySlider: React.FC = () => {
-  return <div>Autonomy Slider placeholder</div>;
+import React from "react";
+type Props = { value: number; onChange: (v:number)=>void };
+export const AutonomySlider: React.FC<Props> = ({ value, onChange }) => {
+  return (
+    <div>
+      <label>Autonomy: {value}</label>
+      <input type="range" min={0} max={2} value={value} onChange={(e)=>onChange(Number(e.target.value))} />
+    </div>
+  );
 };
