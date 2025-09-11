@@ -1,13 +1,13 @@
 type Level = "debug" | "info" | "warn" | "error";
-const PII_KEYS = ["email","phone","iban","ssn","password"];
+const PII_KEYS = ["email", "phone", "iban", "ssn", "password"] as const;
 
-function maskPII(obj: any): any {
+export function maskPII(obj: any): any {
   if (obj == null) return obj;
   if (Array.isArray(obj)) return obj.map(maskPII);
   if (typeof obj === "object") {
     const out: Record<string, any> = {};
-    for (const [k,v] of Object.entries(obj)) {
-      if (PII_KEYS.includes(k.toLowerCase())) {
+    for (const [k, v] of Object.entries(obj)) {
+      if (PII_KEYS.includes(k.toLowerCase() as any)) {
         out[k] = "***";
       } else {
         out[k] = maskPII(v);
@@ -35,5 +35,3 @@ export const logger = {
   warn: (msg: string, meta?: any) => log("warn", msg, meta),
   error: (msg: string, meta?: any) => log("error", msg, meta),
 };
-
-export { maskPII };
