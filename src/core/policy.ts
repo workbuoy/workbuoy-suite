@@ -1,35 +1,49 @@
+import type { Request, Response, NextFunction } from "express";
+
+export type Autonomy = 0 | 1 | 2;
+export type Mode = "ask_approval" | "read_only" | "supervised";
+
 export interface PolicyResult {
-  /**
-   * Whether the requested action is allowed to execute.
-   */
-  allowed: boolean;
-  /**
-   * If true, a human approval is required before execution.
-   */
-  requireApproval: boolean;
-  /**
-   * If true, the policy has degraded the autonomy level (e.g., fallback to supervised mode).
-   */
-  degraded?: boolean;
+  allow: boolean;
+  mode: Mode;
+  reason?: string;
+  confidence?: number;
+  alternatives?: string[];
+  impact?: string;
 }
 
-/**
- * Evaluates a simple autonomy-based policy. In a real implementation this would
- * take user roles, context and risk into account.
- */
-export function evaluatePolicy(autonomy: number): PolicyResult {
-  if (autonomy <= 1) {
-    // autonomy 0 or 1: do not allow automatic actions
-    return { allowed: false, requireApproval: true };
+/** MVP policy: autonomy via header; enforces 0–2 */
+export function evaluatePolicy(req: Request): PolicyResult {
+  const autonomy = Number(req.headers["x-autonomy"] ?? 0) as Autonomy;
+
+  if (autonomy === 0) {
+    return {
+      allow: req.method === "GET",
+      mode: "ask_approval",
+      reason: "Autonomy 0",
+    };
   }
-  if (autonomy === 2) {
-    // autonomy 2: proactive suggestions with approval
-    return { allowed: true, requireApproval: true };
+
+  if (autonomy === 1) {
+    return {
+      allow: req.method !== "DELETE",
+      mode: "read_only",
+      reason: "Autonomy 1 mitigations",
+    };
   }
-  if (autonomy === 3) {
-    // autonomy 3: ambitious – still require approval for high‑risk actions
-    return { allowed: true, requireApproval: true };
+
+  // autonomy === 2
+  return { allow: true, mode: "supervised" };
+}
+
+/** Express middleware that denies when policy says no; attaches explanation to req */
+export function policyGuard(req: Request, res: Response, next: NextFunction) {
+  const result = evaluatePolicy(req);
+  (req as any).__explanation = result; // surfaced via API/UI (WhyDrawer)
+  if (!result.allow) {
+    return res
+      .status(403)
+      .json({ error: { message: "Policy denied" }, explanation: result, correlationId: (req as any).correlationId });
   }
-  // autonomy >= 4: kraken/tsunami allowed
-  return { allowed: true, requireApproval: false };
+  return next();
 }

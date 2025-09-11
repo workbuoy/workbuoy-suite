@@ -1,24 +1,33 @@
-type Handler<T> = (payload: T) => void;
+export type Priority = "low" | "normal" | "high";
 
-export class EventBus {
-  private handlers: Map<string, Handler<any>[]> = new Map();
+export interface Event<T = any> {
+  type: string;
+  payload: T;
+  priority?: Priority;
+}
 
-  /**
-   * Subscribe to a topic with a handler.
-   */
-  subscribe<T>(topic: string, handler: Handler<T>): void {
-    const arr = this.handlers.get(topic) ?? [];
-    arr.push(handler as Handler<any>);
-    this.handlers.set(topic, arr);
-  }
+type Handler = (evt: Event) => Promise<void> | void;
 
-  /**
-   * Publish a payload to all subscribers of a topic.
-   */
-  publish<T>(topic: string, payload: T): void {
-    const arr = this.handlers.get(topic);
-    if (arr) {
-      arr.forEach((handler) => handler(payload));
+const handlers: Record<string, Handler[]> = {};
+
+/** Simple in-proc DLQ for failed handlers (MVP) */
+export const DLQ: Event[] = [];
+
+/** Subscribe a handler for a given event type */
+export function on(type: string, handler: Handler) {
+  handlers[type] = handlers[type] || [];
+  handlers[type].push(handler);
+}
+
+/** Emit an event to all subscribed handlers. Failures go to DLQ. */
+export async function emit(evt: Event) {
+  const hs = handlers[evt.type] || [];
+  // (MVP) priority flag is accepted on the event; actual handler prioritization can be added later
+  for (const h of hs) {
+    try {
+      await h(evt);
+    } catch {
+      DLQ.push(evt);
     }
   }
 }
