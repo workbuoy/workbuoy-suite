@@ -1,0 +1,3 @@
+import taskRoutes from "./features/tasks/tasks.route";
+...
+app.use(taskRoutes);
