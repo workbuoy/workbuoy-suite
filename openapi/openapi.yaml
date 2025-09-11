@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Workbuoy Suite - MVP APIs
-  version: 0.1.0
+  version: 0.2.0
 servers:
   - url: http://localhost:3000
 paths:
@@ -38,4 +38,81 @@ paths:
       responses:
         '204': { description: Deleted }
         '404': { description: Not found }
+        '403': { description: Policy denied }
+
+  /api/tasks:
+    get:
+      summary: List tasks
+      parameters:
+        - in: query
+          name: status
+          schema: { type: string, enum: [todo, doing, done] }
+      responses:
+        '200': { description: OK }
+    post:
+      summary: Create task
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:   { type: string }
+                status:  { type: string, enum: [todo, doing, done] }
+                dueAt:   { type: string, format: date-time }
+                assignee:{ type: string }
+      responses:
+        '201': { description: Created }
+        '400': { description: Invalid payload }
+        '403': { description: Policy denied }
+  /api/tasks/{id}:
+    patch:
+      summary: Update task
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: OK }
+        '400': { description: Invalid patch }
+        '403': { description: Policy denied }
+        '404': { description: Not found }
+    delete:
+      summary: Delete task
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        '204': { description: Deleted }
+        '403': { description: Policy denied }
+        '404': { description: Not found }
+
+  /api/log:
+    get:
+      summary: List logs
+      parameters:
+        - in: query
+          name: level
+          schema: { type: string, enum: [info, warn, error] }
+      responses:
+        '200': { description: OK }
+    post:
+      summary: Append log
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                level: { type: string, enum: [info, warn, error] }
+                msg:   { type: string }
+                meta:  { type: object }
+      responses:
+        '201': { description: Created }
+        '400': { description: Invalid payload }
         '403': { description: Policy denied }
