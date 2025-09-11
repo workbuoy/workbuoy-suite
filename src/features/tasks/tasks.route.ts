@@ -21,14 +21,12 @@ const NewTask = Task.partial({ id: true, status: true }).extend({
 const store = new Map<string, Task>();
 const router = Router();
 
-/** List tasks (filter by status optional) */
 router.get("/api/tasks", (req, res) => {
   const status = req.query.status?.toString();
   const items = Array.from(store.values()).filter(t => !status || t.status === status);
   res.json({ items, correlationId: (req as any).correlationId, explanation: (req as any).__explanation });
 });
 
-/** Create task */
 router.post("/api/tasks", policyGuard, async (req, res) => {
   const parsed = NewTask.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: { message: "Invalid task", details: parsed.error.flatten() }});
@@ -40,7 +38,6 @@ router.post("/api/tasks", policyGuard, async (req, res) => {
   res.status(201).json({ item: task, correlationId: (req as any).correlationId, explanation: (req as any).__explanation });
 });
 
-/** Update task (status/title/assignee) */
 router.patch("/api/tasks/:id", policyGuard, async (req, res) => {
   const id = req.params.id;
   if (!store.has(id)) return res.status(404).json({ error: { message: "Not found" } });
@@ -54,7 +51,6 @@ router.patch("/api/tasks/:id", policyGuard, async (req, res) => {
   res.json({ item: next, correlationId: (req as any).correlationId, explanation: (req as any).__explanation });
 });
 
-/** Delete task */
 router.delete("/api/tasks/:id", policyGuard, async (req, res) => {
   const id = req.params.id;
   if (!store.has(id)) return res.status(404).json({ error: { message: "Not found" } });

@@ -6,7 +6,6 @@ type LogEntry = { ts: string; level: "info"|"warn"|"error"; msg: string; meta?: 
 const logs: LogEntry[] = [];
 const router = Router();
 
-/** Append log (write requires policy) */
 router.post("/api/log", policyGuard, (req, res) => {
   const { level = "info", msg, meta } = req.body || {};
   if (!msg) return res.status(400).json({ error: { message: "msg required" }});
@@ -15,7 +14,6 @@ router.post("/api/log", policyGuard, (req, res) => {
   return res.status(201).json({ item: logs[logs.length - 1], correlationId: (req as any).correlationId, explanation: (req as any).__explanation });
 });
 
-/** List logs (optional level filter) */
 router.get("/api/log", (req, res) => {
   const level = req.query.level?.toString();
   const items = logs.filter(l => !level || l.level === level);
