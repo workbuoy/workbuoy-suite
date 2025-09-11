@@ -1,0 +1,4 @@
+*** Apply to src/server.ts (append at the end of middleware chain) ***
+
++ import { errorMapper } from "./core/http/middleware/errorMapper";
++ app.use(errorMapper); // must be the last middleware

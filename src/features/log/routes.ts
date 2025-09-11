@@ -1,7 +1,10 @@
 import { Router } from "express";
 import { z } from "zod";
+// RAIL:ENTRYPOINT log.routes (hardening)
 
-// RAIL:ENTRYPOINT log.routes
+import { policyV2Guard } from "../../core/policyV2/middleware";
+import { writeRateLimiter } from "../../core/http/middleware/rateLimit";
+
 const router = Router();
 
 const NewLog = z.object({
@@ -18,7 +21,6 @@ type Entry = { ts:string; level:"info"|"warn"|"error"; msg:string; meta?:any; ha
 const items: Entry[] = [];
 
 function tryReq<T=any>(m:string):T|null{ try{return require(m);}catch{return null;} }
-import { policyV2Guard } from "../../core/policyV2/middleware";
 const audit = tryReq<any>("../../core/audit");
 const verify = tryReq<any>("../../core/audit/verify") || tryReq<any>("../../core/auditVerify");
 
@@ -30,7 +32,7 @@ router.get("/api/logs", (req, res, next) => {
   } catch (e) { next(e); }
 });
 
-router.post("/api/logs", policyV2Guard("write","low"), (req, res, next) => {
+router.post("/api/logs", writeRateLimiter(), policyV2Guard("write","low"), (req, res, next) => {
   try {
     const body = NewLog.parse(req.body || {});
     const prev = items[0];
@@ -43,7 +45,7 @@ router.post("/api/logs", policyV2Guard("write","low"), (req, res, next) => {
 
 router.get("/api/audit/verify", (_req, res) => {
   if (verify?.verifyHashChain) {
-    const ok = verify.verifyHashChain([...items].reverse()); // oldest→newest
+    const ok = verify.verifyHashChain([...items].reverse());
     return res.status(ok.ok ? 200 : 500).json(ok);
   }
   return res.json({ ok: true });
