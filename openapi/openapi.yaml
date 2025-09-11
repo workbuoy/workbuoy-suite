@@ -1,0 +1,41 @@
+openapi: 3.0.3
+info:
+  title: Workbuoy Suite - MVP APIs
+  version: 0.1.0
+servers:
+  - url: http://localhost:3000
+paths:
+  /api/crm/contacts:
+    get:
+      summary: List contacts
+      responses:
+        '200':
+          description: OK
+    post:
+      summary: Create contact
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name: { type: string }
+                email: { type: string, format: email }
+                phone: { type: string }
+      responses:
+        '201': { description: Created }
+        '400': { description: Invalid payload }
+        '403': { description: Policy denied }
+  /api/crm/contacts/{id}:
+    delete:
+      summary: Delete contact
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        '204': { description: Deleted }
+        '404': { description: Not found }
+        '403': { description: Policy denied }
