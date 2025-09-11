@@ -6,6 +6,10 @@ import crmRoutes from "./features/crm/contacts.route";
 import taskRoutes from "./features/tasks/tasks.route";
 ...
 app.use(taskRoutes);
+import logRoutes from "./features/log/log.route";
+...
+app.use(logRoutes);
+
 
 
 const app = express();
