@@ -1,0 +1,4 @@
+-- Optional index for tasks.status (adjust table name to your schema)
+-- This file is optional if your schema already defines the index.
+-- Prisma will handle idempotency by history table; or run guarded:
+-- CREATE INDEX IF NOT EXISTS "Task_status_idx" ON "Task" ("status");
