@@ -1,0 +1,38 @@
+{
+  "version": "2.4.4",
+  "rules": [
+    {
+      "id": "policy.read.safe",
+      "match": {
+        "category": "read"
+      },
+      "minAutonomy": 0,
+      "mode": "supervised",
+      "explanation": "Read-safe operation allowed."
+    },
+    {
+      "id": "policy.write.low",
+      "match": {
+        "category": "write",
+        "risk": "low"
+      },
+      "minAutonomy": 2,
+      "mode": "ask_approval",
+      "explanation": "Write requires autonomy \u22652 or approval."
+    },
+    {
+      "id": "policy.write.high",
+      "match": {
+        "category": "write",
+        "risk": "high"
+      },
+      "minAutonomy": 3,
+      "mode": "read_only",
+      "explanation": "High-risk write disabled in MVP."
+    }
+  ],
+  "default": {
+    "mode": "ask_approval",
+    "explanation": "No specific rule matched; defaulting to approval."
+  }
+}
