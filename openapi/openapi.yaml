@@ -39,3 +39,28 @@ paths:
         '204': { description: Deleted }
         '404': { description: Not found }
         '403': { description: Policy denied }
+  /api/log:
+    get:
+      summary: List logs
+      parameters:
+        - in: query
+          name: level
+          schema: { type: string, enum: [info, warn, error] }
+      responses:
+        '200': { description: OK }
+    post:
+      summary: Append log
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                level: { type: string, enum: [info, warn, error] }
+                msg:   { type: string }
+                meta:  { type: object }
+      responses:
+        '201': { description: Created }
+        '400': { description: Invalid payload }
+        '403': { description: Policy denied }
