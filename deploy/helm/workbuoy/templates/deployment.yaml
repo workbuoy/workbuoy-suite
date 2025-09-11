@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: workbuoy
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app: workbuoy }
+  template:
+    metadata:
+      labels: { app: workbuoy }
+    spec:
+      containers:
+        - name: workbuoy
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          ports:
+            - containerPort: 3000
+          env:
+{{- range .Values.env }}
+            - name: {{ .name }}
+              value: "{{ .value }}"
+{{- end }}

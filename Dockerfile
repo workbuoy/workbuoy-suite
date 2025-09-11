@@ -1,4 +1,19 @@
-FROM alpine:3.20
-RUN adduser -D -H -s /sbin/nologin app &&     echo 'WorkBuoy backend placeholder' > /app.txt
-USER app
-CMD ["sh","-c","sleep 3600"]
+# Multi-stage Dockerfile for Workbuoy
+FROM node:20-alpine AS deps
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci
+
+FROM node:20-alpine AS build
+WORKDIR /app
+COPY --from=deps /app/node_modules node_modules
+COPY . .
+RUN npm run build || echo "skip build for ts-node apps"
+
+FROM node:20-alpine AS runner
+WORKDIR /app
+ENV NODE_ENV=production
+COPY --from=deps /app/node_modules node_modules
+COPY . .
+EXPOSE 3000
+CMD ["npm","run","start"]
