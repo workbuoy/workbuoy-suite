@@ -1,0 +1,18 @@
+openapi: 3.0.3
+info: { title: Workbuoy Tasks, version: 0.1.0 }
+paths:
+  /api/tasks:
+    get: { operationId: listTasks, responses: { '200': { description: OK } } }
+    post:
+      operationId: createTask
+      requestBody: { required: true, content: { application/json: { schema: { type: object, required: [title], properties: { title: { type: string } } } } } }
+      responses: { '201': { description: Created } }
+  /api/tasks/{id}:
+    patch:
+      operationId: updateTask
+      parameters: [ { in: path, name: id, required: true, schema: { type: string } } ]
+      responses: { '200': { description: OK } }
+    delete:
+      operationId: deleteTask
+      parameters: [ { in: path, name: id, required: true, schema: { type: string } } ]
+      responses: { '204': { description: Deleted } }

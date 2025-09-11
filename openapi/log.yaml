@@ -1,0 +1,11 @@
+openapi: 3.0.3
+info: { title: Workbuoy Log, version: 0.1.0 }
+paths:
+  /api/logs:
+    get: { operationId: listLogs, responses: { '200': { description: OK } } }
+    post:
+      operationId: appendLog
+      requestBody: { required: true, content: { application/json: { schema: { type: object, required: [msg], properties: { msg: { type: string }, level: { type: string } } } } } }
+      responses: { '201': { description: Created } }
+  /api/audit/verify:
+    get: { operationId: auditVerify, responses: { '200': { description: OK }, '500': { description: Broken } } }
