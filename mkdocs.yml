@@ -1,0 +1,7 @@
+site_name: Workbuoy Docs
+nav:
+  - Home: index.md
+  - Core: docs/core.md
+  - Navi: docs/navi.md
+  - API: docs/api.md
+theme: readthedocs
