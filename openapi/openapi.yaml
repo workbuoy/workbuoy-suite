@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Workbuoy Suite - MVP APIs
-  version: 0.2.0
+  version: 0.2.1
 servers:
   - url: http://localhost:3000
 paths:
@@ -11,6 +11,19 @@ paths:
       responses:
         '200':
           description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Contact'
+                  correlationId:
+                    type: string
+                  explanation:
+                    $ref: '#/components/schemas/Explanation'
     post:
       summary: Create contact
       requestBody:
@@ -18,15 +31,24 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                name: { type: string }
-                email: { type: string, format: email }
-                phone: { type: string }
+              $ref: '#/components/schemas/NewContact'
       responses:
-        '201': { description: Created }
-        '400': { description: Invalid payload }
-        '403': { description: Policy denied }
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  item:
+                    $ref: '#/components/schemas/Contact'
+                  correlationId:
+                    type: string
+                  explanation:
+                    $ref: '#/components/schemas/Explanation'
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
   /api/crm/contacts/{id}:
     delete:
       summary: Delete contact
@@ -37,8 +59,8 @@ paths:
           schema: { type: string }
       responses:
         '204': { description: Deleted }
-        '404': { description: Not found }
-        '403': { description: Policy denied }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '403': { $ref: '#/components/responses/Forbidden' }
 
   /api/tasks:
     get:
@@ -46,9 +68,25 @@ paths:
       parameters:
         - in: query
           name: status
-          schema: { type: string, enum: [todo, doing, done] }
+          schema:
+            type: string
+            enum: [todo, doing, done]
       responses:
-        '200': { description: OK }
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Task'
+                  correlationId:
+                    type: string
+                  explanation:
+                    $ref: '#/components/schemas/Explanation'
     post:
       summary: Create task
       requestBody:
@@ -56,16 +94,24 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                title:   { type: string }
-                status:  { type: string, enum: [todo, doing, done] }
-                dueAt:   { type: string, format: date-time }
-                assignee:{ type: string }
+              $ref: '#/components/schemas/NewTask'
       responses:
-        '201': { description: Created }
-        '400': { description: Invalid payload }
-        '403': { description: Policy denied }
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  item:
+                    $ref: '#/components/schemas/Task'
+                  correlationId:
+                    type: string
+                  explanation:
+                    $ref: '#/components/schemas/Explanation'
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
   /api/tasks/{id}:
     patch:
       summary: Update task
@@ -74,11 +120,29 @@ paths:
           name: id
           required: true
           schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TaskPatch'
       responses:
-        '200': { description: OK }
-        '400': { description: Invalid patch }
-        '403': { description: Policy denied }
-        '404': { description: Not found }
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  item:
+                    $ref: '#/components/schemas/Task'
+                  correlationId:
+                    type: string
+                  explanation:
+                    $ref: '#/components/schemas/Explanation'
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
     delete:
       summary: Delete task
       parameters:
@@ -88,8 +152,8 @@ paths:
           schema: { type: string }
       responses:
         '204': { description: Deleted }
-        '403': { description: Policy denied }
-        '404': { description: Not found }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
 
   /api/log:
     get:
@@ -97,9 +161,25 @@ paths:
       parameters:
         - in: query
           name: level
-          schema: { type: string, enum: [info, warn, error] }
+          schema:
+            type: string
+            enum: [info, warn, error]
       responses:
-        '200': { description: OK }
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/LogEntry'
+                  correlationId:
+                    type: string
+                  explanation:
+                    $ref: '#/components/schemas/Explanation'
     post:
       summary: Append log
       requestBody:
@@ -107,12 +187,104 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                level: { type: string, enum: [info, warn, error] }
-                msg:   { type: string }
-                meta:  { type: object }
+              $ref: '#/components/schemas/LogAppend'
       responses:
-        '201': { description: Created }
-        '400': { description: Invalid payload }
-        '403': { description: Policy denied }
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  item:
+                    $ref: '#/components/schemas/LogEntry'
+                  correlationId:
+                    type: string
+                  explanation:
+                    $ref: '#/components/schemas/Explanation'
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+components:
+  schemas:
+    Explanation:
+      type: object
+      properties:
+        mode: { type: string, enum: [ask_approval, read_only, supervised] }
+        reason: { type: string }
+        confidence: { type: number }
+        impact: { type: string }
+        alternatives:
+          type: array
+          items: { type: string }
+
+    Contact:
+      type: object
+      required: [id, name]
+      properties:
+        id: { type: string, format: uuid }
+        name: { type: string }
+        email: { type: string, format: email }
+        phone: { type: string }
+
+    NewContact:
+      type: object
+      required: [name]
+      properties:
+        name: { type: string }
+        email: { type: string, format: email }
+        phone: { type: string }
+
+    Task:
+      type: object
+      required: [id, title, status]
+      properties:
+        id: { type: string, format: uuid }
+        title: { type: string }
+        status: { type: string, enum: [todo, doing, done], default: todo }
+        dueAt: { type: string, format: date-time }
+        assignee: { type: string }
+
+    NewTask:
+      type: object
+      required: [title]
+      properties:
+        title: { type: string }
+        status: { type: string, enum: [todo, doing, done] }
+        dueAt: { type: string, format: date-time }
+        assignee: { type: string }
+
+    TaskPatch:
+      type: object
+      properties:
+        title: { type: string }
+        status: { type: string, enum: [todo, doing, done] }
+        dueAt: { type: string, format: date-time }
+        assignee: { type: string }
+
+    LogEntry:
+      type: object
+      required: [ts, level, msg]
+      properties:
+        ts: { type: string, format: date-time }
+        level: { type: string, enum: [info, warn, error] }
+        msg: { type: string }
+        meta: { type: object }
+        hash: { type: string }
+        prevHash: { type: string }
+
+    LogAppend:
+      type: object
+      required: [msg]
+      properties:
+        level: { type: string, enum: [info, warn, error], default: info }
+        msg: { type: string }
+        meta: { type: object }
+
+  responses:
+    BadRequest:
+      description: Invalid payload
+    Forbidden:
+      description: Policy denied
+    NotFound:
+      description: Not found

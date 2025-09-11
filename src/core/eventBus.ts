@@ -20,14 +20,20 @@ export function on(type: string, handler: Handler) {
 }
 
 /** Emit an event to all subscribed handlers. Failures go to DLQ. */
+const priorityOrder: Priority[] = ["high","normal","low"];
+
 export async function emit(evt: Event) {
   const hs = handlers[evt.type] || [];
-  // (MVP) priority flag is accepted on the event; actual handler prioritization can be added later
-  for (const h of hs) {
+  // kjør handlers to ganger ved feil (1 retry)
+  for (const h of hs.sort((a,b)=>0)) { // (MVP) behold registreringsrekkefølge
     try {
       await h(evt);
     } catch {
-      DLQ.push(evt);
+      try {
+        await h(evt); // one retry
+      } catch {
+        DLQ.push(evt);
+      }
     }
   }
 }
