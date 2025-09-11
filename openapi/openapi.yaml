@@ -1,13 +1,14 @@
 openapi: 3.0.3
 info:
   title: Workbuoy Suite - MVP APIs
-  version: 0.2.1
+  version: 0.3.0
 servers:
   - url: http://localhost:3000
 paths:
   /api/crm/contacts:
     get:
       summary: List contacts
+      operationId: listContacts
       responses:
         '200':
           description: OK
@@ -18,20 +19,17 @@ paths:
                 properties:
                   items:
                     type: array
-                    items:
-                      $ref: '#/components/schemas/Contact'
-                  correlationId:
-                    type: string
-                  explanation:
-                    $ref: '#/components/schemas/Explanation'
+                    items: { $ref: '#/components/schemas/Contact' }
+                  correlationId: { type: string }
+                  explanation: { $ref: '#/components/schemas/Explanation' }
     post:
       summary: Create contact
+      operationId: createContact
       requestBody:
         required: true
         content:
           application/json:
-            schema:
-              $ref: '#/components/schemas/NewContact'
+            schema: { $ref: '#/components/schemas/NewContact' }
       responses:
         '201':
           description: Created
@@ -40,18 +38,16 @@ paths:
               schema:
                 type: object
                 properties:
-                  item:
-                    $ref: '#/components/schemas/Contact'
-                  correlationId:
-                    type: string
-                  explanation:
-                    $ref: '#/components/schemas/Explanation'
+                  item: { $ref: '#/components/schemas/Contact' }
+                  correlationId: { type: string }
+                  explanation: { $ref: '#/components/schemas/Explanation' }
         '400': { $ref: '#/components/responses/BadRequest' }
         '403': { $ref: '#/components/responses/Forbidden' }
 
   /api/crm/contacts/{id}:
     delete:
       summary: Delete contact
+      operationId: deleteContact
       parameters:
         - in: path
           name: id
@@ -65,12 +61,11 @@ paths:
   /api/tasks:
     get:
       summary: List tasks
+      operationId: listTasks
       parameters:
         - in: query
           name: status
-          schema:
-            type: string
-            enum: [todo, doing, done]
+          schema: { type: string, enum: [todo, doing, done] }
       responses:
         '200':
           description: OK
@@ -81,20 +76,17 @@ paths:
                 properties:
                   items:
                     type: array
-                    items:
-                      $ref: '#/components/schemas/Task'
-                  correlationId:
-                    type: string
-                  explanation:
-                    $ref: '#/components/schemas/Explanation'
+                    items: { $ref: '#/components/schemas/Task' }
+                  correlationId: { type: string }
+                  explanation: { $ref: '#/components/schemas/Explanation' }
     post:
       summary: Create task
+      operationId: createTask
       requestBody:
         required: true
         content:
           application/json:
-            schema:
-              $ref: '#/components/schemas/NewTask'
+            schema: { $ref: '#/components/schemas/NewTask' }
       responses:
         '201':
           description: Created
@@ -103,18 +95,16 @@ paths:
               schema:
                 type: object
                 properties:
-                  item:
-                    $ref: '#/components/schemas/Task'
-                  correlationId:
-                    type: string
-                  explanation:
-                    $ref: '#/components/schemas/Explanation'
+                  item: { $ref: '#/components/schemas/Task' }
+                  correlationId: { type: string }
+                  explanation: { $ref: '#/components/schemas/Explanation' }
         '400': { $ref: '#/components/responses/BadRequest' }
         '403': { $ref: '#/components/responses/Forbidden' }
 
   /api/tasks/{id}:
     patch:
       summary: Update task
+      operationId: updateTask
       parameters:
         - in: path
           name: id
@@ -124,8 +114,7 @@ paths:
         required: true
         content:
           application/json:
-            schema:
-              $ref: '#/components/schemas/TaskPatch'
+            schema: { $ref: '#/components/schemas/TaskPatch' }
       responses:
         '200':
           description: OK
@@ -134,17 +123,15 @@ paths:
               schema:
                 type: object
                 properties:
-                  item:
-                    $ref: '#/components/schemas/Task'
-                  correlationId:
-                    type: string
-                  explanation:
-                    $ref: '#/components/schemas/Explanation'
+                  item: { $ref: '#/components/schemas/Task' }
+                  correlationId: { type: string }
+                  explanation: { $ref: '#/components/schemas/Explanation' }
         '400': { $ref: '#/components/responses/BadRequest' }
         '403': { $ref: '#/components/responses/Forbidden' }
         '404': { $ref: '#/components/responses/NotFound' }
     delete:
       summary: Delete task
+      operationId: deleteTask
       parameters:
         - in: path
           name: id
@@ -158,12 +145,11 @@ paths:
   /api/log:
     get:
       summary: List logs
+      operationId: listLogs
       parameters:
         - in: query
           name: level
-          schema:
-            type: string
-            enum: [info, warn, error]
+          schema: { type: string, enum: [info, warn, error] }
       responses:
         '200':
           description: OK
@@ -174,20 +160,17 @@ paths:
                 properties:
                   items:
                     type: array
-                    items:
-                      $ref: '#/components/schemas/LogEntry'
-                  correlationId:
-                    type: string
-                  explanation:
-                    $ref: '#/components/schemas/Explanation'
+                    items: { $ref: '#/components/schemas/LogEntry' }
+                  correlationId: { type: string }
+                  explanation: { $ref: '#/components/schemas/Explanation' }
     post:
       summary: Append log
+      operationId: appendLog
       requestBody:
         required: true
         content:
           application/json:
-            schema:
-              $ref: '#/components/schemas/LogAppend'
+            schema: { $ref: '#/components/schemas/LogAppend' }
       responses:
         '201':
           description: Created
@@ -196,12 +179,9 @@ paths:
               schema:
                 type: object
                 properties:
-                  item:
-                    $ref: '#/components/schemas/LogEntry'
-                  correlationId:
-                    type: string
-                  explanation:
-                    $ref: '#/components/schemas/Explanation'
+                  item: { $ref: '#/components/schemas/LogEntry' }
+                  correlationId: { type: string }
+                  explanation: { $ref: '#/components/schemas/Explanation' }
         '400': { $ref: '#/components/responses/BadRequest' }
         '403': { $ref: '#/components/responses/Forbidden' }
 
