@@ -1,42 +1,34 @@
-import { createHash } from 'crypto';
+import crypto from 'crypto';
 
 export interface AuditEntry {
-  id: string;
-  timestamp: string;
-  component: 'buoy'|'navi'|'core'|'flex'|'secure'|'meta';
-  level: 'info'|'warn'|'error'|'audit';
-  message: string;
-  metadata?: Record<string,unknown>;
-  correlationId?: string;
-  hash_prev?: string;
-  hash_curr: string;
+  ts: string;
+  correlationId: string;
+  type: string;
+  payloadHash: string;
+  prevHash: string;
+  hash: string;
 }
 
 const chain: AuditEntry[] = [];
 
-export function append(entry: Omit<AuditEntry,'hash_prev'|'hash_curr'>): AuditEntry {
-  const prev = chain.length ? chain[chain.length-1].hash_curr : '';
-  const payload = JSON.stringify({ ...entry, hash_prev: prev });
-  const hash_curr = sha256(payload);
-  const finalEntry: AuditEntry = { ...entry, hash_prev: prev, hash_curr };
-  chain.push(finalEntry);
-  return finalEntry;
+export function append(correlationId: string, type: string, payload: any){
+  const ts = new Date().toISOString();
+  const payloadHash = crypto.createHash('sha256').update(JSON.stringify(payload || {})).digest('hex');
+  const prevHash = chain.length ? chain[chain.length-1].hash : 'GENESIS';
+  const hash = crypto.createHash('sha256').update(ts + correlationId + type + payloadHash + prevHash).digest('hex');
+  const entry = { ts, correlationId, type, payloadHash, prevHash, hash };
+  chain.push(entry);
+  return entry;
 }
 
-export function verify(): boolean {
-  let prev = '';
-  for (const e of chain) {
-    const payload = JSON.stringify({ ...e, hash_curr: undefined });
-    const recompute = sha256(payload.replace(/,"hash_curr":undefined/,''));
-    if (e.hash_prev !== prev || e.hash_curr !== recompute) return false;
-    prev = e.hash_curr;
+export function verify(){
+  let prev = 'GENESIS';
+  for (const e of chain){
+    const recompute = require('crypto').createHash('sha256').update(e.ts + e.correlationId + e.type + e.payloadHash + prev).digest('hex');
+    if (recompute !== e.hash) return false;
+    prev = e.hash;
   }
   return true;
 }
 
-export function __reset(){ chain.length = 0; }
-export function __all(){ return chain.slice(); }
-
-function sha256(s: string) {
-  return createHash('sha256').update(s).digest('hex');
-}
+export function size(){ return chain.length; }

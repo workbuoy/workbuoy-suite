@@ -1,29 +1,20 @@
-import AppError from '../../AppError';
-import { log } from '../../logger';
+import { Request, Response, NextFunction } from 'express';
 
-// Express-like error handler middleware that integrates with structured logger
-export function errorHandler(err: any, req: any, res: any, next: any): void {
-  // correlationId from request context if present
-  const correlationId = req?.correlationId || 'unknown';
-
-  if (err instanceof AppError) {
-    // Log application errors at error level
-    log('error', err.message, {
-      correlationId,
-      details: err.details || null,
-      type: 'APP_ERROR',
-    });
-    res.status(err.statusCode || 500).json({
-      message: err.message,
-      details: err.details || null,
-    });
-  } else {
-    // Log unexpected errors and mask details from client
-    log('error', 'UNEXPECTED_ERROR', {
-      correlationId,
-      error: err,
-      type: 'UNEXPECTED',
-    });
-    res.status(500).json({ message: 'Internal Server Error' });
+export class AppError extends Error {
+  status: number;
+  code: string;
+  explanations?: any[];
+  constructor(code: string, message: string, status = 400, explanations?: any[]){
+    super(message);
+    this.code = code;
+    this.status = status;
+    this.explanations = explanations;
   }
+}
+
+export default function errorHandler(err: any, req: Request, res: Response, _next: NextFunction){
+  const status = err?.status || 500;
+  const code = err?.code || 'E_INTERNAL';
+  const explanations = err?.explanations || (status===403 ? [{ reasoning: 'Policy denied', policyBasis: 'autonomy-level', confidence: 0.8 }] : undefined);
+  res.status(status).json({ error: { code, message: err?.message || 'Internal Error', correlationId: req.wb?.correlationId, explanations } });
 }

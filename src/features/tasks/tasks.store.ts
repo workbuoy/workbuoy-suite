@@ -1,22 +1,18 @@
-import type { Task } from "./tasks.types";
-const items: Task[] = [];
+import { Task, TaskStatus } from './tasks.types';
+const store: Map<string, Task> = new Map();
+function id(){ return Math.random().toString(36).slice(2,10); }
 
-export function list(status?: Task["status"]): Task[] {
-  return status ? items.filter(i => i.status === status) : items;
+export function list(): Task[]{ return Array.from(store.values()); }
+export function create(input: Omit<Task,'id'|'createdAt'>): Task{
+  const item: Task = { ...input, id:id(), createdAt: new Date().toISOString() };
+  store.set(item.id, item);
+  return item;
 }
-export function create(data: { title: string; status?: Task["status"]; dueAt?: string; assignee?: string }): Task {
-  const t: Task = { id: Math.random().toString(36).slice(2), title: data.title, status: data.status ?? "todo", dueAt: data.dueAt, assignee: data.assignee, createdAt: new Date().toISOString() };
-  items.unshift(t);
-  return t;
+export function update(id: string, patch: Partial<Omit<Task,'id'|'createdAt'>>): Task | null{
+  const cur = store.get(id); if (!cur) return null;
+  const next = { ...cur, ...patch };
+  store.set(id, next as Task);
+  return next as Task;
 }
-export function patch(id: string, p: Partial<{ title: string; status: Task["status"]; dueAt: string; assignee: string }>): Task | null {
-  const i = items.findIndex(x => x.id === id);
-  if (i < 0) return null;
-  items[i] = { ...items[i], ...p };
-  return items[i];
-}
-export function remove(id: string): boolean {
-  const i = items.findIndex(x => x.id === id);
-  if (i < 0) return false;
-  items.splice(i,1); return true;
-}
+export function remove(id: string){ return store.delete(id); }
+export function clear(){ store.clear(); }
