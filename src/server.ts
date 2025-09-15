@@ -1,43 +1,39 @@
-
 import express from 'express';
+import { requestContext } from './core/http/middleware/requestContext';
+import { errorHandler } from './core/http/middleware/errorHandler';
 import { requestLogger } from './core/logging/logger';
+import { crmRouter } from './features/crm/routes';
+import { tasksRouter } from './features/tasks/routes';
+import { logRouter } from './features/log/routes';
+import { buoyRouter } from './buoy/routes';
 import { metricsRouter } from './core/http/routes/debug.metrics';
 
 const app = express();
 
-// Minimal request context (correlationId/autonomy/role) for logs
-app.use((req: any, _res, next) => {
-  req.wb = req.wb || {};
-  req.wb.correlationId = req.wb.correlationId || (globalThis.crypto?.randomUUID?.() || String(Date.now()));
-  req.wb.roleId = req.headers['x-role-id'] || 'user';
-  req.wb.autonomyLevel = Number(req.headers['x-autonomy-level'] || 2);
-  next();
-});
-
+// Order: context -> json -> logger -> routes -> health -> error
+app.use(requestContext);
 app.use(express.json());
 app.use(requestLogger());
 
-// Debug routes (metrics + DLQ)
+// Feature routes
+app.use('/api/crm', crmRouter());
+app.use('/api/tasks', tasksRouter());
+app.use('/api/logs', logRouter());
+app.use('/buoy', buoyRouter());
+
+// Debug (dev only guard here if you want)
 app.use(metricsRouter());
 
-// Health endpoints
-app.get('/healthz', (_req, res) => res.json({ ok:true }));
-app.get('/readyz', (_req, res) => res.json({ ok:true, bus:true, stores:true }));
-app.get('/buildz', (_req, res) => res.json({
+// Health/ready/build
+app.get('/healthz', (_req, res)=> res.json({ ok:true }));
+app.get('/readyz', (_req, res)=> res.json({ ok:true, bus:true, stores:true }));
+app.get('/buildz', (_req, res)=> res.json({
   version: process.env.BUILD_VERSION || 'dev',
   commit: process.env.BUILD_COMMIT || 'local',
   buildTime: process.env.BUILD_TIME || new Date().toISOString()
 }));
 
-// Placeholder feature routes (keep existing project routes alongside)
-app.get('/api/crm/contacts', (_req, res) => res.json([]));
-app.get('/api/tasks', (_req, res) => res.json([]));
-app.get('/api/logs', (_req, res) => res.json([]));
-
-// Error handler (safe)
-app.use((err: any, _req: any, res: any, _next: any) => {
-  const status = err?.status || 500;
-  res.status(status).json({ error: err?.message || 'Internal Error' });
-});
+// Error handler last
+app.use(errorHandler);
 
 export default app;
