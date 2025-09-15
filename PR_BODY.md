@@ -1,14 +1,19 @@
-# feat(ux): Collaborative Cursors for Solo Work (PR-24)
+# feat(ux): Backend wiring from UI + feature flag (PR-25)
 
 **Hva**
-- `GhostCursors`-overlay i Navi som viser subtile "hotspots" (ghost cursors).
-- Patch for FlipCard (monterer overlay på baksiden).
+- `Flags.realBackend` for trygg aktivering av ekte serverkall.
+- `useEndpoints()` med typed klientkall for CRM/Buoy/Undo.
+- Oppdaterte paneler (ContactsPanel, NaviGrid) til å bruke `useEndpoints`.
+- `useBuoy` kan kalle `/core/complete` når flagget er på.
+- `docs/integration-plan.md` beskriver endepunkter + TODO for dev.
 
 **Hvorfor**
-- Gir retning og fokus når du jobber alene, basert på teamets typiske navigasjon.
+- Rask overgang fra demo til ekte handlinger, uten å endre UX.
 
 **Hvordan teste**
-- Flip til **Navi** → se svakt markerte sirkler/labels i overlay.
+- Default (`realBackend=false`) → alt som før (stub).
+- Sett `realBackend=true` → UI bruker ekte API-er.
+- Verifiser at 403 fra `createContact/deleteContact` fortsatt åpner WhyDrawer.
 
 **Risiko/rollback**
-- Kun frontend + docs. Ingen tracking, ingen backend.
+- Kun frontend + docs. Flip av feature flag styrer adferd.

@@ -1,0 +1,36 @@
+--- a/frontend/src/features/buoy/useBuoy.ts
++++ b/frontend/src/features/buoy/useBuoy.ts
+@@
+ import { useActiveContext } from "../../core/ActiveContext";
+-import { useApi } from "../../lib/api/client";
++import { Flags } from "../../lib/flags";
++import { useEndpoints } from "../../lib/api/endpoints";
+@@
+-  const { withContext } = useApi();
++  const api = useEndpoints();
+@@
+   async function send(text: string, intent?: ParsedIntent) {
+     const userMsg: UserMessage = { id: crypto.randomUUID(), role:"user", text };
+     setMessages(m => [...m, userMsg]);
+     if (intent?.kind) pushIntent(`chat.${intent?.kind}`);
+-    // Placeholder for backend call example:
+-    // const res = await withContext("/core/complete", { method:"POST", body: JSON.stringify({ text, intent }) }, {
+-    //   intent: intent?.kind, whenISO: extractWhen(text) // optional helper
+-    // });
+-    const aMsg: AssistantMessage = { id: crypto.randomUUID(), role:"assistant", text: `Forstod: ${intent?.kind||"ukjent"}` };
+-    setMessages(m => [...m, userMsg, aMsg]);
++    if (Flags.realBackend){
++      try{
++        const res = await api.buoyComplete({ text, intent });
++        if (res.ok){
++          const data = await res.json();
++          const aMsg: AssistantMessage = { id: crypto.randomUUID(), role:"assistant", text: data.text || "OK" };
++          setMessages(m => [...m, userMsg, aMsg]);
++          return;
++        }
++      } catch {}
++    }
++    // Fallback stub
++    const msg: AssistantMessage = { id: crypto.randomUUID(), role:"assistant", text: `Forstod: ${intent?.kind||"ukjent"}` };
++    setMessages(m => [...m, userMsg, msg]);
+   }
