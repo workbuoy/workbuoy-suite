@@ -1,14 +1,10 @@
-# API Overview
+# Workbuoy API
 
-Dette er OpenAPI-spesifikasjonene som matcher dagens in-memory-API-er:
+Dette repoet eksponerer flere API-er:
 
-- **CRM**: `openapi/crm.yaml` – `/api/crm/contacts`
-- **Tasks**: `openapi/tasks.yaml` – `/api/tasks`
-- **Log**: `openapi/log.yaml` – `/api/logs`, `/api/audit/verify`
-- **Buoy**: `openapi/buoy.yaml` – `/buoy/complete`
+- **CRM API** – se [openapi/crm.yaml](../openapi/crm.yaml)
+- **Tasks API** – se [openapi/tasks.yaml](../openapi/tasks.yaml)
+- **Log API** – se [openapi/log.yaml](../openapi/log.yaml)
+- **Buoy API** – se [openapi/buoy.yaml](../openapi/buoy.yaml)
 
-## Lint i CI
-Workflow: `.github/workflows/openapi-lint.yml` (Spectral). Første iterasjoner er non-blocking (bruker `|| true`).
-
-## Kontrakt ↔️ kode
-Når ruter endres, oppdater spes samtidig i samme PR. UX bruker disse spesene i klienten og dokumentasjonen linker hit.
+Alle spesifikasjoner valideres med [Spectral](https://meta.stoplight.io/docs/spectral) i CI.
