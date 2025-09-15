@@ -1,42 +1,31 @@
-
-import type { PolicyResponse } from './types';
+/**
+ * Explainability helpers for Buoy responses.
+ * Produces a normalized Explanation[] array used by WhyDrawer.
+ */
 
 export interface Explanation {
   reasoning: string;
-  policyBasis?: string[];
+  sources?: string[];
   confidence?: number;
   impact?: { minutesSaved?: number; dsoDeltaDays?: number; riskReduced?: string };
+  policyBasis?: string[];
+  alternatives?: string[];
 }
 
 export function buildExplanation(input: {
-  capability: string;
-  policy: PolicyResponse;
-  outcome?: any;
+  reasoning: string;
+  basis?: string[];
+  impact?: { minutesSaved?: number; dsoDeltaDays?: number; riskReduced?: string };
+  sources?: string[];
+  confidence?: number;
+  alternatives?: string[];
 }): Explanation {
-  const base: Explanation = {
-    reasoning: templateReasoning(input.capability, input.policy, input.outcome),
-    policyBasis: input.policy.basis || [],
-    confidence: deriveConfidence(input.capability, input.policy, input.outcome),
-    impact: input.policy.impact
+  return {
+    reasoning: input.reasoning,
+    sources: input.sources,
+    confidence: input.confidence,
+    impact: input.impact,
+    policyBasis: input.basis,
+    alternatives: input.alternatives
   };
-  return base;
-}
-
-function templateReasoning(cap: string, policy: PolicyResponse, outcome: any): string {
-  if (!policy.allowed) {
-    return `Handling '${cap}' stoppet av policy: ${policy.explanation}`;
-  }
-  if (cap === 'finance.invoice.prepareDraft') {
-    return 'Utkast foreslått basert på vunnet deal og fakturaflyt. Ingen utsendelse uten godkjenning.';
-  }
-  if (cap === 'finance.invoice.send') {
-    return 'Forsøker å sende faktura i henhold til policy. Faller tilbake til utkast hvis ikke tillatt.';
-  }
-  return `Handling '${cap}' gjennomført i tråd med policy.`;
-}
-
-function deriveConfidence(cap: string, policy: PolicyResponse, outcome: any): number {
-  if (!policy.allowed) return 0.4;
-  if (cap === 'finance.invoice.prepareDraft') return 0.7;
-  return 0.8;
 }
