@@ -1,11 +1,14 @@
-# feat(ux): Predictive Loading States v2 (PR-23)
+# feat(ux): Collaborative Cursors for Solo Work (PR-24)
 
 **Hva**
-- Utvider `usePredictivePrefetch` med per-dag plan og menneskelig melding.
-- Ingen nye UI-komponenter; eksisterende skeleton bruker den nye teksten/planen.
+- `GhostCursors`-overlay i Navi som viser subtile "hotspots" (ghost cursors).
+- Patch for FlipCard (monterer overlay på baksiden).
+
+**Hvorfor**
+- Gir retning og fokus når du jobber alene, basert på teamets typiske navigasjon.
 
 **Hvordan teste**
-- Kjør appen på mandag: se “Laster mandagsrapporter…”. Ellers “Forbereder morgenoversikten…” eller “Henter det du vanligvis trenger…”.
+- Flip til **Navi** → se svakt markerte sirkler/labels i overlay.
 
 **Risiko/rollback**
-- Patch av v1-hook. Ingen backend-endringer.
+- Kun frontend + docs. Ingen tracking, ingen backend.

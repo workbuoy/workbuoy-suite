@@ -1,0 +1,14 @@
+--- a/frontend/src/components/FlipCard.tsx
++++ b/frontend/src/components/FlipCard.tsx
+@@
+ import NaviGrid from "../features/navi/NaviGrid";
++import GhostCursors from "../features/collab/GhostCursors";
+@@
+         <section {...ariaBack} className="flipface" style={{transform:"rotateY(180deg)", padding:12}}>
+           <Header side="Navi" onFlip={()=>setMode("CHAT")} />
+-          <div style={{position:"absolute", inset:"56px 12px 12px 12px"}}><NaviGrid/></div>
++          <div style={{position:"absolute", inset:"56px 12px 12px 12px"}}>
++            <NaviGrid/>
++            <GhostCursors/>
++          </div>
+         </section>
