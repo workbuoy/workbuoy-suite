@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="420">
+  <rect width="100%" height="100%" fill="#0b0f14"/>
+  <rect x="40" y="40" rx="16" ry="16" width="640" height="340" fill="#121822" stroke="rgba(255,255,255,0.1)"/>
+  <text x="60" y="80" fill="#ecf2ff" font-family="sans-serif" font-size="18">CRM – Kontakter (round-trip)</text>
+  <rect x="60" y="110" rx="10" ry="10" width="600" height="200" fill="rgba(255,255,255,0.06)"/>
+  <text x="70" y="140" fill="#ecf2ff" font-family="sans-serif" font-size="14">• Ola Nordmann — ola@example.com</text>
+  <text x="70" y="168" fill="#ecf2ff" font-family="sans-serif" font-size="14">• Kari Normann — kari@example.com</text>
+  <rect x="60" y="320" rx="12" ry="12" width="200" height="40" fill="none" stroke="#ecf2ff"/>
+  <text x="80" y="345" fill="#ecf2ff" font-family="sans-serif" font-size="14">Åpne i Buoy</text>
+</svg>

@@ -1,22 +1,47 @@
-# WorkBuoy Suite
+# Workbuoy — Buoy AI + Navi (UX Shell)
 
-WorkBuoy Suite is an AI‑first office platform built around two core primitives: **Buoy AI** and **Navi**. It replaces traditional apps and menus with context‑aware suggestions and autonomous execution.
+**Workbuoy** er en AI-first arbeidsplattform:  
+- **Buoy AI** (forside): samtalebasert assistent med forklarbarhet (“Vis hvorfor”).  
+- **Navi** (bakside): visuell oversikt over add-ons (CRM, ERP, e-post, filer) og kontekst.
 
-## Architecture
+Frontend-skallet (FlipCard) og UX-komponentene som danner grunnmuren:
+- Flip-kort: Buoy ↔ Navi
+- BuoyChat: meldingsschema, micro-visualiseringer, “Vis hvorfor”
+- NaviGrid: manifest → tiles → paneler (CRM “Kontakter” som MVP)
+- Autonomi-moduser: Passiv / Proaktiv / Ambisiøs / Kraken
+- A11y/tema tokens + responsive fallback
+- E2E-smoke (Playwright)
 
-* **CORE** – the heart of WorkBuoy. All integrations (CRM, Visma ERP, email), Buoy, Navi, policy hooks, audit logging and explainability live here.
-* **FLEX** – on‑demand mode of the CORE used for ad‑hoc requests. Uses the same endpoints but is triggered manually or via batch jobs.
-* **SECURE** – compliance‑focused mode of the CORE. Enforces stricter policies (e.g. autonomy levels, data redaction, EU‑only processing).
+> **Bestemor-vennlig UX**: store treffflater, én primærhandling, tydelig hierarki, norsk tekst.
 
-Buoy and Navi live in CORE and behave the same across all modes. **Navi** sets the autonomy level (0 = suggest only, 1 = auto + receipt, 2 = full auto + summary). **Buoy** executes and displays drafts, actions and receipts, always with explanations.  
-For more details, see [docs/core.md](docs/core.md) and [docs/secure.md](docs/secure.md). The current project status is tracked in [STATUS.md](STATUS.md).
+## Kom i gang (frontend)
+```bash
+cd frontend
+npm install
+npm run dev
+# åpne http://localhost:5173
+```
 
-## Release Orchestrate (GitHub Actions)
-Se `.github/workflows/release-orchestrate.yml`. Kjør via Actions → workbuoy‑release‑orchestrate med inputs `modules` og `environment`.
+**Mocks:** UI bruker mockede `fetch`-endepunkter i utvikling. Ingen eksterne systemer trengs.
 
-## CI Templates
+## Demo-snutter
+Se `assets/demo/` for SVG-illustrasjoner:
+- `flip.svg` — FlipCard (Buoy ↔ Navi)
+- `why.svg` — “Vis hvorfor” i Buoy
+- `crm.svg` — CRM “Kontakter” + round-trip chip
 
-- GitLab CI: `.gitlab‑ci.yml`
-- Azure DevOps: `azure‑pipelines.yml`
+## Videre lesning
+- `docs/ux.md` — UX-visjon og flip-kortprinsipper  
+- `docs/buoy.md` — meldingsschema + gradert autonomi  
+- `docs/navi.md` — moduser og UI-policy  
+- `docs/addons/crm.md` — CRM cockpit & round-trip  
+- `docs/ux.predictive.md` — Predictive Loading & skeletons  
+- `docs/frontend.md` — utviklerguide (scripts, mocktips)
 
+## Status
+- UX Vision v1: ✅  
+- PR-1 → PR-11: ✅  
+- Denne PR-12: README + demo + frontend-dok.
 
+## Lisens
+© Workbuoy. Med forbehold. Se LICENSE hvis den legges til.
