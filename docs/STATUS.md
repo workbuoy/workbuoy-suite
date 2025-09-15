@@ -1,12 +1,12 @@
-# STATUS (MVP snapshot)
-
-- Core rails: logger/PII ✅, errorHandler ✅, policy (0–2) ✅, EventBus+DLQ (MVP) ✅, audit hashchain ✅ + verify() ✅
-- APIs: CRM ✅ (guard on write), Tasks ✅, Log ✅
-- UI: Navi (slider, tasks, log, WhyDrawer) ✅
-- OpenAPI: CRM+Tasks+Log ✅, lint-ready ✅
-- CI: backend-ci ✅; coverage gate ≥80% ⚠ (enable now); openapi-lint optional ⚠ (make required after green streak)
-
-Next:
-- Turn on coverage gate (80%)
-- Make openapi-lint required after 2 green PRs
-- Add event-bus handler metrics and DLQ inspection endpoint (optional)
+# STATUS — MVP v1.2 Landing (2025-09-15)
+- Server mounts in `src/server.ts`
+- Health: /healthz, readiness: /readyz, build info: /buildz
+- Feature routes mounted if present:
+  - /api/crm/contacts (crmRouter)
+  - /api/tasks (tasksRouter)
+  - /api/logs (logRouter)
+  - /buoy (buoyRouter)
+  - /api/insights (insightsRouter)
+  - /api/finance (financeReminderRouter)
+  - /api (manualCompleteRouter)
+- Runtime entrypoint: `src/bin/www.ts` (exports app for tests elsewhere)
