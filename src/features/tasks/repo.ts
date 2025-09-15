@@ -1,4 +1,3 @@
-
 export interface Task { id:string; title:string; status:'todo'|'doing'|'done'; assignee?:string; dueDate?:string; createdAt:string }
 export interface TasksRepository {
   list(): Promise<Task[]>;

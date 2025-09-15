@@ -1,4 +1,3 @@
-
 export interface LogEntry { id:string; level:'info'|'warn'|'error'|'debug'; message:string; correlationId?:string; ts:string }
 export interface LogRepository {
   list(limit?:number): Promise<LogEntry[]>;
