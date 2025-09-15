@@ -1,0 +1,15 @@
+--- a/src/routes/crm.ts
++++ b/src/routes/crm.ts
+@@
++import { issueUndoToken } from "./core.undo";
+@@
+   store[id] = c;
+-  res.status(201).json(c);
++  const undoToken = issueUndoToken({ type:"create.contact", id });
++  res.status(201).json({ ...c, undoToken });
+@@
+   const id = req.params.id;
+   delete store[id];
+-  res.status(204).end();
++  const undoToken = issueUndoToken({ type:"delete.contact", id });
++  res.status(200).json({ ok:true, undoToken });

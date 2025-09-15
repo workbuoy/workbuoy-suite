@@ -1,0 +1,10 @@
+--- a/src/server.ts
++++ b/src/server.ts
+@@
+ import express from "express";
+@@
++import { coreUndoRouter } from "./routes/core.undo";
+@@
+-// existing routes...
++// existing routes...
++app.use(coreUndoRouter());
