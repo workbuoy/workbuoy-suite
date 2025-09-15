@@ -1,0 +1,21 @@
+--- a/frontend/src/features/buoy/MorphInput.tsx
++++ b/frontend/src/features/buoy/MorphInput.tsx
+@@
+ import React, { useEffect, useMemo, useRef, useState } from "react";
++import { useTypingAffect } from "../affect/useTypingAffect";
++import AffectStyles from "../affect/AffectStyles";
+@@
+-  return (
+-    <div>
++  const inputRef = useRef<HTMLInputElement|null>(null);
++  const { affect } = useTypingAffect(inputRef.current || undefined);
++  return (
++    <div>
++      <AffectStyles affect={affect}/>
+       <form onSubmit={submit} style={{display:"grid", gridTemplateColumns:"1fr auto", gap:8}}>
+-        <input ref={inputRef} … />
++        <input ref={inputRef} style={{minHeight:"var(--tap-area)"}} … />
+         <button className="chip" style={{transform:`scale(var(--btn-scale))`}}>Send</button>
+       </form>
+     </div>
+   );
