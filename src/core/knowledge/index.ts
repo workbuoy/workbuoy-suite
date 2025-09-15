@@ -1,9 +1,14 @@
-export interface KnowledgeQuery {
-  query: string;
-  topN: number;
+// src/core/knowledge/index.ts
+export type KnowledgeResult = { id: string; title: string; snippet: string; score: number };
+export interface KnowledgeIndex {
+  search(q: string): Promise<KnowledgeResult[]>;
 }
-
-export async function searchKnowledge(query: KnowledgeQuery) {
-  // TODO: implement search using vector database or knowledge index
-  return [] as const;
+export class StubKnowledgeIndex implements KnowledgeIndex {
+  async search(q: string): Promise<KnowledgeResult[]> {
+    if (!q) return [];
+    return [{ id: 'stub-1', title: `Result for "${q}"`, snippet: 'stub', score: 0.1 }];
+  }
+}
+export function getKnowledgeIndex(): KnowledgeIndex {
+  return new StubKnowledgeIndex();
 }
