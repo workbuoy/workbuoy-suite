@@ -1,12 +1,11 @@
-# feat(backend): CRM write policy + 403 explanations (PR-29)
+# feat(backend): /core/undo + undoToken store (PR-30)
 
 **Hva**
-- `policyGuardWrite` middleware.
-- `/api/crm/contacts` (GET/POST/DELETE) med policy på write-ruter.
+- `/core/undo` endepunkt.
+- In-memory token store + `registerUndo` helper.
 
 **Hvordan teste**
-- Uten `X-WB-Autonomy` (eller 0): POST/DELETE gir 403 + explanations.
-- Med `X-WB-Autonomy: 1`: POST=201, DELETE=204.
+- Utsted `token` manuelt i en write-rute og kall `/core/undo` med den → `{ ok:true }`.
 
 **Risiko/rollback**
-- Isolert router. Fjern mount for rollback.
+- Isolert rute. Fjern mount for rollback.
