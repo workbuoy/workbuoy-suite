@@ -1,14 +1,14 @@
-# feat(ux): Peripheral Vision UI (PR-19)
+# feat(ux): Semantic Zoom demo (PR-20)
 
 **Hva**
-- `StatusEdge` + `usePeripheralStatus`.
-- Demo-knapper i FlipCard.
+- `SemanticZoom`-komponent (liste/tidslinje/strategi).
+- Patch for `NaviGrid` for å åpne `tasks`-panelet som demo.
 
 **Hvorfor**
-- Uforstyrrende systemstatus i perifert syn.
+- Skifte kognitivt nivå med ett grep.
 
 **Hvordan teste**
-- Bytt mellom OK/Vent/Alarm og observer kanten.
+- Åpne `tasks` i Navi og bytt nivå.
 
 **Risiko/rollback**
 - Kun frontend.
