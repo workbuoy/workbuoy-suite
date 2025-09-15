@@ -1,30 +1,42 @@
+
+import type { PolicyResponse } from './types';
+
 export interface Explanation {
-  /**
-   * A human-readable reason explaining why an action or suggestion was made.
-   */
-  reason: string;
-  /**
-   * A list of sources or evidence that support this explanation.
-   */
-  sources: string[];
-  /**
-   * Confidence score between 0 and 1 indicating the strength of this explanation.
-   */
-  confidence: number;
-  /**
-   * Alternative suggestions or options that were considered.
-   */
-  alternatives: any[];
+  reasoning: string;
+  policyBasis?: string[];
+  confidence?: number;
+  impact?: { minutesSaved?: number; dsoDeltaDays?: number; riskReduced?: string };
 }
 
-/**
- * Helper to create an Explanation object.
- */
-export function createExplanation(
-  reason: string,
-  sources: string[],
-  confidence: number,
-  alternatives: any[]
-): Explanation {
-  return { reason, sources, confidence, alternatives };
+export function buildExplanation(input: {
+  capability: string;
+  policy: PolicyResponse;
+  outcome?: any;
+}): Explanation {
+  const base: Explanation = {
+    reasoning: templateReasoning(input.capability, input.policy, input.outcome),
+    policyBasis: input.policy.basis || [],
+    confidence: deriveConfidence(input.capability, input.policy, input.outcome),
+    impact: input.policy.impact
+  };
+  return base;
+}
+
+function templateReasoning(cap: string, policy: PolicyResponse, outcome: any): string {
+  if (!policy.allowed) {
+    return `Handling '${cap}' stoppet av policy: ${policy.explanation}`;
+  }
+  if (cap === 'finance.invoice.prepareDraft') {
+    return 'Utkast foreslått basert på vunnet deal og fakturaflyt. Ingen utsendelse uten godkjenning.';
+  }
+  if (cap === 'finance.invoice.send') {
+    return 'Forsøker å sende faktura i henhold til policy. Faller tilbake til utkast hvis ikke tillatt.';
+  }
+  return `Handling '${cap}' gjennomført i tråd med policy.`;
+}
+
+function deriveConfidence(cap: string, policy: PolicyResponse, outcome: any): number {
+  if (!policy.allowed) return 0.4;
+  if (cap === 'finance.invoice.prepareDraft') return 0.7;
+  return 0.8;
 }
