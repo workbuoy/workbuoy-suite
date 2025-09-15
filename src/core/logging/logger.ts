@@ -1,7 +1,35 @@
+
+import fs from 'fs';
+import path from 'path';
+import { maskPII } from './maskPII';
+
 type Level = 'debug'|'info'|'warn'|'error';
-function log(level: Level, msg: string, meta: Record<string,any> = {}){
-  const entry = { level, msg, ts: new Date().toISOString(), ...meta };
-  // eslint-disable-next-line no-console
-  console.log(JSON.stringify(entry));
+const LOG_FILE = process.env.WB_LOG_FILE || path.join(process.cwd(), 'workbuoy.log');
+
+function write(fields: Record<string, any>) {
+  const rec = { ts: new Date().toISOString(), ...fields };
+  const line = JSON.stringify(rec);
+  try { fs.appendFileSync(LOG_FILE, line + '\n', 'utf8'); } catch {}
+  // dev stdout
+  console.log(line);
 }
-export default { debug:(m:string,x?:any)=>log('debug',m,x), info:(m:string,x?:any)=>log('info',m,x), warn:(m:string,x?:any)=>log('warn',m,x), error:(m:string,x?:any)=>log('error',m,x) };
+
+export function log(level: Level, msg: string, fields: Record<string, any> = {}) {
+  const safe: Record<string, any> = {};
+  for (const [k,v] of Object.entries(fields)) safe[k] = typeof v === 'string' ? maskPII(v) : v;
+  write({ level, msg, ...safe });
+}
+
+export function requestLogger() {
+  return (req: any, _res: any, next: any) => {
+    const wb = req.wb || {};
+    log('info', 'http_request', {
+      method: req.method,
+      url: req.originalUrl || req.url,
+      correlationId: wb.correlationId,
+      roleId: wb.roleId,
+      autonomyLevel: wb.autonomyLevel
+    });
+    next();
+  };
+}

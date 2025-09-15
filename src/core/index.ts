@@ -1,6 +1,7 @@
-export * as policy from "./policyV2";
-export * as explain from "./explain";
-export * as events from "./eventBus";
-export * as audit from "./audit";
-export * as logging from "./logger";
-export * as config from "./config";
+
+export * as Logging from './logging/logger';
+export * as Policy from './policy';
+export * as Events from './events/priorityBus';
+export * as Audit from './audit/immutableLog';
+export * as Explain from './explain/explain';
+export * as Config from './config';
