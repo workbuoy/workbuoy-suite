@@ -1,16 +1,11 @@
-# feat(ux): Emotional State Inference – UI-stub (PR-22)
+# feat(ux): Predictive Loading States v2 (PR-23)
 
 **Hva**
-- `useTypingAffect` hook (cadence/backspace-rate).
-- `AffectStyles` injiserer CSS-variabler for knappestørrelse/treffflate.
-- Patch for `MorphInput` (bruker hook + styles).
-
-**Hvorfor**
-- Tilpasser UI til brukerens tempo/tilstand → mer forgiving.
+- Utvider `usePredictivePrefetch` med per-dag plan og menneskelig melding.
+- Ingen nye UI-komponenter; eksisterende skeleton bruker den nye teksten/planen.
 
 **Hvordan teste**
-- Skriv veldig raskt og trykk Backspace flere ganger → knapper “puster” litt større.
-- Rolig skriving → normal størrelse.
+- Kjør appen på mandag: se “Laster mandagsrapporter…”. Ellers “Forbereder morgenoversikten…” eller “Henter det du vanligvis trenger…”.
 
 **Risiko/rollback**
-- Kun frontend. Ingenting lagres eller sendes.
+- Patch av v1-hook. Ingen backend-endringer.
