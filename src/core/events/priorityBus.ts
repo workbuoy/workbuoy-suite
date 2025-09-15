@@ -1,49 +1,65 @@
+
+import fs from 'fs';
+import path from 'path';
+
 type Priority = 'high'|'medium'|'low';
-type Handler = (e: any) => void|Promise<void>;
-type QueueItem = { type:string; priority:Priority; payload?:any };
+type Handler = (ev: { id:string; type:string; payload:any; ts:string }) => Promise<void>;
 
-const subs = new Map<string, Handler[]>();
-const q: Record<Priority, QueueItem[]> = { high:[], medium:[], low:[] };
-const dlq: QueueItem[] = [];
-const MAX_ATTEMPTS = Number(process.env.BUS_MAX_ATTEMPTS || 3);
+interface QItem { id:string; type:string; payload:any; ts:string; priority: Priority; tries: number; }
 
-function subscribe(type: string, handler: Handler){
-  const arr = subs.get(type) || [];
-  arr.push(handler);
-  subs.set(type, arr);
+const DLQ_FILE = process.env.WB_DLQ_FILE || path.join(process.cwd(), 'dlq.jsonl');
+const metrics = { published: 0, handled: 0, failed: 0, dlq: 0 };
+const high: QItem[] = []; const med: QItem[] = []; const low: QItem[] = [];
+const subs: Record<string, Handler[]> = {};
+
+function nextItem(): QItem|undefined {
+  if (high.length) return high.shift();
+  if (med.length) return med.shift();
+  if (low.length) return low.shift();
+  return undefined;
 }
 
-function emit(e: Partial<QueueItem> & { type:string; priority?:Priority }){
-  const item: QueueItem = { priority: e.priority || 'low', type: e.type, payload: (e as any).payload };
-  q[item.priority].push(item);
-  setImmediate(drain);
-}
+export const PriorityBus = {
+  publish(type: string, payload:any, opts?: { priority?: Priority; id?: string }) {
+    const item: QItem = { id: (opts?.id) || (globalThis.crypto?.randomUUID?.() || String(Date.now())),
+      type, payload, ts: new Date().toISOString(), priority: opts?.priority || 'low', tries: 0 };
+    metrics.published++;
+    (item.priority === 'high' ? high : item.priority === 'medium' ? med : low).push(item);
+    setImmediate(processLoop);
+    return item.id;
+  },
+  subscribe(type: string, handler: Handler){
+    (subs[type] ||= []).push(handler);
+  },
+  stats(){ return { ...metrics, q:{ high: high.length, med: med.length, low: low.length } }; },
+  dlqList(limit=200){
+    try {
+      const txt = fs.readFileSync(DLQ_FILE, 'utf8');
+      return txt.trim().split('\n').filter(Boolean).slice(-limit).map(l => JSON.parse(l));
+    } catch { return []; }
+  }
+};
 
-async function drain(){
-  for (const p of ['high','medium','low'] as Priority[]){
-    while(q[p].length){
-      const item = q[p].shift()!;
-      const handlers = subs.get(item.type) || [];
-      for (const h of handlers){
-        let attempts = 0, ok=false;
-        while(attempts < MAX_ATTEMPTS && !ok){
-          attempts++;
-          try{
-            await Promise.resolve(h(item));
-            ok = true;
-          }catch(_e){
-            if (attempts>=MAX_ATTEMPTS){
-              dlq.push(item);
-            }
-          }
-        }
+async function processLoop(){
+  let item: QItem|undefined;
+  while ((item = nextItem())) {
+    const handlers = subs[item.type] || [];
+    if (!handlers.length) { metrics.failed++; persistDLQ(item, 'no_subscribers'); continue; }
+    try {
+      for (const h of handlers) { item.tries++; await h(item); }
+      metrics.handled++;
+    } catch (e:any) {
+      if (item.tries >= 3) { metrics.failed++; persistDLQ(item, e?.message || 'handler_error'); }
+      else {
+        // backoff by demoting priority
+        (item.priority === 'high' ? med : low).push(item);
       }
     }
   }
 }
 
-function _peek(){
-  return { sizes: { high: q.high.length, medium: q.medium.length, low: q.low.length, dlq: dlq.length } };
+function persistDLQ(item: QItem, reason: string){
+  metrics.dlq++;
+  const rec = { ...item, reason, at: new Date().toISOString() };
+  try { fs.appendFileSync(DLQ_FILE, JSON.stringify(rec) + '\n', 'utf8'); } catch {}
 }
-
-export default { subscribe, emit, _peek };
