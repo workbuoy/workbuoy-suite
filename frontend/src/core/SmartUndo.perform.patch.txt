@@ -1,0 +1,33 @@
+--- a/frontend/src/core/SmartUndo.tsx
++++ b/frontend/src/core/SmartUndo.tsx
+@@
+-export type UndoSuggestion = {
++export type UndoSuggestion = {
+   id: string;
+   label: string;
+   explanation: string[];
+   perform: () => Promise<boolean> | boolean; // returns success
+   ttlMs?: number; // time to live (ms), default 15000
+ };
+@@
+ type CtxType = {
+   suggestions: UndoSuggestion[];
+-  addAction: (action: UndoAction) => void;
++  addAction: (action: UndoAction, performOverride?: () => Promise<boolean> | boolean) => void;
+   performNow: (id: string) => Promise<boolean>;
+   consume: (id: string) => void;
+   clear: () => void;
+ };
+@@
+-  function addAction(action: UndoAction){
++  function addAction(action: UndoAction, performOverride?: () => Promise<boolean> | boolean){
+@@
+-    const perform = () => {
++    const perform = performOverride || (() => {
+       // UI-stub: markér som utført og returner true
+       return true;
+-    };
++    });
+@@
+-    const s: UndoSuggestion = { id, label, explanation, perform, ttlMs: 15000 };
++    const s: UndoSuggestion = { id, label, explanation, perform, ttlMs: 15000 };

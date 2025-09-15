@@ -1,0 +1,12 @@
+--- a/frontend/src/lib/flags.ts
++++ b/frontend/src/lib/flags.ts
+@@
+-export const Flags = {
+-  realBackend: false, // flip to true when server routes are ready
+-  sendContextHeaders: true,
+-};
++export const Flags = {
++  // Backend er nå stubbet (PR-27..30). Slå på ekte ruter i UI:
++  realBackend: true,
++  sendContextHeaders: true,
++};

@@ -1,0 +1,60 @@
+--- a/frontend/src/features/crm/ContactsPanel.tsx
++++ b/frontend/src/features/crm/ContactsPanel.tsx
+@@
+ import React from "react";
+ import { useActiveContext } from "../../core/ActiveContext";
+ import { useEndpoints } from "../../lib/api/endpoints";
++import { useSmartUndo } from "../../core/SmartUndo";
+@@
+ export default function ContactsPanel({ onClose }:{ onClose:()=>void }){
+   const { setSelectedEntity, pushIntent } = useActiveContext();
+   const api = useEndpoints();
++  const { addAction } = useSmartUndo();
+@@
+   async function createContact(form){
+-    const r = await api.createContact(form);
+-    if (r.status===201){
+-      const created = await r.json();
++    const r = await api.createContact(form);
++    if (r.status===201){
++      const created = await r.json();
++      const token = (created && created.undoToken) || r.headers.get("x-undo-token") || undefined;
+       setContacts(c => [created, ...c]);
++      // Register SmartUndo with server perform when token exists
++      if (token){
++        addAction({ kind:"create.contact", id: String(created.id), name: created.name, email: created.email }, async ()=>{
++          try{
++            const res = await api.undoPerform(token);
++            return res.ok;
++          }catch{ return false; }
++        });
++      } else {
++        addAction({ kind:"create.contact", id: String(created.id), name: created.name, email: created.email });
++      }
+     } else if (r.status===403){
+       const data = await r.json();
+       setWhy(data.explanations||["Ingen forklaring"]);
+     }
+   }
+@@
+   async function deleteContact(id){
+-    const r = await api.deleteContact(id);
++    const r = await api.deleteContact(id);
+     if (r.status===204){
+       setContacts(c => c.filter(x=>x.id!==id));
++      const token = r.headers.get("x-undo-token") || undefined;
++      if (token){
++        addAction({ kind:"delete.contact", id: String(id) }, async ()=>{
++          try{
++            const res = await api.undoPerform(token);
++            return res.ok;
++          }catch{ return false; }
++        });
++      } else {
++        addAction({ kind:"delete.contact", id: String(id) });
++      }
+     } else if (r.status===403){
+       const data = await r.json();
+       setWhy(data.explanations||["Ingen forklaring"]);
+     }
+   }
