@@ -1,28 +1,24 @@
 openapi: 3.0.3
-info:
-  title: Workbuoy CRM API
-  version: 1.0.0
+info: { title: CRM API, version: 1.0.0 }
 paths:
   /api/crm/contacts:
     get:
-      summary: List contacts
+      operationId: listContacts
       responses:
         '200':
-          description: OK
+          description: ok
+          content:
+            application/json:
+              schema: { type: array, items: { type: object } }
     post:
-      summary: Create contact
+      operationId: createContact
       responses:
-        '201':
-          description: Created
+        '201': { description: created }
+        '403': { description: forbidden }
   /api/crm/contacts/{id}:
     delete:
-      summary: Delete contact
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
+      operationId: deleteContact
+      parameters: [ { name: id, in: path, required: true, schema: { type: string } } ]
       responses:
-        '204':
-          description: Deleted
+        '204': { description: deleted }
+        '403': { description: forbidden }

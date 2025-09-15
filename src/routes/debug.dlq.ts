@@ -1,6 +1,5 @@
 import { Router } from 'express';
 
-// expects app.set('eventBus', { getDLQ: () => any[] })
 export function debugDlqRouter() {
   const r = Router();
   r.get('/_debug/dlq', (req: any, res) => {

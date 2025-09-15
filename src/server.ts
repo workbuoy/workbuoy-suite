@@ -1,4 +1,4 @@
-// Workbuoy server (mounts + health routes). Exports `app` for tests.
+// Workbuoy server (mounts + health routes). Exports `app` for tests; runtime listen in src/bin/www.ts
 import express from 'express';
 
 const app = express();
@@ -34,6 +34,12 @@ safeMount('/buoy', './src/routes/buoy.complete', 'buoyRouter');
 safeMount('/api/insights', './src/routes/insights', 'insightsRouter');
 safeMount('/api/finance', './src/routes/finance.reminder', 'financeReminderRouter');
 safeMount('/api', './src/routes/manual.complete', 'manualCompleteRouter');
+
+// Debug-only mounts (optional)
+if (process.env.NODE_ENV !== 'production') {
+  safeMount('/api', './src/routes/debug.dlq', 'debugDlqRouter');
+  safeMount('/api', './src/routes/debug.circuit', 'debugCircuitRouter');
+}
 
 // Health / readiness / build
 app.get('/healthz', (_req, res) => res.json({ ok: true }));

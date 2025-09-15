@@ -1,6 +1,9 @@
 # API Overview
-- Buoy: `openapi/buoy.yaml`
+- CRM: `openapi/crm.yaml`
+- Tasks: `openapi/tasks.yaml`
+- Log: `openapi/log.yaml`
 - Finance: `openapi/finance.yaml`
-- Manual-complete: `openapi/manual.yaml`
-- (Earlier) CRM, Tasks, Log specs should live under `openapi/`.
-CI: Spectral runs on PRs and pushes (non-blocking).
+- Buoy: `openapi/buoy.yaml`
+- Manual: `openapi/manual.yaml`
+
+CI runs Spectral (non-blocking) over all specs.

@@ -1,6 +1,5 @@
 import { Router } from 'express';
 
-// expects app.set('financeConnector', { breaker?: { getState:()=>string, getFailures:()=>number } })
 export function debugCircuitRouter() {
   const r = Router();
   r.get('/_debug/circuit', (req: any, res) => {

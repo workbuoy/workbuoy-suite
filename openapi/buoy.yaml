@@ -1,11 +1,9 @@
 openapi: 3.0.3
-info:
-  title: Workbuoy Buoy API
-  version: 1.1.0
+info: { title: Buoy API, version: 1.0.0 }
 paths:
   /buoy/complete:
     post:
-      summary: Complete a natural-language prompt via capability routing
+      operationId: buoyComplete
       requestBody:
         required: true
         content:
@@ -13,39 +11,7 @@ paths:
             schema:
               type: object
               properties:
-                text:
-                  type: string
-                intent:
-                  type: string
-                params:
-                  type: object
+                text: { type: string }
       responses:
-        '200':
-          description: Completion response
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  result:
-                    type: object
-                  explanations:
-                    type: array
-                    items:
-                      type: object
-                      properties:
-                        reasoning: { type: string }
-                        sources: { type: array, items: { type: string } }
-                        confidence: { type: number }
-                        impact:
-                          type: object
-                          properties:
-                            minutesSaved: { type: number }
-                            dsoDeltaDays: { type: number }
-                            riskReduced: { type: string }
-                        policyBasis: { type: array, items: { type: string } }
-                        alternatives: { type: array, items: { type: string } }
-                  correlationId:
-                    type: string
-                  confidence:
-                    type: number
+        '200': { description: ok }
+        '403': { description: policy deny/degrade }
