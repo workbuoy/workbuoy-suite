@@ -1,0 +1,5 @@
+// In audit.router.ts add:
+import { verifyAuditChain } from './audit.verify';
+r.get('/audit/verify', async (_req,res)=>{
+  res.json(await verifyAuditChain());
+});
