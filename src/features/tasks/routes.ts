@@ -9,7 +9,7 @@ export function tasksRouter() {
     try {
       const { title, status='todo', assignee, dueDate } = req.body || {};
       if (!title) return res.status(400).json({ error: 'title required' });
-      const row = await InMemoryTasksRepo.create({ title, status, assignee, dueDate, createdAt: '' } as any);
+      const row = await InMemoryTasksRepo.create({ title, status, assignee, dueDate } as any);
       res.status(201).json(row);
     } catch (e) { next(e); }
   });
