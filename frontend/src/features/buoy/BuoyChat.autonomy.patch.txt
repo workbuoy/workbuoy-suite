@@ -1,0 +1,38 @@
+--- a/frontend/src/features/buoy/BuoyChat.tsx
++++ b/frontend/src/features/buoy/BuoyChat.tsx
+@@
+-import React, { useState, useRef, useEffect } from "react";
++import React, { useState, useRef, useEffect } from "react";
++import { useAutonomy } from "../navi/AutonomyContext";
+@@
+-export default function BuoyChat() {
++export default function BuoyChat() {
++  const { ui, label } = useAutonomy();
+@@
+-      <div style={{overflow:"auto", padding:16}}>
++      <div style={{overflow:"auto", padding:16}}>
++        <div className="chip" title="Gjeldende autonomi-modus" style={{marginBottom:8}}>Modus: {label}</div>
+         {messages.map(m => <ChatMessage key={m.id} msg={m} />)}
+         <div ref={endRef}/>
+       </div>
+@@
+-function ChatMessage({ msg }:{ msg: UserMessage|AssistantMessage }){
++function ChatMessage({ msg }:{ msg: UserMessage|AssistantMessage }){
+   if (msg.role==="user") {
+     return <div style={{margin:"4px 0"}}><span className="chip" style={{marginRight:8}}>Du</span>{msg.text}</div>;
+   }
+   const a = msg as AssistantMessage;
+   return (
+     <div style={{margin:"10px 0", padding:10, border:"1px solid rgba(255,255,255,.1)", borderRadius:10}}>
+       <div style={{marginBottom:6}}><span className="chip" style={{marginRight:8}}>Buoy</span>{a.text}</div>
+-      {a.actions?.length ? (
++      {/* Handlinger vises kun hvis policy tillater det */}
++      {a.actions?.length && useAutonomy().ui.canShowActions ? (
+         <div style={{display:"flex", gap:8, flexWrap:"wrap"}}>
+           {a.actions.map(act=><button key={act.id} className="chip">{act.label}</button>)}
+         </div>
+       ) : null}
+       <WhyDrawer reasons={a.why||[]} />
+     </div>
+   );
+ }

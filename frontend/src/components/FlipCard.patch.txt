@@ -1,0 +1,47 @@
+--- a/frontend/src/components/FlipCard.tsx
++++ b/frontend/src/components/FlipCard.tsx
+@@
+-import React, { useEffect, useMemo, useState } from "react";
++import React, { useEffect, useMemo, useState } from "react";
++import ModeSwitch from "../features/navi/ModeSwitch";
++import { AutonomyProvider } from "../features/navi/AutonomyContext";
+@@
+-export default function FlipCard() {
++export default function FlipCard() {
+@@
+-  return (
+-    <div className="perspective" style={{position:"relative", height:"min(82vh, 760px)"}}>
++  return (
++    <AutonomyProvider>
++    <div className="perspective" style={{position:"relative", height:"min(82vh, 760px)"}}>
+       <div className="flipcard cardbg" style={{position:"absolute", inset:0, borderRadius:16, transform: `rotateY(${flipped?180:0}deg)`}}>
+         <section {...ariaFront} className="flipface" style={{padding:12}}>
+-          <Header side="Buoy" onFlip={()=>setMode("NAVI")} />
++          <Header side="Buoy" onFlip={()=>setMode("NAVI")} />
+           <div style={{position:"absolute", inset:"56px 12px 12px 12px"}}><BuoyChat/></div>
+         </section>
+         <section {...ariaBack} className="flipface" style={{transform:"rotateY(180deg)", padding:12}}>
+-          <Header side="Navi" onFlip={()=>setMode("CHAT")} />
++          <Header side="Navi" onFlip={()=>setMode("CHAT")} />
+           <div style={{position:"absolute", inset:"56px 12px 12px 12px"}}><NaviGrid/></div>
+         </section>
+       </div>
+-    </div>
++    </div>
++    </AutonomyProvider>
+   );
+ }
+@@
+-function Header({side, onFlip}:{side:"Buoy"|"Navi"; onFlip:()=>void}) {
++function Header({side, onFlip}:{side:"Buoy"|"Navi"; onFlip:()=>void}) {
+   return (
+     <div style={{display:"flex", alignItems:"center", gap:10}}>
+       <strong style={{letterSpacing:.3, opacity:.9}}>{side}</strong>
+-      <span style={{flex:1}}/>
++      <span style={{flex:1}}/>
++      <div><ModeSwitch/></div>
+       <HealthBadge/>
+       <button onClick={onFlip} aria-label={side==="Buoy"?"Gå til Navi":"Gå til Buoy"} className="chip" style={{background:"transparent"}}>Flip</button>
+     </div>
+   );
+ }
