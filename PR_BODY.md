@@ -1,15 +1,16 @@
-# feat(ux): Temporal Layering (PR-21)
+# feat(ux): Emotional State Inference – UI-stub (PR-22)
 
 **Hva**
-- `TemporalLayering`-komponent: Fortid / Nå / Fremtid på samme flate.
-- Patch for `NaviGrid` for å åpne `timeline`-panelet.
+- `useTypingAffect` hook (cadence/backspace-rate).
+- `AffectStyles` injiserer CSS-variabler for knappestørrelse/treffflate.
+- Patch for `MorphInput` (bruker hook + styles).
 
 **Hvorfor**
-- Hurtig bytte av tidsperspektiv uten ny navigasjon.
+- Tilpasser UI til brukerens tempo/tilstand → mer forgiving.
 
 **Hvordan teste**
-- Åpne Navi → timeline (demo).
-- Bruk musescroll (opp/ned) eller **PageUp/Down** og **Home**.
+- Skriv veldig raskt og trykk Backspace flere ganger → knapper “puster” litt større.
+- Rolig skriving → normal størrelse.
 
 **Risiko/rollback**
-- Kun frontend + docs.
+- Kun frontend. Ingenting lagres eller sendes.
