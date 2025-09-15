@@ -1,0 +1,43 @@
+--- a/frontend/src/components/FlipCard.tsx
++++ b/frontend/src/components/FlipCard.tsx
+@@
+-import React, { useEffect, useMemo, useState } from "react";
++import React, { useEffect, useMemo, useState, useRef } from "react";
+@@
+ export default function FlipCard() {
+-  const [flipped, setFlipped] = useState(false);
++  const [flipped, setFlipped] = useState(false);
++  const hostRef = useRef<HTMLDivElement>(null);
+@@
+-  return (
+-    <div className="perspective" style={{position:"relative", height:"min(82vh, 760px)"}}>
++  function onKey(e: React.KeyboardEvent){
++    if (e.key === " " || e.key === "Enter"){
++      e.preventDefault();
++      setFlipped(f => !f);
++    }
++  }
++
++  return (
++    <div ref={hostRef} className="perspective flip-host" role="application"
++         aria-label="Workbuoy flip-kort" tabIndex={0} onKeyDown={onKey}
++         style={{position:"relative", height:"min(82vh, 760px)"}}>
+       <div className="flipcard cardbg" style={{position:"absolute", inset:0, borderRadius:16, transform: `rotateY(${flipped?180:0}deg)`}}>
+-        <section {...ariaFront} className="flipface" style={{padding:12}}>
++        <section {...ariaFront} className="flipface region" aria-label="Buoy"
++                 style={{padding:12}}>
+           <Header side="Buoy" onFlip={()=>setMode("NAVI")} />
+-          <div style={{position:"absolute", inset:"56px 12px 12px 12px"}}><BuoyChat/></div>
++          <div className="flip-face-content" style={{position:"absolute", inset:"56px 12px 12px 12px"}}><BuoyChat/></div>
+         </section>
+-        <section {...ariaBack} className="flipface" style={{transform:"rotateY(180deg)", padding:12}}>
++        <section {...ariaBack} className="flipface region" aria-label="Navi"
++                 style={{transform:"rotateY(180deg)", padding:12}}>
+           <Header side="Navi" onFlip={()=>setMode("CHAT")} />
+-          <div style={{position:"absolute", inset:"56px 12px 12px 12px"}}><NaviGrid/></div>
++          <div className="flip-face-content" style={{position:"absolute", inset:"56px 12px 12px 12px"}}><NaviGrid/></div>
+         </section>
+       </div>
+     </div>
+   );
+ }

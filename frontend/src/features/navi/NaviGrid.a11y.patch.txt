@@ -1,0 +1,28 @@
+--- a/frontend/src/features/navi/NaviGrid.tsx
++++ b/frontend/src/features/navi/NaviGrid.tsx
+@@
+-  return (
+-    <div role="region" aria-label="Navi-oversikt" style={{display:"grid",gridTemplateRows:"auto 1fr",height:"100%"}}>
++  return (
++    <div role="region" aria-label="Navi-oversikt" className="region"
++         style={{display:"grid",gridTemplateRows:"auto 1fr",height:"100%"}}>
+@@
+-      <div style={{position:"relative", padding:12, height:"100%"}}>
++      <div style={{position:"relative", padding:12, height:"100%"}}>
+         {!open ? (
+-          <div style={{display:"grid", gap:12, gridTemplateColumns:"repeat(auto-fill, minmax(220px,1fr))", overflow:"auto", height:"100%"}}>
++          <div style={{display:"grid", gap:12, gridTemplateColumns:"repeat(auto-fill, minmax(220px,1fr))", overflow:"auto", height:"100%"}}>
+             {show.map(a=> <AddOnTile key={a.id} {...a} onOpen={()=>{
+               if (a.id==="crm") setOpen("crm"); else alert(`Åpne ${a.name} (intent)`);
+             }} />)}
+           </div>
+         ) : (
+-          <div style={{position:"absolute", inset:12, overflow:"auto", border:"1px solid rgba(255,255,255,.08)", borderRadius:12, padding:12}}>
++          <div role="region" aria-label="Panel" className="region"
++               style={{position:"absolute", inset:12, overflow:"auto", border:"1px solid rgba(255,255,255,.08)", borderRadius:12, padding:12}}>
+             {open==="crm" && <ContactsPanel onClose={()=>setOpen(null)}/>}
+           </div>
+         )}
+       </div>
+     </div>
+   );

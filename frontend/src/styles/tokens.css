@@ -1,0 +1,79 @@
+:root{
+  --bg: #0b0f14;
+  --bg-elev: #121822;
+  --ink: #ecf2ff;
+  --muted: rgba(236,242,255,.72);
+  --ok: #27e39b;
+  --warn: #ffcc33;
+  --err: #ff6b6b;
+  --ring: #7aa2ff;
+
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+
+  --shadow-sm: 0 1px 2px rgba(0,0,0,.25);
+  --shadow-md: 0 6px 24px rgba(0,0,0,.28);
+  --shadow-lg: 0 16px 48px rgba(0,0,0,.35);
+
+  --bp-sm: 480px;
+  --bp-md: 768px;
+  --bp-lg: 1024px;
+
+  --trans-fast: 120ms cubic-bezier(.2,.8,.2,1);
+  --trans-slow: 320ms cubic-bezier(.2,.8,.2,1);
+}
+
+html, body, #root { height:100%; background: var(--bg); color: var(--ink); }
+
+/* Focus rings */
+*:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+/* Chip baseline */
+.chip{
+  display:inline-flex; align-items:center; gap:.5ch;
+  padding:8px 10px; border-radius:999px;
+  border:1px solid rgba(255,255,255,.18);
+  background: transparent; color: var(--ink);
+  cursor: pointer;
+}
+.chip[aria-pressed="true"]{ background: rgba(255,255,255,.08); }
+
+/* Card background helper */
+.cardbg{ background: var(--bg-elev); box-shadow: var(--shadow-md); border:1px solid rgba(255,255,255,.08) }
+
+/* Perspective flip baseline */
+.perspective{ perspective: 1200px; }
+.flipcard{
+  transform-style: preserve-3d;
+  transition: transform var(--trans-slow);
+  border-radius: var(--radius-lg);
+}
+.flipface{ backface-visibility: hidden; position: absolute; inset:0; }
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .flipcard { transition: none !important; }
+}
+
+/* Responsive – card height and layout */
+@media (max-width: 900px){
+  .flip-host { height: min(86vh, 680px); }
+}
+@media (max-width: 640px){
+  .flip-host { height: auto; }
+  .flip-face-content { position: static !important; }
+  /* Fallback: don't rotate on mobile, use tabs-like switch in same plane */
+  .flipcard { transform: none !important; }
+}
+
+/* High-contrast mode (forced colors) */
+@media (forced-colors: active){
+  .chip, .cardbg { border-color: ButtonText; }
+}
+
+/* Helper regions */
+.region { border-radius: var(--radius-md); }

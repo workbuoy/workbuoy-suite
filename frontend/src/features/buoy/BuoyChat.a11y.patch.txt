@@ -1,0 +1,15 @@
+--- a/frontend/src/features/buoy/BuoyChat.tsx
++++ b/frontend/src/features/buoy/BuoyChat.tsx
+@@
+-  return (
+-    <div role="region" aria-label="Buoy chat" aria-live="polite" style={{display:"grid", gridTemplateRows:"1fr auto", height:"100%"}}>
+-      <div style={{overflow:"auto", padding:16}}>
+-        {messages.map(m => <ChatMessage key={m.id} msg={m} />)}
+-        <div ref={endRef}/>
+-      </div>
++  return (
++    <div role="region" aria-label="Buoy chat" aria-live="polite" style={{display:"grid", gridTemplateRows:"1fr auto", height:"100%"}}>
++      <div style={{overflow:"auto", padding:16}} role="log" aria-live="polite">
++        {messages.map(m => <ChatMessage key={m.id} msg={m} />)}
++        <div ref={endRef}/>
++      </div>
