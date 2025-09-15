@@ -1,0 +1,39 @@
+--- a/frontend/src/features/navi/NaviGrid.tsx
++++ b/frontend/src/features/navi/NaviGrid.tsx
+@@
+ import React, { useEffect, useState } from "react";
+ import AddOnTile from "./AddOnTile";
+ import SynchBadge from "./SynchBadge";
+ import ContactsPanel from "../crm/ContactsPanel";
++import SmartSkeleton from "../../components/SmartSkeleton";
++import { usePredictivePrefetch } from "../core/usePredictivePrefetch";
+@@
+ export default function NaviGrid() {
+   const [addons, setAddons] = useState<AddOn[]>([]);
+   const [filter, setFilter] = useState("alle");
+   const [open, setOpen] = useState<string|null>(null);
++  const { status, message } = usePredictivePrefetch({ intents: ["contacts.view","addons.open"] });
+@@
+-  useEffect(() => { fetch("/api/addons").then(r=>r.json()).then(setAddons); }, []);
++  useEffect(() => {
++    fetch("/api/addons").then(r=>r.json()).then(setAddons);
++  }, []);
+@@
+-      <div style={{position:"relative", padding:12, height:"100%"}}>
++      <div style={{position:"relative", padding:12, height:"100%"}}>
++        {status!=="ready" && !open && <SmartSkeleton text={message} />}
+         {!open ? (
+           <div style={{display:"grid", gap:12, gridTemplateColumns:"repeat(auto-fill, minmax(220px,1fr))", overflow:"auto", height:"100%"}}>
+             {show.map(a=> <AddOnTile key={a.id} {...a} onOpen={()=>{
+               if (a.id==="crm") setOpen("crm"); else alert(`Åpne ${a.name} (intent)`);
+             }} />)}
+           </div>
+         ) : (
+           <div style={{position:"absolute", inset:12, overflow:"auto", border:"1px solid rgba(255,255,255,.08)", borderRadius:12, padding:12}}>
+             {open==="crm" && <ContactsPanel onClose={()=>setOpen(null)}/>}
+           </div>
+         )}
+       </div>
+     </div>
+   );
+ }

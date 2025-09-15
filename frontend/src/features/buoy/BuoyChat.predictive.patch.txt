@@ -1,0 +1,22 @@
+--- a/frontend/src/features/buoy/BuoyChat.tsx
++++ b/frontend/src/features/buoy/BuoyChat.tsx
+@@
+ import React, { useState, useRef, useEffect } from "react";
+ import { useBuoy } from "./useBuoy";
+ import WhyDrawer from "./WhyDrawer";
+ import type { UserMessage, AssistantMessage } from "./types";
++import SmartSkeleton from "../../components/SmartSkeleton";
++import { usePredictivePrefetch } from "../core/usePredictivePrefetch";
+@@
+ export default function BuoyChat() {
+   const { messages, send } = useBuoy();
++  const { status, message } = usePredictivePrefetch({ intents:["chat.open"] });
+   const [input, setInput] = useState("");
+   const endRef = useRef<HTMLDivElement>(null);
+@@
+-      <div style={{overflow:"auto", padding:16}}>
++      <div style={{overflow:"auto", padding:16}}>
++        {status!=="ready" && messages.length<=1 && <SmartSkeleton text={message} />}
+         {messages.map(m => <ChatMessage key={m.id} msg={m} />)}
+         <div ref={endRef}/>
+       </div>
