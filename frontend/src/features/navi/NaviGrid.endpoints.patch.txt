@@ -1,0 +1,12 @@
+--- a/frontend/src/features/navi/NaviGrid.tsx
++++ b/frontend/src/features/navi/NaviGrid.tsx
+@@
+-import { useApi } from "../../lib/api/client";
++import { useEndpoints } from "../../lib/api/endpoints";
+@@
+-  const { withContext } = useApi();
++  const api = useEndpoints();
+@@
+-    withContext("/api/addons", { method:"GET" }, { intent:"addons.list" })
+-      .then(r=>r.json()).then(setAddons);
++    api.listAddons().then(setAddons);
