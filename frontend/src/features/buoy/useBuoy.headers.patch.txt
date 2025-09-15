@@ -1,0 +1,18 @@
+--- a/frontend/src/features/buoy/useBuoy.ts
++++ b/frontend/src/features/buoy/useBuoy.ts
+@@
+-import { useActiveContext } from "../../core/ActiveContext";
++import { useActiveContext } from "../../core/ActiveContext";
++import { useApi } from "../../lib/api/client";
+@@
+   const { pushIntent } = useActiveContext();
++  const { withContext } = useApi();
+@@
+   async function send(text: string, intent?: ParsedIntent) {
+@@
+-    const aMsg: AssistantMessage = { id: crypto.randomUUID(), role:"assistant", text: `Forstod: ${intent?.kind||"ukjent"}` };
++    // Placeholder for backend call example:
++    // const res = await withContext("/core/complete", { method:"POST", body: JSON.stringify({ text, intent }) }, {
++    //   intent: intent?.kind, whenISO: extractWhen(text) // optional helper
++    // });
++    const aMsg: AssistantMessage = { id: crypto.randomUUID(), role:"assistant", text: `Forstod: ${intent?.kind||"ukjent"}` };

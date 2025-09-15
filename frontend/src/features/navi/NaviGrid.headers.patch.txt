@@ -1,0 +1,17 @@
+--- a/frontend/src/features/navi/NaviGrid.tsx
++++ b/frontend/src/features/navi/NaviGrid.tsx
+@@
+ import ContactsPanel from "../crm/ContactsPanel";
+ import { useActiveContext } from "../../core/ActiveContext";
++import { useApi } from "../../lib/api/client";
+@@
+ export default function NaviGrid() {
+   const { pushIntent, setSelectedEntity } = useActiveContext();
++  const { withContext } = useApi();
+@@
+-  useEffect(() => {
+-    fetch("/api/addons").then(r=>r.json()).then(setAddons);
++  useEffect(() => {
++    withContext("/api/addons", { method:"GET" }, { intent:"addons.list" })
++      .then(r=>r.json()).then(setAddons);
+   }, []);

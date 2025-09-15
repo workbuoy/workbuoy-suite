@@ -1,0 +1,43 @@
+--- a/frontend/src/features/crm/ContactsPanel.tsx
++++ b/frontend/src/features/crm/ContactsPanel.tsx
+@@
+ import React from "react";
+ import { useActiveContext } from "../../core/ActiveContext";
++import { useApi } from "../../lib/api/client";
+@@
+ export default function ContactsPanel({ onClose }:{ onClose:()=>void }){
+   const { setSelectedEntity, pushIntent } = useActiveContext();
++  const { withContext } = useApi();
+@@
+-  async function fetchContacts(){
+-    const r = await fetch("/api/crm/contacts");
++  async function fetchContacts(){
++    const r = await withContext("/api/crm/contacts", { method:"GET" }, { intent:"contacts.list" });
+     setContacts(await r.json());
+   }
+@@
+-  async function createContact(form){
+-    const r = await fetch("/api/crm/contacts", { method:"POST", headers:{ "Content-Type":"application/json" }, body: JSON.stringify(form) });
++  async function createContact(form){
++    const whenISO = (form?.whenISO)||undefined;
++    const r = await withContext("/api/crm/contacts", { method:"POST", body: JSON.stringify(form) }, { intent:"contacts.create", whenISO });
+     if (r.status===201){
+       const created = await r.json();
+       setContacts(c => [created, ...c]);
+     } else if (r.status===403){
+       const data = await r.json();
+       setWhy(data.explanations||["Ingen forklaring"]);
+     }
+   }
+@@
+-  async function deleteContact(id){
+-    const r = await fetch(`/api/crm/contacts/${id}`, { method:"DELETE" });
++  async function deleteContact(id){
++    const r = await withContext(`/api/crm/contacts/${id}`, { method:"DELETE" }, { intent:"contacts.delete" });
+     if (r.status===204){
+       setContacts(c => c.filter(x=>x.id!==id));
+     } else if (r.status===403){
+       const data = await r.json();
+       setWhy(data.explanations||["Ingen forklaring"]);
+     }
+   }
