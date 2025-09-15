@@ -1,0 +1,14 @@
+--- a/frontend/src/features/buoy/types.ts
++++ b/frontend/src/features/buoy/types.ts
+@@
+ export interface ActionSuggestion {
+   id: string;
+   label: string;
+   explanation?: string[];
+ }
++
++export interface Suggestion {
++  id: string;
++  label: string;
++  explanation: string[];
++}
