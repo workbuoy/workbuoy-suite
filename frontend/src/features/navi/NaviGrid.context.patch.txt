@@ -1,0 +1,19 @@
+--- a/frontend/src/features/navi/NaviGrid.tsx
++++ b/frontend/src/features/navi/NaviGrid.tsx
+@@
+ import ContactsPanel from "../crm/ContactsPanel";
++import { useActiveContext } from "../../core/ActiveContext";
+@@
+ export default function NaviGrid() {
++  const { pushIntent, setSelectedEntity } = useActiveContext();
+@@
+-            {show.map(a=> <AddOnTile key={a.id} {...a} onOpen={()=>{
+-              if (a.id==="crm") setOpen("crm"); else alert(`Åpne ${a.name} (intent)`);
+-            }} />)}
++            {show.map(a=> <AddOnTile key={a.id} {...a} onOpen={()=>{
++              pushIntent(`${a.id}.open`);
++              if (a.id==="crm") setOpen("crm"); else alert(`Åpne ${a.name} (intent)`);
++            }} />)}
+@@
+-            {open==="crm" && <ContactsPanel onClose={()=>setOpen(null)}/>}
++            {open==="crm" && <ContactsPanel onClose={()=>{ setOpen(null); setSelectedEntity(null); }}/>}
