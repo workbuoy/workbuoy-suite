@@ -1,0 +1,89 @@
+--- a/frontend/src/core/SmartUndo.tsx
++++ b/frontend/src/core/SmartUndo.tsx
+@@
+-import React, { createContext, useContext, useMemo, useState } from "react";
++import React, { createContext, useContext, useEffect, useMemo, useRef, useState } from "react";
+@@
+ export type UndoSuggestion = {
+   id: string;
+   label: string;
+   explanation: string[];
+-  perform: () => Promise<boolean> | boolean; // returns success
++  perform: () => Promise<boolean> | boolean; // returns success
++  ttlMs?: number; // time to live (ms), default 15000
+ };
+@@
+ type CtxType = {
+   suggestions: UndoSuggestion[];
+   addAction: (action: UndoAction) => void;
++  performNow: (id: string) => Promise<boolean>;
+   consume: (id: string) => void;
+   clear: () => void;
+ };
+@@
+ export function SmartUndoProvider({ children }:{ children: React.ReactNode }){
+   const [suggestions, setSuggestions] = useState<UndoSuggestion[]>([]);
++  const timers = useRef<Record<string, any>>({});
+@@
+   function addAction(action: UndoAction){
+@@
+-    const perform = () => {
++    const perform = () => {
+       // UI-stub: markér som utført og returner true
+       return true;
+     };
+
+-    setSuggestions(prev => {
++    const s: UndoSuggestion = { id, label, explanation, perform, ttlMs: 15000 };
++
++    setSuggestions(prev => {
+-      if (prev.find(s => s.id === id)) return prev;
+-      return [{ id, label, explanation, perform }, ...prev].slice(0, 5);
++      if (prev.find(x => x.id === id)) return prev;
++      return [s, ...prev].slice(0, 5);
+     });
++
++    // Auto-timeout
++    clearTimeout(timers.current[id]);
++    timers.current[id] = setTimeout(()=> {
++      setSuggestions(prev => prev.filter(x => x.id !== id));
++    }, s.ttlMs);
+   }
+
++  async function performNow(id: string){
++    const s = suggestions.find(x => x.id === id);
++    if (!s) return false;
++    try{
++      const ok = await s.perform();
++      if (ok) consume(id);
++      return ok;
++    } catch {
++      return false;
++    }
++  }
++
+   function consume(id: string){
+     setSuggestions(prev => prev.filter(s => s.id !== id));
++    clearTimeout(timers.current[id]);
++    delete timers.current[id];
+   }
+
+   function clear(){ setSuggestions([]); }
+
+-  const value = useMemo(()=>({ suggestions, addAction, consume, clear }), [suggestions]);
++  // ESC to perform latest suggestion
++  useEffect(()=>{
++    function onKey(e: KeyboardEvent){
++      if (e.key === "Escape" && suggestions.length){
++        const latest = suggestions[0];
++        performNow(latest.id);
++      }
++    }
++    window.addEventListener("keydown", onKey);
++    return ()=> window.removeEventListener("keydown", onKey);
++  }, [suggestions]);
++
++  const value = useMemo(()=>({ suggestions, addAction, performNow, consume, clear }), [suggestions]);
+
+   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
+ }
