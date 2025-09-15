@@ -1,0 +1,10 @@
+--- a/src/server.ts
++++ b/src/server.ts
+@@
+ import express from "express";
+@@
++import { crmContactsRouter } from "./routes/crm.contacts";
+@@
+-// existing routes...
++// existing routes...
++app.use(crmContactsRouter());

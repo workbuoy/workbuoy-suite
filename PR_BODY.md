@@ -1,12 +1,12 @@
-# feat(backend): /core/complete stub + Why-kontrakt (PR-28)
+# feat(backend): CRM write policy + 403 explanations (PR-29)
 
 **Hva**
-- `POST /core/complete` som svarer med `text` + `explanations[]`.
-- Enkelt autonomy-sjekk → `403` med forklaringer.
+- `policyGuardWrite` middleware.
+- `/api/crm/contacts` (GET/POST/DELETE) med policy på write-ruter.
 
 **Hvordan teste**
-- `curl -X POST /core/complete -H "X-WB-Intent: contacts.create" -H "X-WB-Autonomy: 0" -d '{"text":"lag kontakt"}'`
-- Forvent `403` med `explanations`.
+- Uten `X-WB-Autonomy` (eller 0): POST/DELETE gir 403 + explanations.
+- Med `X-WB-Autonomy: 1`: POST=201, DELETE=204.
 
 **Risiko/rollback**
-- Isolert rute. Fjern mount for rollback.
+- Isolert router. Fjern mount for rollback.

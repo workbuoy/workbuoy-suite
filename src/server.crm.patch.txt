@@ -1,0 +1,8 @@
+--- a/src/server.ts
++++ b/src/server.ts
+@@
++import { crm } from "./routes/crm";
+@@
+-// routes...
++// routes...
++app.use(crm);
