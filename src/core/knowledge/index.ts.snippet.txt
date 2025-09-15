@@ -1,0 +1,2 @@
+// Optionally extend getKnowledgeIndex():
+// if (process.env.KNOWLEDGE_MODE === 'file') return new FileKnowledgeIndex();
