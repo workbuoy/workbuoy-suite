@@ -1,21 +1,22 @@
-
-# feat(ux): Morphing Input – Dato/Kalender (PR-15)
+# feat(ux): Undo That Thinks Ahead (PR-16)
 
 **Hva**
-- `parseNaturalDate` for enkle dag/tid-formater (nb/en).
-- `InlineDateTimePicker` (native date/time).
-- Patch for `MorphInput` som viser chip → inline picker → enrich tekst med `:: when=`.
-- `docs/calendar.md`.
+- `SmartUndoProvider` + `useSmartUndo()` for hendelser → undo-forslag.
+- `UndoChips` som rendrer forslag under Buoy-feed; klikker åpner WhyDrawer.
+- Patch for `FlipCard` (wrap med SmartUndo), `ContactsPanel` (emit create/delete), `BuoyChat` (vis UndoChips).
+- `docs/undo.md` dokumenterer prinsipper og videre plan.
 
 **Hvorfor**
-- Tidsstyrte handlinger uten tunge dialoger. Naturlig og raskt.
+- Brukere gjør feil når tempoet er høyt. Proaktiv “angre” senker stress og øker trygghet.
 
 **Hvordan teste**
-- Skriv `tor 14:00` eller `i morgen 09` → chip → velg → tekst berikes.
-- Også `thu 14` og `12.10 09`.
+- `npm run dev` i `frontend`.
+- Åpne **Navi → Kontakter**, opprett en kontakt → se chip “Angre opprettelse …” i Buoy.
+- Slett en kontakt → se chip “Angre sletting …” i Buoy.
+- Klikk chip → WhyDrawer med forklaringer (stub).
 
 **Risiko/rollback**
-- Kun frontend + docs.
+- Kun frontend/UX. Ingen backend- eller CI-endringer. Patcher er små og enkle å reverte.
 
 **TODO (@dev)**
-- Knytte `:: when=` til faktisk intent payload i backend.
+- Eksponere `/core/undo` med `undoToken` for ekte tilbakeføring + audit.

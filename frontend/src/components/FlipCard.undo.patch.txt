@@ -1,0 +1,22 @@
+--- a/frontend/src/components/FlipCard.tsx
++++ b/frontend/src/components/FlipCard.tsx
+@@
+-import { ActiveContextProvider } from "../core/ActiveContext";
++import { ActiveContextProvider } from "../core/ActiveContext";
++import { SmartUndoProvider } from "../core/SmartUndo";
+@@
+-  return (
+-    <ActiveContextProvider>
+-    <AutonomyProvider>
++  return (
++    <SmartUndoProvider>
++    <ActiveContextProvider>
++    <AutonomyProvider>
+@@
+-    </AutonomyProvider>
+-    </ActiveContextProvider>
++    </AutonomyProvider>
++    </ActiveContextProvider>
++    </SmartUndoProvider>
+   );
+ }
