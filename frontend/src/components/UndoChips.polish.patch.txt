@@ -1,0 +1,51 @@
+--- a/frontend/src/components/UndoChips.tsx
++++ b/frontend/src/components/UndoChips.tsx
+@@
+-import React, { useState } from "react";
+-import { useSmartUndo } from "../core/SmartUndo";
++import React, { useEffect, useState } from "react";
++import { useSmartUndo } from "../core/SmartUndo";
+ import WhyDrawer from "../features/buoy/WhyDrawer";
+
+ export default function UndoChips(){
+-  const { suggestions, consume } = useSmartUndo();
++  const { suggestions, performNow } = useSmartUndo();
+   const [why, setWhy] = useState<string[]|null>(null);
+
+   if (!suggestions.length) return null;
+
+   return (
+     <div style={{marginTop:12, display:"flex", gap:8, flexWrap:"wrap"}}>
+-      {suggestions.map(s => (
+-        <button key={s.id} className="chip" onClick={()=> setWhy(s.explanation)}>
+-          {s.label}
+-        </button>
+-      ))}
++      {suggestions.map(s => <UndoChip key={s.id} label={s.label} ttlMs={s.ttlMs ?? 15000}
++                                      onPerform={()=>performNow(s.id)} onWhy={()=>setWhy(s.explanation)} />)}
+       {why && <WhyDrawer explanations={why} onClose={()=>setWhy(null)}/>}
+     </div>
+   );
+ }
++
++function UndoChip({ label, ttlMs, onPerform, onWhy }:{ label:string; ttlMs:number; onPerform:()=>void; onWhy:()=>void }){
++  const [remain, setRemain] = useState(ttlMs);
++  useEffect(()=>{
++    const start = Date.now();
++    const id = setInterval(()=> setRemain(ttlMs - (Date.now()-start)), 200);
++    return ()=> clearInterval(id);
++  }, [ttlMs]);
++  const seconds = Math.max(0, Math.ceil(remain/1000));
++  return (
++    <div className="chip" role="group" aria-label="Angre forslag" style={{display:"inline-flex", alignItems:"center", gap:8}}>
++      <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
++        <path d="M12 5v2a5 5 0 1 1-4.58 2.9l-1.86.75A7 7 0 1 0 12 5zM5 5h6v6H9V8.41l-5.3 5.3-1.4-1.42L7.59 7H5z"
++              fill="currentColor" />
++      </svg>
++      <span>{label}</span>
++      <button className="chip" onClick={onPerform} title="Utfør angre (Enter)"><span>Angre</span></button>
++      <button className="chip" onClick={onWhy} title="Hvorfor?">?</button>
++      <span aria-live="polite" style={{opacity:.7}}>{seconds}s</span>
++    </div>
++  );
++}
