@@ -1,39 +1,15 @@
 openapi: 3.0.3
-info:
-  title: Workbuoy Tasks API
-  version: 1.0.0
+info: { title: Tasks API, version: 1.0.0 }
 paths:
   /api/tasks:
-    get:
-      summary: List tasks
-      responses:
-        '200':
-          description: OK
-    post:
-      summary: Create task
-      responses:
-        '201':
-          description: Created
+    get: { operationId: listTasks, responses: { '200': { description: ok } } }
+    post: { operationId: createTask, responses: { '201': { description: created }, '403': { description: forbidden } } }
   /api/tasks/{id}:
     patch:
-      summary: Update task
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: Updated
+      operationId: updateTask
+      parameters: [ { name: id, in: path, required: true, schema: { type: string } } ]
+      responses: { '200': { description: ok }, '403': { description: forbidden } }
     delete:
-      summary: Delete task
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-      responses:
-        '204':
-          description: Deleted
+      operationId: deleteTask
+      parameters: [ { name: id, in: path, required: true, schema: { type: string } } ]
+      responses: { '204': { description: deleted }, '403': { description: forbidden } }

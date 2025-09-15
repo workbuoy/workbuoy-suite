@@ -1,12 +1,6 @@
-# STATUS — MVP v1.2 Landing (2025-09-15)
-- Server mounts in `src/server.ts`
+# STATUS — Cleanup landing (2025-09-15)
+- Consolidated mounts in `src/server.ts` (export-only). Runtime: `src/bin/www.ts`.
 - Health: /healthz, readiness: /readyz, build info: /buildz
-- Feature routes mounted if present:
-  - /api/crm/contacts (crmRouter)
-  - /api/tasks (tasksRouter)
-  - /api/logs (logRouter)
-  - /buoy (buoyRouter)
-  - /api/insights (insightsRouter)
-  - /api/finance (financeReminderRouter)
-  - /api (manualCompleteRouter)
-- Runtime entrypoint: `src/bin/www.ts` (exports app for tests elsewhere)
+- Debug (dev): /api/_debug/dlq, /api/_debug/circuit
+- OpenAPI specs present for CRM/Tasks/Log/Finance/Buoy/Manual
+- CI: OpenAPI lint (non-blocking), backend coverage (non-blocking)
