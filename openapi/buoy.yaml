@@ -1,11 +1,51 @@
 openapi: 3.0.3
 info:
   title: Workbuoy Buoy API
-  version: 1.0.0
+  version: 1.1.0
 paths:
   /buoy/complete:
     post:
-      summary: Complete prompt
+      summary: Complete a natural-language prompt via capability routing
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                text:
+                  type: string
+                intent:
+                  type: string
+                params:
+                  type: object
       responses:
         '200':
           description: Completion response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: object
+                  explanations:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        reasoning: { type: string }
+                        sources: { type: array, items: { type: string } }
+                        confidence: { type: number }
+                        impact:
+                          type: object
+                          properties:
+                            minutesSaved: { type: number }
+                            dsoDeltaDays: { type: number }
+                            riskReduced: { type: string }
+                        policyBasis: { type: array, items: { type: string } }
+                        alternatives: { type: array, items: { type: string } }
+                  correlationId:
+                    type: string
+                  confidence:
+                    type: number
