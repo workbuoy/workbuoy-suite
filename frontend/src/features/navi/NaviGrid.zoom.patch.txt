@@ -1,0 +1,9 @@
+--- a/frontend/src/features/navi/NaviGrid.tsx
++++ b/frontend/src/features/navi/NaviGrid.tsx
+@@
+ import ContactsPanel from "../crm/ContactsPanel";
++import SemanticZoom from "../zoom/SemanticZoom";
+@@
+-            {open==="crm" && <ContactsPanel onClose={()=>setOpen(null)}/>}
++            {open==="crm" && <ContactsPanel onClose={()=>setOpen(null)}/>}
++            {open==="tasks" && <SemanticZoom/>}
