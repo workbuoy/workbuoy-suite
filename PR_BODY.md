@@ -1,22 +1,21 @@
-# feat(ux): Triggers & Suggestions (PR-14)
+
+# feat(ux): Morphing Input – Dato/Kalender (PR-15)
 
 **Hva**
-- Ny `useTriggerEngine` hook som legger til forslag basert på ActiveContext.
-- Utvidet `useBuoy` med `suggestions` + `addSuggestion`.
-- `BuoyChat` rendrer forslag som chips; klikker åpner WhyDrawer.
-- Dokumentasjon i `docs/triggers.md`.
+- `parseNaturalDate` for enkle dag/tid-formater (nb/en).
+- `InlineDateTimePicker` (native date/time).
+- Patch for `MorphInput` som viser chip → inline picker → enrich tekst med `:: when=`.
+- `docs/calendar.md`.
 
 **Hvorfor**
-- Første skritt mot proaktive forslag i Workbuoy. Gjør at Buoy føles mer initiativrik, men alltid med forklarbarhet.
+- Tidsstyrte handlinger uten tunge dialoger. Naturlig og raskt.
 
 **Hvordan teste**
-- `npm run dev` i `frontend`.
-- Åpne Navi → Kontakter (trigges `contacts.view`).
-- Sørg for at `recentIntents` inkluderer `crm`/`invoice` → “Send purring”-chip vises i BuoyChat.
-- Klikk chip → WhyDrawer åpnes med forklaring.
+- Skriv `tor 14:00` eller `i morgen 09` → chip → velg → tekst berikes.
+- Også `thu 14` og `12.10 09`.
 
 **Risiko/rollback**
-- Kun UI/UX. Ingen backend- eller CI-endringer.
+- Kun frontend + docs.
 
 **TODO (@dev)**
-- Koble triggers til ekte backend-events.
+- Knytte `:: when=` til faktisk intent payload i backend.
