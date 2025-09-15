@@ -1,0 +1,26 @@
+--- a/frontend/src/features/crm/ContactsPanel.tsx
++++ b/frontend/src/features/crm/ContactsPanel.tsx
+@@
++import { useSmartUndo } from "../../core/SmartUndo";
+@@
+ export default function ContactsPanel({ onClose }:{ onClose:()=>void }){
++  const { addAction } = useSmartUndo();
+@@
+-  async function createContact(form){
++  async function createContact(form){
+     // ... existing post logic
++    // Etter vellykket opprettelse:
++    try{
++      if (form && form.id) {
++        addAction({ kind:"create.contact", id: String(form.id), name: form.name, email: form.email });
++      }
++    } catch {}
+   }
+@@
+-  async function deleteContact(id){
++  async function deleteContact(id){
+     // ... existing delete logic
++    try{
++      addAction({ kind:"delete.contact", id: String(id) });
++    } catch {}
+   }

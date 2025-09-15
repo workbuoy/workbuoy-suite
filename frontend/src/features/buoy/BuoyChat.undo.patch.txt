@@ -1,0 +1,13 @@
+--- a/frontend/src/features/buoy/BuoyChat.tsx
++++ b/frontend/src/features/buoy/BuoyChat.tsx
+@@
+ import WhyDrawer from "./WhyDrawer";
+ import type { UserMessage, AssistantMessage } from "./types";
++import UndoChips from "../../components/UndoChips";
+@@
+       <div style={{overflow:"auto", padding:16}}>
+         {status!=="ready" && messages.length<=1 && <SmartSkeleton text={message} />}
+         {messages.map(m => <ChatMessage key={m.id} msg={m} />)}
++        <UndoChips/>
+         <div ref={endRef}/>
+       </div>
