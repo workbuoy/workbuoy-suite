@@ -1,0 +1,1 @@
+// backend addons endpoint placeholder
