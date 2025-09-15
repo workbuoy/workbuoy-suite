@@ -1,13 +1,18 @@
+/**
+ * On finance.overdue.detected, ask orchestrator to suggest a reminder email.
+ */
+import type { FinanceOrchestrator } from '../finance/orchestrator';
 
-import { FinanceOrchestrator } from '../finance/orchestrator';
-import { priorityBus } from '../core/events/priorityBus';
+type Event = { type: string; payload: any };
 
-export function registerOverdueToReminder(finance: FinanceOrchestrator) {
-  priorityBus.subscribe('overdue2reminder', 'finance-reminder', async (ev) => {
+export interface SimpleBus {
+  subscribe(topic: string, consumerId: string, handler: (ev: Event) => Promise<void> | void): void;
+}
+
+export function registerOverdueToReminder(bus: SimpleBus, finance: FinanceOrchestrator) {
+  bus.subscribe('finance.overdue.detected', 'overdue2reminder', async (ev: Event) => {
     if (ev.type !== 'finance.overdue.detected') return;
-    const { tenantId = 'T1', invoiceId } = ev.payload || {};
-    await finance.suggestReminder({ invoiceId, tenantId }, {
-      autonomy_level: 3 as any, tenantId, role: 'finance'
-    });
+    const { invoiceId, tenantId, customerEmail } = ev.payload || {};
+    await finance.suggestReminder({ invoiceId, customerEmail }, { autonomy_level: 3, tenantId: tenantId ?? 'T1', role: 'finance' });
   });
 }
