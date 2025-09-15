@@ -1,19 +1,17 @@
-# feat(ux): Backend wiring from UI + feature flag (PR-25)
+# feat(ux): WhyDrawer polish (PR-26)
 
 **Hva**
-- `Flags.realBackend` for trygg aktivering av ekte serverkall.
-- `useEndpoints()` med typed klientkall for CRM/Buoy/Undo.
-- Oppdaterte paneler (ContactsPanel, NaviGrid) til å bruke `useEndpoints`.
-- `useBuoy` kan kalle `/core/complete` når flagget er på.
-- `docs/integration-plan.md` beskriver endepunkter + TODO for dev.
+- Ny versjon av `WhyDrawer` som støtter rike forklaringer (title/quote/link/source) og er bakoverkompatibel med `string[]`.
+- A11y og ergonomi: ESC-lukk, fokusstyring, kopier-knapp, åpne-kilde per rad.
+- `docs/whydrawer.md` beskriver bruk og videre muligheter.
 
 **Hvorfor**
-- Rask overgang fra demo til ekte handlinger, uten å endre UX.
+- Forklarbarhet må være skarp og delbar. Dette gjør forslagene troverdige og lette å revidere.
 
 **Hvordan teste**
-- Default (`realBackend=false`) → alt som før (stub).
-- Sett `realBackend=true` → UI bruker ekte API-er.
-- Verifiser at 403 fra `createContact/deleteContact` fortsatt åpner WhyDrawer.
+- Trigge en chip i Buoy (f.eks. “Send purring”) → WhyDrawer åpnes.
+- Klikk **Kopier** → lim inn resultatet i et tekstdokument.
+- Åpne kilde-lenke hvis tilgjengelig (ny fane).
 
 **Risiko/rollback**
-- Kun frontend + docs. Flip av feature flag styrer adferd.
+- Kun frontend + docs. Kompatibel med eksisterende `string[]`-explanations.
