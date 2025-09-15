@@ -1,14 +1,15 @@
-# feat(ux): Semantic Zoom demo (PR-20)
+# feat(ux): Temporal Layering (PR-21)
 
 **Hva**
-- `SemanticZoom`-komponent (liste/tidslinje/strategi).
-- Patch for `NaviGrid` for å åpne `tasks`-panelet som demo.
+- `TemporalLayering`-komponent: Fortid / Nå / Fremtid på samme flate.
+- Patch for `NaviGrid` for å åpne `timeline`-panelet.
 
 **Hvorfor**
-- Skifte kognitivt nivå med ett grep.
+- Hurtig bytte av tidsperspektiv uten ny navigasjon.
 
 **Hvordan teste**
-- Åpne `tasks` i Navi og bytt nivå.
+- Åpne Navi → timeline (demo).
+- Bruk musescroll (opp/ned) eller **PageUp/Down** og **Home**.
 
 **Risiko/rollback**
-- Kun frontend.
+- Kun frontend + docs.
