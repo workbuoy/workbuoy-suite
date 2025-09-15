@@ -1,22 +1,21 @@
-# feat(ux): Undo That Thinks Ahead (PR-16)
+# feat(ux): Context → Server Headers (PR-17)
 
 **Hva**
-- `SmartUndoProvider` + `useSmartUndo()` for hendelser → undo-forslag.
-- `UndoChips` som rendrer forslag under Buoy-feed; klikker åpner WhyDrawer.
-- Patch for `FlipCard` (wrap med SmartUndo), `ContactsPanel` (emit create/delete), `BuoyChat` (vis UndoChips).
-- `docs/undo.md` dokumenterer prinsipper og videre plan.
+- Ny `useApi().withContext` fetch-wrapper som injiserer headere:
+  - `X-WB-Intent`, `X-WB-When`, `X-WB-Autonomy`, `X-WB-Selected-{Id,Type}`.
+- Oppdatert `ContactsPanel` og `NaviGrid` til å bruke wrapperen.
+- Kommentar i `useBuoy` som viser hvordan `/core/complete` kan bruke samme mønster.
+- Dokumentasjon i `docs/context-headers.md`.
 
 **Hvorfor**
-- Brukere gjør feil når tempoet er høyt. Proaktiv “angre” senker stress og øker trygghet.
+- Gjør det enkelt for backend å forstå *hva* brukeren prøver å gjøre, *når*, og i hvilken *kontekst* — uten å låse payload-kontrakter.
 
 **Hvordan teste**
-- `npm run dev` i `frontend`.
-- Åpne **Navi → Kontakter**, opprett en kontakt → se chip “Angre opprettelse …” i Buoy.
-- Slett en kontakt → se chip “Angre sletting …” i Buoy.
-- Klikk chip → WhyDrawer med forklaringer (stub).
+- Åpne DevTools → Network. Se at kall til `/api/addons` og `/api/crm/contacts` har `X-WB-*` headere.
+- Opprett/slett kontakt: verifiser at `X-WB-Intent` endres (create/delete).
 
 **Risiko/rollback**
-- Kun frontend/UX. Ingen backend- eller CI-endringer. Patcher er små og enkle å reverte.
+- Kun frontend + docs. Ingen backend/CI-endringer. Lett å reverte.
 
 **TODO (@dev)**
-- Eksponere `/core/undo` med `undoToken` for ekte tilbakeføring + audit.
+- Parse `X-WB-*` headere i serveren for policy/audit/why.
