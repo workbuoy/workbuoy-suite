@@ -1,0 +1,4 @@
+// Add in jest.config.js:
+coverageThreshold: {
+  global: { lines: 80, statements: 80 }
+}
