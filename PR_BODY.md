@@ -1,16 +1,12 @@
-# feat(backend): wbContext + audit stub (PR-27)
+# feat(backend): /core/complete stub + Why-kontrakt (PR-28)
 
 **Hva**
-- `wbContext` middleware (leser `X-WB-*` → `req.wb`).
-- `/api/audit` (POST & GET) for enkel audit i dev.
-- `errorAudit` som standard error-handler.
-
-**Hvorfor**
-- Gjør frontendens kontekst tilgjengelig for policy/audit. Enkel synlighet i dev.
+- `POST /core/complete` som svarer med `text` + `explanations[]`.
+- Enkelt autonomy-sjekk → `403` med forklaringer.
 
 **Hvordan teste**
-- Kall en valgfri rute med `X-WB-Intent: demo` → `GET /api/audit` viser raden.
-- Provoke feil (kast error i valgfri rute) → `errorAudit` logger med `explanations`.
+- `curl -X POST /core/complete -H "X-WB-Intent: contacts.create" -H "X-WB-Autonomy: 0" -d '{"text":"lag kontakt"}'`
+- Forvent `403` med `explanations`.
 
 **Risiko/rollback**
-- Isolert middleware og ruter. Fjerner mount for rollback.
+- Isolert rute. Fjern mount for rollback.
