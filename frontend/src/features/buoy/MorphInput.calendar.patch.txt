@@ -1,0 +1,45 @@
+--- a/frontend/src/features/buoy/MorphInput.tsx
++++ b/frontend/src/features/buoy/MorphInput.tsx
+@@
+ import React, { useEffect, useMemo, useRef, useState } from "react";
+ import { parseCommand, type ParsedIntent } from "./commandParser";
++import InlineDateTimePicker, { type DateTimeValue } from "../../components/InlineDateTimePicker";
++import { parseNaturalDate } from "./dateParser";
+@@
+   const intent = useMemo(()=> parseCommand(value), [value]);
+   const calcResult = useMemo(()=> isCalc ? evalCalc(value) : null, [isCalc, value]);
++  const naturalDate = useMemo(()=> parseNaturalDate(value), [value]);
++  const [showPicker, setShowPicker] = useState(false);
+@@
+   return (
+     <div>
+       <form onSubmit={submit} style={{display:"grid", gridTemplateColumns:"1fr auto", gap:8}}>
+@@
+       </form>
+@@
+-      {focused && dateHint && (
+-        <div className="chip" style={{marginTop:6}}>{dateHint}</div>
+-      )}
++      {focused && naturalDate && !showPicker && (
++        <div className="chip" style={{marginTop:6}} onClick={()=>setShowPicker(true)} title="Klikk for å velge nøyaktig">
++          Dato oppdaget: {naturalDate.date}{naturalDate.time?` ${naturalDate.time}`:""} — trykk for å velge
++        </div>
++      )}
++
++      {showPicker && (
++        <div style={{marginTop:6}}>
++          <InlineDateTimePicker
++            initial={naturalDate || undefined}
++            onPick={(v:DateTimeValue)=>{
++              const text = value.trim();
++              const enriched = `${text} :: when=${v.date}${v.time?`T${v.time}`:""}`;
++              setValue(enriched);
++              setShowPicker(false);
++            }}
++            onCancel={()=>setShowPicker(false)}
++          />
++        </div>
++      )}
+     </div>
+   );
+ }
