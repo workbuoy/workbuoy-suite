@@ -1,17 +1,16 @@
-# feat(ux): WhyDrawer polish (PR-26)
+# feat(backend): wbContext + audit stub (PR-27)
 
 **Hva**
-- Ny versjon av `WhyDrawer` som støtter rike forklaringer (title/quote/link/source) og er bakoverkompatibel med `string[]`.
-- A11y og ergonomi: ESC-lukk, fokusstyring, kopier-knapp, åpne-kilde per rad.
-- `docs/whydrawer.md` beskriver bruk og videre muligheter.
+- `wbContext` middleware (leser `X-WB-*` → `req.wb`).
+- `/api/audit` (POST & GET) for enkel audit i dev.
+- `errorAudit` som standard error-handler.
 
 **Hvorfor**
-- Forklarbarhet må være skarp og delbar. Dette gjør forslagene troverdige og lette å revidere.
+- Gjør frontendens kontekst tilgjengelig for policy/audit. Enkel synlighet i dev.
 
 **Hvordan teste**
-- Trigge en chip i Buoy (f.eks. “Send purring”) → WhyDrawer åpnes.
-- Klikk **Kopier** → lim inn resultatet i et tekstdokument.
-- Åpne kilde-lenke hvis tilgjengelig (ny fane).
+- Kall en valgfri rute med `X-WB-Intent: demo` → `GET /api/audit` viser raden.
+- Provoke feil (kast error i valgfri rute) → `errorAudit` logger med `explanations`.
 
 **Risiko/rollback**
-- Kun frontend + docs. Kompatibel med eksisterende `string[]`-explanations.
+- Isolert middleware og ruter. Fjerner mount for rollback.

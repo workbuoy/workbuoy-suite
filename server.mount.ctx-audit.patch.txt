@@ -1,0 +1,22 @@
+--- a/src/server.ts
++++ b/src/server.ts
+@@
+-import express from "express";
++import express from "express";
++import { wbContext } from "./middleware/wbContext";
++import { auditRouter } from "./routes/audit";
++import { errorAudit } from "./errorAudit";
+@@
+-const app = express();
++const app = express();
++app.use(wbContext); // X-WB-* → req.wb
+@@
+-// existing routes...
++// existing routes...
++app.use(auditRouter());
+@@
+-app.use((err, req, res, next) => {
+-  res.status(500).json({ error: "internal" });
+-});
++app.use(errorAudit);
+ export default app;
