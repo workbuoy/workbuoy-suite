@@ -1,23 +1,23 @@
-# feat(ux): Navi-moduser i UI (autonomi)
+# chore(ux): A11y, responsivitet og tema (PR-8)
 
 **Hva**
-- `AutonomyProvider` (context) og `POLICY`-mapping for UI.
-- `ModeSwitch`-komponent (Passiv/Proaktiv/Ambisiøs/Kraken).
-- `FlipCard` patched for å vise `ModeSwitch` og wrappe med `AutonomyProvider`.
-- `BuoyChat` patched: viser gjeldende modus og skjuler/viser actions iht. policy.
-- `docs/navi.md` dokumenterer moduser og UI-policy.
+- Ny `styles/tokens.css` med tema-variabler, fokusringer og responsive tokens.
+- FlipCard: tastatur-flip (Space/Enter), rolle/ARIA, mobil-fallback (ingen 3D).
+- NaviGrid: `role="region"` + mer ARIA på paneler.
+- Docs: A11y-prinsipper lagt til (`docs/ux.md` addendum).
 
 **Hvorfor**
-Brukeren skal styre hvor aktiv Buoy er. UI speiler nivået uten å ta over backend-policy.
+- Sikre WCAG-vennlig navigasjon, bedre kontrast og brukbarhet uten mus.
+- Gjøre UI robust på mobil og ved redusert bevegelse.
 
 **Hvordan teste**
 - `cd frontend && npm run dev`
-- Bytt modus via kontrollen i headeren.
-- Skriv i Buoy → se at actions vises/skjules basert på valgt modus.
+- Tab til flip-kort → Space/Enter flipper.
+- Sjekk `aria-live` i chat (nye meldinger dukker opp).
+- Smal skjerm: 3D-rotasjon slås av; layout flyter vertikalt.
 
 **Risiko/rollback**
-- Kun frontend + docs. Patch for `FlipCard` og `BuoyChat` er små og kan reverseres.
+- Kun frontend + docs. Endringer via små patcher. Enkelt å rulle tilbake.
 
 **TODO (@dev)**
-- Koble UI-modus til faktisk policy i backend (headers/context).
-- Logg modusskifte (audit).
+- Valgfritt: koble `prefers-color-scheme`/tema-innstillinger via user settings.
