@@ -1,0 +1,17 @@
+--- a/frontend/src/features/buoy/useBuoy.ts
++++ b/frontend/src/features/buoy/useBuoy.ts
+@@
+-import { useState } from "react";
++import { useState } from "react";
++import { useActiveContext } from "../../core/ActiveContext";
+@@
+ export function useBuoy() {
+   const [messages, setMessages] = useState<(UserMessage|AssistantMessage)[]>([
+     { id: "a0", role: "assistant", text: "Hei! Jeg er Buoy. Hva ønsker du å gjøre?" }
+   ]);
++  const { pushIntent } = useActiveContext();
+@@
+   async function send(text: string, intent?: ParsedIntent) {
+     const userMsg: UserMessage = { id: crypto.randomUUID(), role:"user", text };
+     setMessages(m => [...m, userMsg]);
++    if (intent?.kind) pushIntent(`chat.${intent.kind}`);

@@ -1,0 +1,23 @@
+--- a/frontend/src/features/crm/ContactsPanel.tsx
++++ b/frontend/src/features/crm/ContactsPanel.tsx
+@@
++import { useActiveContext } from "../../core/ActiveContext";
+@@
+ export default function ContactsPanel({ onClose }:{ onClose:()=>void }){
++  const { setSelectedEntity, pushIntent } = useActiveContext();
++  React.useEffect(()=>{ pushIntent("contacts.view"); }, [pushIntent]);
+@@
+-        {contacts.map(c => (
+-          <div key={c.id} style={{display:"grid", gridTemplateColumns:"1fr auto", alignItems:"center"}}>
++        {contacts.map(c => (
++          <div key={c.id} style={{display:"grid", gridTemplateColumns:"1fr auto", alignItems:"center"}}
++               onClick={()=> setSelectedEntity({ type:"contact", id:c.id, name:c.name })}>
+             <div>
+               <div style={{fontWeight:600}}>{c.name}</div>
+               {c.email && <div style={{opacity:.8}}>{c.email}</div>}
+             </div>
+             <button className="chip" onClick={(e)=>{ e.stopPropagation(); /* existing open-in-buoy */ }}>
+               Åpne i Buoy
+             </button>
+           </div>
+         ))}

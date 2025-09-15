@@ -1,0 +1,33 @@
+--- a/frontend/src/components/FlipCard.tsx
++++ b/frontend/src/components/FlipCard.tsx
+@@
+-import React, { useEffect, useMemo, useState } from "react";
++import React, { useEffect, useMemo, useState } from "react";
++import { ActiveContextProvider } from "../core/ActiveContext";
++import ContextDebug from "../core/ContextDebug";
+@@
+-  return (
+-    <ActiveContextProvider>
+-    <AutonomyProvider>
+-    <div className="perspective" style={{position:"relative", height:"min(82vh, 760px)"}}>
++  return (
++    <ActiveContextProvider>
++    <AutonomyProvider>
++    <div className="perspective" style={{position:"relative", height:"min(82vh, 760px)"}}>
+       <div className="flipcard cardbg" style={{position:"absolute", inset:0, borderRadius:16, transform: `rotateY(${flipped?180:0}deg)`}}>
+         <section {...ariaFront} className="flipface" style={{padding:12}}>
+           <Header side="Buoy" onFlip={()=>setMode("NAVI")} />
+           <div style={{position:"absolute", inset:"56px 12px 12px 12px"}}><BuoyChat/></div>
+         </section>
+         <section {...ariaBack} className="flipface" style={{transform:"rotateY(180deg)", padding:12}}>
+           <Header side="Navi" onFlip={()=>setMode("CHAT")} />
+           <div style={{position:"absolute", inset:"56px 12px 12px 12px"}}><NaviGrid/></div>
+         </section>
+       </div>
++      <ContextDebug/>
+     </div>
+-    </div>
++    </AutonomyProvider>
++    </ActiveContextProvider>
+   );
+ }
