@@ -1,23 +1,23 @@
-
-# feat(ux): Buoy interaksjonskontrakt (schema + stub)
+# feat(ux): Navi-moduser i UI (autonomi)
 
 **Hva**
-- Definerer meldingsschema (`UserMessage`, `AssistantMessage`, `VisualizationAttachment`, `ActionSuggestion`).
-- Nytt hook `useBuoy.ts` som simulerer respons (stub).
-- Oppdatert `BuoyChat.tsx` → bruker hook, viser actions og "Vis hvorfor".
-- Ny komponent `WhyDrawer.tsx` for forklarbarhet.
-- Ny dokumentasjon `docs/buoy.md` (gradert autonomi).
+- `AutonomyProvider` (context) og `POLICY`-mapping for UI.
+- `ModeSwitch`-komponent (Passiv/Proaktiv/Ambisiøs/Kraken).
+- `FlipCard` patched for å vise `ModeSwitch` og wrappe med `AutonomyProvider`.
+- `BuoyChat` patched: viser gjeldende modus og skjuler/viser actions iht. policy.
+- `docs/navi.md` dokumenterer moduser og UI-policy.
 
 **Hvorfor**
-Gir forutsigbart API mellom UI ↔ backend, og forklarbarhet i alle svar.
+Brukeren skal styre hvor aktiv Buoy er. UI speiler nivået uten å ta over backend-policy.
 
 **Hvordan teste**
 - `cd frontend && npm run dev`
-- Skriv melding i Buoy → stub-svar med tekst + [visualisering] + "Vis hvorfor"-knapp.
+- Bytt modus via kontrollen i headeren.
+- Skriv i Buoy → se at actions vises/skjules basert på valgt modus.
 
 **Risiko/rollback**
-- Kun frontend + docs. Ingen backend/CI-endringer. Trygt å reverte.
+- Kun frontend + docs. Patch for `FlipCard` og `BuoyChat` er små og kan reverseres.
 
 **TODO (@dev)**
-- Implementere ekte AI-pipe mot CORE.
-- Logging av provenance og persistens.
+- Koble UI-modus til faktisk policy i backend (headers/context).
+- Logg modusskifte (audit).
