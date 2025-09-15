@@ -1,0 +1,10 @@
+--- a/src/server.ts
++++ b/src/server.ts
+@@
+ import express from "express";
+@@
++import { coreCompleteRouter } from "./routes/core.complete";
+@@
+-// existing routes...
++// existing routes...
++app.use(coreCompleteRouter());
