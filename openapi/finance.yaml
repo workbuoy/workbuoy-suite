@@ -1,0 +1,31 @@
+openapi: 3.0.3
+info:
+  title: Workbuoy Finance API
+  version: 1.0.0
+paths:
+  /api/finance/reminder/suggest:
+    post:
+      summary: Suggest a payment reminder email (draft, suggest-only)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                invoiceId: { type: string }
+                customerEmail: { type: string }
+      responses:
+        '200':
+          description: Reminder suggestion
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  outcome:
+                    type: object
+                    properties:
+                      draftEmail: { type: string }
+                  policy:
+                    type: object
