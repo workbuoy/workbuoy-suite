@@ -1,23 +1,23 @@
-# chore(ux): A11y, responsivitet og tema (PR-8)
+# test(ux): E2E UI smoke (Playwright/Vitest) – PR-9
 
 **Hva**
-- Ny `styles/tokens.css` med tema-variabler, fokusringer og responsive tokens.
-- FlipCard: tastatur-flip (Space/Enter), rolle/ARIA, mobil-fallback (ingen 3D).
-- NaviGrid: `role="region"` + mer ARIA på paneler.
-- Docs: A11y-prinsipper lagt til (`docs/ux.md` addendum).
+- Legger til Playwright-konfig (`frontend/playwright.config.ts`) som starter Vite-devserver automatisk.
+- En minimal smoke-test `frontend/e2e/smoke.spec.ts`: last app → flip til Navi → åpne Kontakter → legg til kontakt → verifiser.
+- Dokumentasjon `docs/ops/ci.md` for lokal kjøring og hvordan Dev aktiverer dette i CI.
 
 **Hvorfor**
-- Sikre WCAG-vennlig navigasjon, bedre kontrast og brukbarhet uten mus.
-- Gjøre UI robust på mobil og ved redusert bevegelse.
+- Sikre at frontend-skjelettet og de viktigste brukerflytene fungerer fra ende til ende.
 
-**Hvordan teste**
-- `cd frontend && npm run dev`
-- Tab til flip-kort → Space/Enter flipper.
-- Sjekk `aria-live` i chat (nye meldinger dukker opp).
-- Smal skjerm: 3D-rotasjon slås av; layout flyter vertikalt.
+**Hvordan teste lokalt**
+```bash
+cd frontend
+npm i -D @playwright/test
+npx playwright install --with-deps
+npx playwright test
+```
 
 **Risiko/rollback**
-- Kun frontend + docs. Endringer via små patcher. Enkelt å rulle tilbake.
+- Kun test + docs. Påvirker ikke prod-kode. Enkel å reverte.
 
 **TODO (@dev)**
-- Valgfritt: koble `prefers-color-scheme`/tema-innstillinger via user settings.
+- Legge inn `npx playwright install --with-deps` og `npx playwright test` i CI-workflow.

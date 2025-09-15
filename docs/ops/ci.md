@@ -1,19 +1,35 @@
-# CI Rails – Temporary Smoke Mode
+# E2E UI smoke (Playwright) — PR-9
 
-We are running a **smoke-only** Jest config in CI to keep PRs green while stabilizing the repository.
+Denne testen starter `frontend` via Vite og kjører en enkel flyt:
+1) Last app (`/`)
+2) Flip til **Navi**
+3) Åpne **Kontakter**
+4) Legg til kontakt (**Test Person**)
+5) Verifiser at navnet vises
 
-## Required settings
-- Ruleset: only require `backend-ci`.
-- Actions → Workflow permissions: **Read and write**.
+## Lokal kjøring
 
-## What runs in CI right now
-- `backend-ci` → `npx jest --ci --config backend/jest.ci.config.cjs`
-- `auto-merge` → turns on auto-merge when label `automerge` + ≥1 approval.
-- `smoke-open-pr` → manual button to open a validation PR.
+Installer Playwright hvis ikke allerede gjort:
+```bash
+cd frontend
+npm i -D @playwright/test
+npx playwright install --with-deps
+```
 
-## How to exit Smoke Mode
-When the backend is stabilized:
-1) Fix legacy tests and TS errors.
-2) Move test scope back to full suite by changing backend-ci to `npm test -- --ci`.
-3) Optional: make build/typecheck required again.
+Kjør testene (webServer starter dev-server automatisk på :5173):
+```bash
+npx playwright test
+```
 
+Kjør med UI:
+```bash
+npx playwright test --ui
+```
+
+## CI (TODO for Dev)
+- Legg til Playwright i CI med `npx playwright install --with-deps`.
+- Bruk `npx playwright test` i workflow etter build.
+- Sørg for at `frontend` er arbeidskatalog.
+- Nettverkskall er mocket i UI; ingen eksterne avhengigheter forventet.
+
+> **Merk:** Ingen workflows endres i denne PR-en. Dette dokumentet beskriver hva Dev må gjøre for å aktivere E2E i CI.
