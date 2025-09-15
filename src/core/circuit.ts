@@ -1,53 +1,75 @@
-type State = 'closed'|'open'|'half-open';
-
-interface Bucket {
-  state: State;
-  failures: number;
-  lastOpenedAt: number;
-}
+export type CircuitState = 'closed'|'open'|'half-open';
 
 export interface CircuitOptions {
-  failureThreshold?: number; // consecutive failures before open
-  cooldownMs?: number;       // how long to stay open
+  failureThreshold?: number;
+  halfOpenAfterMs?: number;
+  resetTimeoutMs?: number;
 }
 
-const DEFAULTS: Required<CircuitOptions> = { failureThreshold: 3, cooldownMs: 30000 };
-
-const buckets: Record<string, Bucket> = {};
-
 export class CircuitBreaker {
-  private opts: Required<CircuitOptions>;
-  constructor(opts?: CircuitOptions) { this.opts = { ...DEFAULTS, ...(opts||{}) }; }
+  private state: CircuitState = 'closed';
+  private failures = 0;
+  private lastOpenedAt = 0;
 
-  private getBucket(key:string): Bucket {
-    return buckets[key] ||= { state:'closed', failures:0, lastOpenedAt:0 };
-  }
+  constructor(private opts: CircuitOptions = {}) {}
 
-  isOpen(key:string): boolean {
-    const b = this.getBucket(key);
-    if (b.state === 'open' && (Date.now() - b.lastOpenedAt) > this.opts.cooldownMs) {
-      b.state = 'half-open'; // allow a trial
+  isOpen(now = Date.now()): boolean {
+    if (this.state === 'open') {
+      const wait = this.opts.halfOpenAfterMs ?? 10000;
+      if ((now - this.lastOpenedAt) >= wait) {
+        this.state = 'half-open';
+        return false;
+      }
+      return true;
     }
-    return b.state === 'open';
+    return false;
   }
 
-  async exec<T>(key:string, fn:()=>Promise<T>): Promise<T> {
-    const b = this.getBucket(key);
-    if (this.isOpen(key)) throw new Error('circuit_open');
+  async call<T>(name: string, fn: () => Promise<T>): Promise<T> {
+    const now = Date.now();
+    if (this.isOpen(now)) throw new Error(`circuit_open:${name}`);
 
     try {
       const res = await fn();
-      // success path
-      b.failures = 0;
-      b.state = 'closed';
+      this.onSuccess();
       return res;
     } catch (e) {
-      b.failures += 1;
-      if (b.failures >= this.opts.failureThreshold) {
-        b.state = 'open';
-        b.lastOpenedAt = Date.now();
-      }
+      this.onFailure();
       throw e;
     }
+  }
+
+  onSuccess() {
+    if (this.state === 'half-open') {
+      this.state = 'closed';
+      this.failures = 0;
+      return;
+    }
+    if (this.state === 'closed') {
+      this.failures = 0;
+    }
+  }
+
+  onFailure() {
+    const threshold = this.opts.failureThreshold ?? 3;
+    if (this.state === 'half-open') {
+      this.open();
+      return;
+    }
+    this.failures += 1;
+    if (this.failures >= threshold) this.open();
+  }
+
+  private open() {
+    this.state = 'open';
+    this.lastOpenedAt = Date.now();
+  }
+
+  getState(): CircuitState {
+    return this.state;
+  }
+
+  getFailures(): number {
+    return this.failures;
   }
 }

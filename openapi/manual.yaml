@@ -1,0 +1,28 @@
+openapi: 3.0.3
+info:
+  title: Workbuoy Manual Completion API
+  version: 1.0.0
+paths:
+  /api/manual-complete:
+    post:
+      summary: Record a manual completion for audit/intent log
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                capability: { type: string }
+                payload: { type: object }
+                note: { type: string }
+      responses:
+        '200':
+          description: Recorded
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+                  intentId: { type: string }
