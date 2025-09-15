@@ -1,0 +1,33 @@
+--- a/frontend/src/features/buoy/useBuoy.ts
++++ b/frontend/src/features/buoy/useBuoy.ts
+@@
+ import { useState } from "react";
+ import { useActiveContext } from "../../core/ActiveContext";
+ import type { UserMessage, AssistantMessage } from "./types";
++import type { Suggestion } from "./types";
+@@
+ export function useBuoy() {
+   const [messages, setMessages] = useState<(UserMessage|AssistantMessage)[]>([
+     { id: "a0", role: "assistant", text: "Hei! Jeg er Buoy. Hva ønsker du å gjøre?" }
+   ]);
+   const { pushIntent } = useActiveContext();
++  const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
+@@
+   async function send(text: string, intent?: ParsedIntent) {
+     const userMsg: UserMessage = { id: crypto.randomUUID(), role:"user", text };
+     setMessages(m => [...m, userMsg]);
+     if (intent?.kind) pushIntent(`chat.${intent.kind}`);
+     const aMsg: AssistantMessage = { id: crypto.randomUUID(), role:"assistant", text: `Forstod: ${intent?.kind||"ukjent"}` };
+     setMessages(m => [...m, userMsg, aMsg]);
+   }
++
++  function addSuggestion(s: Suggestion){
++    setSuggestions(prev => {
++      if (prev.find(p=>p.id===s.id)) return prev;
++      return [...prev, s];
++    });
++  }
++
++  return { messages, send, suggestions, addSuggestion };
+-  return { messages, send };
+ }

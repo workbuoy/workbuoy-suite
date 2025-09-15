@@ -1,0 +1,32 @@
+--- a/frontend/src/features/buoy/BuoyChat.tsx
++++ b/frontend/src/features/buoy/BuoyChat.tsx
+@@
+ import { useBuoy } from "./useBuoy";
+ import WhyDrawer from "./WhyDrawer";
+ import type { UserMessage, AssistantMessage } from "./types";
++import { useState } from "react";
+@@
+ export default function BuoyChat() {
+-  const { messages, send } = useBuoy();
++  const { messages, send, suggestions } = useBuoy();
++  const [why, setWhy] = useState<string[]|null>(null);
+@@
+       <div style={{overflow:"auto", padding:16}}>
+         {status!=="ready" && messages.length<=1 && <SmartSkeleton text={message} />}
+         {messages.map(m => <ChatMessage key={m.id} msg={m} />)}
++        {suggestions.length>0 && (
++          <div style={{marginTop:12, display:"flex", gap:8, flexWrap:"wrap"}}>
++            {suggestions.map(s => (
++              <button key={s.id} className="chip" onClick={()=>setWhy(s.explanation)}>
++                {s.label}
++              </button>
++            ))}
++          </div>
++        )}
+         <div ref={endRef}/>
+       </div>
+@@
+       <form onSubmit={onSubmit} style={{display:"flex", gap:8, padding:12, borderTop:"1px solid rgba(255,255,255,.1)"}}>
+@@
+       </form>
++      {why && <WhyDrawer explanations={why} onClose={()=>setWhy(null)}/>}
