@@ -1,20 +1,14 @@
-# chore(ux): Undo polish — ikon, timeout, Esc (PR-18)
+# feat(ux): Peripheral Vision UI (PR-19)
 
 **Hva**
-- `SmartUndo`: TTL på forslag + Esc-shortcut + `performNow`.
-- `UndoChips`: ikon, nedtelling, egne knapper (Angre/Why).
-- `docs/undo.polish.md`: beskriver endringen.
+- `StatusEdge` + `usePeripheralStatus`.
+- Demo-knapper i FlipCard.
 
 **Hvorfor**
-- Mer trygg og effektiv “angre”-opplevelse.
+- Uforstyrrende systemstatus i perifert syn.
 
 **Hvordan teste**
-- Opprett/slett kontakt → se chips med nedtelling.
-- Trykk **Esc** → siste forslag utføres (forventet: forsvinner).
-- Klikk **?** → WhyDrawer åpnes.
+- Bytt mellom OK/Vent/Alarm og observer kanten.
 
 **Risiko/rollback**
-- Kun frontend/UX. Små patcher.
-
-**TODO (@dev)**
-- Koble `perform()` til `/core/undo` når tilgjengelig.
+- Kun frontend.

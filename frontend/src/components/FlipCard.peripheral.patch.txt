@@ -1,0 +1,38 @@
+--- a/frontend/src/components/FlipCard.tsx
++++ b/frontend/src/components/FlipCard.tsx
+@@
+ import React, { useEffect, useMemo, useState } from "react";
+ import { AutonomyProvider } from "../features/navi/AutonomyProvider";
+ import BuoyChat from "../features/buoy/BuoyChat";
+ import NaviGrid from "../features/navi/NaviGrid";
++import StatusEdge from "../features/status/StatusEdge";
++import { usePeripheralStatus } from "../features/status/usePeripheralStatus";
+@@
+ export default function FlipCard(){
++  const { state, setState } = usePeripheralStatus();
+@@
+   return (
+     <ActiveContextProvider>
+     <AutonomyProvider>
+     <div className="perspective" style={{position:"relative", height:"min(82vh, 760px)"}}>
+       <div className="flipcard cardbg" style={{position:"absolute", inset:0, borderRadius:16, transform: `rotateY(${flipped?180:0}deg)`}}>
++        <StatusEdge state={state}/>
+         <section {...ariaFront} className="flipface" style={{padding:12}}>
+           <Header side="Buoy" onFlip={()=>setMode("NAVI")} />
+           <div style={{position:"absolute", inset:"56px 12px 12px 12px"}}><BuoyChat/></div>
+         </section>
+         <section {...ariaBack} className="flipface" style={{transform:"rotateY(180deg)", padding:12}}>
+           <Header side="Navi" onFlip={()=>setMode("CHAT")} />
+           <div style={{position:"absolute", inset:"56px 12px 12px 12px"}}><NaviGrid/></div>
+         </section>
+       </div>
++      <div style={{position:"absolute", top:8, right:12, display:"flex", gap:6}}>
++        <button className="chip" onClick={()=>setState("ok")} title="Alt ok">OK</button>
++        <button className="chip" onClick={()=>setState("pending")} title="Noe venter">Vent</button>
++        <button className="chip" onClick={()=>setState("alert")} title="Krever handling">Alarm</button>
++      </div>
+     </div>
+     </AutonomyProvider>
+     </ActiveContextProvider>
+   );
+ }
