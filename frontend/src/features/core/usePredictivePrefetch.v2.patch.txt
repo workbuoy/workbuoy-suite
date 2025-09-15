@@ -1,0 +1,14 @@
+--- a/frontend/src/features/core/usePredictivePrefetch.ts
++++ b/frontend/src/features/core/usePredictivePrefetch.ts
+@@
+-export function usePredictivePrefetch(){
+-  // existing v1 implementation …
++export function usePredictivePrefetch(){
++  // v2: per-intent/weekday map + personalized message
++  const hour = new Date().getHours();
++  const weekday = new Date().getDay(); // 0=Sun
++  const usual = (weekday===1) ? ["reports.monday", "crm.contacts"] : ["crm.contacts"];
++  const plan = usual.map(x => ({ key:x, status:"pending" as const }));
++  const friendly = (weekday===1) ? "Laster mandagsrapporter…" : (hour<10 ? "Forbereder morgenoversikten…" : "Henter det du vanligvis trenger…");
++  return { status:"pending" as const, plan, message:friendly };
+ }
