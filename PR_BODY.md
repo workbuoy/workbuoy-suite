@@ -1,23 +1,19 @@
-
-# feat(ux): Predictive Loading + Smart Skeletons (PR-11)
+# chore(ux): Polish + README + demo-snutter (PR-12)
 
 **Hva**
-- `usePredictivePrefetch` (ukedag + siste intents) for å forvarme sannsynlige kall.
-- `SmartSkeleton` for kontekstsensitiv lastemelding.
-- Integrasjon i `NaviGrid` og `BuoyChat` via små patcher.
-- Dokumentasjon i `docs/ux.predictive.md`.
+- Oppdatert `README.md` (konsept, kom-i-gang, lenker til docs).
+- Ny `docs/frontend.md` (dev-guide: scripts, mocks, tips).
+- Demo-SVGs i `assets/demo/` for PR-beskrivelser og repo-landing (`flip.svg`, `why.svg`, `crm.svg`).
 
 **Hvorfor**
-- Opplevelsen føles “klar før du spør” – spesielt på mandag/ukeavslutning.
+- Rask “wow” for nye som åpner repoet. Demo-vennlig og lett å sette opp.
 
 **Hvordan teste**
-- `cd frontend && npm run dev`
-- Åpne appen → se skeleton med “Laster mandagsrapporter…” (mandag) eller generell melding.
-- Flip til Navi → skeleton vises før tiles, forsvinner når prefetch er “ready”.
+- Åpne `README.md` og klikk `assets/demo/*.svg` i GitHub.
+- `cd frontend && npm run dev` for å starte appen som før.
 
 **Risiko/rollback**
-- Kun frontend + docs. Ingen backend/CI-endringer.
-- Prefetch er best effort; avbrytes når komponent unmountes.
+- Kun docs og assets. Ingen backend/CI-endringer. Enkel å reverte.
 
 **TODO (@dev)**
-- Valgfritt: gi `recentIntents`/prefetch-hints fra backend.
+- (Valgfritt) Generere GIF/PNG automatisk i CI fra Playwright-videoer i en senere PR.
