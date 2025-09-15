@@ -1,23 +1,27 @@
-# test(ux): E2E UI smoke (Playwright/Vitest) – PR-9
+# feat(ux): Morphing Input + Conversational Commands (PR-10)
 
 **Hva**
-- Legger til Playwright-konfig (`frontend/playwright.config.ts`) som starter Vite-devserver automatisk.
-- En minimal smoke-test `frontend/e2e/smoke.spec.ts`: last app → flip til Navi → åpne Kontakter → legg til kontakt → verifiser.
-- Dokumentasjon `docs/ops/ci.md` for lokal kjøring og hvordan Dev aktiverer dette i CI.
+- Ny komponent `MorphInput` med:
+  - @kontakt-forslag (fra `/api/crm/contacts`)
+  - =kalkulator (evaluerer enkle uttrykk lokalt)
+  - dato/klokkeslett-hint (kalender kommer senere)
+- Parser `commandParser.ts` som gjenkjenner 5+ kommando-mønstre.
+- `BuoyChat` bytter til `MorphInput` og sender `intent` videre til `useBuoy`.
+- `useBuoy` aksepterer valgfri `intent` og viser en bekreftelse i stub-svaret.
+- `docs/commands.md` beskriver mønstre og atferd.
 
 **Hvorfor**
-- Sikre at frontend-skjelettet og de viktigste brukerflytene fungerer fra ende til ende.
+- Én, intelligent inngang gjør Workbuoy rask og naturlig å bruke — uten menyjakt.
 
-**Hvordan teste lokalt**
-```bash
-cd frontend
-npm i -D @playwright/test
-npx playwright install --with-deps
-npx playwright test
-```
+**Hvordan teste**
+- `cd frontend && npm run dev`
+- Skriv `show me tasks from last week` → assistentsvar viser forstått intent.
+- Skriv `@ol` → kontaktforslag dukker opp.
+- Skriv `=34+8*2` → inline resultatchip.
+- Skriv `thu 14:00` → vises som dato-hint (kalender kommer senere).
 
 **Risiko/rollback**
-- Kun test + docs. Påvirker ikke prod-kode. Enkel å reverte.
+- Kun frontend + docs. Ingen endring i backend/CI. Enkel å reverte.
 
 **TODO (@dev)**
-- Legge inn `npx playwright install --with-deps` og `npx playwright test` i CI-workflow.
+- `/core/complete` kan konsumere `intent`-objektet for ekte handlinger senere.

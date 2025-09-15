@@ -1,0 +1,32 @@
+--- a/frontend/src/features/buoy/BuoyChat.tsx
++++ b/frontend/src/features/buoy/BuoyChat.tsx
+@@
+-import React, { useState, useRef, useEffect } from "react";
++import React, { useState, useRef, useEffect } from "react";
+ import { useBuoy } from "./useBuoy";
+ import WhyDrawer from "./WhyDrawer";
+ import type { UserMessage, AssistantMessage } from "./types";
++import MorphInput from "./MorphInput";
++import type { ParsedIntent } from "./commandParser";
+@@
+-  const [input, setInput] = useState("");
+   const endRef = useRef<HTMLDivElement>(null);
+@@
+-  function handleSend(e:React.FormEvent){
+-    e.preventDefault();
+-    if (!input.trim()) return;
+-    send(input.trim());
+-    setInput("");
+-  }
++  function handleSubmit(text: string, intent?: ParsedIntent){
++    send(text.trim(), intent as any);
++  }
+@@
+-      <form onSubmit={handleSend} style={{display:"grid",gridTemplateColumns:"1fr auto",gap:8,padding:8}}>
+-        <input value={input} onChange={e=>setInput(e.target.value)} placeholder="Skriv en handling…"
+-               style={{padding:"10px 12px", borderRadius:8, border:"1px solid rgba(255,255,255,.14)", background:"transparent", color:"var(--ink)"}} />
+-        <button className="chip">Send</button>
+-      </form>
++      <div style={{padding:8}}>
++        <MorphInput onSubmit={handleSubmit}/>
++      </div>
