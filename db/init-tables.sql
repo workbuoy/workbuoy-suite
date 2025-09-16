@@ -1,0 +1,10 @@
+CREATE TABLE IF NOT EXISTS crm_contacts (data JSONB NOT NULL);
+CREATE UNIQUE INDEX IF NOT EXISTS crm_contacts_id ON crm_contacts ((data->>'id'));
+CREATE TABLE IF NOT EXISTS tasks (data JSONB NOT NULL);
+CREATE UNIQUE INDEX IF NOT EXISTS tasks_id ON tasks ((data->>'id'));
+CREATE TABLE IF NOT EXISTS logs (data JSONB NOT NULL);
+CREATE UNIQUE INDEX IF NOT EXISTS logs_id ON logs ((data->>'id'));
+CREATE TABLE IF NOT EXISTS deals (data JSONB NOT NULL);
+CREATE UNIQUE INDEX IF NOT EXISTS deals_id ON deals ((data->>'id'));
+CREATE TABLE IF NOT EXISTS audit (data JSONB NOT NULL);
+CREATE UNIQUE INDEX IF NOT EXISTS audit_id ON audit ((data->>'id'));
