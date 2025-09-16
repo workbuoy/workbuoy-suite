@@ -9,3 +9,16 @@ module.exports = {
     }]
   }
 };
+
+module.exports = {
+  rules: {
+    'no-restricted-imports': ['error', {
+      paths: [],
+      patterns: [
+        '**/contacts.route.ts',
+        '**/tasks.route.ts',
+        '**/log.route.ts'
+      ]
+    }]
+  }
+};
