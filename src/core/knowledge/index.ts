@@ -1,14 +1,9 @@
-// src/core/knowledge/index.ts
-export type KnowledgeResult = { id: string; title: string; snippet: string; score: number };
-export interface KnowledgeIndex {
-  search(q: string): Promise<KnowledgeResult[]>;
-}
-export class StubKnowledgeIndex implements KnowledgeIndex {
-  async search(q: string): Promise<KnowledgeResult[]> {
-    if (!q) return [];
-    return [{ id: 'stub-1', title: `Result for "${q}"`, snippet: 'stub', score: 0.1 }];
-  }
-}
+import { KnowledgeIndex } from './base';
+import { StubKnowledgeIndex } from './stubIndex';
+import { FileKnowledgeIndex } from './fileIndex';
+
 export function getKnowledgeIndex(): KnowledgeIndex {
+  const mode = process.env.KNOWLEDGE_MODE || 'stub';
+  if (mode==='file') return new FileKnowledgeIndex();
   return new StubKnowledgeIndex();
 }
