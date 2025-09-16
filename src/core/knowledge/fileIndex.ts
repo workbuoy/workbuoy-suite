@@ -1,16 +1,14 @@
-// src/core/knowledge/fileIndex.ts
-import { FileRepo } from '../persist/fileRepo';
-import type { KnowledgeResult, KnowledgeIndex } from './index';
-
+import { KnowledgeIndex } from './base';
+import fs from 'fs';
 export class FileKnowledgeIndex implements KnowledgeIndex {
-  private repo = new FileRepo<KnowledgeResult>('knowledge.index.json');
-  async search(q: string): Promise<KnowledgeResult[]> {
-    if (!q) return [];
-    const results = await this.repo.all();
-    const existing = results.filter(r => r.title.includes(q) || r.snippet.includes(q));
-    if (existing.length) return existing;
-    const r = { id: `q-${Date.now()}`, title: `Cached ${q}`, snippet: 'cached', score: 1.0 };
-    await this.repo.upsert(r);
-    return [r];
+  private file: string;
+  private cache: Record<string, any[]> = {};
+  constructor(fname='knowledge.json'){ this.file=fname; this.load(); }
+  private load(){ try{ this.cache = JSON.parse(fs.readFileSync(this.file,'utf-8')); }catch{ this.cache={}; } }
+  private save(){ fs.writeFileSync(this.file, JSON.stringify(this.cache,null,2)); }
+  async search(q:string){ 
+    if(this.cache[q]) return { results:this.cache[q] };
+    const res:any[] = []; 
+    this.cache[q]=res; this.save(); return { results:res };
   }
 }

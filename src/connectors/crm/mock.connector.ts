@@ -1,6 +1,7 @@
-// src/connectors/crm/mock.connector.ts
-import { CRMConnector } from './connector.interface';
-export class MockCRMConnector implements CRMConnector {
-  async listContacts(){ return [{id:'1', name:'Mock Contact'}]; }
-  async upsertContact(_c:any){}
+import { CrmConnector } from './base';
+export class MockCrmConnector implements CrmConnector {
+  private items: any[] = [];
+  async listContacts(){ return this.items; }
+  async upsertContact(c:any){ this.items.push(c); return c; }
+  async removeContact(id:string){ this.items = this.items.filter(x=>x.id!==id); return true; }
 }
