@@ -1,25 +1,52 @@
-// frontend/src/features/crm/ContactsPanel.tsx
 import React, { useEffect, useState } from 'react';
-import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { apiFetch } from "@/api/client";
 
-type Contact = { id:string; name:string; email?:string; phone?:string };
+export function ContactsPanel() {
+  const [contacts, setContacts] = useState<any[]>([]);
+  const [open, setOpen] = useState(false);
+  const [form, setForm] = useState({ id:"", name:"", email:"", phone:"" });
 
-export default function ContactsPanel(){
-  const [contacts,setContacts] = useState<Contact[]>([]);
-  useEffect(()=>{
-    fetch('/api/crm/contacts').then(r=>r.json()).then(setContacts).catch(()=>{});
-  },[]);
+  async function load() {
+    const res = await apiFetch('/api/crm/contacts');
+    setContacts(res);
+  }
+  useEffect(()=>{ load(); }, []);
+
+  async function save() {
+    await apiFetch('/api/crm/contacts', { method:'POST', body: JSON.stringify(form) });
+    setOpen(false);
+    load();
+  }
+
   return (
-    <Card className="p-4">
-      <h2 className="text-xl mb-2">Contacts</h2>
-      <table className="w-full text-sm">
-        <thead><tr><th>Name</th><th>Email</th><th>Phone</th></tr></thead>
-        <tbody>
-          {contacts.map(c=>(
-            <tr key={c.id}><td>{c.name}</td><td>{c.email}</td><td>{c.phone}</td></tr>
-          ))}
-        </tbody>
-      </table>
+    <Card className="m-2">
+      <CardContent>
+        <div className="flex justify-between items-center mb-2">
+          <h2 className="text-xl font-bold">Contacts</h2>
+          <Dialog open={open} onOpenChange={setOpen}>
+            <DialogTrigger asChild>
+              <Button>Add Contact</Button>
+            </DialogTrigger>
+            <DialogContent>
+              <Input placeholder="id" value={form.id} onChange={e=>setForm({...form,id:e.target.value})}/>
+              <Input placeholder="name" value={form.name} onChange={e=>setForm({...form,name:e.target.value})}/>
+              <Input placeholder="email" value={form.email} onChange={e=>setForm({...form,email:e.target.value})}/>
+              <Input placeholder="phone" value={form.phone} onChange={e=>setForm({...form,phone:e.target.value})}/>
+              <Button onClick={save}>Save</Button>
+            </DialogContent>
+          </Dialog>
+        </div>
+        <table className="w-full">
+          <thead><tr><th>ID</th><th>Name</th><th>Email</th><th>Phone</th></tr></thead>
+          <tbody>
+            {contacts.map(c=>(<tr key={c.id}><td>{c.id}</td><td>{c.name}</td><td>{c.email}</td><td>{c.phone}</td></tr>))}
+          </tbody>
+        </table>
+      </CardContent>
     </Card>
   );
 }
