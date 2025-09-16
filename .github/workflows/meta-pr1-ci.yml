@@ -1,0 +1,25 @@
+name: META PR1 CI
+on:
+  push:
+    paths:
+      - 'openapi/meta.yaml'
+      - 'tests/meta/**'
+      - 'scripts/validate-openapi.ts'
+      - 'backend/meta/**'
+  pull_request:
+    paths:
+      - 'openapi/meta.yaml'
+      - 'tests/meta/**'
+      - 'scripts/validate-openapi.ts'
+      - 'backend/meta/**'
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: npm ci || npm i
+      - run: npx -y @apidevtools/swagger-parser@10.0.3 validate openapi/meta.yaml
+      - run: node -e "console.log('META PR1 CI - basic validation complete')"
