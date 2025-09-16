@@ -1,4 +1,6 @@
 # Contributing
-- Run roles gate: `node core/roles/validate_roles.js`
-- For docs/tests/scripts changes proposed by Builder, review carefully.
-- Use PR-preview environment when available.
+
+- Use small, meaningful commits (no "Add files via upload").
+- Ensure `npm test` passes before pushing.
+- Do not commit node_modules, dist, coverage, or data files.
+- Follow feature branch naming: cleanup/<scope>.

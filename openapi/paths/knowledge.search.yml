@@ -1,0 +1,25 @@
+get:
+  summary: Search knowledge
+  parameters:
+    - in: query
+      name: q
+      required: true
+      schema:
+        type: string
+  responses:
+    "200":
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              results:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id: { type: string }
+                    title: { type: string }
+                    snippet: { type: string }
+                    score: { type: number }
