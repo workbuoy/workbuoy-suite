@@ -24,3 +24,30 @@ intent-log.jsonl
 .env
 .env.local
 .env.*.local
+
+# dependencies
+node_modules/
+**/node_modules/
+
+# builds
+dist/
+build/
+out/
+**/dist/
+**/build/
+
+# coverage
+coverage/
+**/coverage/
+
+# data & logs
+data/
+intent-log.jsonl
+*.log
+*.tmp
+
+# misc
+.DS_Store
+.env
+.env.local
+.env.*.local
