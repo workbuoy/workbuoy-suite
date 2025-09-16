@@ -1,15 +1,15 @@
-name: META PR2 CI
+name: META PR1 CI
 on:
   push:
     paths:
-      - 'backend/meta/**'
       - 'openapi/meta.yaml'
+      - '.spectral.yaml'
   pull_request:
     paths:
-      - 'backend/meta/**'
       - 'openapi/meta.yaml'
+      - '.spectral.yaml'
 jobs:
-  smoke:
+  validate:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -18,8 +18,5 @@ jobs:
           node-version: '20'
       - name: Validate OpenAPI (swagger-parser)
         run: npx -y @apidevtools/swagger-parser@10.0.3 validate openapi/meta.yaml
-      - name: Ensure router compiles (tsc transpile-only)
-        run: |
-          npx -y esbuild@0.21 backend/meta/router.ts --bundle --platform=node --format=cjs --outfile=/tmp/meta-router.js || echo "esbuild fallback OK"
-      - name: Done
-        run: echo "META PR2 smoke OK"
+      - name: Lint OpenAPI (spectral)
+        run: npx -y @stoplight/spectral-cli@6.11.1 lint openapi/meta.yaml
