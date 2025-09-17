@@ -1,0 +1,8 @@
+{
+  "name": "workbuoy-suite",
+  "private": true,
+  "scripts": {
+    "test": "npm run test --prefix backend",
+    "typecheck": "tsc --noEmit -p tsconfig.meta.json"
+  }
+}

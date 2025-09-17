@@ -34,6 +34,7 @@ safeMount('/buoy', './src/routes/buoy.complete', 'buoyRouter');
 safeMount('/api/insights', './src/routes/insights', 'insightsRouter');
 safeMount('/api/finance', './src/routes/finance.reminder', 'financeReminderRouter');
 safeMount('/api', './src/routes/manual.complete', 'manualCompleteRouter');
+safeMount('/', './src/routes/genesis.autonomy', 'metaGenesisRouter');
 
 // Debug-only mounts (optional)
 if (process.env.NODE_ENV !== 'production') {
