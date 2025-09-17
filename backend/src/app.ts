@@ -1,11 +1,13 @@
 import express from 'express';
+import { randomUUID } from 'crypto';
 import { canAccess, EntityType, RecordMeta } from './rbac/policies.js';
 import { clearAudit, getAudit, pushAudit } from './rbac/audit.js';
-import { randomUUID } from 'crypto';
+import { createEvolutionRouter } from './meta-evolution/routes/evolution.routes.js';
 
 export function buildApp() {
   const app = express();
   app.use(express.json());
+  app.use('/api/meta-evolution', createEvolutionRouter());
 
   // simple in-memory store
   const store: Record<string, RecordMeta & any> = {};
