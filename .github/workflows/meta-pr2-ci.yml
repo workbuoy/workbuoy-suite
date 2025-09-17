@@ -1,8 +1,8 @@
 name: META PR2 CI (disabled)
 on:
-  pull_request: {}
+  workflow_dispatch:
 jobs:
   disabled:
     runs-on: ubuntu-latest
     steps:
-      - run: echo "META PR2 CI disabled"
+      - run: echo "META PR2 CI disabled on this branch"
