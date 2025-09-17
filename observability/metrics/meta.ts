@@ -10,3 +10,12 @@ export const metaReadinessChecksTotal = new client.Counter({
 export function recordMetaReadinessCheck(check: string, status: ProbeStatus): void {
   metaReadinessChecksTotal.inc({ check, status });
 }
+
+export const policyDeniesTotal = new client.Counter({
+  name: 'policy_denies_total',
+  help: 'Total policy deny decisions recorded by META.',
+});
+
+export function recordPolicyDenyMetric(): void {
+  policyDeniesTotal.inc();
+}

@@ -19,7 +19,7 @@ paths:
           content:
             application/json:
               schema: { $ref: '#/components/schemas/HealthResponse' }
-      security: []
+      security: []   # public
   /meta/readiness:
     get:
       operationId: getMetaReadiness
@@ -51,18 +51,29 @@ paths:
           content:
             application/json:
               schema: { $ref: '#/components/schemas/VersionResponse' }
-      security: []
+      security: []   # public
   /meta/capabilities:
     get:
       operationId: getMetaCapabilities
       tags: [meta]
-      summary: Capability toggles and availability snapshot
+      summary: Enabled modes, connectors, and feature flags
       responses:
         '200':
           description: Capabilities response
           content:
             application/json:
               schema: { $ref: '#/components/schemas/CapabilitiesResponse' }
+  /meta/policy:
+    get:
+      operationId: getMetaPolicy
+      tags: [meta]
+      summary: Policy snapshot & deny counters
+      responses:
+        '200':
+          description: Policy response
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PolicyResponse' }
 components:
   securitySchemes:
     bearerAuth:
@@ -104,12 +115,6 @@ components:
         git_sha: { type: string }
         built_at: { type: string, format: date-time }
         commit_time: { type: string, format: date-time }
-    ConnectorCapability:
-      type: object
-      required: [name, enabled]
-      properties:
-        name: { type: string }
-        enabled: { type: boolean }
     CapabilitiesResponse:
       type: object
       required: [modes, connectors, feature_flags]
@@ -123,9 +128,30 @@ components:
             secure: { type: boolean }
         connectors:
           type: array
-          items: { $ref: '#/components/schemas/ConnectorCapability' }
+          items:
+            type: object
+            required: [name, enabled]
+            properties:
+              name: { type: string }
+              enabled: { type: boolean }
         feature_flags:
           type: object
           additionalProperties: { type: boolean }
+    PolicyResponse:
+      type: object
+      required: [autonomy_level, policy_profile, deny_counters]
+      properties:
+        autonomy_level:
+          type: integer
+          enum: [0, 1, 2]
+        policy_profile:
+          type: string
+          enum: [default, secure, custom]
+        deny_counters:
+          type: object
+          required: [last_1h, last_24h]
+          properties:
+            last_1h: { type: integer, minimum: 0 }
+            last_24h: { type: integer, minimum: 0 }
 security:
   - bearerAuth: []

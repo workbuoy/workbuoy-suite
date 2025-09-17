@@ -39,3 +39,18 @@ export interface MetaReadinessResponse {
   checks: ProbeResult[];
   reason?: string;
 }
+
+export type MetaPolicyAutonomyLevel = 0 | 1 | 2;
+
+export type MetaPolicyProfile = 'default' | 'secure' | 'custom';
+
+export interface MetaPolicyDenyCounters {
+  last_1h: number;
+  last_24h: number;
+}
+
+export interface MetaPolicySnapshotResponse {
+  autonomy_level: MetaPolicyAutonomyLevel;
+  policy_profile: MetaPolicyProfile;
+  deny_counters: MetaPolicyDenyCounters;
+}
