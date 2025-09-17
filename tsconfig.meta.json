@@ -6,6 +6,9 @@
     "frontend/src/components/IntrospectionBadge.tsx",
     "frontend/src/types/static.d.ts",
     "backend/tests/genesis.autonomy.test.ts",
-    "backend/tests/__mocks__/**/*.ts"
+    "backend/tests/__mocks__/**/*.ts",
+    "backend/meta/**/*.ts",
+    "observability/metrics/**/*.ts",
+    "tests/meta/**/*.ts"
   ]
 }
