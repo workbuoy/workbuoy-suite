@@ -3,7 +3,17 @@
 // Re-exports the shared PriorityEventBus instance from ./events/bus
 // and keeps legacy publish/subscribe aliases for compatibility.
 
+import type { WorkbuoyEvent } from './events/bus';
+
 export type Priority = 'high' | 'med' | 'low';
+
+export type PriorityStatsName = 'high' | 'medium' | 'low' | 'med';
+
+export interface PriorityBusStats {
+  summary: { high: number; medium: number; low: number; dlq: number };
+  queues: Array<{ name: PriorityStatsName; size: number; events?: WorkbuoyEvent[] }>;
+  dlq: WorkbuoyEvent[];
+}
 
 export interface PriorityBus {
   emit<T>(
@@ -12,7 +22,7 @@ export interface PriorityBus {
     opts?: { priority?: Priority; idempotencyKey?: string }
   ): Promise<void>;
   on(type: string, handler: (payload: any) => Promise<void> | void): void;
-  stats(): Promise<{ queues: any[]; dlq: any[] }>;
+  stats(): Promise<PriorityBusStats>;
 
   // Compat helpers – kept for existing call sites
   publish?: PriorityBus['emit'];

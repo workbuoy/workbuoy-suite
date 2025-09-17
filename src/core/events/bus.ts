@@ -105,9 +105,25 @@ class PriorityEventBus {
     });
   }
 
-  async stats(): Promise<{ queues: Array<{ name: Priority; size: number }>; dlq: Array<WorkbuoyEvent> }> {
+  async stats(): Promise<{
+    summary: { high: number; medium: number; low: number; dlq: number };
+    queues: Array<{ name: Priority; size: number; events: Array<WorkbuoyEvent> }>;
+    dlq: Array<WorkbuoyEvent>;
+  }> {
+    const summary = {
+      high: this.queues.high.length,
+      medium: this.queues.medium.length,
+      low: this.queues.low.length,
+      dlq: this.dlq.length
+    } as const;
+
     return {
-      queues: PRIORITIES.map((name) => ({ name, size: this.queues[name].length })),
+      summary,
+      queues: PRIORITIES.map((name) => ({
+        name,
+        size: summary[name],
+        events: this.queues[name].map((event) => cloneEvent(event))
+      })),
       dlq: this.dlq.map((event) => cloneEvent(event))
     };
   }
