@@ -2,7 +2,7 @@
 module.exports = {
   preset: 'ts-jest',
   testEnvironment: 'node',
-  roots: ['<rootDir>/src', '<rootDir>/tests'],
+  roots: ['<rootDir>/src', '<rootDir>/tests', '<rootDir>/../tests'],
   moduleFileExtensions: ['ts', 'js', 'json'],
   transform: {
     '^.+\\.ts$': ['ts-jest'],
@@ -13,6 +13,7 @@ module.exports = {
     '^prom-client$': '<rootDir>/tests/__mocks__/prom-client.ts',
     '^jsonwebtoken$': '<rootDir>/tests/__mocks__/jsonwebtoken.ts',
     '^express$': '<rootDir>/node_modules/express',
+    '^supertest$': '<rootDir>/node_modules/supertest',
   },
   // If your package.json has "type": "module", this CJS config still works.
 };

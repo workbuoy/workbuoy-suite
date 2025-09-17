@@ -1,0 +1,123 @@
+openapi: 3.1.0
+info:
+  title: WorkBuoy META API
+  version: 1.0.0
+servers:
+  - url: /api
+paths:
+  /meta/health:
+    get:
+      summary: Get service health information
+      tags:
+        - META
+      operationId: getMetaHealth
+      responses:
+        '200':
+          description: Health payload
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MetaHealthResponse'
+  /meta/version:
+    get:
+      summary: Get deployment version info
+      tags:
+        - META
+      operationId: getMetaVersion
+      responses:
+        '200':
+          description: Version payload
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MetaVersionResponse'
+  /meta/readiness:
+    get:
+      summary: Run readiness probes for META surfaces
+      tags:
+        - META
+      operationId: getMetaReadiness
+      parameters:
+        - in: query
+          name: include
+          description: Filter readiness probes to a subset by name.
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: array
+            items:
+              type: string
+              enum: [db, queue, outbound]
+      responses:
+        '200':
+          description: Readiness status and probe breakdown.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MetaReadinessResponse'
+components:
+  schemas:
+    MetaHealthResponse:
+      type: object
+      additionalProperties: false
+      properties:
+        status:
+          type: string
+          enum: [ok, degraded, down]
+        uptime_s:
+          type: number
+        git_sha:
+          type: string
+        build_id:
+          type: string
+          nullable: true
+        started_at:
+          type: string
+          format: date-time
+      required: [status, uptime_s, git_sha, started_at]
+    MetaVersionResponse:
+      type: object
+      additionalProperties: false
+      properties:
+        semver:
+          type: string
+        git_sha:
+          type: string
+        built_at:
+          type: string
+          format: date-time
+      required: [semver, git_sha, built_at]
+    MetaProbeStatus:
+      type: string
+      enum: [ok, warn, fail]
+    MetaProbeResult:
+      type: object
+      additionalProperties: false
+      properties:
+        name:
+          type: string
+        status:
+          $ref: '#/components/schemas/MetaProbeStatus'
+        latency_ms:
+          type: integer
+          minimum: 0
+        reason:
+          type: string
+      required: [name, status, latency_ms]
+    MetaReadinessStatus:
+      type: string
+      enum: [ready, degraded, not_ready]
+    MetaReadinessResponse:
+      type: object
+      additionalProperties: false
+      properties:
+        status:
+          $ref: '#/components/schemas/MetaReadinessStatus'
+        checks:
+          type: array
+          items:
+            $ref: '#/components/schemas/MetaProbeResult'
+        reason:
+          type: string
+      required: [status, checks]
