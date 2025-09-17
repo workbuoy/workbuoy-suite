@@ -2,5 +2,8 @@ const baseConfig = require('./jest.config.cjs');
 
 module.exports = {
   ...baseConfig,
-  testMatch: ['<rootDir>/tests/genesis.autonomy.test.ts'],
+  testMatch: [
+    '<rootDir>/tests/genesis.autonomy.test.ts',
+    '<rootDir>/tests/eventBus.stats.shape.test.ts',
+  ],
 };

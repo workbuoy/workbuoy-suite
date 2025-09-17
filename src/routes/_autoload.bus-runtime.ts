@@ -1,24 +1,36 @@
 // src/routes/_autoload.bus-runtime.ts
 // Ensures unified bus is non-noop at runtime by swapping in a simple in-proc priority bus if needed.
 type Handler = (payload:any)=>Promise<void>|void;
-type Priority = 'high'|'med'|'low';
+type Priority = 'high'|'medium'|'low';
 
 class InProcPriorityBus {
-  private q: Record<Priority, Array<{type:string,payload:any}>> = { high:[], med:[], low:[] };
+  private q: Record<Priority, Array<{type:string,payload:any}>> = { high:[], medium:[], low:[] };
   private handlers: Record<string, Handler[]> = {};
   async emit<T>(type:string, payload:T, opts?:{priority?:Priority,idempotencyKey?:string}) {
-    const p:Priority = opts?.priority || 'med';
+    const p:Priority = opts?.priority || 'medium';
     this.q[p].push({ type, payload });
     queueMicrotask(()=>this.drain());
   }
   on(type:string, h:Handler){ (this.handlers[type] ||= []).push(h as Handler); }
-  async stats(){ return { queues:[
-    {name:'high',size:this.q.high.length},
-    {name:'med',size:this.q.med.length},
-    {name:'low',size:this.q.low.length}
-  ], dlq:[] }; }
+  async stats(){
+    const summary = {
+      high: this.q.high.length,
+      medium: this.q.medium.length,
+      low: this.q.low.length,
+      dlq: 0
+    } as const;
+    return {
+      summary,
+      queues:[
+        {name:'high',size:summary.high,events:[...this.q.high]},
+        {name:'medium',size:summary.medium,events:[...this.q.medium]},
+        {name:'low',size:summary.low,events:[...this.q.low]}
+      ],
+      dlq:[]
+    };
+  }
   private async drain(){
-    for (const name of ['high','med','low'] as Priority[]) {
+    for (const name of ['high','medium','low'] as Priority[]) {
       const arr = this.q[name];
       while (arr.length) {
         const { type, payload } = arr.shift()!;
