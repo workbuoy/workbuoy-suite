@@ -3,6 +3,7 @@ import { getHealth } from './health';
 import { getVersion } from './version';
 import { runReadiness } from './readiness';
 import type { Probe } from './probes';
+import { getCapabilities } from './capabilities';
 
 export interface ReadinessOptions {
   probes?: Probe[];
@@ -53,7 +54,8 @@ export function createMetaRouter(options: MetaRouterOptions = {}): Router {
   });
 
   router.get('/capabilities', (_req: Request, res: Response) => {
-    res.status(501).json({ error: 'Not implemented' });
+    const payload = getCapabilities();
+    res.status(200).json(payload);
   });
 
   router.get('/policy', (_req: Request, res: Response) => {
