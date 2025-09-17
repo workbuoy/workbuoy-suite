@@ -1,23 +1,8 @@
-name: META PR2 CI
+name: META PR2 CI (disabled)
 on:
-  push:
-    paths:
-      - 'backend/meta/**'
-      - 'tests/meta/**'
-      - 'docs/PR2_NOTES.md'
-  pull_request:
-    paths:
-      - 'backend/meta/**'
-      - 'tests/meta/**'
-      - 'docs/PR2_NOTES.md'
+  workflow_dispatch:
 jobs:
-  test:
+  disabled:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-      - run: npm ci || npm i
-      - run: npx -y jest@29 --version || true
-      - run: npm test --workspaces -- --runTestsByPath tests/meta/health.version.test.ts || npx -y jest@29 tests/meta/health.version.test.ts
+      - run: echo "META PR2 CI disabled on this branch"

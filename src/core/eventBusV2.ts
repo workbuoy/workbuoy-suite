@@ -1,23 +1,37 @@
 // src/core/eventBusV2.ts
+// Single-surface event bus facade used by ALL imports.
+// Re-exports the shared PriorityEventBus instance from ./events/bus
+// and keeps legacy publish/subscribe aliases for compatibility.
+
+export type Priority = 'high' | 'med' | 'low';
+
 export interface PriorityBus {
-  emit<T>(type: string, payload: T, opts?: {priority?: 'high'|'med'|'low', idempotencyKey?: string}): Promise<void>;
-  on(type: string, handler: (payload:any)=>Promise<void>): void;
-  stats(): Promise<{queues:any[], dlq:any[]}>;
+  emit<T>(
+    type: string,
+    payload: T,
+    opts?: { priority?: Priority; idempotencyKey?: string }
+  ): Promise<void>;
+  on(type: string, handler: (payload: any) => Promise<void> | void): void;
+  stats(): Promise<{ queues: any[]; dlq: any[] }>;
+
+  // Compat helpers – kept for existing call sites
+  publish?: PriorityBus['emit'];
+  subscribe?: PriorityBus['on'];
+
+  // Introspection helpers (optional on impl)
+  reset?: () => void;
+  _peek?: () => any;
 }
 
-let priorityBus: any; let dlq: any;
-try { priorityBus = require('./priorityBus'); } catch {}
-try { dlq = require('./dlq'); } catch {}
+// Import the concrete shared instance
+import PriorityBusImpl from './events/bus';
 
-async function stats() {
-  const queues = (priorityBus?.snapshot && await priorityBus.snapshot()) || [];
-  const dead = (dlq?.snapshot && await dlq.snapshot()) || [];
-  return { queues, dlq: dead };
-}
+// Export the instance as the canonical bus
+export const bus: PriorityBus = PriorityBusImpl as unknown as PriorityBus;
 
-export const bus: PriorityBus = {
-  emit: (type: string, payload: any, opts?: any) => priorityBus?.emit ? priorityBus.emit(type, payload, opts) : Promise.resolve(),
-  on: (type: string, handler: (payload:any)=>Promise<void>) => { if (priorityBus?.on) priorityBus.on(type, handler); },
-  stats
-};
+// Back-compat aliases (publish/subscribe) mapped to emit/on
+(bus as any).publish = bus.emit.bind(bus);
+(bus as any).subscribe = bus.on.bind(bus);
+
+// Default export for consumers using `import bus from ...`
 export default bus;

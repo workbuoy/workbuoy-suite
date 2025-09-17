@@ -1,0 +1,8 @@
+name: META PR1 CI (disabled)
+on:
+  workflow_dispatch:
+jobs:
+  disabled:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "META PR1 CI disabled on this branch"
