@@ -13,3 +13,4 @@ export function api(path:string, method?:string, body?:any, headers?:Record<stri
 
 export default api;
 export { apiFetch } from '@/api/client';
+export { fetchIntrospectionReport } from './introspection';

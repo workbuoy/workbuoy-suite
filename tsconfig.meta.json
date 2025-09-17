@@ -1,0 +1,11 @@
+{
+  "extends": "./tsconfig.json",
+  "include": [
+    "src/routes/genesis.autonomy.ts",
+    "frontend/src/api/introspection.ts",
+    "frontend/src/components/IntrospectionBadge.tsx",
+    "frontend/src/types/static.d.ts",
+    "backend/tests/genesis.autonomy.test.ts",
+    "backend/tests/__mocks__/**/*.ts"
+  ]
+}

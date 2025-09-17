@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import BuoyChat from "../features/buoy/BuoyChat";
 import NaviGrid from "../features/navi/NaviGrid";
+import { IntrospectionBadge } from "./IntrospectionBadge";
 type Mode = "CHAT" | "NAVI";
 export default function FlipCard() {
   const [mode, setMode] = useState<Mode>("CHAT");
@@ -34,6 +35,7 @@ function Header({side, onFlip}:{side:"Buoy"|"Navi"; onFlip:()=>void}) {
     <div style={{display:"flex", alignItems:"center", gap:10}}>
       <strong style={{letterSpacing:.3, opacity:.9}}>{side}</strong>
       <span style={{flex:1}}/>
+      <IntrospectionBadge/>
       <HealthBadge/>
       <button onClick={onFlip} aria-label={side==="Buoy"?"Gå til Navi":"Gå til Buoy"} className="chip" style={{background:"transparent"}}>Flip</button>
     </div>

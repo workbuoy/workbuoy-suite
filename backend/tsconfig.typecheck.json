@@ -1,0 +1,12 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "rootDir": "."
+  },
+  "include": [
+    "src/**/*",
+    "tests/genesis.autonomy.test.ts",
+    "tests/__mocks__/**/*.ts"
+  ]
+}

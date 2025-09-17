@@ -105,7 +105,7 @@ importExportRouter.get('/export', async (req, res, next) => {
 
     if (fmt==='csv') {
       res.setHeader('Content-Type', 'text/csv');
-      res.setHeader('Content-Disposition', f'attachment; filename="{entity}.csv"');
+      res.setHeader('Content-Disposition', `attachment; filename="${entity}.csv"`);
       res.send(toCSV(items));
     } else {
       res.json({ items, next_cursor: null });
