@@ -52,6 +52,17 @@ paths:
             application/json:
               schema: { $ref: '#/components/schemas/VersionResponse' }
       security: []
+  /meta/capabilities:
+    get:
+      operationId: getMetaCapabilities
+      tags: [meta]
+      summary: Capability toggles and availability snapshot
+      responses:
+        '200':
+          description: Capabilities response
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/CapabilitiesResponse' }
 components:
   securitySchemes:
     bearerAuth:
@@ -93,5 +104,28 @@ components:
         git_sha: { type: string }
         built_at: { type: string, format: date-time }
         commit_time: { type: string, format: date-time }
+    ConnectorCapability:
+      type: object
+      required: [name, enabled]
+      properties:
+        name: { type: string }
+        enabled: { type: boolean }
+    CapabilitiesResponse:
+      type: object
+      required: [modes, connectors, feature_flags]
+      properties:
+        modes:
+          type: object
+          required: [core, flex, secure]
+          properties:
+            core: { type: boolean }
+            flex: { type: boolean }
+            secure: { type: boolean }
+        connectors:
+          type: array
+          items: { $ref: '#/components/schemas/ConnectorCapability' }
+        feature_flags:
+          type: object
+          additionalProperties: { type: boolean }
 security:
   - bearerAuth: []

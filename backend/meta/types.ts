@@ -10,6 +10,21 @@ export interface HealthResponse {
   started_at: string;
 }
 
+export interface MetaConnectorCapability {
+  name: string;
+  enabled: boolean;
+}
+
+export interface MetaCapabilitiesResponse {
+  modes: {
+    core: boolean;
+    flex: boolean;
+    secure: boolean;
+  };
+  connectors: MetaConnectorCapability[];
+  feature_flags: Record<string, boolean>;
+}
+
 export interface VersionResponse {
   semver: string;
   git_sha: string;
