@@ -3,6 +3,8 @@ import { getHealth } from './health';
 import { getVersion } from './version';
 import { runReadiness } from './readiness';
 import type { Probe } from './probes';
+import { getCapabilities } from './capabilities';
+import { getPolicySnapshot } from './policy';
 
 export interface ReadinessOptions {
   probes?: Probe[];
@@ -53,11 +55,17 @@ export function createMetaRouter(options: MetaRouterOptions = {}): Router {
   });
 
   router.get('/capabilities', (_req: Request, res: Response) => {
-    res.status(501).json({ error: 'Not implemented' });
+    const payload = getCapabilities();
+    res.status(200).json(payload);
   });
 
-  router.get('/policy', (_req: Request, res: Response) => {
-    res.status(501).json({ error: 'Not implemented' });
+  router.get('/policy', async (_req: Request, res: Response) => {
+    try {
+      const payload = await getPolicySnapshot();
+      res.status(200).json(payload);
+    } catch (_error) {
+      res.status(500).json({ error: 'policy_snapshot_unavailable' });
+    }
   });
 
   router.get('/audit-stats', (_req: Request, res: Response) => {
