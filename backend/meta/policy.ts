@@ -192,10 +192,10 @@ export function resetPolicySnapshot(): void {
   activeMetrics = new InMemoryPolicyMetricsStore();
 }
 
-export function recordPolicyDeny(at?: Date | number): void {
+export function recordPolicyDeny(at?: Date | number, feature = 'policy', reason = 'deny'): void {
   const recorded = activeMetrics.recordDeny(at);
   if (recorded) {
-    recordPolicyDenyMetric();
+    recordPolicyDenyMetric(feature, reason);
   }
 }
 

@@ -1,7 +1,9 @@
 import express from 'express';
+import type { NextFunction, Request, Response, Router as ExpressRouter } from 'express';
 import request from 'supertest';
 import { createMetaRouter } from '../../backend/meta/router';
 import type { Probe, ProbeResult } from '../../backend/meta/probes';
+import * as readinessModule from '../../backend/meta/readiness';
 
 const makeProbe = (result: Omit<ProbeResult, 'latency_ms'> & { latency_ms?: number }): Probe => ({
   name: result.name,
@@ -10,17 +12,25 @@ const makeProbe = (result: Omit<ProbeResult, 'latency_ms'> & { latency_ms?: numb
   },
 });
 
+const withUser = (router: ExpressRouter) => {
+  const app = express();
+  app.use((req: Request, _res: Response, next: NextFunction) => {
+    (req as any).user = { scopes: ['meta:read'] };
+    next();
+  });
+  app.use('/api/meta', router);
+  return app;
+};
+
 describe('META: /meta/readiness', () => {
   it('returns ready when every probe is ok', async () => {
     const router = createMetaRouter({
-      readiness: {
-        probes: [
-          makeProbe({ name: 'db', status: 'ok' }),
-          makeProbe({ name: 'queue', status: 'ok' }),
-        ],
-      },
+      probes: [
+        makeProbe({ name: 'db', status: 'ok' }),
+        makeProbe({ name: 'queue', status: 'ok' }),
+      ],
     });
-    const app = express().use('/api/meta', router);
+    const app = withUser(router);
 
     const response = await request(app).get('/api/meta/readiness');
 
@@ -37,14 +47,12 @@ describe('META: /meta/readiness', () => {
 
   it('returns degraded when a probe warns', async () => {
     const router = createMetaRouter({
-      readiness: {
-        probes: [
-          makeProbe({ name: 'db', status: 'ok' }),
-          makeProbe({ name: 'queue', status: 'warn', reason: 'lagging' }),
-        ],
-      },
+      probes: [
+        makeProbe({ name: 'db', status: 'ok' }),
+        makeProbe({ name: 'queue', status: 'warn', reason: 'lagging' }),
+      ],
     });
-    const app = express().use('/api/meta', router);
+    const app = withUser(router);
 
     const response = await request(app).get('/api/meta/readiness');
 
@@ -56,14 +64,12 @@ describe('META: /meta/readiness', () => {
 
   it('returns not_ready when a probe fails, even if others succeed', async () => {
     const router = createMetaRouter({
-      readiness: {
-        probes: [
-          makeProbe({ name: 'db', status: 'ok' }),
-          makeProbe({ name: 'outbound', status: 'fail', reason: 'timeout' }),
-        ],
-      },
+      probes: [
+        makeProbe({ name: 'db', status: 'ok' }),
+        makeProbe({ name: 'outbound', status: 'fail', reason: 'timeout' }),
+      ],
     });
-    const app = express().use('/api/meta', router);
+    const app = withUser(router);
 
     const response = await request(app).get('/api/meta/readiness');
 
@@ -76,15 +82,13 @@ describe('META: /meta/readiness', () => {
 
   it('filters probes via include query parameter', async () => {
     const router = createMetaRouter({
-      readiness: {
-        probes: [
-          makeProbe({ name: 'db', status: 'ok' }),
-          makeProbe({ name: 'queue', status: 'ok' }),
-          makeProbe({ name: 'outbound', status: 'ok' }),
-        ],
-      },
+      probes: [
+        makeProbe({ name: 'db', status: 'ok' }),
+        makeProbe({ name: 'queue', status: 'ok' }),
+        makeProbe({ name: 'outbound', status: 'ok' }),
+      ],
     });
-    const app = express().use('/api/meta', router);
+    const app = withUser(router);
 
     const response = await request(app).get('/api/meta/readiness').query({ include: ['db', 'queue,outbound'] });
 
@@ -95,21 +99,18 @@ describe('META: /meta/readiness', () => {
   });
 
   it('surfaces runner errors without throwing 500', async () => {
-    const router = createMetaRouter({
-      readiness: {
-        probes: [],
-        runner: async () => {
-          throw new Error('simulated failure');
-        },
-      },
-    });
-    const app = express().use('/api/meta', router);
+    const spy = jest.spyOn(readinessModule, 'runReadiness').mockRejectedValueOnce(new Error('simulated failure'));
+    const router = createMetaRouter();
+    const app = withUser(router);
 
     const response = await request(app).get('/api/meta/readiness');
 
     expect(response.status).toBe(200);
     expect(response.body.status).toBe('not_ready');
-    expect(response.body.reason).toBe('simulated failure');
-    expect(response.body.checks).toEqual([]);
+    expect(response.body.checks).toEqual([
+      { name: 'handler', status: 'fail', latency_ms: 0, reason: 'handler-error' },
+    ]);
+
+    spy.mockRestore();
   });
 });

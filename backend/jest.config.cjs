@@ -11,6 +11,7 @@ module.exports = {
     // Resolve TS files when imports end with .js (e.g., './rbac/policies.js')
     '^(\\.{1,2}/.*)\\.js$': '$1',
     '^prom-client$': '<rootDir>/tests/__mocks__/prom-client.ts',
+    '^express-rate-limit$': '<rootDir>/tests/__mocks__/express-rate-limit.ts',
     '^jsonwebtoken$': '<rootDir>/tests/__mocks__/jsonwebtoken.ts',
     '^express$': '<rootDir>/node_modules/express',
     '^supertest$': '<rootDir>/node_modules/supertest',
