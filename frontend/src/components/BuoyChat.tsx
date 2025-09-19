@@ -3,7 +3,7 @@ import { parseToQuery } from '../buoy/parser';
 import type { GlobalSearchQuery, BuoyCompletion } from '../buoy/types';
 import { Chips } from './Chips';
 import { ResultCard } from './ResultCard';
-import { apiFetch } from '../api/client';
+import { apiFetch } from '@/api';
 
 export default function BuoyChat(){
   const [text, setText] = useState('');
@@ -13,18 +13,20 @@ export default function BuoyChat(){
   const chips = useMemo(()=> Object.entries(query.filters).map(([k,v])=>({key:k, value:v as any})), [query]);
 
   async function run(){
-    const q = parseToQuery(text);
-    setQuery(q);
-    const res = await apiFetch('/buoy/complete', { method:'POST', body: JSON.stringify({ intent: 'visualize', params: q }) });
-    if (!res.ok) {
-      setExplanations([{reasoning:'Policy denied or error', confidence:0}]);
+    try {
+      const q = parseToQuery(text);
+      setQuery(q);
+      const body = await apiFetch<BuoyCompletion>('/buoy/complete', {
+        method:'POST',
+        body: JSON.stringify({ intent: 'visualize', params: q })
+      });
+      setExplanations(body.explanations || []);
+      const arr = Array.isArray(body.result) ? body.result : [{kunde:q.filters['kunde']||'acme', deal: 120000, region: q.filters['region']||'vest'}];
+      setData(arr);
+    } catch (err) {
+      setExplanations([{ reasoning: 'Policy denied or error', confidence: 0, error: String(err) }]);
       setData(null);
-      return;
     }
-    const body = await res.json() as BuoyCompletion;
-    setExplanations(body.explanations || []);
-    const arr = Array.isArray(body.result) ? body.result : [{kunde:q.filters['kunde']||'acme', deal: 120000, region: q.filters['region']||'vest'}];
-    setData(arr);
   }
 
   function removeFilter(key:string){

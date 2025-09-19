@@ -8,23 +8,62 @@ declare global {
         intent?: string;
         when?: string;
         autonomy?: number;
+        autonomyLevel?: number;
+        roleId?: string;
+        role?: string;
         selectedId?: string;
         selectedType?: string;
         correlationId: string;
-      }
+      };
+      correlationId?: string;
     }
   }
 }
 
-export function wbContext(req: Request, _res: Response, next: NextFunction){
-  const h = req.headers;
+function parseAutonomy(value: unknown, fallback?: number): number | undefined {
+  if (typeof value === "number" && Number.isFinite(value)) return value;
+  if (typeof value === "string" && value.trim().length) {
+    const numeric = Number(value);
+    if (Number.isFinite(numeric)) return numeric;
+  }
+  return fallback;
+}
+
+export function wbContext(req: Request, _res: Response, next: NextFunction) {
+  const headers = req.headers;
+  const existing = req.wb || {};
+
+  const headerCorrelation = (req as any).correlationId as string | undefined;
+  const correlationId =
+    headerCorrelation ||
+    (headers["x-correlation-id"] as string) ||
+    existing.correlationId ||
+    (typeof crypto.randomUUID === "function"
+      ? crypto.randomUUID()
+      : Math.random().toString(36).slice(2));
+
+  const autonomyLevel = parseAutonomy(
+    headers["x-autonomy-level"] ?? headers["x-wb-autonomy"] ?? headers["x-autonomy"],
+    existing.autonomyLevel
+  );
+
+  const roleHeader =
+    (headers["x-role"] || headers["x-role-id"] || headers["x-wb-role"]) as string | undefined;
+  const roleId = roleHeader?.toString().trim() || existing.roleId;
+
   req.wb = {
-    intent: String(h["x-wb-intent"] || "" ) || undefined,
-    when: String(h["x-wb-when"] || "" ) || undefined,
-    autonomy: h["x-wb-autonomy"] != null ? Number(h["x-wb-autonomy"]) : undefined,
-    selectedId: String(h["x-wb-selected-id"] || "" ) || undefined,
-    selectedType: String(h["x-wb-selected-type"] || "" ) || undefined,
-    correlationId: (h["x-correlation-id"] as string) || crypto.randomUUID()
+    ...existing,
+    intent: String(headers["x-wb-intent"] || existing.intent || "") || undefined,
+    when: String(headers["x-wb-when"] || existing.when || "") || undefined,
+    autonomy: autonomyLevel ?? existing.autonomy,
+    autonomyLevel: autonomyLevel ?? existing.autonomyLevel,
+    roleId: roleId || existing.roleId,
+    role: roleId || existing.role,
+    selectedId: String(headers["x-wb-selected-id"] || existing.selectedId || "") || undefined,
+    selectedType: String(headers["x-wb-selected-type"] || existing.selectedType || "") || undefined,
+    correlationId
   };
+
+  (req as any).correlationId = correlationId;
   next();
 }
