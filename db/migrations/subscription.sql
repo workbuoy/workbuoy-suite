@@ -1,0 +1,3 @@
+-- Subscription caps (placeholder migration)
+-- Intended to create subscription table storing plan, kill switch and overrides per tenant.
+-- Actual schema to be finalised when integrating with persistence layer.

@@ -5,5 +5,6 @@
 - Finance: `openapi/finance.yaml`
 - Buoy: `openapi/buoy.yaml`
 - Manual: `openapi/manual.yaml`
+- Proactivity: `openapi/proactivity.yaml`
 
 CI runs Spectral (non-blocking) over all specs.
