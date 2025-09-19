@@ -14,5 +14,9 @@ export type IntrospectionResponse = {
 };
 
 export async function fetchIntrospectionReport(): Promise<IntrospectionResponse> {
-  return apiFetch<IntrospectionResponse>('/genesis/introspection-report');
+  try {
+    return await apiFetch<IntrospectionResponse>('/api/introspection');
+  } catch (error) {
+    return apiFetch<IntrospectionResponse>('/genesis/introspection-report');
+  }
 }
