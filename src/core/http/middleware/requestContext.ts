@@ -8,5 +8,6 @@ export function requestContext(req: Request, _res: Response, next: NextFunction)
   const al = Number(req.headers['x-autonomy-level'] || 2);
   wb.autonomyLevel = Number.isFinite(al) ? al : 2;
   (req as any).wb = wb;
+  (req as any).correlationId = wb.correlationId;
   next();
 }
