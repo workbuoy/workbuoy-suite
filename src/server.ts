@@ -3,7 +3,7 @@ import express from 'express';
 import { correlationHeader } from './middleware/correlationHeader';
 import { wbContext } from './middleware/wbContext';
 import { requestLogger } from './core/logging/logger';
-import { timingMiddleware, metricsHandler } from './core/observability/metrics';
+import { timingMiddleware } from './core/observability/metrics';
 import { errorHandler } from './core/http/middleware/errorHandler';
 import { debugBusHandler } from './routes/_debug.bus';
 import knowledgeRouter from './routes/knowledge.router';
@@ -56,6 +56,10 @@ safeMount('/api/insights', './src/routes/insights', 'insightsRouter');
 safeMount('/api/finance', './src/routes/finance.reminder', 'financeReminderRouter');
 safeMount('/api', './src/routes/manual.complete', 'manualCompleteRouter');
 safeMount('/', './src/routes/genesis.autonomy', 'metaGenesisRouter');
+safeMount('/api', '../backend/routes/proactivity');
+safeMount('/api', '../backend/routes/admin.subscription');
+safeMount('/api', '../backend/routes/explainability');
+safeMount('/', '../backend/routes/metrics');
 
 app.use('/api', knowledgeRouter);
 app.use('/api/audit', auditRouter());
@@ -64,6 +68,7 @@ app.use('/api/audit', auditRouter());
 if (process.env.NODE_ENV !== 'production') {
   safeMount('/api', './src/routes/debug.dlq', 'debugDlqRouter');
   safeMount('/api', './src/routes/debug.circuit', 'debugCircuitRouter');
+  safeMount('/api', '../backend/routes/dev.runner');
 }
 
 // Operability surfaces
@@ -83,8 +88,6 @@ app.get('/status', async (_req, res) => {
 });
 
 app.get('/_debug/bus', debugBusHandler);
-app.get('/metrics', metricsHandler);
-
 // Health / readiness / build
 app.get('/healthz', (_req, res) => res.json({ ok: true }));
 app.get('/readyz', (_req, res) => res.json({ ok: true }));

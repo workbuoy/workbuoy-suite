@@ -1,34 +1,80 @@
-import { policyCheckRoleAware } from './policyRoleAware';
+import { RoleRegistry } from '../roles/registry';
+import { policyCheckRoleAware, RoleAwareContext } from './policyRoleAware';
+import { modeToKey, ProactivityMode } from './proactivity/modes';
+
+interface CapabilityImpl<T> {
+  observe?: () => Promise<void>;
+  suggest?: () => Promise<T>;
+  prepare?: () => Promise<T>;
+  execute?: () => Promise<T>;
+  overlay?: () => Promise<T>;
+  rollback?: (outcome: T) => Promise<void>;
+}
 
 export async function runCapabilityWithRole<T>(
-  rr: any,
+  rr: RoleRegistry,
   capabilityId: string,
   featureId: string | undefined,
   payload: any,
-  ctx: { autonomy_level: 1|2|3|4|5|6; tenantId: string; roleBinding: { userId:string; primaryRole:string; secondaryRoles?:string[] } },
-  impl: { observe?:()=>Promise<void>; suggest?:()=>Promise<T>; prepare?:()=>Promise<T>; execute?:()=>Promise<T>; overlay?:()=>Promise<T>; rollback?: (o:T)=>Promise<void>; },
-  policyCheckImpl: (input:any, ctx:any)=>Promise<{allowed:boolean; basis?:string[]}>,
-  logIntent: (i:any)=>Promise<void>
-){
-  const policy = await policyCheckRoleAware({ capability: capabilityId, featureId, payload }, ctx, rr, policyCheckImpl);
-  const mode = ctx.autonomy_level >= 5 ? 'integration' : 'simulate';
-  let outcome: any;
+  ctx: RoleAwareContext,
+  impl: CapabilityImpl<T>,
+  policyCheckImpl: (input: any, ctx: any) => Promise<{ allowed: boolean; basis?: string[] }>,
+  logIntent: (event: any) => Promise<void>
+) {
+  const { policy, proactivity } = await policyCheckRoleAware({ capability: capabilityId, featureId, payload }, ctx, rr, policyCheckImpl);
+  const mode = proactivity.effective;
+  const logBase = {
+    tenantId: ctx.tenantId,
+    capability: capabilityId,
+    payload,
+    policy,
+    proactivity: {
+      requested: proactivity.requestedKey,
+      effective: proactivity.effectiveKey,
+      basis: proactivity.basis,
+    },
+    mode: modeToKey(mode),
+  };
+
+  let outcome: T | undefined;
 
   if (!policy.allowed) {
-    await logIntent({ tenantId: ctx.tenantId, capability: capabilityId, payload, policy, mode, degraded_mode: 'ask_approval' });
-    return { policy };
+    await logIntent({ ...logBase, degraded_mode: 'ask_approval' });
+    return { policy, proactivity };
   }
 
   try {
-    switch (ctx.autonomy_level) {
-      case 1: case 2: await impl.observe?.(); break;
-      case 3: outcome = await impl.suggest?.(); break;
-      case 4: outcome = await impl.prepare?.(); break;
-      case 5: outcome = await impl.execute?.(); break;
-      case 6: outcome = await (impl.execute?.() ?? impl.overlay?.()); break;
+    switch (mode) {
+      case ProactivityMode.Usynlig:
+      case ProactivityMode.Rolig:
+        await impl.observe?.();
+        break;
+      case ProactivityMode.Proaktiv:
+        outcome = await impl.suggest?.();
+        break;
+      case ProactivityMode.Ambisiøs:
+        outcome = await impl.prepare?.();
+        break;
+      case ProactivityMode.Kraken:
+        outcome = await impl.execute?.();
+        break;
+      case ProactivityMode.Tsunami: {
+        if (impl.execute) {
+          outcome = await impl.execute();
+        }
+        if (impl.overlay) {
+          const overlayResult = await impl.overlay();
+          outcome = (overlayResult ?? outcome) as T | undefined;
+        }
+        break;
+      }
+      default:
+        await impl.observe?.();
+        break;
     }
   } finally {
-    await logIntent({ tenantId: ctx.tenantId, capability: capabilityId, payload, policy, mode, outcome });
+    await logIntent({ ...logBase, outcome });
   }
-  return { outcome, policy };
+
+  return { outcome, policy, proactivity };
 }

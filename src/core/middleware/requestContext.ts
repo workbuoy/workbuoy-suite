@@ -5,11 +5,15 @@ declare global {
   namespace Express {
     interface Request {
       correlationId?: string;
+      wb?: { correlationId?: string };
     }
   }
 }
 
 export function requestContext(req: Request, _res: Response, next: NextFunction) {
-  req.correlationId = req.headers["x-correlation-id"]?.toString() || randomUUID();
+  const correlationId = req.headers["x-correlation-id"]?.toString() || randomUUID();
+  req.correlationId = correlationId;
+  const existing = (req as any).wb || {};
+  (req as any).wb = { ...existing, correlationId };
   next();
 }

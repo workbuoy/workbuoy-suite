@@ -1,0 +1,31 @@
+{
+  "title": "Proactivity Overview",
+  "uid": "proactivity",
+  "timezone": "browser",
+  "panels": [
+    {
+      "type": "stat",
+      "title": "Effective mode (last scrape)",
+      "targets": [
+        { "expr": "proactivity_dummy" }
+      ],
+      "gridPos": { "x": 0, "y": 0, "w": 8, "h": 4 }
+    },
+    {
+      "type": "graph",
+      "title": "Degradations",
+      "targets": [
+        { "expr": "proactivity_degrade_total" }
+      ],
+      "gridPos": { "x": 8, "y": 0, "w": 16, "h": 8 }
+    },
+    {
+      "type": "table",
+      "title": "Overrides / Kill switch",
+      "targets": [
+        { "expr": "proactivity_overrides" }
+      ],
+      "gridPos": { "x": 0, "y": 8, "w": 24, "h": 8 }
+    }
+  ]
+}

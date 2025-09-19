@@ -1,33 +1,32 @@
 import { RoleRegistry } from '../../src/roles/registry';
 import { policyCheckRoleAware } from '../../src/core/policyRoleAware';
+import { ProactivityMode } from '../../src/core/proactivity/modes';
 
-const roles = [
-  { role_id:'sales_rep', canonical_title:'Sales Rep', featureCaps:{ lead_qualification:5 } },
-  { role_id:'cfo', canonical_title:'CFO', featureCaps:{ cashflow_forecast:3 } }
-] as any;
+const rr = new RoleRegistry(
+  [
+    { role_id: 'sales_rep', canonical_title: 'Sales Rep', featureCaps: { 'crm': 3 } },
+  ] as any,
+  [
+    { id: 'crm', title: 'CRM', capabilities: ['demo'], defaultAutonomyCap: 3 },
+  ],
+  []
+);
 
-const features = [
-  { id:'lead_qualification', title:'Lead Qualification', defaultAutonomyCap:5, capabilities:['crm.email.send'] },
-  { id:'cashflow_forecast', title:'Cashflow', defaultAutonomyCap:3, capabilities:['finance.cashflow.forecast'] }
-] as any;
+describe('policy role cap enforcement', () => {
+  it('degrades requested mode beyond role cap', async () => {
+    const policySpy = jest.fn(async () => ({ allowed: true, basis: ['policy:allow'] }));
+    const result = await policyCheckRoleAware(
+      { capability: 'demo', featureId: 'crm' },
+      { tenantId: 'TEN', roleBinding: { userId: 'user', primaryRole: 'sales_rep' }, requestedMode: ProactivityMode.Tsunami },
+      rr,
+      policySpy
+    );
 
-async function allow(){ return { allowed: true, basis:['ok'] }; }
-
-test('sales_rep L=5 allowed for lead_qualification (crm.email.send)', async () => {
-  const rr = new RoleRegistry(roles, features, []);
-  const res = await policyCheckRoleAware(
-    { capability:'crm.email.send' },
-    { autonomy_level: 5, tenantId:'DEV', roleBinding:{ userId:'u1', primaryRole:'sales_rep' } },
-    rr, allow);
-  expect(res.allowed).toBe(true);
-});
-
-test('cfo L=4 blocked for cashflow_forecast', async () => {
-  const rr = new RoleRegistry(roles, features, []);
-  const res = await policyCheckRoleAware(
-    { capability:'finance.cashflow.forecast' },
-    { autonomy_level: 4, tenantId:'DEV', roleBinding:{ userId:'u2', primaryRole:'cfo' } },
-    rr, allow);
-  expect(res.allowed).toBe(false);
-  expect(res.basis?.some(b=>b.startsWith('roleCap:'))).toBe(true);
+    expect(result.proactivity.effective).toBe(ProactivityMode.Proaktiv);
+    expect(result.proactivity.basis).toEqual(expect.arrayContaining(['cap:role:crm:proaktiv']));
+    expect(policySpy).toHaveBeenCalledWith(
+      expect.any(Object),
+      expect.objectContaining({ autonomy_level: ProactivityMode.Proaktiv })
+    );
+  });
 });

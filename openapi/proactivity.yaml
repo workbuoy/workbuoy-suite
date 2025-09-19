@@ -1,0 +1,183 @@
+openapi: 3.0.3
+info:
+  title: Workbuoy Proactivity API
+  version: 0.1.0
+servers:
+  - url: https://api.workbuoy.local
+paths:
+  /api/proactivity/state:
+    get:
+      summary: Get proactivity state for current tenant/user
+      parameters:
+        - in: header
+          name: x-tenant
+          schema: { type: string }
+        - in: header
+          name: x-user
+          schema: { type: string }
+        - in: header
+          name: x-role
+          schema: { type: string }
+        - in: header
+          name: x-proactivity
+          schema:
+            type: string
+            description: Desired mode (numeric 1-6 or keyword)
+      responses:
+        '200':
+          description: Current proactivity posture
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProactivityState'
+    post:
+      summary: Request a new proactivity mode
+      parameters:
+        - in: header
+          name: x-tenant
+          schema: { type: string }
+        - in: header
+          name: x-user
+          schema: { type: string }
+        - in: header
+          name: x-role
+          schema: { type: string }
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                requestedMode:
+                  type: string
+                  description: Desired mode (number or keyword)
+                featureId:
+                  type: string
+      responses:
+        '200':
+          description: Resolved proactivity state
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProactivityState'
+  /api/admin/subscription:
+    get:
+      summary: Get subscription configuration for tenant
+      parameters:
+        - in: header
+          name: x-tenant
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Subscription state
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubscriptionState'
+    put:
+      summary: Update subscription configuration
+      parameters:
+        - in: header
+          name: x-tenant
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                plan:
+                  type: string
+                  enum: [flex, secure, enterprise]
+                killSwitch:
+                  type: boolean
+                secureTenant:
+                  type: boolean
+                maxOverride:
+                  type: string
+                  description: Optional numeric mode override
+      responses:
+        '200':
+          description: Updated subscription state
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubscriptionState'
+  /api/explain/last:
+    get:
+      summary: Fetch recent proactivity events for explainability UI
+      responses:
+        '200':
+          description: Recent events
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  events:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/TelemetryEvent'
+components:
+  schemas:
+    ProactivityState:
+      type: object
+      properties:
+        tenantId: { type: string }
+        requested: { type: integer, minimum: 1, maximum: 6 }
+        requestedKey: { type: string }
+        effective: { type: integer, minimum: 1, maximum: 6 }
+        effectiveKey: { type: string }
+        basis:
+          type: array
+          items: { type: string }
+        caps:
+          type: array
+          items:
+            type: object
+            properties:
+              id: { type: string }
+              label: { type: string }
+              mode: { type: integer, minimum: 1, maximum: 6 }
+        degradeRail:
+          type: array
+          items: { type: integer, minimum: 1, maximum: 6 }
+        uiHints:
+          type: object
+          properties:
+            overlay: { type: boolean }
+            callToAction: { type: string }
+            banner: { type: string }
+            healthChecks: { type: boolean }
+            reviewType: { type: string }
+        subscription:
+          $ref: '#/components/schemas/SubscriptionState'
+        featureId: { type: string, nullable: true }
+        timestamp: { type: string, format: date-time }
+    SubscriptionState:
+      type: object
+      properties:
+        tenantId: { type: string }
+        plan: { type: string, enum: [flex, secure, enterprise] }
+        killSwitch: { type: boolean }
+        secureTenant: { type: boolean }
+        maxMode: { type: integer, minimum: 1, maximum: 6 }
+        maxOverride: { type: integer, nullable: true }
+    TelemetryEvent:
+      type: object
+      properties:
+        ts: { type: integer, format: int64 }
+        tenantId: { type: string }
+        userId: { type: string, nullable: true }
+        requested: { type: integer, minimum: 1, maximum: 6 }
+        requestedKey: { type: string }
+        effective: { type: integer, minimum: 1, maximum: 6 }
+        effectiveKey: { type: string }
+        basis:
+          type: array
+          items: { type: string }
+        source: { type: string, nullable: true }
