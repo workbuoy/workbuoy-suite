@@ -7,7 +7,11 @@ import { apiFetch } from "@/api";
 
 type FormState = { id:string; name:string; email:string; phone:string };
 
-export function ContactsPanel({ onClose }: { onClose?: () => void } = {}) {
+export type ContactsPanelProps = {
+  onClose?: () => void;
+};
+
+export function ContactsPanel({ onClose }: ContactsPanelProps = {}) {
   const [contacts, setContacts] = useState<any[]>([]);
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState<FormState>({ id:"", name:"", email:"", phone:"" });
@@ -30,18 +34,25 @@ export function ContactsPanel({ onClose }: { onClose?: () => void } = {}) {
       <CardContent>
         <div className="flex justify-between items-center mb-2">
           <h2 className="text-xl font-bold">Contacts</h2>
-          <Dialog open={open} onOpenChange={(value)=>{ setOpen(value); if (!value && onClose) onClose(); }}>
-            <DialogTrigger asChild>
-              <Button>Add Contact</Button>
-            </DialogTrigger>
-            <DialogContent>
-              <Input placeholder="id" value={form.id} onChange={e=>setForm({...form,id:e.target.value})}/>
-              <Input placeholder="name" value={form.name} onChange={e=>setForm({...form,name:e.target.value})}/>
-              <Input placeholder="email" value={form.email} onChange={e=>setForm({...form,email:e.target.value})}/>
-              <Input placeholder="phone" value={form.phone} onChange={e=>setForm({...form,phone:e.target.value})}/>
-              <Button onClick={save}>Save</Button>
-            </DialogContent>
-          </Dialog>
+          <div className="flex items-center gap-2">
+            {onClose && (
+              <Button variant="ghost" size="sm" onClick={onClose} aria-label="Close contacts panel">
+                Close
+              </Button>
+            )}
+            <Dialog open={open} onOpenChange={(value)=>{ setOpen(value); }}>
+              <DialogTrigger asChild>
+                <Button>Add Contact</Button>
+              </DialogTrigger>
+              <DialogContent>
+                <Input placeholder="id" value={form.id} onChange={e=>setForm({...form,id:e.target.value})}/>
+                <Input placeholder="name" value={form.name} onChange={e=>setForm({...form,name:e.target.value})}/>
+                <Input placeholder="email" value={form.email} onChange={e=>setForm({...form,email:e.target.value})}/>
+                <Input placeholder="phone" value={form.phone} onChange={e=>setForm({...form,phone:e.target.value})}/>
+                <Button onClick={save}>Save</Button>
+              </DialogContent>
+            </Dialog>
+          </div>
         </div>
         <table className="w-full">
           <thead><tr><th>ID</th><th>Name</th><th>Email</th><th>Phone</th></tr></thead>
