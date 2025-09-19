@@ -1,4 +1,4 @@
-import { maskValue } from '../security/pii';
+import maskValue from '../security/maskValue';
 
 export type LogLevel = 'info' | 'warn' | 'error' | 'debug';
 

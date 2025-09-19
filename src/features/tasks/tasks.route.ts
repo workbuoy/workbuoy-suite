@@ -4,6 +4,7 @@ import { policyGuard } from "../../core/policy";
 import { emit } from "../../core/eventBus";
 import crypto from "crypto";
 import { appendAudit } from "../../core/audit";
+import { log } from "../../core/logging/logger";
 
 const Task = z.object({
   id: z.string().uuid(),
@@ -24,7 +25,8 @@ const router = Router();
 router.get("/api/tasks", (req, res) => {
   const status = req.query.status?.toString();
   const items = Array.from(store.values()).filter(t => !status || t.status === status);
-  res.json({ items, correlationId: (req as any).correlationId, explanation: (req as any).__explanation });
+  log('info', 'tasks.route', 'list', { status, count: items.length }, req.correlationId);
+  res.json({ items, correlationId: req.correlationId, explanation: (req as any).__explanation });
 });
 
 router.post("/api/tasks", policyGuard, async (req, res) => {
@@ -35,7 +37,8 @@ router.post("/api/tasks", policyGuard, async (req, res) => {
   store.set(id, task);
   appendAudit("task.create", { id, task });
   await emit({ type: "task.created", payload: task, priority: "normal" });
-  res.status(201).json({ item: task, correlationId: (req as any).correlationId, explanation: (req as any).__explanation });
+  log('info', 'tasks.route', 'create', { id }, req.correlationId);
+  res.status(201).json({ item: task, correlationId: req.correlationId, explanation: (req as any).__explanation });
 });
 
 router.patch("/api/tasks/:id", policyGuard, async (req, res) => {
@@ -48,7 +51,8 @@ router.patch("/api/tasks/:id", policyGuard, async (req, res) => {
   store.set(id, next);
   appendAudit("task.update", { id, patch: patch.data });
   await emit({ type: "task.updated", payload: next, priority: "normal" });
-  res.json({ item: next, correlationId: (req as any).correlationId, explanation: (req as any).__explanation });
+  log('info', 'tasks.route', 'update', { id }, req.correlationId);
+  res.json({ item: next, correlationId: req.correlationId, explanation: (req as any).__explanation });
 });
 
 router.delete("/api/tasks/:id", policyGuard, async (req, res) => {
@@ -57,6 +61,7 @@ router.delete("/api/tasks/:id", policyGuard, async (req, res) => {
   store.delete(id);
   appendAudit("task.delete", { id });
   await emit({ type: "task.deleted", payload: { id }, priority: "low" });
+  log('info', 'tasks.route', 'delete', { id }, req.correlationId);
   res.status(204).end();
 });
 

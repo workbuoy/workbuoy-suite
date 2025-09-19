@@ -32,7 +32,7 @@ function tryRequire<T = any>(mod: string): T | null {
 const explainLib = tryRequire<any>("../core/explain");
 const eventBus = tryRequire<any>("../core/eventBus");
 const audit = tryRequire<any>("../core/audit");
-const logger = tryRequire<any>("../core/logger");
+const logging = tryRequire<any>("../core/logging/logger");
 
 function buildExplanation(input: Partial<Explanation>): Explanation {
   if (explainLib && typeof explainLib.buildExplanation === "function") {
@@ -53,7 +53,7 @@ export async function run(input: RunInput, req: Request): Promise<RunOutput> {
   const { intent, params } = input || {};
   const corrId = ctx.correlationId;
 
-  logger?.info?.({ corrId, intent, tag: "buoy.run.start" });
+  logging?.log?.("info", "buoy.agent", "buoy.run.start", { intent }, corrId);
 
   // Reasoning (MVP)
   const planRes = await plan(intent, ctx);
@@ -81,7 +81,7 @@ export async function run(input: RunInput, req: Request): Promise<RunOutput> {
     await audit.append({ ts: new Date().toISOString(), msg: "buoy.action.executed", meta: { intent, action: planRes.action, ok: !!execRes?.ok, corrId } });
   }
 
-  logger?.info?.({ corrId, intent, tag: "buoy.run.end" });
+  logging?.log?.("info", "buoy.agent", "buoy.run.end", { intent }, corrId);
 
   return {
     result: execRes,
