@@ -1,0 +1,24 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": true
+  },
+  "include": [],
+  "files": [
+    "src/core/proactivity/modes.ts",
+    "src/core/proactivity/state.ts",
+    "src/core/proactivity/context.ts",
+    "src/core/proactivity/telemetry.ts",
+    "src/core/proactivity/guards.ts",
+    "src/core/policyRoleAware.ts",
+    "src/core/capabilityRunnerRole.ts",
+    "src/core/subscription/types.ts",
+    "src/core/subscription/entitlements.ts",
+    "src/core/subscription/state.ts",
+    "backend/routes/proactivity.ts",
+    "backend/routes/admin.subscription.ts",
+    "backend/routes/explainability.ts",
+    "backend/routes/metrics.ts",
+    "backend/routes/dev.runner.ts"
+  ]
+}

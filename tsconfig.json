@@ -22,6 +22,7 @@
   "include": [
     "src/**/*.ts",
     "backend/src/**/*.ts",
+    "backend/routes/**/*.ts",
     "backend/tests/**/*.ts",
     "frontend/src/**/*.ts",
     "frontend/src/**/*.tsx",
