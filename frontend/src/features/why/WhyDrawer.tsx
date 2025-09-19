@@ -1,14 +1,14 @@
 import React, { useState } from 'react';
 import { Drawer } from "@/components/ui/drawer";
-import { apiFetch } from "@/api/client";
+import { apiFetch } from "@/api";
 
 export function WhyDrawer({ targetId }:{targetId:string}) {
   const [entries, setEntries] = useState<any[]>([]);
 
   async function load() {
     if (!targetId) return;
-    const res = await apiFetch(`/api/audit?id=${targetId}`);
-    setEntries(res);
+    const res = await apiFetch<{ log: any[] }>(`/api/audit?id=${targetId}`);
+    setEntries(res.log || []);
   }
 
   return (
@@ -17,7 +17,7 @@ export function WhyDrawer({ targetId }:{targetId:string}) {
         <h2 className="text-xl font-bold mb-2">Audit trail for {targetId}</h2>
         <button onClick={load}>Load</button>
         <ul>
-          {entries.map(e=>(<li key={e.id}>{e.action} at {e.ts}</li>))}
+          {entries.map(e=>(<li key={e.id}>{e.method} {e.route} at {e.ts}</li>))}
         </ul>
       </div>
     </Drawer>

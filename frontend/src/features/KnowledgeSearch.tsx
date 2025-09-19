@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
+import { apiFetch } from '@/api';
 
 export const KnowledgeSearch: React.FC = () => {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<any[]>([]);
 
   const search = async () => {
-    const r = await fetch(`/api/knowledge/search?q=${encodeURIComponent(query)}`);
-    const j = await r.json();
-    setResults(j.results || []);
+    const data = await apiFetch<{ results: any[] }>(`/api/knowledge/search?q=${encodeURIComponent(query)}`);
+    setResults(data.results || []);
   };
 
   return (

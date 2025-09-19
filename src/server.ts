@@ -1,21 +1,42 @@
 // Workbuoy server (mounts + health routes). Exports `app` for tests; runtime listen in src/bin/www.ts
 import express from 'express';
+import { correlationHeader } from './middleware/correlationHeader';
+import { wbContext } from './middleware/wbContext';
+import { requestLogger } from './core/logging/logger';
+import { timingMiddleware, metricsHandler } from './core/observability/metrics';
+import { errorHandler } from './core/http/middleware/errorHandler';
+import { debugBusHandler } from './routes/_debug.bus';
+import knowledgeRouter from './routes/knowledge.router';
+import { auditRouter } from './routes/audit';
+import { bus } from './core/eventBusV2';
 
 const app = express();
 app.use(express.json());
+app.use(correlationHeader);
+app.use(wbContext);
+app.use(timingMiddleware);
+app.use(requestLogger());
 
-// Minimal requestContext to ensure a correlationId exists
-app.use((req: any, _res, next) => {
-  const cid = (req.headers['x-correlation-id'] as string) || Math.random().toString(36).slice(2);
-  (req as any).wb = { ...(req as any).wb, correlationId: cid };
-  next();
-});
+function loadModule(modPath: string) {
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    return require(modPath);
+  } catch (err: any) {
+    if (modPath.startsWith('./src/') && err?.code === 'MODULE_NOT_FOUND') {
+      const fallback = modPath.replace('./src/', './');
+      if (fallback !== modPath) {
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        return require(fallback);
+      }
+    }
+    throw err;
+  }
+}
 
 // Helper to conditionally mount routers if present
 function safeMount(path: string, modPath: string, factory?: string) {
   try {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const mod = require(modPath);
+    const mod = loadModule(modPath);
     const router = factory ? (mod[factory] ? mod[factory]() : null) : (mod.default || mod.router || null);
     if (router) {
       app.use(path, router);
@@ -36,11 +57,33 @@ safeMount('/api/finance', './src/routes/finance.reminder', 'financeReminderRoute
 safeMount('/api', './src/routes/manual.complete', 'manualCompleteRouter');
 safeMount('/', './src/routes/genesis.autonomy', 'metaGenesisRouter');
 
+app.use('/api', knowledgeRouter);
+app.use('/api/audit', auditRouter());
+
 // Debug-only mounts (optional)
 if (process.env.NODE_ENV !== 'production') {
   safeMount('/api', './src/routes/debug.dlq', 'debugDlqRouter');
   safeMount('/api', './src/routes/debug.circuit', 'debugCircuitRouter');
 }
+
+// Operability surfaces
+app.get('/status', async (_req, res) => {
+  try {
+    const stats = await bus.stats();
+    const summary = stats.summary ?? { high: 0, medium: 0, low: 0, dlq: 0 };
+    res.json({
+      ok: true,
+      ts: new Date().toISOString(),
+      persistMode: (process.env.PERSIST_MODE || 'file').toLowerCase(),
+      queues: summary
+    });
+  } catch (err: any) {
+    res.status(500).json({ error: 'status_unavailable', message: err?.message || String(err) });
+  }
+});
+
+app.get('/_debug/bus', debugBusHandler);
+app.get('/metrics', metricsHandler);
 
 // Health / readiness / build
 app.get('/healthz', (_req, res) => res.json({ ok: true }));
@@ -52,9 +95,6 @@ app.get('/buildz', (_req, res) => res.json({
 }));
 
 // Basic error handler
-app.use((err: any, _req: any, res: any, _next: any) => {
-  const status = err?.status || 500;
-  res.status(status).json({ error: err?.message || 'internal_error' });
-});
+app.use(errorHandler);
 
 export default app;

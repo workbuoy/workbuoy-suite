@@ -10,14 +10,22 @@ export interface PolicyResponse {
 
 export async function policyCheck(action: { capability: string }, ctx: { autonomy_level: Autonomy }): Promise<PolicyResponse> {
   // Local simple rules; can be swapped with OPA later
-  if (action.capability.startsWith('write:') || action.capability.startsWith('delete:') || action.capability.startsWith('update:')) {
-    if (ctx.autonomy_level >= 3) {
-      return { allowed: true, explanation: 'Write allowed at ≥3', basis: ['local:write', `autonomy:${ctx.autonomy_level}`] };
+  if (
+    action.capability.startsWith('write:') ||
+    action.capability.startsWith('delete:') ||
+    action.capability.startsWith('update:')
+  ) {
+    if (ctx.autonomy_level >= 2) {
+      return {
+        allowed: true,
+        explanation: 'Write allowed at ≥2',
+        basis: ['local:write', `autonomy:${ctx.autonomy_level}`]
+      };
     }
     return {
       allowed: false,
       degraded_mode: 'ask_approval',
-      explanation: 'Write denied below 3; ask approval',
+      explanation: 'Write denied below autonomy level 2',
       basis: ['local:write:deny', `autonomy:${ctx.autonomy_level}`]
     };
   }

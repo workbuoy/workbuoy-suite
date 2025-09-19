@@ -15,5 +15,20 @@ services:
       interval: 5s
       timeout: 3s
       retries: 10
+  app:
+    image: node:20
+    working_dir: /workspace/workbuoy-suite
+    command: >-
+      sh -c "npm install --prefix backend && NODE_PATH=backend/node_modules node -r ts-node/register src/bin/www.ts"
+    environment:
+      PORT: 3000
+      PERSIST_MODE: file
+      NODE_PATH: backend/node_modules
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/workspace/workbuoy-suite
+    depends_on:
+      - db
 volumes:
   db_data:

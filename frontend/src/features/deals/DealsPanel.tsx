@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Select, SelectItem } from "@/components/ui/select";
-import { apiFetch } from "@/api/client";
+import { apiFetch } from "@/api";
 
 export function DealsPanel() {
   const [deals, setDeals] = useState<any[]>([]);
 
   async function load() {
-    const res = await apiFetch('/api/deals');
+    const res = await apiFetch<any[]>('/api/deals');
     setDeals(res);
   }
   useEffect(()=>{ load(); }, []);
