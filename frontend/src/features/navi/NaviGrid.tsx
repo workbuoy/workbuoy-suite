@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import AddOnTile from "./AddOnTile";
 import SynchBadge from "./SynchBadge";
-import ContactsPanel from "../crm/ContactsPanel";
+import ContactsPanel from "../CRMPanel";
 type AddOn = { id:string; name:string; icon:string; category:string; enabled:boolean };
 export default function NaviGrid() {
   const [addons, setAddons] = useState<AddOn[]>([]);
@@ -15,7 +15,8 @@ export default function NaviGrid() {
       <div style={{display:"flex", gap:10, padding:12, alignItems:"center"}}>
         <span className="chip">Navi</span>
         <select aria-label="Kategori" value={filter} onChange={e=>setFilter(e.target.value)}
-                style={{background:"transparent", color:"var(--ink)", border:"1px solid rgba(255,255,255,.14)", borderRadius:8, padding:"6px 8px"}}>
+                style={{background:"transparent", color:"var(--ink)", border:"1px solid rgba(255,255,255,.14)", borderRadius:8,
+padding:"6px 8px"}}>
           {cats.map(c=> <option key={c} value={c} style={{color:"#000"}}>{c}</option>)}
         </select>
         <span style={{flex:1}}/>

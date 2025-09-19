@@ -8,6 +8,11 @@ export async function debugBusHandler(_req: Request, res: Response) {
     res.json({ summary, queues, dlq });
   }
   catch (e:any) {
-    res.status(500).json({ error: 'bus_stats_failed', message: e?.message || String(e) });
+    res.json({
+      summary: { high: 0, medium: 0, low: 0, dlq: 0 },
+      queues: [],
+      dlq: [],
+      error: e?.message || String(e)
+    });
   }
 }

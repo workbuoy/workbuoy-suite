@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import { ContactsPanel } from './ContactsPanel';
 
-jest.mock('@/api/client', ()=>({
+jest.mock('@/api', ()=>({
   apiFetch: jest.fn(async ()=>[ {id:'1', name:'A', email:'a@test', phone:'123'} ])
 }));
 
