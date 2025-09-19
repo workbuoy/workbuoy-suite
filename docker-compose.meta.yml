@@ -1,0 +1,62 @@
+version: '3.9'
+
+services:
+  api:
+    image: node:20
+    working_dir: /workspace/workbuoy-suite
+    command: >-
+      sh -c "npm install --prefix backend && \
+      NODE_PATH=backend/node_modules \
+      MODE_CORE=true MODE_FLEX=false MODE_SECURE=true \
+      META_FEATURE_FLAGS=alpha=true,beta=false \
+      PORT=8080 \
+      node -r ts-node/register backend/src/index.ts"
+    environment:
+      NODE_PATH: backend/node_modules
+      PORT: 8080
+      MODE_CORE: 'true'
+      MODE_FLEX: 'false'
+      MODE_SECURE: 'true'
+      META_POLICY_AUTONOMY_LEVEL: '1'
+      META_FEATURE_FLAGS: 'alpha=true,beta=false,gamma'
+      META_CONNECTOR_HUBSPOT_ENABLED: 'true'
+      META_CONNECTOR_SALESFORCE_ENABLED: 'false'
+    ports:
+      - '8080:8080'
+    volumes:
+      - .:/workspace/workbuoy-suite
+    depends_on:
+      mock-db:
+        condition: service_healthy
+      mock-queue:
+        condition: service_healthy
+    healthcheck:
+      test: ['CMD-SHELL', 'curl -sf http://localhost:8080/api/meta/health >/dev/null']
+      interval: 15s
+      timeout: 5s
+      retries: 5
+
+  mock-db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: workbuoy
+      POSTGRES_PASSWORD: workbuoy
+      POSTGRES_DB: workbuoy
+    ports:
+      - '5432:5432'
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U workbuoy']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  mock-queue:
+    image: redis:7-alpine
+    command: ['redis-server', '--save', '', '--appendonly', 'no']
+    ports:
+      - '6379:6379'
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 10s
+      timeout: 5s
+      retries: 5

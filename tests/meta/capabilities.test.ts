@@ -1,4 +1,5 @@
 import express from 'express';
+import type { NextFunction, Request, Response } from 'express';
 import request from 'supertest';
 import router from '../../backend/meta/router';
 
@@ -7,6 +8,10 @@ describe('META: /meta/capabilities', () => {
 
   const createApp = () => {
     const app = express();
+    app.use((req: Request, _res: Response, next: NextFunction) => {
+      (req as any).user = { scopes: ['meta:read'] };
+      next();
+    });
     app.use('/api/meta', router);
     return app;
   };

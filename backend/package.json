@@ -11,6 +11,8 @@
   },
   "dependencies": {
     "express": "^4.19.2",
+    "express-rate-limit": "^6.10.0",
+    "prom-client": "^15.1.0",
     "uuid": "^9.0.1"
   },
   "devDependencies": {

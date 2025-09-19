@@ -1,4 +1,5 @@
 import express from 'express';
+import type { NextFunction, Request, Response } from 'express';
 import request from 'supertest';
 import router from '../../backend/meta/router';
 import {
@@ -12,6 +13,10 @@ import { policyDeniesTotal } from '../../observability/metrics/meta';
 describe('META: /meta/policy', () => {
   const createApp = () => {
     const app = express();
+    app.use((req: Request, _res: Response, next: NextFunction) => {
+      (req as any).user = { scopes: ['meta:read'] };
+      next();
+    });
     app.use('/api/meta', router);
     return app;
   };
@@ -51,6 +56,7 @@ describe('META: /meta/policy', () => {
       deny_counters: { last_1h: 1, last_24h: 2 },
     });
     expect(policyDeniesTotal.inc).toHaveBeenCalledTimes(3);
+    expect(policyDeniesTotal.inc).toHaveBeenCalledWith({ feature: 'policy', reason: 'deny' });
   });
 
   it('normalises unexpected engine values and counter responses', async () => {
@@ -74,7 +80,7 @@ describe('META: /meta/policy', () => {
     });
   });
 
-  it('returns 500 when snapshot retrieval throws', async () => {
+  it('returns safe defaults when snapshot retrieval throws', async () => {
     const engine = {
       getSnapshot: jest.fn(async () => {
         throw new Error('boom');
@@ -85,7 +91,11 @@ describe('META: /meta/policy', () => {
     const app = createApp();
     const res = await request(app).get('/api/meta/policy');
 
-    expect(res.status).toBe(500);
-    expect(res.body).toEqual({ error: 'policy_snapshot_unavailable' });
+    expect(res.status).toBe(200);
+    expect(res.body).toEqual({
+      autonomy_level: 0,
+      policy_profile: 'default',
+      deny_counters: { last_1h: 0, last_24h: 0 },
+    });
   });
 });
