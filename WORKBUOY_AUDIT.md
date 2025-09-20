@@ -1,16 +1,14 @@
-# WorkBuoy Suite Audit (47bea11)
-
 ## Pillar coverage
 | Pillar | Status | Highlights |
 | --- | --- | --- |
 | Core | ✅ Present | Express CRM CRUD with RBAC audit logging anchors the domain API surface.【F:backend/src/app.ts†L1-L88】 |
 | Flex | ✅ Present | Dynamics connector orchestrates OAuth/mapping/metrics while the TS SDK wraps CRM endpoints for integrators.【F:connectors/dynamics/connector.js†L1-L39】【F:sdk/ts/workbuoy.ts†L1-L21】 |
 | Secure | ✅ Present | Secure bootstrap enables helmet/CORS/rate limiting and META scope checks on protected routes.【F:backend/src/app.secure.ts†L1-L22】【F:backend/meta/security.ts†L1-L21】 |
+
 | Navi | ✅ Present | Flip-card stitches Buoy chat with Navi grid, exposes keyboard flip controls, and surfaces introspection/health badges.【F:frontend/src/components/FlipCard.tsx†L1-L52】【F:frontend/src/features/navi/NaviGrid.tsx†L1-L74】 |
 | Buoy AI | ✅ Present | Single agent builds request context and runs plan/execute pipeline consumed by the chat UI.【F:src/buoy/agent.ts†L1-L95】【F:frontend/src/features/buoy/useBuoy.ts†L1-L18】 |
 | Roles | ✅ Present | Role registry composes feature caps from seeded profiles and drives role-aware proactivity APIs.【F:src/roles/registry.ts†L1-L49】【F:roles/roles.json†L10880-L10915】【F:backend/routes/proactivity.ts†L1-L60】 |
 | Proactivity | ✅ Present | Six named modes with degrade rails flow through context builders and telemetry-backed REST endpoints.【F:src/core/proactivity/modes.ts†L1-L170】【F:src/core/proactivity/context.ts†L1-L86】【F:backend/routes/proactivity.ts†L1-L60】 |
-| Meta | ✅ Present | META router instruments health/policy metrics and the genesis gatekeeper enforces `.evolution/APPROVED` before execution.【F:backend/meta/router.ts†L1-L123】【F:observability/metrics/meta.ts†L76-L118】【F:src/routes/genesis.autonomy.ts†L70-L118】 |
 | Infra | ✅ Present | Helm deployment, Prometheus alert rules, and a Grafana proactivity dashboard ship with the repo.【F:deploy/helm/workbuoy/templates/deployment.yaml†L1-L22】【F:observability/alerts/workbuoy_alerts.yaml†L1-L10】【F:grafana/dashboards/proactivity.json†L1-L30】 |
 | Adoption | ✅ Present | Multi-step onboarding, guarded demo seeding API, and deterministic insight nudges are delivered as code.【F:enterprise/onboarding.js†L1-L23】【F:crm/pages/api/onboarding/demo.ts†L1-L15】【F:src/insights/engine.ts†L1-L59】 |
 
@@ -30,15 +28,18 @@
 - `backend/routes/proactivity.ts` exposes GET/POST APIs that resolve requested vs effective modes per tenant/role, logging telemetry via `logModusskift`.【F:backend/routes/proactivity.ts†L1-L60】【F:src/core/proactivity/telemetry.ts†L1-L24】
 - Proactivity data also powers Grafana dashboards and enterprise config presets (e.g., `core.config.json`), showing the modes are baked into config and observability layers.【F:grafana/dashboards/proactivity.json†L1-L30】【F:enterprise/public/config/core.config.json†L1-L44】
 
+
 ## Meta rails
 - `backend/meta/router.ts` instruments every META endpoint with rate limits, `meta:read` scope enforcement, and histogram logging for metrics collection.【F:backend/meta/router.ts†L1-L123】【F:observability/metrics/meta.ts†L76-L118】
 - The `metaGenesisRouter` (exposed under `/genesis/*`) serves awareness snapshots, proposal scaffolding, and strictly requires `.evolution/APPROVED` before acknowledging evolution implementation, responding with a manual checklist instead of merging anything automatically.【F:src/routes/genesis.autonomy.ts†L70-L118】
 - META observability is backed by Prometheus counters/histograms and Grafana dashboards documented in `META_ROUTE_RUNBOOK.md`, aligning with the platform’s “rails” expectations.【F:observability/metrics/meta.ts†L1-L129】【F:META_ROUTE_RUNBOOK.md†L1-L60】
 
+
 ## Roles
 - The seeded role library (`roles/roles.json`) captures domains, KPIs, autonomy caps, and policy hints consumed by runtime services.【F:roles/roles.json†L10880-L10915】
 - `RoleRegistry` resolves inherited roles, tenant overrides, and feature caps; it is wired directly into proactivity APIs and feature activation routes.【F:src/roles/registry.ts†L1-L49】【F:backend/routes/proactivity.ts†L1-L33】【F:backend/routes/features.ts†L1-L16】
 - Capability execution uses `runCapabilityWithRole` to enforce policy and proactivity behavior per resolved caps, linking role context back to Buoy AI/autonomy flows.【F:src/core/capabilityRunnerRole.ts†L1-L79】
+
 
 ## Infra & observability
 - The Helm chart (`deploy/helm/workbuoy`) and Kubernetes deployment manifest set up container images, env vars, and services for cluster operation.【F:deploy/helm/workbuoy/templates/deployment.yaml†L1-L22】

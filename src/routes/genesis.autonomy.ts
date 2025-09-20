@@ -1,5 +1,5 @@
 import { Router, Request, Response } from 'express';
-import { promises as fs } from 'fs';
+import { access } from 'fs/promises';
 import path from 'path';
 
 type AutonomySuggestion = {
@@ -92,7 +92,7 @@ export function metaGenesisRouter() {
   router.post('/genetics/implement-evolution', async (req: Request, res: Response) => {
     const approvalPath = approvalFilePath();
     try {
-      await fs.access(approvalPath);
+      await access(approvalPath);
     } catch {
       return res.status(403).json({
         ok: false,

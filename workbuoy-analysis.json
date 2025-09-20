@@ -1,5 +1,4 @@
 {
-  "head": "47bea11",
   "summary": {
     "CORE": "present",
     "FLEX": "present",
@@ -427,7 +426,8 @@
       "desktop/docs/dashboards/sync-health.json",
       "desktop/electron-builder.yml",
       "desktop/electron-src/",
-      "desktop/electron-src/main.ts",
+      "desktop/electron-src/
+      .ts",
       "desktop/electron-src/preload.ts",
       "desktop/electron-src/renderer/",
       "desktop/electron-src/renderer/global.d.ts",
@@ -451,7 +451,8 @@
       "desktop/integrations/signature.js",
       "desktop/jest.config.js",
       "desktop/logger.js",
-      "desktop/main.js",
+      "desktop/
+      .js",
       "desktop/metrics.js",
       "desktop/otel.js",
       "desktop/package.json",

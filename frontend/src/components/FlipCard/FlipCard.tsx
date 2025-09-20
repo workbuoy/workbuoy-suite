@@ -1,213 +1,419 @@
-import React, { useCallback, useMemo, useState, useEffect } from "react";
-import BuoyChat from "@/features/buoy/BuoyChat";
-import NaviGrid from "@/features/navi/NaviGrid";
-import { IntrospectionBadge } from "@/components/IntrospectionBadge";
+import React, {
+  useCallback,
+  useEffect,
+  useId,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import { useActiveContext } from "@/core/ActiveContext";
+import "./FlipCard.css";
 
-type Mode = "CHAT" | "NAVI";
+export type FlipCardSize = "sm" | "md" | "lg" | "xl";
+type Side = "front" | "back";
 
-type FlipCardProps = {
-  onConnect?: () => void;
+type ConnectLink = { type: string; id: string; label?: string };
+
+export type FlipCardProps = {
+  front: React.ReactNode;
+  back: React.ReactNode;
+  size?: FlipCardSize;
+  onFlip?: (side: Side) => void;
+  onResize?: (size: FlipCardSize) => void;
+  onConnect?: (link: ConnectLink) => void;
+  ariaLabelFront?: string;
+  ariaLabelBack?: string;
 };
 
-export default function FlipCard({ onConnect }: FlipCardProps = {}) {
-  const [mode, setMode] = useState<Mode>("CHAT");
-  const [expanded, setExpanded] = useState(false);
+const ORDER: FlipCardSize[] = ["sm", "md", "lg", "xl"];
 
-  const flipped = mode === "NAVI";
+const DIMENSIONS: Record<FlipCardSize, { width: string; height: string }> = {
+  sm: { width: "min(420px, 92vw)", height: "min(540px, 70vh)" },
+  md: { width: "min(640px, 94vw)", height: "min(620px, 74vh)" },
+  lg: { width: "min(880px, 96vw)", height: "min(720px, 80vh)" },
+  xl: { width: "min(1040px, 98vw)", height: "min(820px, 86vh)" },
+};
 
-  const ariaFront = useMemo(
-    () => ({ "aria-hidden": flipped, "aria-label": "Buoy chat" }),
-    [flipped],
+function FlipCard({
+  front,
+  back,
+  size = "lg",
+  onFlip,
+  onResize,
+  onConnect,
+  ariaLabelFront = "Buoy panel",
+  ariaLabelBack = "Navi panel",
+}: FlipCardProps) {
+  const [side, setSide] = useState<Side>("front");
+  const [cardSize, setCardSize] = useState<FlipCardSize>(size);
+  const [connectOpen, setConnectOpen] = useState(false);
+  const [manualType, setManualType] = useState("note");
+  const [manualId, setManualId] = useState("");
+  const [manualLabel, setManualLabel] = useState("");
+  const manualIdRef = useRef<HTMLInputElement | null>(null);
+  const dragRef = useRef<{
+    pointerId: number;
+    startX: number;
+    originIndex: number;
+  } | null>(null);
+  const { selectedEntity, setSelectedEntity } = useActiveContext();
+
+  useEffect(() => {
+    setCardSize(size);
+  }, [size]);
+
+  useEffect(() => {
+    if (!connectOpen) return;
+    const id = setTimeout(() => manualIdRef.current?.focus(), 30);
+    return () => clearTimeout(id);
+  }, [connectOpen]);
+
+  const frontId = useId();
+  const backId = useId();
+
+  const dimensions = DIMENSIONS[cardSize];
+  const isFlipped = side === "back";
+
+  const connectLabel = useMemo(() => {
+    if (selectedEntity) {
+      return `${selectedEntity.type}:${selectedEntity.name ?? selectedEntity.id}`;
+    }
+    return "Select a record";
+  }, [selectedEntity]);
+
+  const changeSide = useCallback(
+    (next: Side) => {
+      setSide(next);
+      onFlip?.(next);
+    },
+    [onFlip],
   );
-  const ariaBack = useMemo(
-    () => ({ "aria-hidden": !flipped, "aria-label": "Navi oversikt" }),
-    [flipped],
+
+  const toggleSide = useCallback(() => {
+    changeSide(isFlipped ? "front" : "back");
+  }, [changeSide, isFlipped]);
+
+  const emitResize = useCallback(
+    (next: FlipCardSize) => {
+      setCardSize(next);
+      onResize?.(next);
+    },
+    [onResize],
   );
 
-  const handleFlip = useCallback(() => {
-    setMode((current) => (current === "CHAT" ? "NAVI" : "CHAT"));
-  }, []);
+  const nudgeSize = useCallback(
+    (direction: 1 | -1) => {
+      const index = ORDER.indexOf(cardSize);
+      const nextIndex = Math.min(
+        Math.max(index + direction, 0),
+        ORDER.length - 1,
+      );
+      const next = ORDER[nextIndex];
+      if (next !== cardSize) emitResize(next);
+    },
+    [cardSize, emitResize],
+  );
 
-  const handleResize = useCallback(() => {
-    setExpanded((current) => !current);
-  }, []);
-
+  // Container keyboard handler (flip + resize).
+  // Toolbar-knapper stopper propagation på Enter/Space for å unngå utilsiktet flip.
   const handleKeyDown = useCallback(
     (event: React.KeyboardEvent<HTMLDivElement>) => {
-      if (event.target !== event.currentTarget) {
-        return;
-      }
-
-      if (event.key === " " || event.key === "Enter") {
+      if (event.key === "Enter" || event.key === " ") {
         event.preventDefault();
-        handleFlip();
-        return;
+        toggleSide();
       }
-
-      if (event.key.toLowerCase() === "r") {
+      if (
+        event.shiftKey &&
+        (event.key === "ArrowRight" || event.key === "ArrowUp")
+      ) {
         event.preventDefault();
-        handleResize();
+        nudgeSize(1);
+      }
+      if (
+        event.shiftKey &&
+        (event.key === "ArrowLeft" || event.key === "ArrowDown")
+      ) {
+        event.preventDefault();
+        nudgeSize(-1);
       }
     },
-    [handleFlip, handleResize],
+    [toggleSide, nudgeSize],
   );
+
+  const handlePointerDown = useCallback(
+    (event: React.PointerEvent<HTMLButtonElement>) => {
+      if (event.button !== 0) return;
+      dragRef.current = {
+        pointerId: event.pointerId,
+        startX: event.clientX,
+        originIndex: ORDER.indexOf(cardSize),
+      };
+      (event.target as HTMLElement).setPointerCapture(event.pointerId);
+    },
+    [cardSize],
+  );
+
+  const handlePointerMove = useCallback(
+    (event: React.PointerEvent<HTMLButtonElement>) => {
+      const drag = dragRef.current;
+      if (!drag || drag.pointerId !== event.pointerId) return;
+      const delta = event.clientX - drag.startX;
+      if (Math.abs(delta) < 80) return;
+      const direction: 1 | -1 = delta > 0 ? 1 : -1;
+      const nextIndex = Math.min(
+        Math.max(drag.originIndex + direction, 0),
+        ORDER.length - 1,
+      );
+      const nextSize = ORDER[nextIndex];
+      dragRef.current = {
+        pointerId: drag.pointerId,
+        startX: event.clientX,
+        originIndex: nextIndex,
+      };
+      emitResize(nextSize);
+    },
+    [emitResize],
+  );
+
+  const handlePointerUp = useCallback(
+    (event: React.PointerEvent<HTMLButtonElement>) => {
+      if (dragRef.current && dragRef.current.pointerId === event.pointerId) {
+        dragRef.current = null;
+        (event.target as HTMLElement).releasePointerCapture(event.pointerId);
+      }
+    },
+    [],
+  );
+
+  const commitConnection = useCallback(
+    (link: ConnectLink) => {
+      if (!onConnect) return;
+      onConnect(link);
+      if (["contact", "deal", "invoice", "task", "note"].includes(link.type)) {
+        setSelectedEntity({
+          type: link.type as any,
+          id: link.id,
+          name: link.label ?? link.id,
+        });
+      }
+    },
+    [onConnect, setSelectedEntity],
+  );
+
+  const handleConnect = useCallback(() => {
+    if (!onConnect) return;
+    if (selectedEntity) {
+      commitConnection({
+        type: selectedEntity.type,
+        id: selectedEntity.id,
+        label: selectedEntity.name ?? selectedEntity.id,
+      });
+      return;
+    }
+    setManualId("");
+    setManualLabel("");
+    setConnectOpen(true);
+  }, [commitConnection, onConnect, selectedEntity]);
+
+  const handleManualSubmit = useCallback(
+    (event: React.FormEvent) => {
+      event.preventDefault();
+      const trimmed = manualId.trim();
+      if (!trimmed) return;
+      commitConnection({
+        type: manualType,
+        id: trimmed,
+        label: manualLabel.trim() || trimmed,
+      });
+      setConnectOpen(false);
+    },
+    [commitConnection, manualId, manualLabel, manualType],
+  );
+
+  useEffect(() => {
+    if (!connectOpen) return;
+    function onKey(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        setConnectOpen(false);
+      }
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [connectOpen]);
 
   return (
     <div
-      className="perspective"
-      role="application"
-      aria-label="Workbuoy flipcard"
-      tabIndex={0}
-      onKeyDown={handleKeyDown}
-      style={{
-        position: "relative",
-        height: expanded ? "min(92vh, 840px)" : "min(82vh, 760px)",
-      }}
+      className="flip-card-host flip-host"
+      style={{ width: dimensions.width, height: dimensions.height }}
+      data-testid="flip-card"
     >
       <div
-        className="flipcard cardbg"
-        style={{
-          position: "absolute",
-          inset: 0,
-          borderRadius: 16,
-          transform: `rotateY(${flipped ? 180 : 0}deg)`,
-        }}
+        className={`flip-card flipcard cardbg flip-card--${cardSize} ${
+          isFlipped ? "flip-card--flipped" : ""
+        }`}
+        role="group"
+        aria-roledescription="flip card"
+        onKeyDown={handleKeyDown}
+        tabIndex={0}
+        data-side={side}
       >
-        <section {...ariaFront} className="flipface" style={{ padding: 12 }}>
-          <Header
-            side="Buoy"
-            onFlip={handleFlip}
-            onResize={handleResize}
-            isExpanded={expanded}
-            onConnect={onConnect}
-          />
-          <div style={{ position: "absolute", inset: "56px 12px 12px 12px" }}>
-            <BuoyChat />
+        <div className="flip-card-toolbar">
+          <div className="flip-card-toolbar__side" aria-live="polite">
+            <span className="chip" data-testid="flip-card-side">
+              {isFlipped ? "Navi" : "Buoy"}
+            </span>
+            <button
+              type="button"
+              className="chip flip-card-toolbar__flip"
+              onClick={toggleSide}
+              onKeyDown={(e) => {
+                // Hindre at Enter/Space på selve flip-knappen dobbel-flipper via container
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  toggleSide();
+                }
+              }}
+              aria-label={isFlipped ? "Show Buoy" : "Show Navi"}
+            >
+              {isFlipped ? "Show Buoy" : "Show Navi"}
+            </button>
+          </div>
+          <div className="flip-card-toolbar__actions">
+            <button
+              type="button"
+              className="chip flip-card-toolbar__connect"
+              onClick={handleConnect}
+              onKeyDown={(e) => {
+                // Viktig fix: Enter/Space på Connect skal IKKE flippe kortet
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleConnect();
+                }
+              }}
+              aria-haspopup="dialog"
+              aria-label={`Connect ${connectLabel}`}
+            >
+              Connect
+            </button>
+            <button
+              type="button"
+              className="chip flip-card-toolbar__resize"
+              aria-label={`Resize card (${cardSize})`}
+              onPointerDown={handlePointerDown}
+              onPointerMove={handlePointerMove}
+              onPointerUp={handlePointerUp}
+              onKeyDown={(event) => {
+                if (
+                  event.key === "ArrowRight" ||
+                  event.key === "ArrowUp" ||
+                  event.key === "ArrowLeft" ||
+                  event.key === "ArrowDown"
+                ) {
+                  event.preventDefault();
+                }
+                if (event.key === "ArrowRight" || event.key === "ArrowUp") {
+                  nudgeSize(1);
+                }
+                if (event.key === "ArrowLeft" || event.key === "ArrowDown") {
+                  nudgeSize(-1);
+                }
+                // Enter/Space på resize skal ikke flippe kortet
+                if (event.key === "Enter" || event.key === " ") {
+                  event.preventDefault();
+                  event.stopPropagation();
+                }
+              }}
+            >
+              Resize
+            </button>
+          </div>
+        </div>
+        <section
+          id={frontId}
+          className="flip-card-face flip-card-face--front"
+          aria-hidden={isFlipped}
+          aria-label={ariaLabelFront}
+        >
+          <div className="flip-face-content" data-testid="flip-card-front">
+            {front}
           </div>
         </section>
         <section
-          {...ariaBack}
-          className="flipface"
-          style={{ transform: "rotateY(180deg)", padding: 12 }}
+          id={backId}
+          className="flip-card-face flip-card-face--back"
+          aria-hidden={!isFlipped}
+          aria-label={ariaLabelBack}
         >
-          <Header
-            side="Navi"
-            onFlip={handleFlip}
-            onResize={handleResize}
-            isExpanded={expanded}
-          />
-          <div style={{ position: "absolute", inset: "56px 12px 12px 12px" }}>
-            <NaviGrid />
+          <div className="flip-face-content" data-testid="flip-card-back">
+            {back}
           </div>
         </section>
       </div>
+
+      {connectOpen ? (
+        <div
+          role="dialog"
+          aria-modal="true"
+          className="flip-card-connect"
+          data-testid="flip-card-connect-dialog"
+        >
+          <form className="flip-card-connect__form" onSubmit={handleManualSubmit}>
+            <h2>Link to Navi</h2>
+            <p>Select the record type and identifier to connect.</p>
+            <label className="flip-card-connect__label">
+              Type
+              <select
+                value={manualType}
+                onChange={(event) => setManualType(event.target.value)}
+              >
+                <option value="note">Note</option>
+                <option value="contact">Contact</option>
+                <option value="deal">Deal</option>
+                <option value="invoice">Invoice</option>
+                <option value="task">Task</option>
+              </select>
+            </label>
+            <label className="flip-card-connect__label">
+              Identifier
+              <input
+                ref={manualIdRef}
+                value={manualId}
+                onChange={(event) => setManualId(event.target.value)}
+                placeholder="e.g. CRM-1024"
+              />
+            </label>
+            <label className="flip-card-connect__label">
+              Display label (optional)
+              <input
+                value={manualLabel}
+                onChange={(event) => setManualLabel(event.target.value)}
+                placeholder="Shown in Navi"
+              />
+            </label>
+            <div className="flip-card-connect__actions">
+              <button
+                type="submit"
+                className="chip"
+                disabled={!manualId.trim()}
+              >
+                Connect to Navi
+              </button>
+              <button
+                type="button"
+                className="chip"
+                onClick={() => setConnectOpen(false)}
+              >
+                Cancel
+              </button>
+            </div>
+          </form>
+        </div>
+      ) : null}
     </div>
   );
 }
 
-type HeaderProps = {
-  side: "Buoy" | "Navi";
-  onFlip: () => void;
-  onResize: () => void;
-  isExpanded: boolean;
-  onConnect?: () => void;
-};
-
-function Header({ side, onFlip, onResize, isExpanded, onConnect }: HeaderProps) {
-  const flipLabel = side === "Buoy" ? "Gå til Navi" : "Gå til Buoy";
-  const resizeLabel = isExpanded ? "Reduser kort" : "Utvid kort";
-
-  return (
-    <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-      <strong style={{ letterSpacing: 0.3, opacity: 0.9 }}>{side}</strong>
-      <span style={{ flex: 1 }} />
-      <IntrospectionBadge />
-      <HealthBadge />
-      {onConnect ? <ConnectButton onConnect={onConnect} /> : null}
-      <button
-        type="button"
-        onClick={onResize}
-        aria-label={resizeLabel}
-        className="chip"
-      >
-        Resize
-      </button>
-      <button
-        type="button"
-        onClick={onFlip}
-        aria-label={flipLabel}
-        className="chip"
-        style={{ background: "transparent" }}
-      >
-        Flip
-      </button>
-    </div>
-  );
-}
-
-type ConnectButtonProps = {
-  onConnect: () => void;
-};
-
-function ConnectButton({ onConnect }: ConnectButtonProps) {
-  const handleClick = useCallback(() => {
-    onConnect();
-  }, [onConnect]);
-
-  const handleKeyDown = useCallback(
-    (event: React.KeyboardEvent<HTMLButtonElement>) => {
-      if (event.key === " " || event.key === "Enter") {
-        event.preventDefault();
-        onConnect();
-      }
-    },
-    [onConnect],
-  );
-
-  return (
-    <button
-      type="button"
-      className="chip"
-      onClick={handleClick}
-      onKeyDown={handleKeyDown}
-    >
-      Connect
-    </button>
-  );
-}
-
-type HealthState = "ok" | "wait" | "err";
-
-function HealthBadge() {
-  const [state, setState] = useState<HealthState>("wait");
-
-  useEffect(() => {
-    let cancelled = false;
-    fetch("/api/health")
-      .then((response) => (response.ok ? response.json() : Promise.reject()))
-      .then(() => {
-        if (!cancelled) setState("ok");
-      })
-      .catch(() => {
-        if (!cancelled) setState("err");
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  const color =
-    state === "ok"
-      ? "var(--ok)"
-      : state === "wait"
-        ? "var(--warn)"
-        : "var(--err)";
-  const label =
-    state === "ok" ? "Backend OK" : state === "wait" ? "Sjekker…" : "Feil";
-
-  return (
-    <span className="chip" style={{ borderColor: color, color }}>
-      {label}
-    </span>
-  );
-}
+export default FlipCard;
+export type { FlipCardProps };

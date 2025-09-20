@@ -1,0 +1,140 @@
+.flip-card-host {
+  position: relative;
+  margin: 0 auto;
+}
+
+.flip-card {
+  position: relative;
+  height: 100%;
+  width: 100%;
+  border-radius: var(--radius-lg, 16px);
+  transform-style: preserve-3d;
+  transition: transform var(--trans-slow, 480ms cubic-bezier(.2,.8,.2,1));
+  overflow: hidden;
+}
+
+.flip-card--flipped {
+  transform: rotateY(180deg);
+}
+
+.flip-card-toolbar {
+  position: absolute;
+  inset: 0 0 auto 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  z-index: 3;
+  pointer-events: none;
+}
+
+.flip-card-toolbar__side,
+.flip-card-toolbar__actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  pointer-events: auto;
+}
+
+.flip-card-toolbar__flip,
+.flip-card-toolbar__connect,
+.flip-card-toolbar__resize {
+  background: rgba(12, 16, 24, 0.65);
+  border-color: rgba(255,255,255,.18);
+  color: var(--ink);
+}
+
+.flip-card-toolbar__resize {
+  cursor: ew-resize;
+}
+
+.flip-card-face {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  padding: 64px 18px 18px;
+  display: flex;
+}
+
+.flip-card-face--front {
+  transform: rotateY(0deg);
+}
+
+.flip-card-face--back {
+  transform: rotateY(180deg);
+}
+
+.flip-face-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.flip-card-connect {
+  position: absolute;
+  inset: 0;
+  background: rgba(5, 8, 12, 0.72);
+  display: grid;
+  place-items: center;
+  z-index: 5;
+}
+
+.flip-card-connect__form {
+  background: var(--bg-elev, rgba(14,18,26,0.95));
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: var(--radius-md, 12px);
+  padding: 24px;
+  width: min(320px, 90vw);
+  display: grid;
+  gap: 14px;
+}
+
+.flip-card-connect__label {
+  display: grid;
+  gap: 6px;
+  font-size: 0.85rem;
+}
+
+.flip-card-connect__label input,
+.flip-card-connect__label select {
+  background: rgba(12, 16, 24, 0.65);
+  border: 1px solid rgba(255,255,255,.14);
+  border-radius: 8px;
+  padding: 8px 10px;
+  color: var(--ink);
+}
+
+.flip-card-connect__actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .flip-card {
+    transition: none;
+  }
+}
+
+@media (max-width: 720px) {
+  .flip-card-face {
+    padding: 60px 14px 14px;
+  }
+
+  .flip-card-toolbar {
+    padding: 10px 12px;
+  }
+}
+
+@media (max-width: 540px) {
+  .flip-card-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 6px;
+  }
+
+  .flip-card-toolbar__actions {
+    justify-content: flex-end;
+  }
+}
