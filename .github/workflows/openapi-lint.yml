@@ -14,12 +14,22 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
+          cache: 'npm'
       - name: Install Redocly CLI
         run: npm i -g @redocly/cli@latest
-      - name: Lint OpenAPI (all yaml under openapi/)
+      - name: Lint OpenAPI (each file under openapi/)
         run: |
           if [ -d openapi ]; then
-            redocly lint openapi --format=stylish
+            set -e
+            found=false
+            while IFS= read -r f; do
+              found=true
+              echo "Linting $f"
+              redocly lint "$f" --format=stylish
+            done < <(find openapi -type f \( -name "*.yaml" -o -name "*.yml" -o -name "*.json" \))
+            if [ "$found" = false ]; then
+              echo "No OpenAPI files found under openapi/"
+            fi
           else
-            echo "openapi/ directory not found; skipping" && exit 0
+            echo "openapi/ directory not found; skipping"
           fi
