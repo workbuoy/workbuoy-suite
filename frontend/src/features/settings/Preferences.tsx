@@ -1,85 +1,183 @@
-import React, { useEffect, useMemo, useState } from "react";
-import { audioCue, prefersReducedAudio } from "@/features/peripheral/AudioCue";
+import React, { useEffect } from "react";
+import { audioCue } from "@/features/peripheral/AudioCue";
 import { preferencesStrings as strings } from "./strings";
+import {
+  useSettings,
+  toggleSetting,
+  type SettingsKey,
+  type SettingsState,
+} from "@/store/settings";
+import "./preferences.css";
 
-const STORAGE_KEY = "wb.audioCues";
+type ToggleDescriptor = {
+  key: SettingsKey;
+  label: string;
+  description: string;
+  disabled?: (state: SettingsState) => boolean;
+  meta?: (state: SettingsState) => string[];
+};
 
-type ToggleState = "on" | "off";
+type ToggleGroup = {
+  id: string;
+  title: string;
+  toggles: ToggleDescriptor[];
+};
 
-function readStoredState(): ToggleState | null {
-  if (typeof window === "undefined") return null;
-  try {
-    const value = window.localStorage.getItem(STORAGE_KEY);
-    return value === "on" || value === "off" ? (value as ToggleState) : null;
-  } catch {
-    return null;
+const GROUPS: ToggleGroup[] = [
+  {
+    id: "audio",
+    title: strings.groups.audio,
+    toggles: [
+      {
+        key: "audioCues",
+        label: strings.toggles.audioCues.label,
+        description: strings.toggles.audioCues.description,
+        disabled: (state) => state.reducedSound,
+        meta: (state) => {
+          if (!state.reducedSound) return [];
+          return [strings.meta.audioDisabled];
+        },
+      },
+      {
+        key: "reducedSound",
+        label: strings.toggles.reducedSound.label,
+        description: strings.toggles.reducedSound.description,
+        disabled: (state) => state.systemReducedSound,
+        meta: (state) => {
+          const notes = [strings.meta.reducedSoundHint];
+          if (state.systemReducedSound) {
+            notes.unshift(`${strings.meta.systemLock}: ${strings.meta.systemLockSound}`);
+          }
+          return notes;
+        },
+      },
+    ],
+  },
+  {
+    id: "integrations",
+    title: strings.groups.integrations,
+    toggles: [
+      {
+        key: "enableO365Panel",
+        label: strings.toggles.enableO365Panel.label,
+        description: strings.toggles.enableO365Panel.description,
+      },
+      {
+        key: "enableCollabPanel",
+        label: strings.toggles.enableCollabPanel.label,
+        description: strings.toggles.enableCollabPanel.description,
+      },
+      {
+        key: "enableGwsPanel",
+        label: strings.toggles.enableGwsPanel.label,
+        description: strings.toggles.enableGwsPanel.description,
+      },
+      {
+        key: "enableVismaPanel",
+        label: strings.toggles.enableVismaPanel.label,
+        description: strings.toggles.enableVismaPanel.description,
+      },
+    ],
+  },
+  {
+    id: "accessibility",
+    title: strings.groups.accessibility,
+    toggles: [
+      {
+        key: "reducedMotion",
+        label: strings.toggles.reducedMotion.label,
+        description: strings.toggles.reducedMotion.description,
+        disabled: (state) => state.systemReducedMotion,
+        meta: (state) => {
+          const notes = [strings.meta.reducedMotionHint];
+          if (state.systemReducedMotion) {
+            notes.unshift(`${strings.meta.systemLock}: ${strings.meta.systemLockMotion}`);
+          }
+          return notes;
+        },
+      },
+    ],
+  },
+];
+
+function PreferenceToggle({ descriptor, state }: { descriptor: ToggleDescriptor; state: SettingsState }) {
+  const id = React.useId();
+  const labelId = `${id}-label`;
+  const descriptionId = `${id}-description`;
+  const metaTexts = descriptor.meta?.(state) ?? [];
+  const metaId = metaTexts.length > 0 ? `${id}-meta` : undefined;
+  const disabled = descriptor.disabled?.(state) ?? false;
+  const checked = state[descriptor.key];
+  const describedBy = metaId ? `${descriptionId} ${metaId}` : descriptionId;
+
+  function handleToggle() {
+    if (disabled) return;
+    toggleSetting(descriptor.key);
   }
-}
 
-function writeStoredState(value: ToggleState) {
-  if (typeof window === "undefined") return;
-  try {
-    window.localStorage.setItem(STORAGE_KEY, value);
-  } catch {
-    /* ignore */
-  }
+  return (
+    <div className="settings-row">
+      <div className="settings-row__body">
+        <span id={labelId} className="settings-row__label">
+          {descriptor.label}
+        </span>
+        <p id={descriptionId} className="settings-row__description">
+          {descriptor.description}
+        </p>
+        {metaTexts.length > 0 ? (
+          <div id={metaId} className="settings-row__meta">
+            {metaTexts.map((text, index) => (
+              <p key={index}>{text}</p>
+            ))}
+          </div>
+        ) : null}
+      </div>
+      <button
+        type="button"
+        className="settings-switch"
+        role="switch"
+        aria-checked={checked}
+        aria-labelledby={labelId}
+        aria-describedby={describedBy}
+        data-state={checked ? "on" : "off"}
+        onClick={handleToggle}
+        disabled={disabled}
+      >
+        <span aria-hidden="true" className="settings-switch__track" />
+        <span aria-hidden="true" className="settings-switch__thumb" />
+      </button>
+    </div>
+  );
 }
 
 export default function Preferences() {
-  const [state, setState] = useState<ToggleState>(() => readStoredState() ?? "off");
-  const reduced = useMemo(() => prefersReducedAudio(), []);
+  const settings = useSettings((state) => state);
 
   useEffect(() => {
-    const enabled = state === "on" && !reduced;
+    const enabled = settings.audioCues && !settings.reducedSound && !settings.systemReducedSound;
     audioCue.setEnabled(enabled);
-    writeStoredState(state);
-  }, [state, reduced]);
-
-  useEffect(() => {
-    if (reduced) {
-      setState("off");
-    }
-  }, [reduced]);
-
-  const descriptionId = "audio-cue-description";
-  const reducedId = "audio-cue-reduced";
+  }, [settings.audioCues, settings.reducedSound, settings.systemReducedSound]);
 
   return (
-    <section className="rounded-xl border border-slate-800 bg-slate-900/60 p-4 text-sm text-slate-100">
-      <header className="mb-3">
-        <h2 className="text-base font-semibold">{strings.title}</h2>
+    <section className="settings-panel" aria-labelledby="settings-preferences-heading">
+      <header className="settings-panel__header">
+        <h2 id="settings-preferences-heading" className="settings-panel__title">
+          {strings.title}
+        </h2>
       </header>
-      <div className="flex items-start justify-between gap-4">
-        <div className="space-y-1">
-          <div className="font-medium" id={descriptionId}>{strings.audioCueDescription}</div>
-          {reduced && (
-            <p id={reducedId} className="text-xs text-slate-400">
-              <strong className="block font-semibold text-slate-300">{strings.reducedLabel}</strong>
-              {strings.reducedDescription}
-            </p>
-          )}
-        </div>
-        <label className="inline-flex cursor-pointer items-center gap-2">
-          <span className="text-xs uppercase tracking-wide text-slate-400">{strings.audioCueLabel}</span>
-          <button
-            type="button"
-            role="switch"
-            aria-checked={state === "on"}
-            aria-describedby={reduced ? `${descriptionId} ${reducedId}` : descriptionId}
-            onClick={() => setState((prev) => (prev === "on" ? "off" : "on"))}
-            disabled={reduced}
-            className={`relative h-6 w-11 rounded-full border border-slate-700 transition ${
-              state === "on" && !reduced ? "bg-indigo-600" : "bg-slate-800"
-            } ${reduced ? "opacity-60" : ""}`}
-          >
-            <span
-              className={`absolute left-0 top-0 m-1 h-4 w-4 rounded-full bg-white transition-transform ${
-                state === "on" && !reduced ? "translate-x-5" : "translate-x-0"
-              }`}
-            />
-          </button>
-        </label>
+      <div className="settings-panel__groups">
+        {GROUPS.map((group) => (
+          <div key={group.id} className="settings-group" role="group" aria-labelledby={`${group.id}-heading`}>
+            <h3 id={`${group.id}-heading`} className="settings-group__title">
+              {group.title}
+            </h3>
+            {group.toggles.map((toggle) => (
+              <PreferenceToggle key={toggle.key} descriptor={toggle} state={settings} />
+            ))}
+          </div>
+        ))}
       </div>
+      <p className="settings-panel__footnote">{strings.footnote}</p>
     </section>
   );
 }

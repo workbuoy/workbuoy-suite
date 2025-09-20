@@ -1,11 +1,14 @@
-import { render, screen } from "@testing-library/react";
 import React from "react";
-import { WhyDrawer } from "../components/WhyDrawer";
+import { renderToStaticMarkup } from "react-dom/server";
+import { describe, expect, it } from "vitest";
+import { WhyDrawer } from "@/components/WhyDrawer";
 
 describe("WhyDrawer", () => {
   it("shows reason and confidence", () => {
-    render(<WhyDrawer explanations={[{ reason:"Denied", confidence:0.56 }]} />);
-    expect(screen.getByText(/Denied/)).toBeInTheDocument();
-    expect(screen.getByText(/Confidence:/)).toBeInTheDocument();
+    const markup = renderToStaticMarkup(
+      <WhyDrawer explanations={[{ reason: "Denied", confidence: 0.56 }]} />,
+    );
+    expect(markup).toContain("Denied");
+    expect(markup).toContain("Confidence: 56%");
   });
 });

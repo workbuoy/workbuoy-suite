@@ -32,16 +32,14 @@ export type ProactivityState = {
   timestamp?: string;
 };
 
+type ReviewType = NonNullable<ProactivityState["uiHints"]>["reviewType"];
+
 export type ModeMeta = {
   key: ProactivityModeKey;
   label: string;
   description: string;
   requiresApproval: boolean;
-  reviewType: ProactivityState["uiHints"] extends infer H
-    ? H extends { reviewType?: infer R }
-      ? R
-      : ProactivityState["uiHints"]["reviewType"]
-    : ProactivityState["uiHints"]["reviewType"];
+  reviewType: ReviewType;
   badge: string;
 };
 

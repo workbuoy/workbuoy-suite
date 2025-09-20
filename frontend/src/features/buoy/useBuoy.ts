@@ -1,9 +1,10 @@
 import { useState } from "react";
-import type { UserMessage, AssistantMessage } from "./types";
+import type { UserMessage, AssistantMessage, Suggestion } from "./types";
 export function useBuoy() {
   const [messages, setMessages] = useState<(UserMessage|AssistantMessage)[]>([
     { id: "a0", role: "assistant", text: "Hei! Jeg er Buoy. Hva ønsker du å gjøre?" }
   ]);
+  const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   async function send(text: string) {
     const userMsg: UserMessage = { id: crypto.randomUUID(), role:"user", text };
     setMessages(m => [...m, userMsg]);
@@ -14,5 +15,13 @@ export function useBuoy() {
     };
     setTimeout(()=> setMessages(m=>[...m, a]), 400);
   }
-  return { messages, send };
+  function addSuggestion(suggestion: Suggestion) {
+    setSuggestions((current) => {
+      if (current.some((item) => item.id === suggestion.id)) {
+        return current;
+      }
+      return [...current, suggestion];
+    });
+  }
+  return { messages, send, suggestions, addSuggestion };
 }
