@@ -109,7 +109,7 @@ The META surface provides operational telemetry for WorkBuoy services. All route
 ## Running locally
 1. Start dependencies via `docker-compose -f docker-compose.meta.yml up -d`.
 2. Seed env vars (see compose file for examples of `MODE_CORE`, feature flags, etc.).
-3. Hit the endpoints using the curls above. Use `scripts/smoke-meta.sh` for a quick public probe check.
+3. Hit the endpoints using the curls above. Use `scripts/smoke-meta.sh` for a quick probe check (set `META_TOKEN` to include `/readiness`).
 
 ## Auth & rate limiting
 - Attach a bearer token whose claims include `meta:read` for protected routes. For local testing you can stub `req.user` via middleware.
