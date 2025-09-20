@@ -5,7 +5,7 @@ import { envBool } from '../../src/core/env';
 const r = Router();
 const usePersistence = envBool('FF_PERSISTENCE', false);
 
-r.post('/api/usage/feature', async (req,res)=>{
+r.post('/usage/feature', async (req,res)=>{
   try {
     const tenantId = String(req.header('x-tenant') ?? req.body?.tenantId ?? 'DEV');
     const { userId, featureId, action } = req.body||{};
@@ -21,7 +21,7 @@ r.post('/api/usage/feature', async (req,res)=>{
   }
 });
 
-r.get('/api/usage/aggregate/:userId', async (req,res)=>{
+r.get('/usage/aggregate/:userId', async (req,res)=>{
   try {
     const tenantId = String(req.header('x-tenant') ?? req.query?.tenantId ?? 'DEV');
     const userId = String(req.params.userId);
