@@ -6,6 +6,11 @@ type Metric = {
   reset: jest.Mock<void, any[]>;
 };
 
+interface RegisteredMetric {
+  name: string;
+  type: 'counter' | 'gauge' | 'histogram' | 'summary';
+}
+
 const createMetric = (): Metric => ({
   labels: jest.fn(() => createMetric()),
   inc: jest.fn(),
@@ -15,13 +20,22 @@ const createMetric = (): Metric => ({
 });
 
 class MockRegistry {
-  private metricsList: any[] = [];
+  private metricsList: RegisteredMetric[] = [];
 
-  registerMetric = jest.fn((metric: any) => {
-    this.metricsList.push(metric);
+  registerMetric = jest.fn((metric: Partial<RegisteredMetric> | undefined) => {
+    if (!metric) {
+      return;
+    }
+    const name = typeof metric.name === 'string' ? metric.name : `mock_metric_${this.metricsList.length}`;
+    const type = metric.type ?? 'counter';
+    this.metricsList.push({ name, type });
   });
 
-  metrics = jest.fn(async () => JSON.stringify(this.metricsList));
+  metrics = jest.fn(async () => {
+    return this.metricsList
+      .map(({ name, type }) => `# HELP ${name} mock metric\n# TYPE ${name} ${type}\n${name} 0`)
+      .join('\n');
+  });
 
   clear = jest.fn(() => {
     this.metricsList = [];
@@ -34,11 +48,19 @@ class MockRegistry {
 
 const register = new MockRegistry();
 
+const createMetricFactory = (type: RegisteredMetric['type']) => {
+  return jest.fn((config: { name?: string } = {}) => {
+    const metric = createMetric();
+    register.registerMetric({ name: config.name, type });
+    return metric;
+  });
+};
+
 const promClientMock = {
-  Counter: jest.fn(() => createMetric()),
-  Gauge: jest.fn(() => createMetric()),
-  Histogram: jest.fn(() => createMetric()),
-  Summary: jest.fn(() => createMetric()),
+  Counter: createMetricFactory('counter'),
+  Gauge: createMetricFactory('gauge'),
+  Histogram: createMetricFactory('histogram'),
+  Summary: createMetricFactory('summary'),
   Registry: MockRegistry,
   collectDefaultMetrics: jest.fn(),
   register,

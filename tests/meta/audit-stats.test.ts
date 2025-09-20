@@ -1,5 +1,4 @@
-import express from 'express';
-import type { NextFunction, Request, Response, Router as ExpressRouter } from 'express';
+import express, { type NextFunction, type Request, type Response, type Router as ExpressRouter } from 'express';
 import request from 'supertest';
 import { createMetaRouter } from '../../backend/meta/router';
 import type { AuditRepo, AuditRepoEvent } from '../../backend/meta/auditStats';
