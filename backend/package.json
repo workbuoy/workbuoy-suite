@@ -10,12 +10,14 @@
     "start:compliance": "node dist/compliance/server.js"
   },
   "dependencies": {
+    "@prisma/client": "^5.17.0",
     "express": "^4.19.2",
     "express-rate-limit": "^6.10.0",
     "prom-client": "^15.1.0",
     "uuid": "^9.0.1"
   },
   "devDependencies": {
+    "prisma": "^5.17.0",
     "typescript": "^5.4.5",
     "ts-node": "^10.9.2",
     "@types/node": "^20.11.30",

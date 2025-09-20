@@ -31,15 +31,28 @@ The `/api/admin/subscription` endpoint lets operations teams change plan, engage
 
 `policyCheckRoleAware` now evaluates policy with the *effective* proactivity mode. Role feature caps still apply: the registry resolves feature autonomy caps, and the cap is injected into the resolution pipeline. Policy guardrails can provide their own caps by returning a lower `policyCap`, which folds into the degrade rail before execution.
 
-The runner logs the resolved basis to `intent` records so the Why Drawer can explain *why* Workbuoy acted (e.g. `['subscription:flex', 'feature:crm_forecaster', 'cap:policy:proaktiv']`).
+### Effective mode resolution
+
+The effective mode is now the minimum of:
+
+- the requested mode,
+- the tenant subscription cap (`tenantPlan:*`, `kill`, `tenant<=3` basis entries),
+- the resolved role/feature cap (`roleCap:<featureId>=<n>`), and
+- any additional tenant policy cap supplied by callers.
+
+If any cap forces a downgrade, the degrade rail is followed and the resulting mode is appended as `degraded:<mode>` to the basis for explainability.
+
+The runner logs the resolved basis to `intent` records so the Why Drawer can explain *why* Workbuoy acted (e.g. `['tenantPlan:flex', 'roleCap:cashflow_forecast=4', 'degraded:proaktiv']`).
 
 ## Explainability Basis
 
 Basis strings are intentionally terse. Common prefixes:
 
-- `subscription:*` → subscription plan, kill-switch, secure tenant flags
-- `feature:<id>` → role feature context used for capability execution
-- `cap:<source>:<mode>` → where the cap came from (`subscription`, `role`, `policy`, etc.)
+- `tenantPlan:*` → subscription plan source
+- `kill` → tenant kill switch forced the rail down to `usynlig`
+- `tenant<=3` → secure tenant policy clamped the plan to `proaktiv`
+- `roleCap:<feature>=<n>` → role or override cap applied for the feature
+- `degraded:<mode>` → final mode after downgrade relative to the request
 - `requested:<mode>` → original request from UI or headers
 
 Telemetry is stored in-memory and surfaced via `/api/explain/last` (last 10 events) for UI explainability panes.

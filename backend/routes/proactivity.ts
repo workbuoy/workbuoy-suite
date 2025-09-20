@@ -1,12 +1,11 @@
 import { Router } from 'express';
-import { RoleRegistry } from '../../src/roles/registry';
-import { loadRolesFromRepo, loadFeaturesFromRepo } from '../../src/roles/loader';
+import { getRoleRegistry, resolveUserBinding } from '../../src/roles/registryProvider';
 import { buildProactivityContext } from '../../src/core/proactivity/context';
 import { parseProactivityMode } from '../../src/core/proactivity/modes';
 import { logModusskift } from '../../src/core/proactivity/telemetry';
+import { ensureSubscriptionHydrated } from '../../src/core/subscription/state';
 
 const router: any = Router();
-const roleRegistry = new RoleRegistry(loadRolesFromRepo(), loadFeaturesFromRepo(), []);
 
 function resolveHeaders(req: any) {
   const tenantId = String(req.header('x-tenant') || req.header('x-tenant-id') || 'demo');
@@ -16,19 +15,22 @@ function resolveHeaders(req: any) {
   return { tenantId, userId, role, requestedHeader };
 }
 
-function computeState(req: any, overrideMode?: any) {
+async function computeState(req: any, overrideMode?: any) {
   const { tenantId, userId, role, requestedHeader } = resolveHeaders(req);
   const requested = overrideMode ?? req.body?.requested ?? req.body?.mode ?? requestedHeader;
   const featureId = req.body?.featureId || req.query?.featureId || undefined;
+  const registry = await getRoleRegistry();
+  const binding = await resolveUserBinding(userId, role);
+  await ensureSubscriptionHydrated(tenantId);
   const state = buildProactivityContext({
     tenantId,
-    roleRegistry,
-    roleBinding: { userId, primaryRole: role },
+    roleRegistry: registry,
+    roleBinding: binding,
     requestedMode: parseProactivityMode(requested),
     featureId,
   });
   req.proactivity = state;
-  logModusskift(state, { tenantId, userId, source: 'api/proactivity' });
+  await logModusskift(state, { tenantId, userId, source: 'api/proactivity' });
   return { tenantId, userId, state };
 }
 
@@ -49,14 +51,22 @@ function toResponse(state: ReturnType<typeof buildProactivityContext>) {
   };
 }
 
-router.get('/proactivity/state', (req: any, res: any) => {
-  const { state } = computeState(req);
-  res.json(toResponse(state));
+router.get('/proactivity/state', async (req: any, res: any) => {
+  try {
+    const { state } = await computeState(req);
+    res.json(toResponse(state));
+  } catch (err: any) {
+    res.status(500).json({ error: 'proactivity_state_failed', message: err?.message || String(err) });
+  }
 });
 
-router.post('/proactivity/state', (req: any, res: any) => {
-  const { state } = computeState(req, req.body?.requestedMode ?? req.body?.requested ?? req.body?.mode);
-  res.json(toResponse(state));
+router.post('/proactivity/state', async (req: any, res: any) => {
+  try {
+    const { state } = await computeState(req, req.body?.requestedMode ?? req.body?.requested ?? req.body?.mode);
+    res.json(toResponse(state));
+  } catch (err: any) {
+    res.status(500).json({ error: 'proactivity_state_failed', message: err?.message || String(err) });
+  }
 });
 
 export default router;

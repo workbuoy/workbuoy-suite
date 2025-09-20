@@ -48,7 +48,7 @@ function safeMount(path: string, modPath: string, factory?: string) {
 }
 
 // Feature routers (mounted only if files exist in repo)
-safeMount('/api/crm/contacts', './src/features/crm/routes', 'crmRouter');
+safeMount('/api/crm', './src/features/crm/routes', 'crmRouter');
 safeMount('/api/tasks', './src/features/tasks/routes', 'tasksRouter');
 safeMount('/api/logs', './src/features/log/routes', 'logRouter');
 safeMount('/api', './src/features/deals/deals.router');
@@ -58,7 +58,10 @@ safeMount('/api/finance', './src/routes/finance.reminder', 'financeReminderRoute
 safeMount('/api', './src/routes/manual.complete', 'manualCompleteRouter');
 safeMount('/', './src/routes/genesis.autonomy', 'metaGenesisRouter');
 safeMount('/api', '../backend/routes/proactivity');
+safeMount('/api', '../backend/routes/features');
+safeMount('/api', '../backend/routes/usage');
 safeMount('/api', '../backend/routes/admin.subscription');
+safeMount('/api', '../backend/routes/admin.roles');
 safeMount('/api', '../backend/routes/explainability');
 
 app.use('/api', knowledgeRouter);

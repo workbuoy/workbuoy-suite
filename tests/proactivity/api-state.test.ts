@@ -11,7 +11,7 @@ describe('GET /api/proactivity/state', () => {
   });
 
   it('returns requested and effective modes with ui hints', async () => {
-    setSubscriptionForTenant('TENANT', { plan: 'flex' });
+    await setSubscriptionForTenant('TENANT', { plan: 'flex' });
     const res = await request(app)
       .get('/api/proactivity/state')
       .set('x-tenant', 'TENANT')
@@ -30,7 +30,7 @@ describe('GET /api/proactivity/state', () => {
   });
 
   it('POST allows overriding requested mode', async () => {
-    setSubscriptionForTenant('TENANT', { plan: 'enterprise' });
+    await setSubscriptionForTenant('TENANT', { plan: 'enterprise' });
     const res = await request(app)
       .post('/api/proactivity/state')
       .set('x-tenant', 'TENANT')

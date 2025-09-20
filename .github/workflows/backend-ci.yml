@@ -45,4 +45,6 @@ jobs:
           npm test -- \
             tests/features/active.api.test.ts \
             tests/usage/usage.api.test.ts \
+            tests/admin/roles.api.test.ts \
+            tests/admin/subscription.api.test.ts \
             --runInBand --passWithNoTests

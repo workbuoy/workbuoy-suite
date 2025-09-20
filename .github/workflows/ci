@@ -7,6 +7,17 @@ on:
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_USER: workbuoy
+          POSTGRES_PASSWORD: workbuoy
+          POSTGRES_DB: workbuoy
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U workbuoy" --health-interval 5s --health-timeout 5s --health-retries 5
     strategy:
       matrix:
         node-version: [18.x, 20.x]
@@ -23,6 +34,11 @@ jobs:
       - name: Install
         run: npm ci
 
+      - name: Run Prisma migrations
+        env:
+          DATABASE_URL: postgresql://workbuoy:workbuoy@localhost:5432/workbuoy
+        run: npx prisma migrate deploy --schema=prisma/schema.prisma
+
       - name: Lint (if present)
         run: npm run lint --if-present
 
@@ -32,7 +48,20 @@ jobs:
       - name: Test with coverage
         env:
           TEST_CORRELATION: "1"
+          DATABASE_URL: postgresql://workbuoy:workbuoy@localhost:5432/workbuoy
         run: npm test -- --coverage --runInBand
+
+      - name: Persistence smoke suite
+        env:
+          FF_PERSISTENCE: 'true'
+          DATABASE_URL: postgresql://workbuoy:workbuoy@localhost:5432/workbuoy
+        run: npm test -- --runTestsByPath \
+          tests/roles/db.registry.test.ts \
+          tests/usage/db.usage.test.ts \
+          tests/features/active.db.test.ts \
+          tests/admin/roles.api.test.ts \
+          tests/admin/subscription.api.test.ts \
+          --runInBand --passWithNoTests
 
       - name: Upload coverage
         if: always()

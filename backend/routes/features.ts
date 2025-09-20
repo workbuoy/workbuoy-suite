@@ -1,19 +1,38 @@
 import { Router } from 'express';
-import { loadRolesFromRepo, loadFeaturesFromRepo } from '../../src/roles/loader';
-import { RoleRegistry } from '../../src/roles/registry';
+import { getRoleRegistry, resolveUserBinding } from '../../src/roles/registryProvider';
 import { getActiveFeatures } from '../../src/features/activation/featureActivation';
 import { aggregateFeatureUseCount } from '../../src/telemetry/usageSignals';
+import { persistenceEnabled } from '../../src/core/config/dbFlag';
 
 const r = Router();
-const rr = new RoleRegistry(loadRolesFromRepo(), loadFeaturesFromRepo(), []);
 
-r.get('/api/features/active', (req, res) => {
-  const tenantId = String(req.header('x-tenant') ?? 'DEV');
-  const userId = String(req.header('x-user') ?? 'dev-user');
-  const role = String(req.header('x-role') ?? 'sales_rep');
-  const usage = aggregateFeatureUseCount(userId);
-  const list = getActiveFeatures(rr, { tenantId, userId, roleBinding: { userId, primaryRole: role }, workPatterns: { featureUseCount: usage } });
-  res.json(list);
+r.get('/features/active', async (req, res) => {
+  const tenantId = String(req.header('x-tenant') ?? req.header('x-tenant-id') ?? 'DEV');
+  const userId = String(req.header('x-user') ?? req.header('x-user-id') ?? 'dev-user');
+  const requestedRole = String(req.header('x-role') ?? req.header('x-user-role') ?? 'sales_rep');
+
+  try {
+    const [registry, usage, binding] = await Promise.all([
+      getRoleRegistry(),
+      aggregateFeatureUseCount(userId, tenantId),
+      resolveUserBinding(userId, requestedRole),
+    ]);
+
+    const features = getActiveFeatures(registry, {
+      tenantId,
+      userId,
+      roleBinding: binding,
+      workPatterns: { featureUseCount: usage },
+    });
+
+    if (!features.length && !persistenceEnabled()) {
+      return res.status(204).end();
+    }
+
+    return res.json({ tenantId, userId, features });
+  } catch (err: any) {
+    return res.status(500).json({ error: 'features_active_failed', message: err?.message || String(err) });
+  }
 });
 
 export default r;

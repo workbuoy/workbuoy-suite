@@ -1,5 +1,10 @@
 import { Router } from 'express';
-import { getSubscriptionForTenant, getSubscriptionCap, setSubscriptionForTenant } from '../../src/core/subscription/state';
+import {
+  getSubscriptionForTenant,
+  getSubscriptionCap,
+  setSubscriptionForTenant,
+  ensureSubscriptionHydrated,
+} from '../../src/core/subscription/state';
 import { isSubscriptionPlan } from '../../src/core/subscription/entitlements';
 import { parseProactivityMode } from '../../src/core/proactivity/modes';
 
@@ -9,7 +14,19 @@ function tenantFrom(req: any) {
   return String(req.header('x-tenant') || req.header('x-tenant-id') || req.query?.tenant || 'demo');
 }
 
-function serialize(tenantId: string) {
+function requireAdmin(req: any, res: any, next: any) {
+  const roles = String(req.header('x-roles') || req.header('x-role') || '')
+    .split(',')
+    .map((r: string) => r.trim())
+    .filter(Boolean);
+  if (!roles.includes('admin')) {
+    return res.status(403).json({ error: 'admin_required' });
+  }
+  return next();
+}
+
+async function serialize(tenantId: string) {
+  await ensureSubscriptionHydrated(tenantId);
   const current = getSubscriptionForTenant(tenantId);
   const cap = getSubscriptionCap(tenantId);
   return {
@@ -22,12 +39,13 @@ function serialize(tenantId: string) {
   };
 }
 
-router.get('/admin/subscription', (req: any, res: any) => {
+router.get('/admin/subscription', requireAdmin, async (req: any, res: any) => {
   const tenantId = tenantFrom(req);
-  res.json(serialize(tenantId));
+  const payload = await serialize(tenantId);
+  res.json(payload);
 });
 
-router.put('/admin/subscription', (req: any, res: any) => {
+router.put('/admin/subscription', requireAdmin, async (req: any, res: any) => {
   const tenantId = tenantFrom(req);
   const { plan, killSwitch, secureTenant, maxOverride } = req.body || {};
   const overrideValue = maxOverride === null ? undefined : maxOverride;
@@ -36,14 +54,15 @@ router.put('/admin/subscription', (req: any, res: any) => {
     return res.status(400).json({ error: 'invalid_plan' });
   }
 
-  const next = setSubscriptionForTenant(tenantId, {
+  const next = await setSubscriptionForTenant(tenantId, {
     plan: plan ?? undefined,
     killSwitch: typeof killSwitch === 'boolean' ? killSwitch : undefined,
     secureTenant: typeof secureTenant === 'boolean' ? secureTenant : undefined,
     maxOverride: overrideValue !== undefined ? parseProactivityMode(overrideValue) : undefined,
   });
 
-  res.json({ ...serialize(tenantId), plan: next.plan });
+  const payload = await serialize(tenantId);
+  res.json({ ...payload, plan: next.plan });
 });
 
 export default router;

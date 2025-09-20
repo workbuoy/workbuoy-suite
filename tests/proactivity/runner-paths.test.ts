@@ -18,9 +18,9 @@ async function allowPolicy() {
 }
 
 describe('runCapabilityWithRole', () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     resetSubscriptionState();
-    setSubscriptionForTenant('TEN', { plan: 'enterprise' });
+    await setSubscriptionForTenant('TEN', { plan: 'enterprise' });
   });
 
   it.each([

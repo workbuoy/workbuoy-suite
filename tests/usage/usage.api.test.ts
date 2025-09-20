@@ -10,6 +10,9 @@ describe('Usage router public paths', () => {
       .set('x-tenant', 'DEV')
       .send({ userId: 'u1', featureId: 'customer_health', action: 'open' });
     expect([200, 204]).toContain(res.status);
+    if (res.status === 200) {
+      expect(['db', 'memory']).toContain(res.body.mode);
+    }
   });
 
   it('GET /api/usage/aggregate/:userId', async () => {

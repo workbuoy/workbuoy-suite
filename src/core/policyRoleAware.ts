@@ -2,6 +2,7 @@ import { RoleRegistry } from '../roles/registry';
 import type { UserRoleBinding } from '../roles/types';
 import { buildProactivityContext, ProactivityState } from './proactivity/context';
 import { ProactivityMode } from './proactivity/modes';
+import { ensureSubscriptionHydrated } from './subscription/state';
 
 export interface RoleAwareContext {
   tenantId: string;
@@ -26,6 +27,7 @@ export async function policyCheckRoleAware(
   const userCtx = rr.getUserContext(ctx.tenantId, ctx.roleBinding);
   const featureId = base.featureId || userCtx.features.find(f => f.capabilities.includes(base.capability))?.id;
 
+  await ensureSubscriptionHydrated(ctx.tenantId);
   const proactivity = buildProactivityContext({
     tenantId: ctx.tenantId,
     roleRegistry: rr,

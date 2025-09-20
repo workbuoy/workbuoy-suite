@@ -185,6 +185,157 @@ paths:
         '400': { $ref: '#/components/responses/BadRequest' }
         '403': { $ref: '#/components/responses/Forbidden' }
 
+  /api/features/active:
+    get:
+      summary: List active features for a user
+      tags: [Features]
+      parameters:
+        - in: header
+          name: x-tenant
+          schema: { type: string }
+          required: false
+          description: Tenant identifier (defaults to DEV)
+        - in: header
+          name: x-user
+          schema: { type: string }
+          required: false
+          description: User identifier (defaults to dev-user)
+        - in: header
+          name: x-role
+          schema: { type: string }
+          required: false
+          description: Role binding (persisted when persistence is enabled)
+      responses:
+        '200':
+          description: Feature activation list
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/FeatureActivationResponse' }
+        '204': { description: No content (in-memory fallback) }
+
+  /api/usage/feature:
+    post:
+      summary: Record feature usage event
+      tags: [Usage]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/FeatureUsageEvent' }
+      responses:
+        '200':
+          description: Acknowledged
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+                  mode: { type: string, enum: [db, memory] }
+        '400': { $ref: '#/components/responses/BadRequest' }
+
+  /api/usage/aggregate/{userId}:
+    get:
+      summary: Aggregate usage counts by feature
+      tags: [Usage]
+      parameters:
+        - in: path
+          name: userId
+          required: true
+          schema: { type: string }
+        - in: header
+          name: x-tenant
+          required: false
+          schema: { type: string }
+          description: Tenant identifier (defaults to DEV)
+      responses:
+        '200':
+          description: Usage counts per feature
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/FeatureUsageAggregate' }
+        '204': { description: No events recorded }
+
+  /api/admin/roles/import:
+    post:
+      summary: Import role + feature catalogue from repository seed
+      tags: [Admin]
+      responses:
+        '200':
+          description: Import summary
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/RoleImportResponse' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  /api/admin/roles/{roleId}/overrides:
+    put:
+      summary: Upsert tenant overrides for a role
+      tags: [Admin]
+      parameters:
+        - in: path
+          name: roleId
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/RoleOverrideRequest' }
+      responses:
+        '200':
+          description: Updated feature caps for the tenant/role
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/RoleOverrideResponse' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  /api/admin/roles/{roleId}:
+    get:
+      summary: Inspect effective caps for a role within a tenant
+      tags: [Admin]
+      parameters:
+        - in: path
+          name: roleId
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Effective caps and overrides
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/RoleDetailResponse' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /api/admin/subscription:
+    get:
+      summary: Inspect subscription plan/caps for a tenant
+      tags: [Admin]
+      responses:
+        '200':
+          description: Subscription settings
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SubscriptionResponse' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+    put:
+      summary: Update subscription plan or tenant flags
+      tags: [Admin]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/SubscriptionUpdateRequest' }
+      responses:
+        '200':
+          description: Updated subscription summary
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SubscriptionResponse' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
 components:
   schemas:
     Explanation:
@@ -260,6 +411,126 @@ components:
         level: { type: string, enum: [info, warn, error], default: info }
         msg: { type: string }
         meta: { type: object }
+
+    FeatureActivationItem:
+      type: object
+      properties:
+        id: { type: string }
+        title: { type: string }
+        description: { type: string }
+        capabilities:
+          type: array
+          items: { type: string }
+        autonomyCap: { type: integer, minimum: 0, maximum: 6 }
+        usageCount: { type: integer, minimum: 0 }
+        score: { type: number }
+        basis:
+          type: array
+          items: { type: string }
+
+    FeatureActivationResponse:
+      type: object
+      properties:
+        tenantId: { type: string }
+        userId: { type: string }
+        features:
+          type: array
+          items: { $ref: '#/components/schemas/FeatureActivationItem' }
+
+    FeatureUsageEvent:
+      type: object
+      required: [userId, featureId, action]
+      properties:
+        userId: { type: string }
+        featureId: { type: string }
+        action: { type: string, enum: [open, complete, dismiss] }
+        ts: { type: string, format: date-time }
+
+    FeatureUsageAggregate:
+      type: object
+      properties:
+        tenantId: { type: string }
+        counts:
+          type: object
+          additionalProperties: { type: integer, minimum: 0 }
+
+    RoleImportResponse:
+      type: object
+      properties:
+        ok: { type: boolean }
+        summary:
+          type: object
+          properties:
+            roles: { type: integer }
+            features: { type: integer }
+
+    RoleOverrideRequest:
+      type: object
+      properties:
+        featureCaps:
+          type: object
+          additionalProperties: { type: integer, minimum: 0, maximum: 6 }
+        disabledFeatures:
+          type: array
+          items: { type: string }
+
+    RoleOverrideResponse:
+      type: object
+      properties:
+        tenantId: { type: string }
+        roleId: { type: string }
+        featureCaps:
+          type: object
+          additionalProperties: { type: integer, minimum: 0, maximum: 6 }
+        features:
+          type: array
+          items: { $ref: '#/components/schemas/FeatureActivationItem' }
+
+    RoleDetailResponse:
+      type: object
+      properties:
+        tenantId: { type: string }
+        roleId: { type: string }
+        roles:
+          type: array
+          items: { type: object }
+        featureCaps:
+          type: object
+          additionalProperties: { type: integer, minimum: 0, maximum: 6 }
+        override:
+          type: object
+          nullable: true
+          properties:
+            featureCaps:
+              type: object
+              additionalProperties: { type: integer, minimum: 0, maximum: 6 }
+            disabledFeatures:
+              type: array
+              items: { type: string }
+        features:
+          type: array
+          items: { $ref: '#/components/schemas/FeatureActivationItem' }
+
+    SubscriptionResponse:
+      type: object
+      properties:
+        tenantId: { type: string }
+        plan: { type: string, enum: [flex, secure, enterprise] }
+        killSwitch: { type: boolean }
+        secureTenant: { type: boolean }
+        maxMode: { type: integer, minimum: 1, maximum: 6 }
+        maxOverride: { type: integer, nullable: true }
+
+    SubscriptionUpdateRequest:
+      type: object
+      properties:
+        plan: { type: string, enum: [flex, secure, enterprise] }
+        killSwitch: { type: boolean }
+        secureTenant: { type: boolean }
+        maxOverride:
+          oneOf:
+            - { type: integer, minimum: 1, maximum: 6 }
+            - { type: 'null' }
 
   responses:
     BadRequest:

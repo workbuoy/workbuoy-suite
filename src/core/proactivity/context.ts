@@ -56,9 +56,9 @@ export function buildProactivityContext(input: ProactivityContextInput): Proacti
     { id: `subscription:${subscription.plan}`, label: `plan:${subscription.plan}`, mode: subscription.maxMode },
   ];
   const basis = new Set<string>(input.basis ?? []);
-  basis.add(`subscription:${subscription.plan}`);
-  if (subscription.secureTenant) basis.add('subscription:secureTenant');
-  if (subscription.killSwitch) basis.add('subscription:killswitch');
+  basis.add(`tenantPlan:${subscription.plan}`);
+  if (subscription.secureTenant) basis.add('tenant<=3');
+  if (subscription.killSwitch) basis.add('kill');
 
   const requested = parseProactivityMode(input.requestedMode);
   const rail = input.degradeRail && input.degradeRail.length ? input.degradeRail : DEFAULT_DEGRADE_RAIL;
@@ -66,7 +66,7 @@ export function buildProactivityContext(input: ProactivityContextInput): Proacti
   const { cap: roleCap, featureId } = resolveRoleCap(input.roleRegistry, input.tenantId, input.roleBinding, input.featureId);
   if (roleCap) {
     caps.push({ id: featureId ? `role:${featureId}` : 'role', label: featureId ?? 'role', mode: roleCap });
-    basis.add(featureId ? `feature:${featureId}` : 'feature:default');
+    basis.add(featureId ? `roleCap:${featureId}=${roleCap}` : `roleCap:default=${roleCap}`);
   }
 
   if (input.policyCap) {
@@ -82,6 +82,11 @@ export function buildProactivityContext(input: ProactivityContextInput): Proacti
   });
 
   const meta = PROACTIVITY_MODE_META[resolution.effective];
+  const basisSet = new Set<string>([...basis, ...resolution.basis]);
+  if (resolution.effective !== resolution.requested) {
+    basisSet.add(`degraded:${modeToKey(resolution.effective)}`);
+  }
+
   const state: ProactivityState = {
     ...resolution,
     tenantId: input.tenantId,
@@ -92,6 +97,7 @@ export function buildProactivityContext(input: ProactivityContextInput): Proacti
     subscription,
     featureId,
     timestamp: new Date().toISOString(),
+    basis: Array.from(basisSet),
   };
   return state;
 }
