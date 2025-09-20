@@ -63,7 +63,7 @@ export function resolveEffectiveMode(input: ResolveEffectiveModeInput): Proactiv
 
   if (input.killSwitch) {
     effective = ProactivityMode.Usynlig;
-    basis.add('cap:killswitch');
+    basis.add('kill');
   }
 
   for (const cap of caps) {

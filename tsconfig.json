@@ -16,7 +16,7 @@
       "@/*": ["frontend/src/*"],
       "prom-client": ["backend/node_modules/prom-client"]
     },
-    "types": ["node", "jest"],
+    "types": ["node", "jest", "prisma__client"],
     "typeRoots": ["./types", "./node_modules/@types", "./backend/node_modules/@types"]
   },
   "include": [
@@ -26,7 +26,8 @@
     "backend/tests/**/*.ts",
     "frontend/src/**/*.ts",
     "frontend/src/**/*.tsx",
-    "frontend/src/**/*.d.ts"
+    "frontend/src/**/*.d.ts",
+    "types/**/*.d.ts"
   ],
   "exclude": [
     "**/node_modules",

@@ -57,7 +57,7 @@ export async function run(input: RunInput, req: Request): Promise<RunOutput> {
   logger?.info?.('buoy.run.start', { intent, tag: "buoy.run.start", correlationId: corrId }, corrId);
 
   // Reasoning (MVP)
-  const planRes = await plan(intent, ctx);
+  const planRes = await plan(intent, ctx, params);
 
   // Execute
   const execRes = await execute(planRes.action, { ...ctx, params, plan: planRes });

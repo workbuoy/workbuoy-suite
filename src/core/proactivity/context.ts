@@ -53,12 +53,14 @@ function resolveRoleCap(
 export function buildProactivityContext(input: ProactivityContextInput): ProactivityState {
   const subscription = getSubscriptionCap(input.tenantId);
   const caps: ProactivityCap[] = [
-    { id: `subscription:${subscription.plan}`, label: `plan:${subscription.plan}`, mode: subscription.maxMode },
+    { id: `tenantPlan:${subscription.plan}`, label: `plan:${subscription.plan}`, mode: subscription.maxMode },
   ];
   const basis = new Set<string>(input.basis ?? []);
-  basis.add(`subscription:${subscription.plan}`);
-  if (subscription.secureTenant) basis.add('subscription:secureTenant');
-  if (subscription.killSwitch) basis.add('subscription:killswitch');
+  basis.add(`tenantPlan:${subscription.plan}`);
+  if (subscription.killSwitch) basis.add('kill');
+  if (subscription.secureTenant || subscription.maxMode <= ProactivityMode.Proaktiv) {
+    basis.add('tenant<=3');
+  }
 
   const requested = parseProactivityMode(input.requestedMode);
   const rail = input.degradeRail && input.degradeRail.length ? input.degradeRail : DEFAULT_DEGRADE_RAIL;
@@ -66,7 +68,11 @@ export function buildProactivityContext(input: ProactivityContextInput): Proacti
   const { cap: roleCap, featureId } = resolveRoleCap(input.roleRegistry, input.tenantId, input.roleBinding, input.featureId);
   if (roleCap) {
     caps.push({ id: featureId ? `role:${featureId}` : 'role', label: featureId ?? 'role', mode: roleCap });
-    basis.add(featureId ? `feature:${featureId}` : 'feature:default');
+    if (featureId) {
+      basis.add(`roleCap:${featureId}=${roleCap}`);
+    } else {
+      basis.add(`roleCap:default=${roleCap}`);
+    }
   }
 
   if (input.policyCap) {
@@ -81,6 +87,11 @@ export function buildProactivityContext(input: ProactivityContextInput): Proacti
     basis: Array.from(basis),
   });
 
+  const basisSet = new Set(resolution.basis);
+  if (resolution.effective < resolution.requested) {
+    basisSet.add(`degraded:${modeToKey(resolution.effective)}`);
+  }
+
   const meta = PROACTIVITY_MODE_META[resolution.effective];
   const state: ProactivityState = {
     ...resolution,
@@ -92,6 +103,7 @@ export function buildProactivityContext(input: ProactivityContextInput): Proacti
     subscription,
     featureId,
     timestamp: new Date().toISOString(),
+    basis: Array.from(basisSet),
   };
   return state;
 }
