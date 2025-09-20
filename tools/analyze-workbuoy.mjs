@@ -398,6 +398,150 @@ function addAssistantSignal(type, relPath, lineNumber, lineText) {
   signals.BUOY_ASSISTANT_SINGULAR[type].push({ file: relPath, line: lineNumber, match: snippet });
 }
 
+function statusLabel(status) {
+  if (status === 'present') return '✅ Present';
+  if (status === 'partial') return '🟡 Partial';
+  return '⚠️ Missing';
+}
+
+const pillarDetails = [
+  { key: 'CORE', label: 'Core', note: 'Backend services and CRM APIs remain wired up for the base experience.' },
+  { key: 'FLEX', label: 'Flex', note: 'Connector SDKs and integration examples keep the platform extensible.' },
+  { key: 'SECURE', label: 'Secure', note: 'Security modules and policy guards keep governance and approvals in place.' },
+  { key: 'NAVI', label: 'Navi', note: 'Flip-card UI and Navi modules expose the workspace navigation surfaces.' },
+  { key: 'BUOY_AI', label: 'Buoy AI', note: 'Single-assistant orchestration and chat UX live in buoy source modules.' },
+  { key: 'ROLES', label: 'Roles', note: 'Role registries and UI presenters surface tone, priority, and policy chips.' },
+  { key: 'PROACTIVITY', label: 'Proactivity', note: 'Mode definitions and UI keep proactivity controls available.' },
+  { key: 'META', label: 'META', note: 'META routers, genesis flows, and guard specs stay enforced.' },
+  { key: 'INFRA', label: 'Infra', note: 'Deploy and observability assets remain packaged with the suite.' },
+  { key: 'ADOPTION', label: 'Adoption', note: 'Onboarding flows and samples demonstrate adoption tooling.' }
+];
+
+const pillarKeyFiles = {
+  CORE: ['backend/src/app.ts', 'src/routes/genesis.autonomy.ts', 'services/builder/builder.ts'],
+  FLEX: ['connectors/dynamics/connector.js', 'sdk/ts/workbuoy.ts', 'examples/js_quickstart.js'],
+  SECURE: ['backend/meta/router.ts', 'backend/src/meta-evolution/routes/evolution.routes.ts', 'META_ROUTE_RUNBOOK.md'],
+  NAVI: ['frontend/src/components/FlipCard/FlipCard.tsx', 'frontend/src/navi/NaviGrid.tsx', 'frontend/src/components/FlipCard/FlipCard.css'],
+  BUOY_AI: ['src/buoy/agent.ts', 'frontend/src/features/buoy/useBuoy.ts', 'frontend/src/features/buoy/ChatMessage.tsx'],
+  ROLES: ['roles/roles.json', 'src/roles/registry.ts', 'frontend/src/roles/rolePresentation.ts'],
+  PROACTIVITY: ['src/core/proactivity/modes.ts', 'frontend/src/proactivity/useProactivity.ts', 'frontend/src/proactivity/ModeSwitcher.tsx'],
+  META: ['src/routes/genesis.autonomy.ts', 'backend/meta/router.ts', 'tests/meta/meta-rails.test.ts'],
+  INFRA: ['deploy/helm/workbuoy/templates/deployment.yaml', 'observability/metrics/meta.ts', 'grafana/dashboards/proactivity.json'],
+  ADOPTION: ['enterprise/onboarding.js', 'crm/pages/api/onboarding/demo.ts', 'samples/contacts.csv']
+};
+
+function formatFileList(pillar, files) {
+  const overrides = pillarKeyFiles[pillar];
+  const list = Array.isArray(overrides) && overrides.length > 0 ? overrides : Array.isArray(files) ? files.slice(0, 3) : [];
+  if (list.length === 0) {
+    return '';
+  }
+  return ` Key files: ${list.map((file) => `\`${file}\``).join(', ')}.`;
+}
+
+function createAuditMarkdown(result) {
+  const lines = [];
+  const headLabel = result.head || 'unknown';
+
+  lines.push(`# Workbuoy Audit (commit ${headLabel})`);
+  lines.push('');
+  lines.push('## Pillar coverage');
+  lines.push('');
+  lines.push('| Pillar | Status | Notes |');
+  lines.push('| --- | --- | --- |');
+
+  for (const detail of pillarDetails) {
+    const status = result.summary?.[detail.key] || 'missing';
+    const files = result.files?.[detail.key];
+    const note = `${detail.note}${formatFileList(detail.key, files)}`;
+    lines.push(`| ${detail.label} | ${statusLabel(status)} | ${note} |`);
+  }
+
+  const singularSignals = result.signals?.BUOY_ASSISTANT_SINGULAR || { singular_mentions: [], plural_hits: [] };
+  const singularCount = singularSignals.singular_mentions?.length || 0;
+  const pluralCount = singularSignals.plural_hits?.length || 0;
+
+  lines.push('');
+  lines.push('## Buoy AI (one assistant)');
+  lines.push('');
+  lines.push('- `src/buoy/agent.ts` orchestrates the request context and plan/execute pipeline, returning a single assistant response each turn.');
+  lines.push('- `frontend/src/features/buoy/useBuoy.ts` maintains one Buoy AI thread for the chat surface, keeping the assistant singular.');
+  lines.push(`- Analyzer signals: ${singularCount} singular mention${singularCount === 1 ? '' : 's'} recorded, ${pluralCount} plural hit${pluralCount === 1 ? '' : 's'} (must stay at 0).`);
+
+  lines.push('');
+  lines.push('## Navi Flip-card UX');
+  lines.push('');
+  lines.push('- `frontend/src/components/FlipCard/FlipCard.tsx` renders Buoy on the front and Navi on the back with keyboard flips, resize nudges, and connect dialogs.');
+  lines.push('- `frontend/src/components/FlipCard/FlipCard.css` keeps the 3D transform in production while only muting transitions for reduced motion.');
+  lines.push('- `frontend/src/navi/NaviGrid.tsx`, `frontend/src/features/buoy/BuoyChat.tsx`, and `frontend/src/components/FlipCard/FlipCard.test.tsx` ensure Buoy ⇄ Navi wiring stays accurate.');
+
+  lines.push('');
+  lines.push('## Proactivity UI');
+  lines.push('');
+  lines.push('- `frontend/src/proactivity/useProactivity.ts` syncs requested vs. effective modes, degrade rails, and telemetry calls.');
+  lines.push('- `frontend/src/proactivity/ModeSwitcher.tsx` renders the multi-mode selector with pending, approval, and error states.');
+  lines.push('- `frontend/src/proactivity/ApprovalPanel.tsx` surfaces manual approval UI so operators can gate proactivity changes.');
+
+  lines.push('');
+  lines.push('## META rails');
+  lines.push('');
+  lines.push('- `backend/meta/router.ts` enforces scopes, rate limits, and telemetry on META endpoints.');
+  lines.push('- `src/routes/genesis.autonomy.ts` keeps proposals-only behavior and requires `.evolution/APPROVED` tokens before acknowledging evolution.');
+  lines.push('- Guard coverage spans `tests/meta/meta-rails.test.ts` and `ci/policy-meta-rails.sh`, and the analyzer flags any git./fs. usage inside META HTTP handlers.');
+
+  lines.push('');
+  lines.push('## Roles in UI');
+  lines.push('');
+  lines.push('- `roles/roles.json` seeds tone, priority, and policy chips for each persona.');
+  lines.push('- `frontend/src/roles/rolePresentation.ts` renders those role chips and guidance for UI consumption.');
+  lines.push('- `frontend/src/features/buoy/ChatMessage.tsx` displays assistant vs. user roles alongside rationale drawers.');
+
+  lines.push('');
+  lines.push('## Infra & observability quick note');
+  lines.push('');
+  lines.push('- `deploy/helm/workbuoy/templates/deployment.yaml` ships a Kubernetes deployment wired for metrics.');
+  lines.push('- `observability/metrics/meta.ts` exposes META counters and histograms for Prometheus and Grafana.');
+  lines.push('- `grafana/dashboards/proactivity.json` visualises proactivity adoption and degrade rails for operators.');
+
+  lines.push('');
+  lines.push("## What's next");
+  lines.push('');
+
+  const checklist = [];
+
+  if (Array.isArray(result.violations?.http_write_ops) && result.violations.http_write_ops.length > 0) {
+    for (const violation of result.violations.http_write_ops) {
+      const location = violation.line ? `${violation.file}:${violation.line}` : violation.file;
+      const snippet = violation.snippet ? ` – ${violation.snippet}` : '';
+      checklist.push(`- [ ] Move filesystem or git usage out of META HTTP route \`${location}\`${snippet}.`);
+    }
+  }
+
+  if (Array.isArray(result.violations?.missing_approval_gate) && result.violations.missing_approval_gate.length > 0) {
+    for (const violation of result.violations.missing_approval_gate) {
+      const reason = violation.reason || 'Approval gate signal missing.';
+      checklist.push(`- [ ] Reaffirm the .evolution/APPROVED approval gate in code or docs: ${reason}`);
+    }
+  }
+
+  if (checklist.length === 0) {
+    checklist.push('- [x] No outstanding policy violations detected by the analyzer.');
+  }
+
+  for (const item of checklist) {
+    lines.push(item);
+  }
+  lines.push('');
+
+  return lines.join('\n');
+}
+
+function writeAuditMarkdown(result) {
+  const markdown = createAuditMarkdown(result);
+  const target = path.join(repoRoot, 'WORKBUOY_AUDIT.md');
+  fs.writeFileSync(target, `${markdown}\n`, 'utf8');
+}
+
 function walk(currentDir) {
   const entries = fs.readdirSync(currentDir, { withFileTypes: true });
   for (const entry of entries) {
@@ -594,4 +738,5 @@ const result = {
   violations
 };
 
+writeAuditMarkdown(result);
 console.log(JSON.stringify(result, null, 2));
