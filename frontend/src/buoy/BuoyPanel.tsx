@@ -55,7 +55,7 @@ export default function BuoyPanel({ onQuickConnect }: BuoyPanelProps) {
           <h2 style={{ margin: 0, fontSize: 18, letterSpacing: 0.4 }}>Buoy</h2>
           <span className="chip" aria-label="Role tone">{presentation.tone}</span>
         </div>
-        <p style={{ margin: "6px 0", color: "var(--muted)" }}>{presentation.tagline}</p>
+        <p style={{ margin: "6px 0", color: "var(--fg-muted)" }}>{presentation.tagline}</p>
         <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
           {presentation.policyChips.map((chip) => (
             <span key={chip} className="chip" style={{ background: "rgba(255,255,255,.08)" }}>
@@ -72,9 +72,9 @@ export default function BuoyPanel({ onQuickConnect }: BuoyPanelProps) {
               style={{
                 padding: "8px 10px",
                 borderRadius: 8,
-                border: "1px solid rgba(255,255,255,.14)",
+                border: "1px solid var(--stroke-subtle)",
                 background: "rgba(12,16,24,.6)",
-                color: "var(--ink)",
+                color: "var(--fg-default)",
               }}
             >
               {presentation.suggestedEntities.map((item) => {

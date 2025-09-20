@@ -28,34 +28,23 @@ export function UndoToast({
   const undoButtonRef = useRef<HTMLButtonElement | null>(null);
 
   useEffect(() => {
-    if (open) {
-      setStatus("idle");
-      const timer = window.setTimeout(() => {
-        undoButtonRef.current?.focus({ preventScroll: true });
-      }, 40);
-      const onKey = (event: KeyboardEvent) => {
-        if (event.key === "Escape") {
-          event.stopPropagation();
-          onClose?.();
-        }
-      };
-      document.addEventListener("keydown", onKey);
-      return () => {
-        window.clearTimeout(timer);
-        document.removeEventListener("keydown", onKey);
-      };
-    }
-    return;
-  }, [open, onClose]);
-
-  useEffect(() => {
     if (!open) return;
-    const observer = new MutationObserver(() => {
-      containerRef.current?.setAttribute("aria-live", "assertive");
-    });
-    if (containerRef.current) observer.observe(containerRef.current, { childList: true, subtree: true });
-    return () => observer.disconnect();
-  }, [open]);
+    setStatus((prev) => (prev === "idle" ? prev : "idle"));
+    const timer = window.setTimeout(() => {
+      undoButtonRef.current?.focus({ preventScroll: true });
+    }, 40);
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        event.stopPropagation();
+        onClose?.();
+      }
+    };
+    document.addEventListener("keydown", onKey);
+    return () => {
+      window.clearTimeout(timer);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [open, onClose]);
 
   if (!open) return null;
 
@@ -91,7 +80,8 @@ export function UndoToast({
     <div
       ref={containerRef}
       role="status"
-      aria-live="assertive"
+      aria-live="polite"
+      aria-atomic="true"
       className="fixed inset-x-0 bottom-6 z-[100] flex justify-center px-4"
     >
       <div className="w-full max-w-md rounded-lg border border-slate-800 bg-slate-900/95 p-4 shadow-xl">

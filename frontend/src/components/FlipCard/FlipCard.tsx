@@ -222,8 +222,7 @@ function FlipCard({
       event.preventDefault();
       event.stopPropagation();
       // Ignorer auto-repeated keydown (holder kortet på front)
-      // @ts-expect-error - repeat finnes på UIEvent i runtime, ikke i TS-typen
-      if ((event as any).repeat) return;
+      if ("repeat" in event && event.repeat) return;
       handleConnect();
     },
     [handleConnect],
@@ -294,16 +293,7 @@ function FlipCard({
               type="button"
               className="chip flip-card-toolbar__connect"
               onClick={handleConnect}
-            <button
-              type="button"
-              className="chip flip-card-toolbar__connect"
-              onClick={handleConnect}
               onKeyDown={handleConnectKeyDown}
-              aria-haspopup="dialog"
-              aria-label={`Connect ${connectLabel}`}
-            >
-              Connect
-            </button>
               aria-haspopup="dialog"
               aria-label={`Connect ${connectLabel}`}
             >
@@ -428,4 +418,3 @@ function FlipCard({
 }
 
 export default FlipCard;
-export type { FlipCardProps };

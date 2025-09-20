@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { semanticZoomStrings as strings } from "./strings";
+import { useSettings } from "@/store/settings";
 
 type SemanticZoomItem = {
   id: string;
@@ -86,6 +87,8 @@ function groupByType(items: SemanticZoomItem[]) {
 export default function SemanticZoom({ items = defaultItems }: Props) {
   const [level, setLevel] = useState<number>(0);
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const reducedMotion = useSettings((state) => state.reducedMotion);
+  const animate = !reducedMotion;
 
   const sortedItems = useMemo(() => items.slice().sort((a, b) => a.when.localeCompare(b.when)), [items]);
   const weekGroups = useMemo(() => groupByWeek(sortedItems), [sortedItems]);
@@ -133,6 +136,7 @@ export default function SemanticZoom({ items = defaultItems }: Props) {
       ref={containerRef}
       className="rounded-xl border border-slate-800 bg-slate-900/60 p-4 text-slate-100"
       aria-label={strings.title}
+      data-animate={animate ? "on" : "off"}
     >
       <header className="mb-4 flex items-center justify-between gap-3">
         <div>
@@ -156,6 +160,14 @@ export default function SemanticZoom({ items = defaultItems }: Props) {
           ))}
         </div>
       </header>
+      {animate && (
+        <div className="mb-4 flex items-center gap-2 rounded-lg border border-indigo-500/30 bg-indigo-900/20 px-3 py-2 text-xs text-indigo-100" role="note">
+          <span role="img" aria-label="Tre-finger-klyp">🤟</span>
+          <span>
+            Tre-finger-klyp zoomer jevnt. Bruk {strings.shortcuts.zoomIn} og {strings.shortcuts.zoomOut} hvis touch ikke er tilgjengelig.
+          </span>
+        </div>
+      )}
 
       {currentLevel === "list" && (
         <ul role="list" className="grid gap-3">
@@ -164,6 +176,8 @@ export default function SemanticZoom({ items = defaultItems }: Props) {
               key={item.id}
               role="listitem"
               className="rounded-lg border border-slate-800 bg-slate-900/80 p-3"
+              style={animate ? { transition: "transform 220ms ease, opacity 220ms ease" } : undefined}
+              title={strings.clusterLabel(item.type)}
             >
               <div className="flex items-center justify-between">
                 <span className="font-medium">{item.title}</span>
@@ -184,7 +198,12 @@ export default function SemanticZoom({ items = defaultItems }: Props) {
               </h3>
               <ul role="list" className="mt-2 space-y-2">
                 {group.items.map((item) => (
-                  <li key={item.id} className="flex items-center justify-between rounded-md border border-slate-800/60 bg-slate-900/80 px-3 py-2">
+                  <li
+                    key={item.id}
+                    className="flex items-center justify-between rounded-md border border-slate-800/60 bg-slate-900/80 px-3 py-2"
+                    title={strings.clusterLabel(item.type)}
+                    style={animate ? { transition: "transform 220ms ease, opacity 220ms ease" } : undefined}
+                  >
                     <span>{item.title}</span>
                     <span className="text-xs text-slate-400">{item.when}</span>
                   </li>
@@ -202,7 +221,13 @@ export default function SemanticZoom({ items = defaultItems }: Props) {
               <h3 className="text-sm font-semibold text-slate-200">{strings.clusterLabel(group.type)}</h3>
               <ul role="list" className="mt-2 space-y-2">
                 {group.items.map((item) => (
-                  <li key={item.id} className="rounded-md border border-slate-800/60 bg-slate-900/80 px-3 py-2" role="listitem">
+                  <li
+                    key={item.id}
+                    className="rounded-md border border-slate-800/60 bg-slate-900/80 px-3 py-2"
+                    role="listitem"
+                    title={strings.clusterLabel(group.type)}
+                    style={animate ? { transition: "transform 220ms ease, opacity 220ms ease" } : undefined}
+                  >
                     <div className="flex items-center justify-between">
                       <span>{item.title}</span>
                       <span className="text-xs text-slate-400">{item.weight.toFixed(1)}</span>

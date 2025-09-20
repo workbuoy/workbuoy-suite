@@ -55,6 +55,37 @@ type DialogContentProps = React.HTMLAttributes<HTMLDivElement> & {
   children: React.ReactNode;
 };
 
+type FocusEventLike = Pick<KeyboardEvent, "key" | "shiftKey" | "preventDefault">;
+
+type Focusable = {
+  focus: () => void;
+};
+
+export function cycleFocus(event: FocusEventLike, focusable: Focusable[], active: Focusable | null) {
+  if (event.key !== "Tab" || focusable.length === 0) return;
+  const first = focusable[0];
+  const last = focusable[focusable.length - 1];
+  if (event.shiftKey) {
+    if (active === first || !focusable.includes(active!)) {
+      event.preventDefault();
+      last.focus();
+      return last;
+    }
+    return;
+  }
+  if (active === last) {
+    event.preventDefault();
+    first.focus();
+    return first;
+  }
+}
+
+export function handleEscapeKey(event: Pick<KeyboardEvent, "key">, close: () => void) {
+  if (event.key === "Escape") {
+    close();
+  }
+}
+
 export const DialogContent = React.forwardRef<HTMLDivElement, DialogContentProps>(
   ({ className = "", children, ...props }, ref) => {
     const ctx = useContext(DialogContext);
@@ -62,10 +93,10 @@ export const DialogContent = React.forwardRef<HTMLDivElement, DialogContentProps
     useEffect(() => {
       if (ctx?.open) {
         const onKey = (event: KeyboardEvent) => {
-          if (event.key === "Escape") {
+          handleEscapeKey(event, () => {
             event.stopPropagation();
             ctx.setOpen(false);
-          }
+          });
         };
         document.addEventListener("keydown", onKey);
         const el = contentRef.current;
@@ -82,6 +113,23 @@ export const DialogContent = React.forwardRef<HTMLDivElement, DialogContentProps
       return;
     }, [ctx?.open, ctx]);
 
+    useEffect(() => {
+      if (!ctx?.open) return;
+      const el = contentRef.current;
+      if (!el) return;
+      const handleKeyDown = (event: KeyboardEvent) => {
+        const focusable = Array.from(
+          el.querySelectorAll<HTMLElement>(
+            "button, [href], input, select, textarea, [tabindex]:not([tabindex='-1'])",
+          ),
+        ).filter((node) => !node.hasAttribute("disabled"));
+        const active = document.activeElement as HTMLElement | null;
+        cycleFocus(event, focusable, active);
+      };
+      el.addEventListener("keydown", handleKeyDown);
+      return () => el.removeEventListener("keydown", handleKeyDown);
+    }, [ctx?.open]);
+
     if (!ctx?.open) return null;
 
     const classes = [
@@ -95,7 +143,7 @@ export const DialogContent = React.forwardRef<HTMLDivElement, DialogContentProps
       .join(" ");
 
     return (
-      <div className={classes} aria-modal="true" role="dialog" {...props}>
+      <div className={classes} role="presentation">
         <div
           ref={(node) => {
             contentRef.current = node;
@@ -103,6 +151,9 @@ export const DialogContent = React.forwardRef<HTMLDivElement, DialogContentProps
             else if (ref) (ref as React.MutableRefObject<HTMLDivElement | null>).current = node;
           }}
           className={panelClass}
+          role="dialog"
+          aria-modal="true"
+          {...props}
         >
           {children}
         </div>

@@ -24,11 +24,13 @@ export function useTypingAffect(target?: HTMLElement | null){
       else setAffect("calm");
     }
     function onFocus(){ backspaces.current = 0; keys.current = 0; timer.current = { start: Date.now() }; }
-    el.addEventListener("keydown", onKey);
-    el.addEventListener("focus", onFocus, true);
+    const keyListener: EventListener = (event) => onKey(event as KeyboardEvent);
+    const focusListener: EventListener = () => onFocus();
+    el.addEventListener("keydown", keyListener);
+    el.addEventListener("focus", focusListener, true);
     return ()=>{
-      el.removeEventListener("keydown", onKey);
-      el.removeEventListener("focus", onFocus, true);
+      el.removeEventListener("keydown", keyListener);
+      el.removeEventListener("focus", focusListener, true);
     };
   }, [target]);
 

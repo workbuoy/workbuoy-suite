@@ -60,7 +60,7 @@ export default function MorphInput({ onSubmit }: Props){
 
   return (
     <div>
-      <form onSubmit={submit} style={{display:"grid", gridTemplateColumns:"1fr auto", gap:8}}>
+      <form onSubmit={submit} style={{display:"grid", gridTemplateColumns:"1fr auto", gap:"var(--space-sm)"}}>
         <input
           value={value}
           onChange={e=>setValue(e.target.value)}
@@ -68,7 +68,7 @@ export default function MorphInput({ onSubmit }: Props){
           onBlur={()=>setTimeout(()=>setFocused(false), 150)}
           placeholder="Skriv en handling… (@navn, =kalkyle, ‘show me tasks from last week’)"
           aria-label="Skriv kommando eller melding"
-          style={{padding:"10px 12px", borderRadius:8, border:"1px solid rgba(255,255,255,.14)", background:"transparent", color:"var(--ink)"}}
+          style={{padding:"10px 12px", borderRadius:"var(--radius-md)", border:"1px solid var(--stroke-subtle)", background:"transparent", color:"var(--fg-default)"}}
         />
         <button className="chip">Send</button>
       </form>
@@ -88,7 +88,7 @@ export default function MorphInput({ onSubmit }: Props){
       {/* Contacts */}
       {focused && contactTerm && contacts.length>0 && (
         <div role="listbox" aria-label="Forslag: kontakter"
-             className="cardbg" style={{marginTop:6, borderRadius:10, padding:6, display:"grid", gap:6}}>
+             className="cardbg" style={{marginTop:6, borderRadius:"var(--radius-lg)", padding:"var(--space-sm)", display:"grid", gap:"var(--space-sm)"}}>
           {contacts.map(c=> (
             <button key={c.id} className="chip" onMouseDown={(e)=>{ e.preventDefault(); setValue(`@${c.name}`); }}>
               {c.name} {c.email ? `• ${c.email}` : ""}

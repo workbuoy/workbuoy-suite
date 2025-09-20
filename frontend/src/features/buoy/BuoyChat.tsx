@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useBuoy } from "./useBuoy";
-import WhyDrawer from "./WhyDrawer";
+import { WhyDrawer } from "@/components/WhyDrawer";
 import type { UserMessage, AssistantMessage } from "./types";
 import MorphingInput from "@/components/MorphingInput";
 import { buoyStrings as strings } from "./strings";
@@ -50,7 +50,7 @@ function ChatMessage({ msg }:{ msg: UserMessage|AssistantMessage }){
           {a.actions.map(act=><button key={act.id} className="chip">{act.label}</button>)}
         </div>
       ) : null}
-      <WhyDrawer reasons={a.why||[]} />
+      <WhyDrawer explanations={a.why?.map((reason) => ({ reason }))} />
     </div>
   );
 }

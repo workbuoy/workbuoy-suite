@@ -47,8 +47,8 @@ export default function NaviPanel({ connections, highlight, onRemove, onSelect }
           <h2 style={{ margin: 0, fontSize: 18, letterSpacing: 0.4 }}>Navi</h2>
           <span className="chip">Role: {presentation.title}</span>
         </div>
-        <p style={{ margin: "6px 0", color: "var(--muted)" }}>Context is prioritised based on {presentation.title} workflows.</p>
-        <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+        <p style={{ margin: "6px 0", color: "var(--fg-muted)" }}>Context is prioritised based on {presentation.title} workflows.</p>
+        <div style={{ display: "flex", gap: "var(--space-xs)", flexWrap: "wrap" }}>
           {presentation.priorityHints.map((hint) => (
             <span key={hint} className="chip" style={{ borderColor: "rgba(255,255,255,.22)" }}>
               {hint}
@@ -58,25 +58,25 @@ export default function NaviPanel({ connections, highlight, onRemove, onSelect }
       </header>
       <section aria-label="Connections" style={{ marginBottom: 12 }}>
         {ordered.length === 0 ? (
-          <div style={{ padding: 12, border: "1px solid rgba(255,255,255,.12)", borderRadius: 12 }}>
+          <div style={{ padding: "var(--space-md)", border: "1px solid var(--stroke-subtle)", borderRadius: "var(--radius-lg)" }}>
             <strong>No connections yet.</strong>
-            <p style={{ margin: "6px 0 0", color: "var(--muted)" }}>
+            <p style={{ margin: "6px 0 0", color: "var(--fg-muted)" }}>
               Use the connect button on the card or Buoy panel to link entities. Navi will pin them here.
             </p>
           </div>
         ) : (
-          <ul style={{ listStyle: "none", margin: 0, padding: 0, display: "grid", gap: 6 }}>
+          <ul style={{ listStyle: "none", margin: 0, padding: 0, display: "grid", gap: "var(--space-xs)" }}>
             {ordered.map((item) => (
               <li key={item.key}>
                 <div
                   className="cardbg"
                   style={{
-                    borderRadius: 12,
-                    padding: 10,
+                    borderRadius: "var(--radius-lg)",
+                    padding: "var(--space-md)",
                     display: "flex",
                     alignItems: "center",
-                    gap: 10,
-                    border: highlight === item.key ? "1px solid var(--ring)" : "1px solid rgba(255,255,255,.08)",
+                    gap: "var(--space-md)",
+                    border: highlight === item.key ? "1px solid var(--focus-ring)" : "1px solid var(--stroke-hairline)",
                     background: highlight === item.key ? "rgba(122,162,255,.12)" : undefined,
                   }}
                 >
