@@ -1,9 +1,10 @@
 import { Router } from 'express';
 import { logIntent } from '../core/intentLog';
+import { policyGuardWrite } from '../core/policy/guard';
 
 export function manualCompleteRouter() {
   const r = Router();
-  r.post('/manual-complete', async (req: any, res, next) => {
+  r.post('/manual-complete', policyGuardWrite('manual'), async (req: any, res, next) => {
     try {
       const { capability, payload, note } = req.body || {};
       const tenantId = String(req.headers['x-tenant-id'] ?? 'T1');

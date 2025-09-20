@@ -3,7 +3,7 @@ import express from 'express';
 import { correlationHeader } from './middleware/correlationHeader';
 import { wbContext } from './middleware/wbContext';
 import { requestLogger } from './core/logging/logger';
-import { timingMiddleware } from './core/observability/metrics';
+import { timingMiddleware, metricsHandler } from './core/observability/metrics';
 import { errorHandler } from './core/http/middleware/errorHandler';
 import { debugBusHandler } from './routes/_debug.bus';
 import knowledgeRouter from './routes/knowledge.router';
@@ -51,6 +51,7 @@ function safeMount(path: string, modPath: string, factory?: string) {
 safeMount('/api/crm/contacts', './src/features/crm/routes', 'crmRouter');
 safeMount('/api/tasks', './src/features/tasks/routes', 'tasksRouter');
 safeMount('/api/logs', './src/features/log/routes', 'logRouter');
+safeMount('/api', './src/features/deals/deals.router');
 safeMount('/buoy', './src/routes/buoy.complete', 'buoyRouter');
 safeMount('/api/insights', './src/routes/insights', 'insightsRouter');
 safeMount('/api/finance', './src/routes/finance.reminder', 'financeReminderRouter');
@@ -59,7 +60,6 @@ safeMount('/', './src/routes/genesis.autonomy', 'metaGenesisRouter');
 safeMount('/api', '../backend/routes/proactivity');
 safeMount('/api', '../backend/routes/admin.subscription');
 safeMount('/api', '../backend/routes/explainability');
-safeMount('/', '../backend/routes/metrics');
 
 app.use('/api', knowledgeRouter);
 app.use('/api/audit', auditRouter());
@@ -72,6 +72,8 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 // Operability surfaces
+app.get('/metrics', metricsHandler);
+
 app.get('/status', async (_req, res) => {
   try {
     const stats = await bus.stats();

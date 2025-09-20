@@ -6,6 +6,8 @@ describe('Finance Reminder suggest', () => {
   it('POST /api/finance/reminder/suggest returns draftEmail', async () => {
     const res = await request(app)
       .post('/api/finance/reminder/suggest')
+      .set('x-autonomy-level','2')
+      .set('x-role','ops')
       .set('content-type','application/json')
       .send({ invoiceId: 'INV-77' })
       .expect(200);
@@ -15,6 +17,8 @@ describe('Finance Reminder suggest', () => {
   it('POST /api/finance/reminder/suggest 400 when missing invoiceId', async () => {
     await request(app)
       .post('/api/finance/reminder/suggest')
+      .set('x-autonomy-level','2')
+      .set('x-role','ops')
       .set('content-type','application/json')
       .send({})
       .expect(400);

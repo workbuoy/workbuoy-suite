@@ -19,6 +19,8 @@ describe('POST /api/finance/reminder/suggest', () => {
   it('returns a draftEmail', async () => {
     const res = await request(app)
       .post('/api/finance/reminder/suggest')
+      .set('x-autonomy-level','2')
+      .set('x-role','ops')
       .send({ invoiceId: 'INV-1', customerEmail: 'a@b.com' })
       .expect(200);
     expect(res.body?.outcome?.draftEmail).toMatch(/faktura INV-1/);
