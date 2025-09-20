@@ -1,39 +1,32 @@
-# Patch PR: Fix double `/api` (features & usage routers) + minimal tests
+# Patch PR: Fix double `/api` in routers + OpenAPI, export app safely, and add minimal tests
 
-This patch prevents endpoints from being published at `/api/api/...` by removing the
-hardcoded `/api` prefix **inside** the routers (they are already mounted under `/api` in the server).
+This PR bundle helps you quickly fix the "double /api" issue and get CI green.
 
-## What this does
-- In `backend/routes/features.ts`, converts paths from `/api/features/*` → `/features/*`.
-- In `backend/routes/usage.ts`, converts paths from `/api/usage/*` → `/usage/*`.
-- Adds minimal tests to assert the public endpoints: `/api/features/active` and `/api/usage/*`.
-- Leaves server mounting as `app.use('/api', router)` (unchanged).
+## What this includes
+1) **Router path fix script** — removes hardcoded `/api` inside `backend/routes/features.ts` and `backend/routes/usage.ts`.
+2) **OpenAPI path fix script** — rewrites any `/api/api/` occurrences to `/api/` in your OpenAPI spec files.
+3) **Minimal API tests** — verify `/api/features/active` and `/api/usage/*` work.
+4) **Server export note** — ensure `src/server.ts` exports the Express app without calling `listen()` when imported (so Supertest can use it).
 
-## Safe application
-Use the provided script to do an **in-place, surgical** replacement (only in those two files).
-
+## How to apply
 ```bash
-# from repo root (new branch)
-git checkout -b fix/api-router-prefix
+git checkout -b fix/api-paths-and-spec
 node scripts/apply-router-path-fix.mjs
+node scripts/apply-openapi-path-fix.mjs
 
-# run tests (in-memory mode)
+# Run tests in in-memory mode (no Postgres needed)
 FF_PERSISTENCE=false npm test
 
-# (optional) if Postgres is available
-# npx prisma migrate deploy
-# FF_PERSISTENCE=true npm test
-
-git add backend/routes/features.ts backend/routes/usage.ts tests/features/active.api.test.ts tests/usage/usage.api.test.ts
-git commit -m "fix(api): remove double /api by dropping prefix inside routers; add minimal endpoint tests"
-git push -u origin fix/api-router-prefix
+git add backend/routes/features.ts backend/routes/usage.ts scripts/*.mjs tests/features/active.api.test.ts tests/usage/usage.api.test.ts
+git commit -m "fix(api): remove double /api in routers; fix OpenAPI paths; add minimal endpoint tests"
+git push -u origin fix/api-paths-and-spec
 ```
-
-If you prefer to edit manually, simply change any occurrences of `/api/features/` to `/features/`
-and `/api/usage/` to `/usage/` within those two files only.
-
-## Files included
-- `scripts/apply-router-path-fix.mjs` (safe in-place patcher)
-- `tests/features/active.api.test.ts` (asserts `/api/features/active` exists)
-- `tests/usage/usage.api.test.ts` (asserts `/api/usage/*` work)
-
+If any test still fails, ensure `src/server.ts` **exports** the app without listening:
+```ts
+// At the bottom of src/server.ts
+export default app;
+if (process.env.NODE_ENV !== 'test' && require.main === module) {
+  const port = process.env.PORT || 3000;
+  app.listen(port, () => console.log(`Listening on ${port}`));
+}
+```

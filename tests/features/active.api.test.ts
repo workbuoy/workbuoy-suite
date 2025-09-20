@@ -1,8 +1,9 @@
 import request from 'supertest';
-import app from '../../src/server'; // adjust import if server entry differs
+process.env.FF_PERSISTENCE = process.env.FF_PERSISTENCE ?? 'false';
+import app from '../../src/server';
 
 describe('Features router public path', () => {
-  it('serves GET /api/features/active', async () => {
+  it('GET /api/features/active responds (200 or 204)', async () => {
     const res = await request(app)
       .get('/api/features/active')
       .set('x-tenant', 'DEV')
