@@ -1,13 +1,25 @@
-name: openapi-lint
+name: OpenAPI Lint (Redocly)
+
 on:
+  push:
+    paths: ['openapi/**', '.github/workflows/openapi-lint.yml']
   pull_request:
-    paths: [ "openapi/**" ]
+    paths: ['openapi/**', '.github/workflows/openapi-lint.yml']
+
 jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Validate OpenAPI
-        uses: char0n/swagger-editor-validate@v1
+      - uses: actions/setup-node@v4
         with:
-          definition-file: openapi/openapi.yaml
+          node-version: '20'
+      - name: Install Redocly CLI
+        run: npm i -g @redocly/cli@latest
+      - name: Lint OpenAPI (all yaml under openapi/)
+        run: |
+          if [ -d openapi ]; then
+            redocly lint openapi --format=stylish
+          else
+            echo "openapi/ directory not found; skipping" && exit 0
+          fi

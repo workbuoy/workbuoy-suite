@@ -1,8 +1,9 @@
 import request from 'supertest';
-import app from '../../src/server'; // adjust import path if needed
+process.env.FF_PERSISTENCE = process.env.FF_PERSISTENCE ?? 'false';
+import app from '../../src/server';
 
 describe('Usage router public paths', () => {
-  it('records usage at POST /api/usage/feature', async () => {
+  it('POST /api/usage/feature', async () => {
     const res = await request(app)
       .post('/api/usage/feature')
       .set('content-type', 'application/json')
@@ -11,7 +12,7 @@ describe('Usage router public paths', () => {
     expect([200, 204]).toContain(res.status);
   });
 
-  it('reads aggregate at GET /api/usage/aggregate/:userId', async () => {
+  it('GET /api/usage/aggregate/:userId', async () => {
     const res = await request(app)
       .get('/api/usage/aggregate/u1')
       .set('x-tenant', 'DEV');
