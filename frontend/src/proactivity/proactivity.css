@@ -1,0 +1,79 @@
+.proactivity-switcher {
+  display: grid;
+  gap: 8px;
+}
+
+.proactivity-switcher__buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.proactivity-switcher__button[data-effective="true"] {
+  border-color: var(--ring);
+}
+
+.proactivity-switcher__status {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  flex-wrap: wrap;
+  font-size: 12px;
+}
+
+.proactivity-switcher__guard {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.proactivity-approval {
+  position: fixed;
+  inset: 0;
+  background: rgba(6, 10, 16, 0.72);
+  display: grid;
+  place-items: center;
+  z-index: 40;
+}
+
+.proactivity-approval__card {
+  padding: 24px;
+  border-radius: var(--radius-lg, 16px);
+  width: min(420px, 94vw);
+  display: grid;
+  gap: 14px;
+}
+
+.proactivity-approval__guard {
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(255, 204, 51, 0.12);
+  border-radius: 10px;
+  padding: 10px;
+  font-size: 13px;
+}
+
+.proactivity-approval__label {
+  display: grid;
+  gap: 6px;
+  font-size: 13px;
+}
+
+.proactivity-approval__label textarea {
+  resize: vertical;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(12, 16, 24, 0.65);
+  color: var(--ink);
+}
+
+.proactivity-approval__checkbox {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+}
+
+.proactivity-approval__actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}

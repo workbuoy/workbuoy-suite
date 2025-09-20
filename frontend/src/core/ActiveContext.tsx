@@ -1,7 +1,11 @@
-import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 export type ActiveContext = {
   timeOfDay: "morning" | "afternoon" | "evening" | "night";
-  selectedEntity?: { type: "contact" | "deal" | "invoice" | "task"; id: string; name?: string } | null;
+  selectedEntity?: {
+    type: "contact" | "deal" | "invoice" | "task" | "note";
+    id: string;
+    name?: string;
+  } | null;
   recentIntents: string[];
   setSelectedEntity: (e: ActiveContext["selectedEntity"]) => void;
   pushIntent: (intent: string) => void;
@@ -16,8 +20,13 @@ export function ActiveContextProvider({ children }:{ children: React.ReactNode }
   const [recentIntents, setRecentIntents] = useState<string[]>([]);
   const [timeOfDay, setTimeOfDay] = useState<ActiveContext["timeOfDay"]>(toTimeOfDay());
   useEffect(()=>{ const id = setInterval(()=> setTimeOfDay(toTimeOfDay()), 60_000); return ()=> clearInterval(id); }, []);
-  function pushIntent(intent: string){ setRecentIntents(prev => [...prev, intent].slice(-10)); }
-  const value = useMemo<ActiveContext>(() => ({ timeOfDay, selectedEntity, recentIntents, setSelectedEntity, pushIntent }), [timeOfDay, selectedEntity, recentIntents]);
+  const pushIntent = useCallback((intent: string) => {
+    setRecentIntents((prev) => [...prev, intent].slice(-10));
+  }, []);
+  const value = useMemo<ActiveContext>(
+    () => ({ timeOfDay, selectedEntity, recentIntents, setSelectedEntity, pushIntent }),
+    [timeOfDay, selectedEntity, recentIntents, setSelectedEntity, pushIntent],
+  );
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }
 export function useActiveContext(){
