@@ -215,21 +215,31 @@ function FlipCard({
     setConnectOpen(true);
   }, [commitConnection, onConnect, selectedEntity]);
 
-  const handleManualSubmit = useCallback(
-    (event: React.FormEvent) => {
+  const handleConnectKeyDown = useCallback(
+    (event: React.KeyboardEvent<HTMLButtonElement>) => {
+      // Bare håndter Enter/Space – og hindre flip via container
+      if (!(event.key === "Enter" || event.key === " ")) return;
       event.preventDefault();
-      const trimmed = manualId.trim();
-      if (!trimmed) return;
-      commitConnection({
-        type: manualType,
-        id: trimmed,
-        label: manualLabel.trim() || trimmed,
-      });
-      setConnectOpen(false);
+      event.stopPropagation();
+      // Ignorer auto-repeated keydown (holder kortet på front)
+      // @ts-expect-error - repeat finnes på UIEvent i runtime, ikke i TS-typen
+      if ((event as any).repeat) return;
+      handleConnect();
     },
-    [commitConnection, manualId, manualLabel, manualType],
+    [handleConnect],
   );
 
+  const handleManualSubmit = useCallback((event: React.FormEvent) => {
+    event.preventDefault();
+    const trimmed = manualId.trim();
+    if (!trimmed) return;
+    commitConnection({
+      type: manualType,
+      id: trimmed,
+      label: manualLabel.trim() || trimmed,
+    });
+    setConnectOpen(false);
+  }, [commitConnection, manualId, manualLabel, manualType]);
   useEffect(() => {
     if (!connectOpen) return;
     function onKey(event: KeyboardEvent) {
@@ -284,14 +294,16 @@ function FlipCard({
               type="button"
               className="chip flip-card-toolbar__connect"
               onClick={handleConnect}
-              onKeyDown={(e) => {
-                // Viktig fix: Enter/Space på Connect skal IKKE flippe kortet
-                if (e.key === "Enter" || e.key === " ") {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  handleConnect();
-                }
-              }}
+            <button
+              type="button"
+              className="chip flip-card-toolbar__connect"
+              onClick={handleConnect}
+              onKeyDown={handleConnectKeyDown}
+              aria-haspopup="dialog"
+              aria-label={`Connect ${connectLabel}`}
+            >
+              Connect
+            </button>
               aria-haspopup="dialog"
               aria-label={`Connect ${connectLabel}`}
             >

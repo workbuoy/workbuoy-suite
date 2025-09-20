@@ -61,36 +61,52 @@ describe("FlipCard", () => {
       name: /connect contact:ada/i,
     });
     fireEvent.click(connectButton);
-    await waitFor(() =>
-      expect(onConnect).toHaveBeenCalledWith(
-        expect.objectContaining({ type: "contact", id: "contact-1" }),
-      ),
-    );
-  });
-
-  it("activates connect without flipping when Enter is pressed (toolbar button)", () => {
-    const onConnect = vi.fn();
-    renderWithProviders(
-      <FlipCard
-        front={<div>Front</div>}
-        back={<div>Back</div>}
-        onConnect={onConnect}
-      />,
-    );
-
-    // Front face should be visible initially
-    const frontSection = screen.getByLabelText(/buoy panel/i);
-    expect(frontSection.getAttribute("aria-hidden")).not.toBe("true");
-
-    const connectButton = screen.getByRole("button", { name: /connect/i });
-    connectButton.focus();
-
-    // Pressing Enter on the toolbar "Connect" must not flip the card
-    fireEvent.keyDown(connectButton, { key: "Enter", code: "Enter" });
-    fireEvent.keyUp(connectButton, { key: "Enter", code: "Enter" });
-
-    expect(onConnect).toHaveBeenCalledTimes(1);
-    // Still on front
-    expect(frontSection.getAttribute("aria-hidden")).not.toBe("true");
-  });
+  await waitFor(() =>
+    expect(onConnect).toHaveBeenCalledWith(
+      expect.objectContaining({ type: "contact", id: "contact-1" }),
+    ),
+  );
 });
+
+it("activates connect without flipping when Enter is pressed (toolbar button)", () => {
+  const onConnect = vi.fn();
+  renderWithProviders(
+    <FlipCard front={<div>Front</div>} back={<div>Back</div>} onConnect={onConnect} />,
+  );
+
+  // Front face visible
+  const frontSection = screen.getByLabelText(/buoy panel/i);
+  expect(frontSection.getAttribute("aria-hidden")).not.toBe("true");
+
+  const connectButton = screen.getByRole("button", { name: /connect/i });
+  connectButton.focus();
+
+  // Pressing Enter on the toolbar "Connect" must NOT flip the card
+  fireEvent.keyDown(connectButton, { key: "Enter", code: "Enter" });
+  fireEvent.keyUp(connectButton, { key: "Enter", code: "Enter" });
+
+  expect(onConnect).toHaveBeenCalledTimes(1);
+  expect(frontSection.getAttribute("aria-hidden")).not.toBe("true");
+});
+
+it("ignores auto-repeated Enter on Connect and keeps card on front", async () => {
+  const onConnect = vi.fn();
+  renderWithProviders(
+    <FlipCard front={<div>Front</div>} back={<div>Back</div>} onConnect={onConnect} />,
+  );
+
+  const card = screen.getByRole("group", { name: /flip card/i });
+  expect(card.getAttribute("data-side")).toBe("front");
+
+  const connectButton = screen.getByRole("button", { name: /connect/i });
+  connectButton.focus();
+
+  // Simuler auto-repeat keydown
+  fireEvent.keyDown(connectButton, { key: "Enter", code: "Enter", repeat: true });
+  fireEvent.keyUp(connectButton, { key: "Enter", code: "Enter", repeat: true });
+
+  // Ingen ekstra flips og max 1 connect (i praksis 0 her – men tillat 1 om onKeyDown også kaller)
+  expect(onConnect).toHaveBeenCalledTimes(0);
+  expect(card.getAttribute("data-side")).toBe("front");
+});
+
