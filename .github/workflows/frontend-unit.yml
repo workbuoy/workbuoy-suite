@@ -10,29 +10,24 @@ on:
 
 jobs:
   unit:
+    # Skip job hvis frontend-workspace ikke finnes i denne PR-en
+    if: ${{ hashFiles('frontend/package.json') != '' }}
     runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: frontend
     env:
-      PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: "1"
-      CI: "true"
+      PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: '1'
+      CI: 'true'
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # 👇 Sett opp Node UTEN cache (fjerner "paths not resolved"-feilen)
       - name: Setup Node 20
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
-
-      - name: Verify lockfile (optional)
-        run: |
-          ls -la
-          [ -f package.json ] || (echo "No package.json in ./frontend" && exit 1)
-          echo "Lockfile present?"; ls -1 package-lock.json || true
+          node-version: '20'
 
       - name: Install dependencies
         run: |
@@ -43,7 +38,7 @@ jobs:
           fi
 
       - name: Typecheck
-        run: npm run typecheck --if-present
+        run: npm run typecheck
 
       - name: Unit tests
-        run: npm run test --if-present
+        run: npm run test

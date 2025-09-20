@@ -7,18 +7,18 @@ export default function InlineDateTimePicker({ initial, onPick, onCancel }:{ ini
   const [date, setDate] = useState<string>(initial?.date || toISODate(now));
   const [time, setTime] = useState<string>(initial?.time || "");
   return (
-    <div className="cardbg" role="dialog" aria-label="Velg dato og tid" style={{borderRadius:12, padding:10, display:"grid", gap:8, maxWidth:360}}>
-      <label style={{display:"grid", gap:4}}>
+    <div className="cardbg" role="dialog" aria-label="Velg dato og tid" style={{borderRadius:"var(--radius-lg)", padding:"var(--space-md)", display:"grid", gap:"var(--space-sm)", maxWidth:360}}>
+      <label style={{display:"grid", gap:"var(--space-xs)"}}>
         <span style={{opacity:.9}}>Dato</span>
         <input type="date" value={date} onChange={e=>setDate(e.target.value)}
-               style={{padding:"6px 8px", borderRadius:8, border:"1px solid rgba(255,255,255,.18)", background:"transparent", color:"var(--ink)"}}/>
+               style={{padding:"var(--space-xs) var(--space-sm)", borderRadius:"var(--radius-md)", border:"1px solid var(--stroke-subtle)", background:"transparent", color:"var(--fg-default)"}}/>
       </label>
-      <label style={{display:"grid", gap:4}}>
+      <label style={{display:"grid", gap:"var(--space-xs)"}}>
         <span style={{opacity:.9}}>Tid (valgfritt)</span>
         <input type="time" value={time} onChange={e=>setTime(e.target.value)}
-               style={{padding:"6px 8px", borderRadius:8, border:"1px solid rgba(255,255,255,.18)", background:"transparent", color:"var(--ink)"}}/>
+               style={{padding:"var(--space-xs) var(--space-sm)", borderRadius:"var(--radius-md)", border:"1px solid var(--stroke-subtle)", background:"transparent", color:"var(--fg-default)"}}/>
       </label>
-      <div style={{display:"flex", gap:8, justifyContent:"flex-end"}}>
+      <div style={{display:"flex", gap:"var(--space-sm)", justifyContent:"flex-end"}}>
         {onCancel && <button className="chip" onClick={onCancel}>Avbryt</button>}
         <button className="chip" onClick={()=>onPick({ date, time: time||undefined })}>OK</button>
       </div>

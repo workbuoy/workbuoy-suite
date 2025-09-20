@@ -24,7 +24,7 @@ export default function ApprovalPanel({ mode, meta, onApprove, onCancel, guard }
       <div className="proactivity-approval__card cardbg">
         <header>
           <h3 style={{ marginTop: 0 }}>Activate {meta.label}</h3>
-          <p style={{ color: "var(--muted)", marginTop: 4 }}>{meta.description}</p>
+          <p style={{ color: "var(--fg-muted)", marginTop: 4 }}>{meta.description}</p>
         </header>
         {guard ? (
           <div className="proactivity-approval__guard" role="alert">

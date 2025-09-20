@@ -1,4 +1,4 @@
-import { useActiveContext } from "../../src/core/ActiveContext";
+import { useActiveContext } from "@/core/ActiveContext";
 
 export type Extra = {
   intent?: string;             // e.g., "contacts.create"

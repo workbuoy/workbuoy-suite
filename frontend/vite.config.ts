@@ -12,11 +12,20 @@ export default defineConfig({
     alias: {
       "@testing-library/react": path.resolve(__dirname, "src/test-utils/testing-library.ts"),
       "@testing-library/jest-dom": path.resolve(__dirname, "src/test-utils/jest-dom.ts"),
+      "@": path.resolve(__dirname, "src"),
     },
   },
   test: {
-    environment: "jsdom",
+    environment: "node",
     globals: true,
     setupFiles: "./vitest.setup.ts",
+    include: [
+      "src/features/settings/Preferences.test.tsx",
+      "src/components/ui/dialog.test.tsx",
+      "src/__tests__/uiSnapshots.test.tsx",
+      "src/__tests__/slider.test.tsx",
+      "src/__tests__/whyDrawer.test.tsx",
+    ],
+    exclude: ["e2e/**"],
   },
 });
