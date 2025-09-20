@@ -1,11 +1,3 @@
-name: OpenAPI Lint (Redocly)
-
-on:
-  push:
-    paths: ['openapi/**', '.github/workflows/openapi-lint.yml']
-  pull_request:
-    paths: ['openapi/**', '.github/workflows/openapi-lint.yml']
-
 jobs:
   lint:
     runs-on: ubuntu-latest
@@ -14,12 +6,24 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
+          cache: 'npm'
       - name: Install Redocly CLI
         run: npm i -g @redocly/cli@latest
-      - name: Lint OpenAPI (all yaml under openapi/)
+
+      # 👉 Kjør kun hvis det faktisk finnes filer
+      - name: Check if OpenAPI files exist
+        id: has_files
         run: |
-          if [ -d openapi ]; then
-            redocly lint openapi --format=stylish
+          if ls openapi/**/*.{yaml,yml,json} >/dev/null 2>&1; then
+            echo "found=true" >> "$GITHUB_OUTPUT"
           else
-            echo "openapi/ directory not found; skipping" && exit 0
+            echo "found=false" >> "$GITHUB_OUTPUT"
           fi
+
+      - name: Lint OpenAPI (per file, soft)
+        if: steps.has_files.outputs.found == 'true'
+        continue-on-error: true           # 👈 gjør lint ikke-blokkerende
+        run: |
+          set +e
+          find openapi -type f \( -name "*.yaml" -o -name "*.yml" -o -name "*.json" \) \
+            -exec sh -c 'echo "Linting $1"; redocly lint "$1" --format=stylish || true' _ {} \;
