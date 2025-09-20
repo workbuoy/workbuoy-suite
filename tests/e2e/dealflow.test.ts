@@ -3,7 +3,7 @@ import request from 'supertest';
 import app from '../../src/server';
 
 describe('deal → audit flow', () => {
-  const headers = { 'x-role':'owner', 'x-autonomy':'2' };
+  const headers = { 'x-role':'owner', 'x-autonomy-level':'2' };
   it('creates a deal and lists audit entries', async () => {
     // create contact (best-effort; tolerate 2xx/4xx if route differs)
     await request(app).post('/api/crm/contacts').send({ id:'c-e2e', name:'E2E' }).set(headers);

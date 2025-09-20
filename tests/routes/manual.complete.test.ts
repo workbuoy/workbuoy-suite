@@ -12,7 +12,12 @@ describe('POST /api/manual-complete', () => {
   app.use('/api', manualCompleteRouter());
 
   it('records manual completion and returns an id', async () => {
-    const r = await request(app).post('/api/manual-complete').send({ capability: 'finance.invoice.send', note: 'sent via phone' }).expect(200);
+    const r = await request(app)
+      .post('/api/manual-complete')
+      .set('x-autonomy-level', '2')
+      .set('x-role', 'ops')
+      .send({ capability: 'finance.invoice.send', note: 'sent via phone' })
+      .expect(200);
     expect(r.body?.ok).toBe(true);
     expect(r.body?.intentId).toBe('intent-1');
   });
