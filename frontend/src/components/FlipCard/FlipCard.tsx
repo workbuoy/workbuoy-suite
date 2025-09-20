@@ -171,6 +171,17 @@ export function FlipCard({
     setConnectOpen(true);
   }, [commitConnection, onConnect, selectedEntity]);
 
+  const handleConnectKeyDown = useCallback(
+    (event: React.KeyboardEvent<HTMLButtonElement>) => {
+      if (event.key !== "Enter" && event.key !== " ") return;
+      event.preventDefault();
+      event.stopPropagation();
+      if (event.repeat) return;
+      handleConnect();
+    },
+    [handleConnect],
+  );
+
   const handleManualSubmit = useCallback((event: React.FormEvent) => {
     event.preventDefault();
     const trimmed = manualId.trim();
@@ -225,6 +236,7 @@ export function FlipCard({
               type="button"
               className="chip flip-card-toolbar__connect"
               onClick={handleConnect}
+              onKeyDown={handleConnectKeyDown}
               aria-haspopup="dialog"
               aria-label={`Connect ${connectLabel}`}
             >

@@ -60,5 +60,9 @@ describe("FlipCard", () => {
     const connectButton = await screen.findByRole("button", { name: /connect contact:ada/i });
     fireEvent.click(connectButton);
     await waitFor(() => expect(onConnect).toHaveBeenCalledWith(expect.objectContaining({ type: "contact", id: "contact-1" })));
+    fireEvent.keyDown(connectButton, { key: "Enter", repeat: true });
+    expect(onConnect).toHaveBeenCalledTimes(1);
+    const card = screen.getByRole("group", { name: /flip card/i });
+    expect(card.getAttribute("data-side")).toBe("front");
   });
 });
