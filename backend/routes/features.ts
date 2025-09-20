@@ -7,7 +7,7 @@ import { aggregateFeatureUseCount } from '../../src/telemetry/usageSignals';
 const r = Router();
 const rr = new RoleRegistry(loadRolesFromRepo(), loadFeaturesFromRepo(), []);
 
-r.get('/api/features/active', (req, res) => {
+r.get('/features/active', (req, res) => {
   const tenantId = String(req.header('x-tenant') ?? 'DEV');
   const userId = String(req.header('x-user') ?? 'dev-user');
   const role = String(req.header('x-role') ?? 'sales_rep');
