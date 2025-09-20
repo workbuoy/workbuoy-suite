@@ -1,0 +1,11 @@
+// Apply these changes to your existing frontend/package.json:
+// 
+// "scripts": {
+//   "typecheck": "tsc -p tsconfig.build.json --noEmit",
+//   ...
+// },
+// 
+// "devDependencies": {
+//   "@testing-library/jest-dom": "^6.4.2",
+//   ...
+// }

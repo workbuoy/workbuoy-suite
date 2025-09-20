@@ -1,37 +1,39 @@
-# Roles + Runner + Active Features + Usage + Job-board (drop-in)
+# Patch PR: Fix double `/api` (features & usage routers) + minimal tests
 
-## Mount these routes in your Express server (backend/server.ts)
-```ts
-import featuresRoute from './routes/features';
-import usageRoute from './routes/usage';
-import jobboardsDev from './routes/jobboards.dev';
-import devRunner from './routes/dev.runner';
+This patch prevents endpoints from being published at `/api/api/...` by removing the
+hardcoded `/api` prefix **inside** the routers (they are already mounted under `/api` in the server).
 
-app.use(featuresRoute);
-app.use(usageRoute);
-app.use(devRunner);            // dev only if you prefer
-if (process.env.NODE_ENV!=='production') app.use(jobboardsDev);
+## What this does
+- In `backend/routes/features.ts`, converts paths from `/api/features/*` → `/features/*`.
+- In `backend/routes/usage.ts`, converts paths from `/api/usage/*` → `/usage/*`.
+- Adds minimal tests to assert the public endpoints: `/api/features/active` and `/api/usage/*`.
+- Leaves server mounting as `app.use('/api', router)` (unchanged).
+
+## Safe application
+Use the provided script to do an **in-place, surgical** replacement (only in those two files).
+
+```bash
+# from repo root (new branch)
+git checkout -b fix/api-router-prefix
+node scripts/apply-router-path-fix.mjs
+
+# run tests (in-memory mode)
+FF_PERSISTENCE=false npm test
+
+# (optional) if Postgres is available
+# npx prisma migrate deploy
+# FF_PERSISTENCE=true npm test
+
+git add backend/routes/features.ts backend/routes/usage.ts tests/features/active.api.test.ts tests/usage/usage.api.test.ts
+git commit -m "fix(api): remove double /api by dropping prefix inside routers; add minimal endpoint tests"
+git push -u origin fix/api-router-prefix
 ```
 
-## Endpoints
-- GET /api/features/active
-- POST /api/usage/feature
-- GET /api/usage/aggregate/:userId
-- POST /dev/run   (body: { capability, featureId?, payload? }, headers x-autonomy, x-tenant, x-user, x-role)
-- (dev) GET /dev/jobboards/proposals
+If you prefer to edit manually, simply change any occurrences of `/api/features/` to `/features/`
+and `/api/usage/` to `/usage/` within those two files only.
 
-## Headers for /api/features/active
-- x-tenant, x-user, x-role
+## Files included
+- `scripts/apply-router-path-fix.mjs` (safe in-place patcher)
+- `tests/features/active.api.test.ts` (asserts `/api/features/active` exists)
+- `tests/usage/usage.api.test.ts` (asserts `/api/usage/*` work)
 
-## Quick smoke
-curl -s localhost:3000/api/features/active -H 'x-role: cfo' | jq .
-curl -s -X POST localhost:3000/api/usage/feature -H 'Content-Type: application/json' -d '{"userId":"u1","featureId":"customer_health","action":"open"}'
-curl -s localhost:3000/api/features/active -H 'x-user: u1' -H 'x-role: sales_manager' | jq .
-curl -s -X POST localhost:3000/dev/run -H 'Content-Type: application/json' -H 'x-autonomy: 5' -H 'x-role: cfo' -d '{"capability":"finance.invoice.prepareDraft"}' | jq .
-curl -s localhost:3000/dev/jobboards/proposals | jq .
-```
-
-## Notes
-- `roles/roles.json` is loaded automatically if present.
-- Role caps gate autonomy levels; if L exceeds cap, response includes degraded mode rationale in `basis`.
-```

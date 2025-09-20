@@ -8,17 +8,24 @@
       "DOM.Iterable"
     ],
     "module": "ESNext",
-    "skipLibCheck": true,
-    "jsx": "react-jsx",
     "moduleResolution": "Bundler",
+    "skipLibCheck": true,
+    "strict": true,
+    "jsx": "react-jsx",
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
-    "strict": true,
     "baseUrl": "./src",
     "paths": {
-      "@/*": ["./*"]
-    }
+      "@/*": [
+        "./*"
+      ]
+    },
+    "types": [
+      "vitest",
+      "node",
+      "@testing-library/jest-dom"
+    ]
   },
   "include": [
     "src"

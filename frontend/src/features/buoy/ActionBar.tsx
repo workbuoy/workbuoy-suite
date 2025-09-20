@@ -21,10 +21,17 @@ export default function ActionBar({ proposal }: { proposal: ActionProposal }) {
       <button className="chip" onClick={commit} aria-busy={state==="committing"}>Utfør</button>
       {state==="done" && result?.link && <a className="chip" href={result.link} target="_blank" rel="noreferrer">Vis i CRM</a>}
       {state==="error" && <span className="chip" style={{borderColor:"var(--err)", color:"var(--err)"}}>Feil – prøv igjen</span>}
-      {state==="preview" && proposal.preview && (
-        <div role="region" aria-label="Forhåndsvis endringer"
-             style={{border:"1px dashed rgba(255,255,255,.15)", borderRadius:10, padding:10}}>
-          <pre style={{margin:0, whiteSpace:"pre-wrap"}}>{JSON.stringify(proposal.preview, null, 2)}</pre>
+      {state === "preview" && proposal.preview !== undefined && (
+        <div
+          role="region"
+          aria-label="Forhåndsvis endringer"
+          style={{ border: "1px dashed rgba(255,255,255,.15)", borderRadius: 10, padding: 10 }}
+        >
+          <pre style={{ margin: 0, whiteSpace: "pre-wrap" }}>
+            {typeof proposal.preview === "string"
+              ? proposal.preview
+              : JSON.stringify(proposal.preview, null, 2)}
+          </pre>
         </div>
       )}
     </div>
