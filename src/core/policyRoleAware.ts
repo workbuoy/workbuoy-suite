@@ -7,8 +7,11 @@ export interface RoleAwareContext {
   tenantId: string;
   roleBinding: UserRoleBinding;
   requestedMode?: ProactivityMode | number | string;
+  compatMode?: ProactivityMode | number | string;
   degradeRail?: ProactivityMode[];
   policyCap?: ProactivityMode;
+  idempotencyKey?: string;
+  connectorName?: string;
 }
 
 export interface PolicyRoleAwareResult {
@@ -32,6 +35,7 @@ export async function policyCheckRoleAware(
     roleBinding: ctx.roleBinding,
     featureId,
     requestedMode: ctx.requestedMode,
+    compatMode: ctx.compatMode,
     degradeRail: ctx.degradeRail,
     policyCap: ctx.policyCap,
   });

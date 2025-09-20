@@ -23,7 +23,7 @@ describe('policy role cap enforcement', () => {
     );
 
     expect(result.proactivity.effective).toBe(ProactivityMode.Proaktiv);
-    expect(result.proactivity.basis).toEqual(expect.arrayContaining(['cap:role:crm:proaktiv']));
+    expect(result.proactivity.basis).toEqual(expect.arrayContaining(['roleCap:crm=3', 'degraded:role:crm']));
     expect(policySpy).toHaveBeenCalledWith(
       expect.any(Object),
       expect.objectContaining({ autonomy_level: ProactivityMode.Proaktiv })

@@ -11,6 +11,7 @@ export interface ProactivityContextInput {
   roleBinding?: UserRoleBinding;
   featureId?: string;
   requestedMode?: string | number | ProactivityMode;
+  compatMode?: string | number | undefined;
   policyCap?: ProactivityMode;
   degradeRail?: ProactivityMode[];
   basis?: string[];
@@ -21,6 +22,7 @@ export interface ProactivityState extends ProactivityResolution {
   requestedKey: string;
   effectiveKey: string;
   uiHints: typeof PROACTIVITY_MODE_META[ProactivityMode.Proaktiv]['uiHints'];
+  chip: typeof PROACTIVITY_MODE_META[ProactivityMode.Proaktiv]['chip'];
   meta: typeof PROACTIVITY_MODE_META[ProactivityMode.Proaktiv];
   subscription: SubscriptionCapSummary;
   featureId?: string;
@@ -53,24 +55,46 @@ function resolveRoleCap(
 export function buildProactivityContext(input: ProactivityContextInput): ProactivityState {
   const subscription = getSubscriptionCap(input.tenantId);
   const caps: ProactivityCap[] = [
-    { id: `subscription:${subscription.plan}`, label: `plan:${subscription.plan}`, mode: subscription.maxMode },
+    {
+      id: `subscription:${subscription.plan}`,
+      label: `plan:${subscription.plan}`,
+      mode: subscription.maxMode,
+      basis: [`tenantPlan:${subscription.plan}`].concat(subscription.secureTenant ? ['tenant<=3'] : []),
+      degradeTag: 'subscription',
+    },
   ];
   const basis = new Set<string>(input.basis ?? []);
-  basis.add(`subscription:${subscription.plan}`);
-  if (subscription.secureTenant) basis.add('subscription:secureTenant');
-  if (subscription.killSwitch) basis.add('subscription:killswitch');
+  basis.add(`tenantPlan:${subscription.plan}`);
+  if (subscription.secureTenant) basis.add('tenant<=3');
 
-  const requested = parseProactivityMode(input.requestedMode);
+  const compatRequested = mapCompatMode(input.compatMode);
+  const requested = parseProactivityMode(
+    input.requestedMode ?? compatRequested ?? undefined,
+    compatRequested ?? undefined,
+  );
   const rail = input.degradeRail && input.degradeRail.length ? input.degradeRail : DEFAULT_DEGRADE_RAIL;
 
   const { cap: roleCap, featureId } = resolveRoleCap(input.roleRegistry, input.tenantId, input.roleBinding, input.featureId);
   if (roleCap) {
-    caps.push({ id: featureId ? `role:${featureId}` : 'role', label: featureId ?? 'role', mode: roleCap });
-    basis.add(featureId ? `feature:${featureId}` : 'feature:default');
+    const featureTag = featureId ?? 'default';
+    caps.push({
+      id: featureId ? `role:${featureId}` : 'role',
+      label: featureId ?? 'role',
+      mode: roleCap,
+      basis: [`roleCap:${featureTag}=${roleCap}`],
+      degradeTag: `role:${featureTag}`,
+    });
+    basis.add(`roleCap:${featureTag}=${roleCap}`);
   }
 
   if (input.policyCap) {
-    caps.push({ id: 'policy', label: 'policy', mode: input.policyCap });
+    caps.push({
+      id: 'policy',
+      label: 'policy',
+      mode: input.policyCap,
+      basis: [`policyCap:policy=${input.policyCap}`],
+      degradeTag: 'policy',
+    });
   }
 
   const resolution = resolveEffectiveMode({
@@ -88,10 +112,21 @@ export function buildProactivityContext(input: ProactivityContextInput): Proacti
     requestedKey: modeToKey(resolution.requested),
     effectiveKey: modeToKey(resolution.effective),
     uiHints: meta.uiHints,
+    chip: meta.chip,
     meta,
     subscription,
     featureId,
     timestamp: new Date().toISOString(),
   };
   return state;
+}
+
+function mapCompatMode(input: unknown): ProactivityMode | undefined {
+  if (input === undefined || input === null) return undefined;
+  const numeric = typeof input === 'number' ? input : Number(input);
+  if (!Number.isFinite(numeric)) return undefined;
+  if (numeric <= 1) return ProactivityMode.Proaktiv;
+  if (numeric === 2) return ProactivityMode.Ambisiøs;
+  if (numeric >= 3) return ProactivityMode.Kraken;
+  return undefined;
 }

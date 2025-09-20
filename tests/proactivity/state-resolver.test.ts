@@ -12,9 +12,12 @@ describe('proactivity state resolver', () => {
     });
     expect(res.effective).toBe(ProactivityMode.Proaktiv);
     expect(res.basis).toEqual(expect.arrayContaining([
-      'requested:tsunami',
-      'cap:subscription:flex:ambisiøs',
-      'cap:role:feature:proaktiv',
+      'mode:requested=6',
+      'mode:effective=3',
+      'tenantPlan:flex',
+      'roleCap:feature=3',
+      'degraded:subscription',
+      'degraded:role:feature',
     ]));
   });
 
@@ -25,7 +28,7 @@ describe('proactivity state resolver', () => {
       caps: [{ id: 'subscription:enterprise', mode: ProactivityMode.Tsunami }],
     });
     expect(res.effective).toBe(ProactivityMode.Usynlig);
-    expect(res.basis).toContain('cap:killswitch');
+    expect(res.basis).toEqual(expect.arrayContaining(['kill', 'degraded:kill', 'mode:effective=1']));
   });
 
   it('degrades along rail when error occurs', () => {
