@@ -1,4 +1,5 @@
 {
+  "head": "fcfe06e",
   "summary": {
     "CORE": "present",
     "FLEX": "present",
@@ -141,6 +142,7 @@
       ".github/workflows/meta-pr1-ci.yml",
       ".github/workflows/meta-pr2-ci.yml",
       ".github/workflows/openapi-lint.yml",
+      ".github/workflows/policy-meta-rails.yml",
       "api-docs/openapi_connectors.yaml",
       "backend/src/common/README_ADAPTIVE_INTEGRATION.md",
       "backend/src/connectors/",
@@ -253,10 +255,10 @@
       "docs/SDK_PUBLISHING.md",
       "docs/integration-plan.md",
       "docs/ui_undo_integration.md",
-      "enterprise/.github/workflows/",
-      "enterprise/.github/workflows/backlog.json"
+      "enterprise/.github/workflows/"
     ],
     "SECURE": [
+      ".github/workflows/policy-meta-rails.yml",
       "META_ROUTE_README.md",
       "META_ROUTE_RUNBOOK.md",
       "PATCHES/CRM_POLICY.md",
@@ -302,6 +304,7 @@
       "backend/tests/rbac_policy.test.ts",
       "backend/tests/rbac_record_level.test.ts",
       "backend/tests/sfdc_auth_jwt.test.ts",
+      "ci/policy-meta-rails.sh",
       "config/policy.rules.json",
       "connectors/dynamics/oauth.js",
       "connectors/salesforce/oauth.js",
@@ -374,9 +377,7 @@
       "enterprise/auth/login.js",
       "enterprise/auth/me.js",
       "enterprise/auth/oidc-callback.js",
-      "enterprise/auth/oidc-login.js",
-      "enterprise/compliance/",
-      "enterprise/compliance/CHECKLIST.md"
+      "enterprise/auth/oidc-login.js"
     ],
     "NAVI": [
       "backend/src/redis/client.ts",
@@ -426,8 +427,7 @@
       "desktop/docs/dashboards/sync-health.json",
       "desktop/electron-builder.yml",
       "desktop/electron-src/",
-      "desktop/electron-src/
-      .ts",
+      "desktop/electron-src/main.ts",
       "desktop/electron-src/preload.ts",
       "desktop/electron-src/renderer/",
       "desktop/electron-src/renderer/global.d.ts",
@@ -451,8 +451,7 @@
       "desktop/integrations/signature.js",
       "desktop/jest.config.js",
       "desktop/logger.js",
-      "desktop/
-      .js",
+      "desktop/main.js",
       "desktop/metrics.js",
       "desktop/otel.js",
       "desktop/package.json",
@@ -505,6 +504,7 @@
     "BUOY_AI": [
       ".github/workflows/meta-pr1-ci.yml",
       ".github/workflows/meta-pr2-ci.yml",
+      ".github/workflows/policy-meta-rails.yml",
       "META_ROUTE_README.md",
       "META_ROUTE_RUNBOOK.md",
       "PATCHES/WIRE_BUOY_ROUTE.md",
@@ -513,6 +513,7 @@
       "README_PR10_EXPLAIN_BUOY.md",
       "README_SUPERPROMPT.md",
       "README_SUPERPROMPT_BC.md",
+      "WORKBUOY_AUDIT.md",
       "ai/",
       "ai/adapters/",
       "ai/adapters/__init__.py",
@@ -566,6 +567,7 @@
       "backend/src/meta-evolution/routes/",
       "backend/src/meta-evolution/routes/evolution.routes.ts",
       "backend/src/meta-evolution/types.ts",
+      "ci/policy-meta-rails.sh",
       "dashboards/workbuoy_ops.json",
       "deploy/helm/workbuoy/",
       "deploy/helm/workbuoy/Chart.yaml",
@@ -586,6 +588,7 @@
       "docs/ai/",
       "docs/ai/ML_DL_READINESS.md",
       "docs/buoy.md",
+      "docs/role-aware-buoy.md",
       "enterprise/META.md",
       "enterprise/META_EXPERIMENTS_README.md",
       "enterprise/__tests__/e2e/meta_flow.spec.ts",
@@ -618,11 +621,7 @@
       "enterprise/lib/meta/",
       "enterprise/lib/meta/analyzer.js",
       "enterprise/lib/meta/experiments.js",
-      "enterprise/lib/meta/metrics.js",
-      "enterprise/lib/meta/planner.js",
-      "enterprise/lib/meta/rollback-gate.js",
-      "enterprise/lib/meta/rollback.js",
-      "enterprise/lib/meta/slo-watch.js"
+      "enterprise/lib/meta/metrics.js"
     ],
     "ROLES": [
       "backend/src/crm/rbacGuard.ts",
@@ -656,6 +655,7 @@
       "docs/RBAC_TESTS.md",
       "docs/SSO_SCIM_RBAC.md",
       "docs/auto/roles_gate_README.md",
+      "docs/role-aware-buoy.md",
       "enterprise/__tests__/rbac.test.js",
       "enterprise/__tests__/roles.errors.test.js",
       "enterprise/__tests__/roles.test.js",
@@ -692,6 +692,10 @@
       "enterprise/secure/rbac.js",
       "enterprise/tests/e2e/rbac-403.spec.ts",
       "enterprise/tests/jest/rbac-portal.test.js",
+      "frontend/src/roles/",
+      "frontend/src/roles/rolePresentation.test.ts",
+      "frontend/src/roles/rolePresentation.ts",
+      "frontend/src/roles/useCurrentRole.ts",
       "reports/roles/",
       "reports/roles/duplicates.json",
       "reports/roles/missing_required.json",
@@ -721,6 +725,7 @@
     "PROACTIVITY": [
       "backend/routes/proactivity.ts",
       "dashboards/kraken_view.md",
+      "docs/proactivity-ui.md",
       "docs/proactivity.md",
       "enterprise/__tests__/tsunami.approval.test.js",
       "enterprise/modes/tsunami/",
@@ -730,6 +735,12 @@
       "enterprise/public/js/modes/kraken.js",
       "enterprise/public/js/modes/proactive.js",
       "enterprise/public/js/modes/tsunami.js",
+      "frontend/e2e/proactivity.spec.ts",
+      "frontend/src/proactivity/",
+      "frontend/src/proactivity/ApprovalPanel.tsx",
+      "frontend/src/proactivity/ModeSwitcher.tsx",
+      "frontend/src/proactivity/useProactivity.test.ts",
+      "frontend/src/proactivity/useProactivity.ts",
       "grafana/dashboards/proactivity.json",
       "openapi/proactivity.yaml",
       "samples/kraken_sim_output.json",
@@ -749,6 +760,7 @@
     "META": [
       ".github/workflows/meta-pr1-ci.yml",
       ".github/workflows/meta-pr2-ci.yml",
+      ".github/workflows/policy-meta-rails.yml",
       "META_ROUTE_README.md",
       "META_ROUTE_RUNBOOK.md",
       "backend/api/meta.mount.ts",
@@ -792,6 +804,7 @@
       "backend/src/meta-evolution/routes/evolution.routes.ts",
       "backend/src/meta-evolution/types.ts",
       "backend/tests/genesis.autonomy.test.ts",
+      "ci/policy-meta-rails.sh",
       "docker-compose.meta.yml",
       "enterprise/META.md",
       "enterprise/META_EXPERIMENTS_README.md",
@@ -855,6 +868,7 @@
       "enterprise/public/js/meta/learningEngine.js",
       "enterprise/public/js/meta/metaInterface.js",
       "enterprise/public/js/meta/selfAnalysis.js",
+      "frontend/e2e/meta-rails.spec.ts",
       "frontend/src/components/evolution/",
       "frontend/src/components/evolution/EvolutionDashboard.tsx",
       "frontend/src/components/evolution/index.ts",
@@ -863,10 +877,7 @@
       "meta/",
       "meta/ACTIVATION.md",
       "meta/FOUNDATION.md",
-      "meta/KILL_SWITCH.md",
-      "meta/schema/",
-      "meta/schema/decision-log.schema.json",
-      "meta/schema/usage-log.schema.json"
+      "meta/KILL_SWITCH.md"
     ],
     "INFRA": [
       "Dockerfile",
@@ -1156,6 +1167,11 @@
         "match": "describes the manual merge steps; no git actions are triggered from HTTP."
       },
       {
+        "file": "WORKBUOY_AUDIT.md",
+        "line": 39,
+        "match": "- `src/routes/genesis.autonomy.ts` keeps proposals-only behavior and requires `.evolution/APPROVED` tokens before acknowledging evolution."
+      },
+      {
         "file": "backend/src/app.ts",
         "line": 5,
         "match": "import { createEvolutionRouter } from './meta-evolution/routes/evolution.routes.js';"
@@ -1201,6 +1217,21 @@
         "match": "error: 'approval_required',"
       },
       {
+        "file": "ci/policy-meta-rails.sh",
+        "line": 6,
+        "match": "TARGET_FILES=$(git ls-files 'src/routes/genesis.autonomy.ts' 'backend/src/meta-evolution/routes/*.ts' 2>/dev/null || true)"
+      },
+      {
+        "file": "frontend/e2e/meta-rails.spec.ts",
+        "line": 4,
+        "match": "const response = await request.post('/genetics/implement-evolution', {"
+      },
+      {
+        "file": "frontend/e2e/meta-rails.spec.ts",
+        "line": 9,
+        "match": "expect(body.error).toBe('approval_required');"
+      },
+      {
         "file": "frontend/src/components/IntrospectionBadge.test.tsx",
         "line": 35,
         "match": "if (url.endsWith('/genesis/introspection-report')) {"
@@ -1231,6 +1262,21 @@
         "match": "const AUTONOMOUS_DEVELOP_ENDPOINT = '/api/meta-evolution/genesis/autonomous-develop';"
       },
       {
+        "file": "frontend/src/lib/api/mock.ts",
+        "line": 182,
+        "match": "if (url.endsWith(\"/genetics/implement-evolution\")) {"
+      },
+      {
+        "file": "frontend/src/lib/api/mock.ts",
+        "line": 187,
+        "match": "error: \"approval_required\","
+      },
+      {
+        "file": "frontend/src/lib/api/mock.ts",
+        "line": 188,
+        "match": "message: \"Manual approval required. Place operator sign-off at .evolution/APPROVED.\","
+      },
+      {
         "file": "src/routes/genesis.autonomy.ts",
         "line": 71,
         "match": "return process.env.EVOLUTION_APPROVAL_FILE || path.join(process.cwd(), '.evolution/APPROVED');"
@@ -1256,18 +1302,43 @@
         "match": "error: 'approval_required',"
       },
       {
+        "file": "tests/meta/meta-rails.test.ts",
+        "line": 7,
+        "match": ".post('/genetics/implement-evolution')"
+      },
+      {
+        "file": "tests/meta/meta-rails.test.ts",
+        "line": 11,
+        "match": "expect(res.body).toEqual(expect.objectContaining({ error: 'approval_required' }));"
+      },
+      {
         "file": "tools/analyze-workbuoy.mjs",
-        "line": 579,
+        "line": 423,
+        "match": "SECURE: ['backend/meta/router.ts', 'backend/src/meta-evolution/routes/evolution.routes.ts', 'META_ROUTE_RUNBOOK.md'],"
+      },
+      {
+        "file": "tools/analyze-workbuoy.mjs",
+        "line": 489,
+        "match": "lines.push('- `src/routes/genesis.autonomy.ts` keeps proposals-only behavior and requires `.evolution/APPROVED` tokens before acknowledging evolution.');"
+      },
+      {
+        "file": "tools/analyze-workbuoy.mjs",
+        "line": 523,
+        "match": "checklist.push(`- [ ] Reaffirm the .evolution/APPROVED approval gate in code or docs: ${reason}`);"
+      },
+      {
+        "file": "tools/analyze-workbuoy.mjs",
+        "line": 723,
         "match": "violations.missing_approval_gate.push({ file: null, reason: 'No approval gate references detected (.evolution/APPROVED, approval_required, or evolution gatekeeper).' });"
       },
       {
         "file": "tools/analyze-workbuoy.mjs",
-        "line": 579,
+        "line": 723,
         "match": "violations.missing_approval_gate.push({ file: null, reason: 'No approval gate references detected (.evolution/APPROVED, approval_required, or evolution gatekeeper).' });"
       },
       {
         "file": "tools/analyze-workbuoy.mjs",
-        "line": 579,
+        "line": 723,
         "match": "violations.missing_approval_gate.push({ file: null, reason: 'No approval gate references detected (.evolution/APPROVED, approval_required, or evolution gatekeeper).' });"
       }
     ],
@@ -1278,6 +1349,46 @@
         "match": "in the flip-card header."
       },
       {
+        "file": "WORKBUOY_AUDIT.md",
+        "line": 10,
+        "match": "| Navi | ✅ Present | Flip-card UI and Navi modules expose the workspace navigation surfaces. Key files: `backend/src/redis/client.ts`, `backend/tests/__mocks__/prom-client.ts`, `connectors/dynamics/client.js`. |"
+      },
+      {
+        "file": "WORKBUOY_AUDIT.md",
+        "line": 24,
+        "match": "## Navi Flip-card UX"
+      },
+      {
+        "file": "WORKBUOY_AUDIT.md",
+        "line": 26,
+        "match": "- `frontend/src/components/FlipCard/FlipCard.tsx` renders Buoy on the front and Navi on the back with keyboard flips, resize nudges, and connect dialogs."
+      },
+      {
+        "file": "WORKBUOY_AUDIT.md",
+        "line": 26,
+        "match": "- `frontend/src/components/FlipCard/FlipCard.tsx` renders Buoy on the front and Navi on the back with keyboard flips, resize nudges, and connect dialogs."
+      },
+      {
+        "file": "WORKBUOY_AUDIT.md",
+        "line": 27,
+        "match": "- `frontend/src/components/FlipCard/FlipCard.css` keeps the 3D transform in production while only muting transitions for reduced motion."
+      },
+      {
+        "file": "WORKBUOY_AUDIT.md",
+        "line": 27,
+        "match": "- `frontend/src/components/FlipCard/FlipCard.css` keeps the 3D transform in production while only muting transitions for reduced motion."
+      },
+      {
+        "file": "WORKBUOY_AUDIT.md",
+        "line": 28,
+        "match": "- `frontend/src/navi/NaviGrid.tsx`, `frontend/src/features/buoy/BuoyChat.tsx`, and `frontend/src/components/FlipCard/FlipCard.test.tsx` ensure Buoy ⇄ Navi wiring stays accurate."
+      },
+      {
+        "file": "WORKBUOY_AUDIT.md",
+        "line": 28,
+        "match": "- `frontend/src/navi/NaviGrid.tsx`, `frontend/src/features/buoy/BuoyChat.tsx`, and `frontend/src/components/FlipCard/FlipCard.test.tsx` ensure Buoy ⇄ Navi wiring stays accurate."
+      },
+      {
         "file": "assets/demo/flip.svg",
         "line": 4,
         "match": "<text x=\"60\" y=\"80\" fill=\"#ecf2ff\" font-family=\"sans-serif\" font-size=\"18\">FlipCard: Buoy ↔ Navi</text>"
@@ -1308,6 +1419,106 @@
         "match": "- Bruk **ModeSwitch** i FlipCard-headeren for å simulere policy-nivåer i UI."
       },
       {
+        "file": "docs/navi-flipcard.md",
+        "line": 1,
+        "match": "# Navi FlipCard Guide"
+      },
+      {
+        "file": "docs/navi-flipcard.md",
+        "line": 1,
+        "match": "# Navi FlipCard Guide"
+      },
+      {
+        "file": "docs/navi-flipcard.md",
+        "line": 4,
+        "match": "The FlipCard is the primary shell that pairs the Buoy AI surface (front) with Navi context (back)."
+      },
+      {
+        "file": "docs/navi-flipcard.md",
+        "line": 4,
+        "match": "The FlipCard is the primary shell that pairs the Buoy AI surface (front) with Navi context (back)."
+      },
+      {
+        "file": "docs/navi-flipcard.md",
+        "line": 13,
+        "match": "import FlipCard from '@/components/FlipCard';"
+      },
+      {
+        "file": "docs/navi-flipcard.md",
+        "line": 13,
+        "match": "import FlipCard from '@/components/FlipCard';"
+      },
+      {
+        "file": "docs/navi-flipcard.md",
+        "line": 15,
+        "match": "<FlipCard"
+      },
+      {
+        "file": "docs/navi-flipcard.md",
+        "line": 15,
+        "match": "<FlipCard"
+      },
+      {
+        "file": "docs/navi-flipcard.md",
+        "line": 27,
+        "match": "- `onFlip`: callback invoked with `'front' | 'back'` whenever the card flips."
+      },
+      {
+        "file": "docs/navi-flipcard.md",
+        "line": 39,
+        "match": "FlipCard consumes the shared tokens defined in `frontend/src/styles/tokens.css` (radius, color, motion). Custom CSS lives in `frontend/src/components/FlipCard/FlipCard.css`. The host element exposes classes:"
+      },
+      {
+        "file": "docs/navi-flipcard.md",
+        "line": 39,
+        "match": "FlipCard consumes the shared tokens defined in `frontend/src/styles/tokens.css` (radius, color, motion). Custom CSS lives in `frontend/src/components/FlipCard/FlipCard.css`. The host element exposes classes:"
+      },
+      {
+        "file": "docs/navi-flipcard.md",
+        "line": 41,
+        "match": "- `.flip-card-host` / `.flip-host` – outer shell controlling width/height."
+      },
+      {
+        "file": "docs/navi-flipcard.md",
+        "line": 42,
+        "match": "- `.flip-card--{size}` – current preset."
+      },
+      {
+        "file": "docs/navi-flipcard.md",
+        "line": 43,
+        "match": "- `.flip-card--flipped` – applied when Navi is visible."
+      },
+      {
+        "file": "docs/navi-flipcard.md",
+        "line": 52,
+        "match": "3. Render `FlipCard` with `<BuoyPanel>` and `<NaviPanel>`; forward `onConnect` to `addConnection`."
+      },
+      {
+        "file": "docs/navi-flipcard.md",
+        "line": 52,
+        "match": "3. Render `FlipCard` with `<BuoyPanel>` and `<NaviPanel>`; forward `onConnect` to `addConnection`."
+      },
+      {
+        "file": "docs/navi-flipcard.md",
+        "line": 53,
+        "match": "4. Render the `ModeSwitcher` and guard badges next to FlipCard to keep the autonomy context visible."
+      },
+      {
+        "file": "docs/navi-flipcard.md",
+        "line": 53,
+        "match": "4. Render the `ModeSwitcher` and guard badges next to FlipCard to keep the autonomy context visible."
+      },
+      {
+        "file": "docs/navi-flipcard.md",
+        "line": 55,
+        "match": "This pattern keeps the FlipCard reusable while centralising shared state in the shell."
+      },
+      {
+        "file": "docs/navi-flipcard.md",
+        "line": 55,
+        "match": "This pattern keeps the FlipCard reusable while centralising shared state in the shell."
+      },
+      {
         "file": "docs/navi.md",
         "line": 27,
         "match": "- `FlipCard` wrapper hele kortet med `AutonomyProvider` og viser `ModeSwitch` i headeren."
@@ -1326,6 +1537,31 @@
         "file": "docs/peripheral-ui.md",
         "line": 9,
         "match": "FlipCard monterer `StatusEdge` med demo-knapper."
+      },
+      {
+        "file": "docs/role-aware-buoy.md",
+        "line": 25,
+        "match": "## BuoyPanel (front of FlipCard)"
+      },
+      {
+        "file": "docs/role-aware-buoy.md",
+        "line": 25,
+        "match": "## BuoyPanel (front of FlipCard)"
+      },
+      {
+        "file": "docs/role-aware-buoy.md",
+        "line": 28,
+        "match": "- Uses `suggestedEntities` to seed `ActiveContext.setSelectedEntity`. The flip-card connect button will therefore link the role-relevant record first."
+      },
+      {
+        "file": "docs/role-aware-buoy.md",
+        "line": 31,
+        "match": "## NaviPanel (back of FlipCard)"
+      },
+      {
+        "file": "docs/role-aware-buoy.md",
+        "line": 31,
+        "match": "## NaviPanel (back of FlipCard)"
       },
       {
         "file": "docs/ux_a11y_appendix.md",
@@ -1368,6 +1604,26 @@
         "match": "- Oppretter `frontend/` (Vite/React) med FlipCard-shell, BuoyChat (chat + “Vis hvorfor” + mikro-viz),"
       },
       {
+        "file": "frontend/e2e/flipcard.spec.ts",
+        "line": 3,
+        "match": "test('flipcard flips, resizes, and connects entities', async ({ page }) => {"
+      },
+      {
+        "file": "frontend/e2e/flipcard.spec.ts",
+        "line": 3,
+        "match": "test('flipcard flips, resizes, and connects entities', async ({ page }) => {"
+      },
+      {
+        "file": "frontend/e2e/flipcard.spec.ts",
+        "line": 3,
+        "match": "test('flipcard flips, resizes, and connects entities', async ({ page }) => {"
+      },
+      {
+        "file": "frontend/e2e/flipcard.spec.ts",
+        "line": 11,
+        "match": "const card = page.locator('[data-testid=\"flip-card\"] .flip-card');"
+      },
+      {
         "file": "frontend/e2e/smoke.spec.ts",
         "line": 6,
         "match": "// Wait for FlipCard to render (Buoy header visible)"
@@ -1380,22 +1636,522 @@
       {
         "file": "frontend/src/App.tsx",
         "line": 2,
-        "match": "import FlipCard from \"./components/FlipCard\";"
+        "match": "import FlipCard, { type FlipCardSize } from \"./components/FlipCard\";"
       },
       {
         "file": "frontend/src/App.tsx",
         "line": 2,
-        "match": "import FlipCard from \"./components/FlipCard\";"
+        "match": "import FlipCard, { type FlipCardSize } from \"./components/FlipCard\";"
       },
       {
         "file": "frontend/src/App.tsx",
-        "line": 8,
-        "match": "<FlipCard/>"
+        "line": 37,
+        "match": "const [size, setSize] = useState<FlipCardSize>(\"lg\");"
       },
       {
         "file": "frontend/src/App.tsx",
-        "line": 8,
-        "match": "<FlipCard/>"
+        "line": 37,
+        "match": "const [size, setSize] = useState<FlipCardSize>(\"lg\");"
+      },
+      {
+        "file": "frontend/src/App.tsx",
+        "line": 52,
+        "match": "<FlipCard"
+      },
+      {
+        "file": "frontend/src/App.tsx",
+        "line": 52,
+        "match": "<FlipCard"
+      },
+      {
+        "file": "frontend/src/components/FlipCard/FlipCard.css",
+        "line": 1,
+        "match": ".flip-card-host {"
+      },
+      {
+        "file": "frontend/src/components/FlipCard/FlipCard.css",
+        "line": 6,
+        "match": ".flip-card {"
+      },
+      {
+        "file": "frontend/src/components/FlipCard/FlipCard.css",
+        "line": 16,
+        "match": ".flip-card--flipped {"
+      },
+      {
+        "file": "frontend/src/components/FlipCard/FlipCard.css",
+        "line": 20,
+        "match": ".flip-card-toolbar {"
+      },
+      {
+        "file": "frontend/src/components/FlipCard/FlipCard.css",
+        "line": 31,
+        "match": ".flip-card-toolbar__side,"
+      },
+      {
+        "file": "frontend/src/components/FlipCard/FlipCard.css",
+        "line": 32,
+        "match": ".flip-card-toolbar__actions {"
+      },
+      {
+        "file": "frontend/src/components/FlipCard/FlipCard.css",
+        "line": 39,
+        "match": ".flip-card-toolbar__flip,"
+      },
+      {
+        "file": "frontend/src/components/FlipCard/FlipCard.css",
+        "line": 40,
+        "match": ".flip-card-toolbar__connect,"
+      },
+      {
+        "file": "frontend/src/components/FlipCard/FlipCard.css",
+        "line": 41,
+        "match": ".flip-card-toolbar__resize {"
+      },
+      {
+        "file": "frontend/src/components/FlipCard/FlipCard.css",
+        "line": 47,
+        "match": ".flip-card-toolbar__resize {"
+      },
+      {
+        "file": "frontend/src/components/FlipCard/FlipCard.css",
+        "line": 51,
+        "match": ".flip-card-face {"
+      },
+      {
+        "file": "frontend/src/components/FlipCard/FlipCard.css",
+        "line": 59,
+        "match": ".flip-card-face--front {"
+      },
+      {
+        "file": "frontend/src/components/FlipCard/FlipCard.css",
+        "line": 63,
+        "match": ".flip-card-face--back {"
+      },
+      {
+        "file": "frontend/src/components/FlipCard/FlipCard.css",
+        "line": 74,
+        "match": ".flip-card-connect {"
+      },
+      {
+        "file": "frontend/src/components/FlipCard/FlipCard.css",
+        "line": 83,
+        "match": ".flip-card-connect__form {"
+      },
+      {
+        "file": "frontend/src/components/FlipCard/FlipCard.css",
+        "line": 93,
+        "match": ".flip-card-connect__label {"
+      },
+      {
+        "file": "frontend/src/components/FlipCard/FlipCard.css",
+        "line": 99,
+        "match": ".flip-card-connect__label input,"
+      },
+      {
+        "file": "frontend/src/components/FlipCard/FlipCard.css",
+        "line": 100,
+        "match": ".flip-card-connect__label select {"
+      },
+      {
+        "file": "frontend/src/components/FlipCard/FlipCard.css",
+        "line": 108,
+        "match": ".flip-card-connect__actions {"
+      },
+      {
+        "file": "frontend/src/components/FlipCard/FlipCard.css",
+        "line": 115,
+        "match": ".flip-card {"
+      },
+      {
+        "file": "frontend/src/components/FlipCard/FlipCard.css",
+        "line": 121,
+        "match": ".flip-card-face {"
+      },
+      {
+        "file": "frontend/src/components/FlipCard/FlipCard.css",
+        "line": 125,
+        "match": ".flip-card-toolbar {"
+      },
+      {
+        "file": "frontend/src/components/FlipCard/FlipCard.css",
+        "line": 131,
+        "match": ".flip-card-toolbar {"
+      },
+      {
+        "file": "frontend/src/components/FlipCard/FlipCard.css",
+        "line": 137,
+        "match": ".flip-card-toolbar__actions {"
+      },
+      {
+        "file": "frontend/src/components/FlipCard/FlipCard.test.tsx",
+        "line": 4,
+        "match": "import FlipCard from \"./FlipCard\";"
+      },
+      {
+        "file": "frontend/src/components/FlipCard/FlipCard.test.tsx",
+        "line": 4,
+        "match": "import FlipCard from \"./FlipCard\";"
+      },
+      {
+        "file": "frontend/src/components/FlipCard/FlipCard.test.tsx",
+        "line": 11,
+        "match": "describe(\"FlipCard\", () => {"
+      },
+      {
+        "file": "frontend/src/components/FlipCard/FlipCard.test.tsx",
+        "line": 11,
+        "match": "describe(\"FlipCard\", () => {"
+      },
+      {
+        "file": "frontend/src/components/FlipCard/FlipCard.test.tsx",
+        "line": 15,
+        "match": "<FlipCard"
+      },
+      {
+        "file": "frontend/src/components/FlipCard/FlipCard.test.tsx",
+        "line": 15,
+        "match": "<FlipCard"
+      },
+      {
+        "file": "frontend/src/components/FlipCard/FlipCard.test.tsx",
+        "line": 22,
+        "match": "expect(screen.getByTestId(\"flip-card-front\").textContent).toContain(\"Front\");"
+      },
+      {
+        "file": "frontend/src/components/FlipCard/FlipCard.test.tsx",
+        "line": 26,
+        "match": "expect(screen.getByTestId(\"flip-card-back\").textContent).toContain(\"Back\");"
+      },
+      {
+        "file": "frontend/src/components/FlipCard/FlipCard.test.tsx",
+        "line": 32,
+        "match": "<FlipCard"
+      },
+      {
+        "file": "frontend/src/components/FlipCard/FlipCard.test.tsx",
+        "line": 32,
+        "match": "<FlipCard"
+      },
+      {
+        "file": "frontend/src/components/FlipCard/FlipCard.test.tsx",
+        "line": 38,
+        "match": "const card = screen.getByRole(\"group\", { name: /flip card/i });"
+      },
+      {
+        "file": "frontend/src/components/FlipCard/FlipCard.test.tsx",
+        "line": 53,
+        "match": "<FlipCard"
+      },
+      {
+        "file": "frontend/src/components/FlipCard/FlipCard.test.tsx",
+        "line": 53,
+        "match": "<FlipCard"
+      },
+      {
+        "file": "frontend/src/components/FlipCard/FlipCard.test.tsx",
+        "line": 74,
+        "match": "<FlipCard front={<div>Front</div>} back={<div>Back</div>} onConnect={onConnect} />,"
+      },
+      {
+        "file": "frontend/src/components/FlipCard/FlipCard.test.tsx",
+        "line": 74,
+        "match": "<FlipCard front={<div>Front</div>} back={<div>Back</div>} onConnect={onConnect} />,"
+      },
+      {
+        "file": "frontend/src/components/FlipCard/FlipCard.test.tsx",
+        "line": 95,
+        "match": "<FlipCard front={<div>Front</div>} back={<div>Back</div>} onConnect={onConnect} />,"
+      },
+      {
+        "file": "frontend/src/components/FlipCard/FlipCard.test.tsx",
+        "line": 95,
+        "match": "<FlipCard front={<div>Front</div>} back={<div>Back</div>} onConnect={onConnect} />,"
+      },
+      {
+        "file": "frontend/src/components/FlipCard/FlipCard.test.tsx",
+        "line": 98,
+        "match": "const card = screen.getByRole(\"group\", { name: /flip card/i });"
+      },
+      {
+        "file": "frontend/src/components/FlipCard/FlipCard.tsx",
+        "line": 10,
+        "match": "import \"./FlipCard.css\";"
+      },
+      {
+        "file": "frontend/src/components/FlipCard/FlipCard.tsx",
+        "line": 10,
+        "match": "import \"./FlipCard.css\";"
+      },
+      {
+        "file": "frontend/src/components/FlipCard/FlipCard.tsx",
+        "line": 12,
+        "match": "export type FlipCardSize = \"sm\" | \"md\" | \"lg\" | \"xl\";"
+      },
+      {
+        "file": "frontend/src/components/FlipCard/FlipCard.tsx",
+        "line": 12,
+        "match": "export type FlipCardSize = \"sm\" | \"md\" | \"lg\" | \"xl\";"
+      },
+      {
+        "file": "frontend/src/components/FlipCard/FlipCard.tsx",
+        "line": 17,
+        "match": "export type FlipCardProps = {"
+      },
+      {
+        "file": "frontend/src/components/FlipCard/FlipCard.tsx",
+        "line": 17,
+        "match": "export type FlipCardProps = {"
+      },
+      {
+        "file": "frontend/src/components/FlipCard/FlipCard.tsx",
+        "line": 20,
+        "match": "size?: FlipCardSize;"
+      },
+      {
+        "file": "frontend/src/components/FlipCard/FlipCard.tsx",
+        "line": 20,
+        "match": "size?: FlipCardSize;"
+      },
+      {
+        "file": "frontend/src/components/FlipCard/FlipCard.tsx",
+        "line": 22,
+        "match": "onResize?: (size: FlipCardSize) => void;"
+      },
+      {
+        "file": "frontend/src/components/FlipCard/FlipCard.tsx",
+        "line": 22,
+        "match": "onResize?: (size: FlipCardSize) => void;"
+      },
+      {
+        "file": "frontend/src/components/FlipCard/FlipCard.tsx",
+        "line": 28,
+        "match": "const ORDER: FlipCardSize[] = [\"sm\", \"md\", \"lg\", \"xl\"];"
+      },
+      {
+        "file": "frontend/src/components/FlipCard/FlipCard.tsx",
+        "line": 28,
+        "match": "const ORDER: FlipCardSize[] = [\"sm\", \"md\", \"lg\", \"xl\"];"
+      },
+      {
+        "file": "frontend/src/components/FlipCard/FlipCard.tsx",
+        "line": 30,
+        "match": "const DIMENSIONS: Record<FlipCardSize, { width: string; height: string }> = {"
+      },
+      {
+        "file": "frontend/src/components/FlipCard/FlipCard.tsx",
+        "line": 30,
+        "match": "const DIMENSIONS: Record<FlipCardSize, { width: string; height: string }> = {"
+      },
+      {
+        "file": "frontend/src/components/FlipCard/FlipCard.tsx",
+        "line": 37,
+        "match": "function FlipCard({"
+      },
+      {
+        "file": "frontend/src/components/FlipCard/FlipCard.tsx",
+        "line": 37,
+        "match": "function FlipCard({"
+      },
+      {
+        "file": "frontend/src/components/FlipCard/FlipCard.tsx",
+        "line": 46,
+        "match": "}: FlipCardProps) {"
+      },
+      {
+        "file": "frontend/src/components/FlipCard/FlipCard.tsx",
+        "line": 46,
+        "match": "}: FlipCardProps) {"
+      },
+      {
+        "file": "frontend/src/components/FlipCard/FlipCard.tsx",
+        "line": 48,
+        "match": "const [cardSize, setCardSize] = useState<FlipCardSize>(size);"
+      },
+      {
+        "file": "frontend/src/components/FlipCard/FlipCard.tsx",
+        "line": 48,
+        "match": "const [cardSize, setCardSize] = useState<FlipCardSize>(size);"
+      },
+      {
+        "file": "frontend/src/components/FlipCard/FlipCard.tsx",
+        "line": 97,
+        "match": "(next: FlipCardSize) => {"
+      },
+      {
+        "file": "frontend/src/components/FlipCard/FlipCard.tsx",
+        "line": 97,
+        "match": "(next: FlipCardSize) => {"
+      },
+      {
+        "file": "frontend/src/components/FlipCard/FlipCard.tsx",
+        "line": 256,
+        "match": "className=\"flip-card-host flip-host\""
+      },
+      {
+        "file": "frontend/src/components/FlipCard/FlipCard.tsx",
+        "line": 258,
+        "match": "data-testid=\"flip-card\""
+      },
+      {
+        "file": "frontend/src/components/FlipCard/FlipCard.tsx",
+        "line": 261,
+        "match": "className={`flip-card flipcard cardbg flip-card--${cardSize} ${"
+      },
+      {
+        "file": "frontend/src/components/FlipCard/FlipCard.tsx",
+        "line": 261,
+        "match": "className={`flip-card flipcard cardbg flip-card--${cardSize} ${"
+      },
+      {
+        "file": "frontend/src/components/FlipCard/FlipCard.tsx",
+        "line": 261,
+        "match": "className={`flip-card flipcard cardbg flip-card--${cardSize} ${"
+      },
+      {
+        "file": "frontend/src/components/FlipCard/FlipCard.tsx",
+        "line": 262,
+        "match": "isFlipped ? \"flip-card--flipped\" : \"\""
+      },
+      {
+        "file": "frontend/src/components/FlipCard/FlipCard.tsx",
+        "line": 265,
+        "match": "aria-roledescription=\"flip card\""
+      },
+      {
+        "file": "frontend/src/components/FlipCard/FlipCard.tsx",
+        "line": 270,
+        "match": "<div className=\"flip-card-toolbar\">"
+      },
+      {
+        "file": "frontend/src/components/FlipCard/FlipCard.tsx",
+        "line": 271,
+        "match": "<div className=\"flip-card-toolbar__side\" aria-live=\"polite\">"
+      },
+      {
+        "file": "frontend/src/components/FlipCard/FlipCard.tsx",
+        "line": 272,
+        "match": "<span className=\"chip\" data-testid=\"flip-card-side\">"
+      },
+      {
+        "file": "frontend/src/components/FlipCard/FlipCard.tsx",
+        "line": 277,
+        "match": "className=\"chip flip-card-toolbar__flip\""
+      },
+      {
+        "file": "frontend/src/components/FlipCard/FlipCard.tsx",
+        "line": 292,
+        "match": "<div className=\"flip-card-toolbar__actions\">"
+      },
+      {
+        "file": "frontend/src/components/FlipCard/FlipCard.tsx",
+        "line": 295,
+        "match": "className=\"chip flip-card-toolbar__connect\""
+      },
+      {
+        "file": "frontend/src/components/FlipCard/FlipCard.tsx",
+        "line": 299,
+        "match": "className=\"chip flip-card-toolbar__connect\""
+      },
+      {
+        "file": "frontend/src/components/FlipCard/FlipCard.tsx",
+        "line": 314,
+        "match": "className=\"chip flip-card-toolbar__resize\""
+      },
+      {
+        "file": "frontend/src/components/FlipCard/FlipCard.tsx",
+        "line": 347,
+        "match": "className=\"flip-card-face flip-card-face--front\""
+      },
+      {
+        "file": "frontend/src/components/FlipCard/FlipCard.tsx",
+        "line": 351,
+        "match": "<div className=\"flip-face-content\" data-testid=\"flip-card-front\">"
+      },
+      {
+        "file": "frontend/src/components/FlipCard/FlipCard.tsx",
+        "line": 357,
+        "match": "className=\"flip-card-face flip-card-face--back\""
+      },
+      {
+        "file": "frontend/src/components/FlipCard/FlipCard.tsx",
+        "line": 361,
+        "match": "<div className=\"flip-face-content\" data-testid=\"flip-card-back\">"
+      },
+      {
+        "file": "frontend/src/components/FlipCard/FlipCard.tsx",
+        "line": 371,
+        "match": "className=\"flip-card-connect\""
+      },
+      {
+        "file": "frontend/src/components/FlipCard/FlipCard.tsx",
+        "line": 372,
+        "match": "data-testid=\"flip-card-connect-dialog\""
+      },
+      {
+        "file": "frontend/src/components/FlipCard/FlipCard.tsx",
+        "line": 374,
+        "match": "<form className=\"flip-card-connect__form\" onSubmit={handleManualSubmit}>"
+      },
+      {
+        "file": "frontend/src/components/FlipCard/FlipCard.tsx",
+        "line": 377,
+        "match": "<label className=\"flip-card-connect__label\">"
+      },
+      {
+        "file": "frontend/src/components/FlipCard/FlipCard.tsx",
+        "line": 390,
+        "match": "<label className=\"flip-card-connect__label\">"
+      },
+      {
+        "file": "frontend/src/components/FlipCard/FlipCard.tsx",
+        "line": 399,
+        "match": "<label className=\"flip-card-connect__label\">"
+      },
+      {
+        "file": "frontend/src/components/FlipCard/FlipCard.tsx",
+        "line": 407,
+        "match": "<div className=\"flip-card-connect__actions\">"
+      },
+      {
+        "file": "frontend/src/components/FlipCard/FlipCard.tsx",
+        "line": 430,
+        "match": "export default FlipCard;"
+      },
+      {
+        "file": "frontend/src/components/FlipCard/FlipCard.tsx",
+        "line": 430,
+        "match": "export default FlipCard;"
+      },
+      {
+        "file": "frontend/src/components/FlipCard/FlipCard.tsx",
+        "line": 431,
+        "match": "export type { FlipCardProps };"
+      },
+      {
+        "file": "frontend/src/components/FlipCard/FlipCard.tsx",
+        "line": 431,
+        "match": "export type { FlipCardProps };"
+      },
+      {
+        "file": "frontend/src/components/FlipCard/index.ts",
+        "line": 1,
+        "match": "export { default, default as FlipCard } from \"./FlipCard\";"
+      },
+      {
+        "file": "frontend/src/components/FlipCard/index.ts",
+        "line": 1,
+        "match": "export { default, default as FlipCard } from \"./FlipCard\";"
+      },
+      {
+        "file": "frontend/src/components/FlipCard/index.ts",
+        "line": 2,
+        "match": "export type { FlipCardProps, FlipCardSize } from \"./FlipCard\";"
+      },
+      {
+        "file": "frontend/src/components/FlipCard/index.ts",
+        "line": 2,
+        "match": "export type { FlipCardProps, FlipCardSize } from \"./FlipCard\";"
       },
       {
         "file": "frontend/src/components/FlipCard.a11y.patch.txt",
@@ -1578,26 +2334,6 @@
         "match": "<div className=\"flipcard cardbg\" style={{position:\"absolute\", inset:0, borderRadius:16, transform: `rotateY(${flipped?180:0}deg)`}}>"
       },
       {
-        "file": "frontend/src/components/FlipCard.tsx",
-        "line": 6,
-        "match": "export default function FlipCard() {"
-      },
-      {
-        "file": "frontend/src/components/FlipCard.tsx",
-        "line": 6,
-        "match": "export default function FlipCard() {"
-      },
-      {
-        "file": "frontend/src/components/FlipCard.tsx",
-        "line": 20,
-        "match": "<div className=\"flipcard cardbg\" style={{position:\"absolute\", inset:0, borderRadius:16, transform: `rotateY(${flipped?180:0}deg)`}}>"
-      },
-      {
-        "file": "frontend/src/components/FlipCard.tsx",
-        "line": 20,
-        "match": "<div className=\"flipcard cardbg\" style={{position:\"absolute\", inset:0, borderRadius:16, transform: `rotateY(${flipped?180:0}deg)`}}>"
-      },
-      {
         "file": "frontend/src/components/FlipCard.undo.patch.txt",
         "line": 1,
         "match": "--- a/frontend/src/components/FlipCard.tsx"
@@ -1656,16 +2392,6 @@
         "file": "frontend/src/styles/tokens.css",
         "line": 59,
         "match": ".flipcard { transition: none !important; }"
-      },
-      {
-        "file": "frontend/src/styles/tokens.css",
-        "line": 70,
-        "match": ".flipcard { transform: none !important; }"
-      },
-      {
-        "file": "frontend/src/styles/tokens.css",
-        "line": 70,
-        "match": ".flipcard { transform: none !important; }"
       },
       {
         "file": "prototypes/FlipCardPrototype.tsx",
@@ -1726,6 +2452,56 @@
         "file": "tools/analyze-workbuoy.mjs",
         "line": 312,
         "match": "FLIPCARD: [],"
+      },
+      {
+        "file": "tools/analyze-workbuoy.mjs",
+        "line": 411,
+        "match": "{ key: 'NAVI', label: 'Navi', note: 'Flip-card UI and Navi modules expose the workspace navigation surfaces.' },"
+      },
+      {
+        "file": "tools/analyze-workbuoy.mjs",
+        "line": 424,
+        "match": "NAVI: ['frontend/src/components/FlipCard/FlipCard.tsx', 'frontend/src/navi/NaviGrid.tsx', 'frontend/src/components/FlipCard/FlipCard.css'],"
+      },
+      {
+        "file": "tools/analyze-workbuoy.mjs",
+        "line": 424,
+        "match": "NAVI: ['frontend/src/components/FlipCard/FlipCard.tsx', 'frontend/src/navi/NaviGrid.tsx', 'frontend/src/components/FlipCard/FlipCard.css'],"
+      },
+      {
+        "file": "tools/analyze-workbuoy.mjs",
+        "line": 472,
+        "match": "lines.push('## Navi Flip-card UX');"
+      },
+      {
+        "file": "tools/analyze-workbuoy.mjs",
+        "line": 474,
+        "match": "lines.push('- `frontend/src/components/FlipCard/FlipCard.tsx` renders Buoy on the front and Navi on the back with keyboard flips, resize nudges, and connect dialogs.');"
+      },
+      {
+        "file": "tools/analyze-workbuoy.mjs",
+        "line": 474,
+        "match": "lines.push('- `frontend/src/components/FlipCard/FlipCard.tsx` renders Buoy on the front and Navi on the back with keyboard flips, resize nudges, and connect dialogs.');"
+      },
+      {
+        "file": "tools/analyze-workbuoy.mjs",
+        "line": 475,
+        "match": "lines.push('- `frontend/src/components/FlipCard/FlipCard.css` keeps the 3D transform in production while only muting transitions for reduced motion.');"
+      },
+      {
+        "file": "tools/analyze-workbuoy.mjs",
+        "line": 475,
+        "match": "lines.push('- `frontend/src/components/FlipCard/FlipCard.css` keeps the 3D transform in production while only muting transitions for reduced motion.');"
+      },
+      {
+        "file": "tools/analyze-workbuoy.mjs",
+        "line": 476,
+        "match": "lines.push('- `frontend/src/navi/NaviGrid.tsx`, `frontend/src/features/buoy/BuoyChat.tsx`, and `frontend/src/components/FlipCard/FlipCard.test.tsx` ensure Buoy ⇄ Navi wiring stays accurate.');"
+      },
+      {
+        "file": "tools/analyze-workbuoy.mjs",
+        "line": 476,
+        "match": "lines.push('- `frontend/src/navi/NaviGrid.tsx`, `frontend/src/features/buoy/BuoyChat.tsx`, and `frontend/src/components/FlipCard/FlipCard.test.tsx` ensure Buoy ⇄ Navi wiring stays accurate.');"
       }
     ],
     "PROACTIVITY": [
@@ -1743,6 +2519,41 @@
         "file": "README_PR10-EXPLAINABILITY.md",
         "line": 26,
         "match": "\"reasoning\": \"Prepare allowed at Ambisiøs (>=4)\","
+      },
+      {
+        "file": "WORKBUOY_AUDIT.md",
+        "line": 13,
+        "match": "| Proactivity | ✅ Present | Mode definitions and UI keep proactivity controls available. Key files: `backend/routes/proactivity.ts`, `dashboards/kraken_view.md`, `docs/proactivity-ui.md`. |"
+      },
+      {
+        "file": "WORKBUOY_AUDIT.md",
+        "line": 13,
+        "match": "| Proactivity | ✅ Present | Mode definitions and UI keep proactivity controls available. Key files: `backend/routes/proactivity.ts`, `dashboards/kraken_view.md`, `docs/proactivity-ui.md`. |"
+      },
+      {
+        "file": "WORKBUOY_AUDIT.md",
+        "line": 30,
+        "match": "## Proactivity UI"
+      },
+      {
+        "file": "WORKBUOY_AUDIT.md",
+        "line": 32,
+        "match": "- `frontend/src/proactivity/useProactivity.ts` syncs requested vs. effective modes, degrade rails, and telemetry calls."
+      },
+      {
+        "file": "WORKBUOY_AUDIT.md",
+        "line": 33,
+        "match": "- `frontend/src/proactivity/ModeSwitcher.tsx` renders the multi-mode selector with pending, approval, and error states."
+      },
+      {
+        "file": "WORKBUOY_AUDIT.md",
+        "line": 34,
+        "match": "- `frontend/src/proactivity/ApprovalPanel.tsx` surfaces manual approval UI so operators can gate proactivity changes."
+      },
+      {
+        "file": "WORKBUOY_AUDIT.md",
+        "line": 52,
+        "match": "- `grafana/dashboards/proactivity.json` visualises proactivity adoption and degrade rails for operators."
       },
       {
         "file": "backend/routes/admin.subscription.ts",
@@ -1905,6 +2716,11 @@
         "match": "Passiv → Proaktiv → Ambisiøs → Kraken (policy-styrt)."
       },
       {
+        "file": "docs/navi-flipcard.md",
+        "line": 30,
+        "match": "- `ariaLabelFront` / `ariaLabelBack`: optional overrides for assistive tech."
+      },
+      {
         "file": "docs/navi.md",
         "line": 8,
         "match": "- **Ambisiøs:** Forbered utkast automatisk."
@@ -1938,6 +2754,81 @@
         "file": "docs/ops.md",
         "line": 9,
         "match": "Import `grafana/dashboards/proactivity.json` into your Grafana instance. The stub contains panels for:"
+      },
+      {
+        "file": "docs/proactivity-ui.md",
+        "line": 1,
+        "match": "# Proactivity UI"
+      },
+      {
+        "file": "docs/proactivity-ui.md",
+        "line": 4,
+        "match": "The UI exposes the six backend proactivity modes:"
+      },
+      {
+        "file": "docs/proactivity-ui.md",
+        "line": 8,
+        "match": "| `usynlig` | Usynlig | Silent observation | No |"
+      },
+      {
+        "file": "docs/proactivity-ui.md",
+        "line": 9,
+        "match": "| `rolig` | Rolig | Passive telemetry | No |"
+      },
+      {
+        "file": "docs/proactivity-ui.md",
+        "line": 11,
+        "match": "| `ambisiøs` | Ambisiøs | Prepares previews and waits for approval | Yes |"
+      },
+      {
+        "file": "docs/proactivity-ui.md",
+        "line": 12,
+        "match": "| `kraken` | Kraken | Executes automations under guardrails | Yes |"
+      },
+      {
+        "file": "docs/proactivity-ui.md",
+        "line": 13,
+        "match": "| `tsunami` | Tsunami | Full automation with overlays/health checks | Yes |"
+      },
+      {
+        "file": "docs/proactivity-ui.md",
+        "line": 17,
+        "match": "- Selecting Ambisiøs/Kraken/Tsunami opens the approval dialog. The operator must:"
+      },
+      {
+        "file": "docs/proactivity-ui.md",
+        "line": 17,
+        "match": "- Selecting Ambisiøs/Kraken/Tsunami opens the approval dialog. The operator must:"
+      },
+      {
+        "file": "docs/proactivity-ui.md",
+        "line": 17,
+        "match": "- Selecting Ambisiøs/Kraken/Tsunami opens the approval dialog. The operator must:"
+      },
+      {
+        "file": "docs/proactivity-ui.md",
+        "line": 21,
+        "match": "- Without approval the POST still happens but the backend responds with `effectiveKey: proaktiv`; the UI keeps the guard chip visible (`Mode: Assistive`)."
+      },
+      {
+        "file": "docs/proactivity-ui.md",
+        "line": 25,
+        "match": "`GET /api/proactivity/state` returns the server-computed context:"
+      },
+      {
+        "file": "docs/proactivity-ui.md",
+        "line": 40,
+        "match": "`POST /api/proactivity/state` expects:"
+      },
+      {
+        "file": "docs/proactivity-ui.md",
+        "line": 43,
+        "match": "\"requested\": \"kraken\","
+      },
+      {
+        "file": "docs/proactivity-ui.md",
+        "line": 51,
+        "match": "The hook emits `proactivity_mode_change` events via `window.__WB_TELEMETRY__?.track` (falls back to `console.info`). Payload: `{ mode, approved, reason? }`."
       },
       {
         "file": "docs/proactivity.md",
@@ -3250,6 +4141,56 @@
         "match": "\"title\": \"Tsunami overlay stub\","
       },
       {
+        "file": "frontend/e2e/proactivity.spec.ts",
+        "line": 3,
+        "match": "test('proactivity mode switcher enforces approval for high modes', async ({ page }) => {"
+      },
+      {
+        "file": "frontend/e2e/proactivity.spec.ts",
+        "line": 6,
+        "match": "const modeSwitcher = page.getByTestId('proactivity-switcher');"
+      },
+      {
+        "file": "frontend/e2e/proactivity.spec.ts",
+        "line": 9,
+        "match": "await expect(page.getByText(/Mode: Assistive/i)).toBeVisible();"
+      },
+      {
+        "file": "frontend/e2e/proactivity.spec.ts",
+        "line": 11,
+        "match": "await page.getByRole('button', { name: 'Kraken' }).click();"
+      },
+      {
+        "file": "frontend/e2e/proactivity.spec.ts",
+        "line": 12,
+        "match": "const dialog = page.getByRole('dialog', { name: /Activate Kraken/i });"
+      },
+      {
+        "file": "frontend/e2e/proactivity.spec.ts",
+        "line": 16,
+        "match": "await expect(page.getByText(/Mode: Assistive/i)).toBeVisible();"
+      },
+      {
+        "file": "frontend/e2e/proactivity.spec.ts",
+        "line": 18,
+        "match": "await page.getByRole('button', { name: 'Kraken' }).click();"
+      },
+      {
+        "file": "frontend/e2e/proactivity.spec.ts",
+        "line": 19,
+        "match": "const approval = page.getByRole('dialog', { name: /Activate Kraken/i });"
+      },
+      {
+        "file": "frontend/e2e/proactivity.spec.ts",
+        "line": 25,
+        "match": "await expect(page.getByRole('button', { name: 'Kraken' })).toHaveAttribute('aria-pressed', 'true');"
+      },
+      {
+        "file": "frontend/src/App.tsx",
+        "line": 6,
+        "match": "import ModeSwitcher from \"./proactivity/ModeSwitcher\";"
+      },
+      {
         "file": "frontend/src/features/navi/ModeSwitch.tsx",
         "line": 5,
         "match": "const ORDER: AutonomyMode[] = [\"passiv\",\"proaktiv\",\"ambisiøs\",\"kraken\"];"
@@ -3298,6 +4239,731 @@
         "file": "frontend/src/features/navi/policy.ts",
         "line": 21,
         "match": "kraken:   { canShowSuggestions: true,  canShowActions: true,  canAutoDraft: true,  canAutoExecute: true  },"
+      },
+      {
+        "file": "frontend/src/lib/api/mock.ts",
+        "line": 15,
+        "match": "const PROACTIVITY_META = {"
+      },
+      {
+        "file": "frontend/src/lib/api/mock.ts",
+        "line": 16,
+        "match": "usynlig: { id: 1, banner: \"Observing silently\", reviewType: \"none\", requiresApproval: false },"
+      },
+      {
+        "file": "frontend/src/lib/api/mock.ts",
+        "line": 17,
+        "match": "rolig: { id: 2, banner: \"Monitoring in read-only mode\", reviewType: \"passive\", requiresApproval: false },"
+      },
+      {
+        "file": "frontend/src/lib/api/mock.ts",
+        "line": 19,
+        "match": "ambisiøs: { id: 4, banner: \"Previews prepared\", reviewType: \"approval\", requiresApproval: true },"
+      },
+      {
+        "file": "frontend/src/lib/api/mock.ts",
+        "line": 20,
+        "match": "kraken: { id: 5, banner: \"Executing with guardrails\", reviewType: \"execution\", requiresApproval: true },"
+      },
+      {
+        "file": "frontend/src/lib/api/mock.ts",
+        "line": 21,
+        "match": "tsunami: { id: 6, banner: \"Hands-free automation engaged\", reviewType: \"execution\", requiresApproval: true },"
+      },
+      {
+        "file": "frontend/src/lib/api/mock.ts",
+        "line": 24,
+        "match": "type ModeKey = keyof typeof PROACTIVITY_META;"
+      },
+      {
+        "file": "frontend/src/lib/api/mock.ts",
+        "line": 26,
+        "match": "type ProactivityState = {"
+      },
+      {
+        "file": "frontend/src/lib/api/mock.ts",
+        "line": 47,
+        "match": "function buildProactivityState(mode: ModeKey, opts: { approved?: boolean; reason?: string } = {}): ProactivityState {"
+      },
+      {
+        "file": "frontend/src/lib/api/mock.ts",
+        "line": 48,
+        "match": "const meta = PROACTIVITY_META[mode] ?? PROACTIVITY_META.proaktiv;"
+      },
+      {
+        "file": "frontend/src/lib/api/mock.ts",
+        "line": 51,
+        "match": "const effectiveMeta = PROACTIVITY_META[effectiveKey];"
+      },
+      {
+        "file": "frontend/src/lib/api/mock.ts",
+        "line": 62,
+        "match": "caps: { automation: effectiveMeta.id >= PROACTIVITY_META.kraken.id ? \"elevated\" : \"assistive\" },"
+      },
+      {
+        "file": "frontend/src/lib/api/mock.ts",
+        "line": 62,
+        "match": "caps: { automation: effectiveMeta.id >= PROACTIVITY_META.kraken.id ? \"elevated\" : \"assistive\" },"
+      },
+      {
+        "file": "frontend/src/lib/api/mock.ts",
+        "line": 62,
+        "match": "caps: { automation: effectiveMeta.id >= PROACTIVITY_META.kraken.id ? \"elevated\" : \"assistive\" },"
+      },
+      {
+        "file": "frontend/src/lib/api/mock.ts",
+        "line": 63,
+        "match": "degradeRail: [\"tsunami\", \"kraken\", \"ambisiøs\", \"proaktiv\", \"rolig\", \"usynlig\"],"
+      },
+      {
+        "file": "frontend/src/lib/api/mock.ts",
+        "line": 63,
+        "match": "degradeRail: [\"tsunami\", \"kraken\", \"ambisiøs\", \"proaktiv\", \"rolig\", \"usynlig\"],"
+      },
+      {
+        "file": "frontend/src/lib/api/mock.ts",
+        "line": 63,
+        "match": "degradeRail: [\"tsunami\", \"kraken\", \"ambisiøs\", \"proaktiv\", \"rolig\", \"usynlig\"],"
+      },
+      {
+        "file": "frontend/src/lib/api/mock.ts",
+        "line": 63,
+        "match": "degradeRail: [\"tsunami\", \"kraken\", \"ambisiøs\", \"proaktiv\", \"rolig\", \"usynlig\"],"
+      },
+      {
+        "file": "frontend/src/lib/api/mock.ts",
+        "line": 63,
+        "match": "degradeRail: [\"tsunami\", \"kraken\", \"ambisiøs\", \"proaktiv\", \"rolig\", \"usynlig\"],"
+      },
+      {
+        "file": "frontend/src/lib/api/mock.ts",
+        "line": 68,
+        "match": "overlay: effectiveMeta.id >= PROACTIVITY_META.tsunami.id,"
+      },
+      {
+        "file": "frontend/src/lib/api/mock.ts",
+        "line": 68,
+        "match": "overlay: effectiveMeta.id >= PROACTIVITY_META.tsunami.id,"
+      },
+      {
+        "file": "frontend/src/lib/api/mock.ts",
+        "line": 69,
+        "match": "healthChecks: effectiveMeta.id >= PROACTIVITY_META.kraken.id,"
+      },
+      {
+        "file": "frontend/src/lib/api/mock.ts",
+        "line": 69,
+        "match": "healthChecks: effectiveMeta.id >= PROACTIVITY_META.kraken.id,"
+      },
+      {
+        "file": "frontend/src/lib/api/mock.ts",
+        "line": 77,
+        "match": "let proactivityState = buildProactivityState(\"proaktiv\");"
+      },
+      {
+        "file": "frontend/src/lib/api/mock.ts",
+        "line": 86,
+        "match": "ctx.autonomyLevel = proactivityState.effective;"
+      },
+      {
+        "file": "frontend/src/lib/api/mock.ts",
+        "line": 133,
+        "match": "if (url.endsWith(\"/api/proactivity/state\") && method === \"GET\") {"
+      },
+      {
+        "file": "frontend/src/lib/api/mock.ts",
+        "line": 135,
+        "match": "return new Response(JSON.stringify(proactivityState), {"
+      },
+      {
+        "file": "frontend/src/lib/api/mock.ts",
+        "line": 141,
+        "match": "if (url.endsWith(\"/api/proactivity/state\") && method === \"POST\") {"
+      },
+      {
+        "file": "frontend/src/lib/api/mock.ts",
+        "line": 147,
+        "match": "proactivityState = buildProactivityState(requested, { approved: payload.approved, reason: payload.reason });"
+      },
+      {
+        "file": "frontend/src/lib/api/mock.ts",
+        "line": 150,
+        "match": "ctx.autonomyLevel = proactivityState.effective;"
+      },
+      {
+        "file": "frontend/src/lib/api/mock.ts",
+        "line": 152,
+        "match": "return new Response(JSON.stringify(proactivityState), {"
+      },
+      {
+        "file": "frontend/src/proactivity/ApprovalPanel.tsx",
+        "line": 2,
+        "match": "import type { ModeMeta, ProactivityModeKey } from \"./useProactivity\";"
+      },
+      {
+        "file": "frontend/src/proactivity/ApprovalPanel.tsx",
+        "line": 5,
+        "match": "mode: ProactivityModeKey;"
+      },
+      {
+        "file": "frontend/src/proactivity/ApprovalPanel.tsx",
+        "line": 23,
+        "match": "<div className=\"proactivity-approval\" role=\"dialog\" aria-modal=\"true\">"
+      },
+      {
+        "file": "frontend/src/proactivity/ApprovalPanel.tsx",
+        "line": 24,
+        "match": "<div className=\"proactivity-approval__card cardbg\">"
+      },
+      {
+        "file": "frontend/src/proactivity/ApprovalPanel.tsx",
+        "line": 30,
+        "match": "<div className=\"proactivity-approval__guard\" role=\"alert\">"
+      },
+      {
+        "file": "frontend/src/proactivity/ApprovalPanel.tsx",
+        "line": 37,
+        "match": "<label className=\"proactivity-approval__label\">"
+      },
+      {
+        "file": "frontend/src/proactivity/ApprovalPanel.tsx",
+        "line": 47,
+        "match": "<label className=\"proactivity-approval__checkbox\">"
+      },
+      {
+        "file": "frontend/src/proactivity/ApprovalPanel.tsx",
+        "line": 55,
+        "match": "<div className=\"proactivity-approval__actions\">"
+      },
+      {
+        "file": "frontend/src/proactivity/ModeSwitcher.tsx",
+        "line": 3,
+        "match": "import { MODE_META, PROACTIVITY_ORDER, type ProactivityModeKey, useProactivity } from \"./useProactivity\";"
+      },
+      {
+        "file": "frontend/src/proactivity/ModeSwitcher.tsx",
+        "line": 4,
+        "match": "import \"./proactivity.css\";"
+      },
+      {
+        "file": "frontend/src/proactivity/ModeSwitcher.tsx",
+        "line": 7,
+        "match": "const { state, mode, effectiveMode, setMode, loading, lastGuard, error } = useProactivity();"
+      },
+      {
+        "file": "frontend/src/proactivity/ModeSwitcher.tsx",
+        "line": 8,
+        "match": "const [pending, setPending] = useState<ProactivityModeKey | null>(null);"
+      },
+      {
+        "file": "frontend/src/proactivity/ModeSwitcher.tsx",
+        "line": 11,
+        "match": "const handleSelect = (next: ProactivityModeKey) => {"
+      },
+      {
+        "file": "frontend/src/proactivity/ModeSwitcher.tsx",
+        "line": 30,
+        "match": "<div className=\"proactivity-switcher\" data-testid=\"proactivity-switcher\">"
+      },
+      {
+        "file": "frontend/src/proactivity/ModeSwitcher.tsx",
+        "line": 31,
+        "match": "<div className=\"proactivity-switcher__buttons\" role=\"group\" aria-label=\"Proactivity mode\">"
+      },
+      {
+        "file": "frontend/src/proactivity/ModeSwitcher.tsx",
+        "line": 32,
+        "match": "{PROACTIVITY_ORDER.map((key) => {"
+      },
+      {
+        "file": "frontend/src/proactivity/ModeSwitcher.tsx",
+        "line": 40,
+        "match": "className=\"chip proactivity-switcher__button\""
+      },
+      {
+        "file": "frontend/src/proactivity/ModeSwitcher.tsx",
+        "line": 50,
+        "match": "<div className=\"proactivity-switcher__status\" aria-live=\"polite\">"
+      },
+      {
+        "file": "frontend/src/proactivity/ModeSwitcher.tsx",
+        "line": 51,
+        "match": "{loading ? \"Updating proactivity…\" : null}"
+      },
+      {
+        "file": "frontend/src/proactivity/ModeSwitcher.tsx",
+        "line": 52,
+        "match": "{!loading && guard ? <span className=\"chip proactivity-switcher__guard\">{guard}</span> : null}"
+      },
+      {
+        "file": "frontend/src/proactivity/ModeSwitcher.tsx",
+        "line": 54,
+        "match": "<span className=\"chip proactivity-switcher__guard\">Mode: {MODE_META[effectiveMode].badge}</span>"
+      },
+      {
+        "file": "frontend/src/proactivity/proactivity.css",
+        "line": 1,
+        "match": ".proactivity-switcher {"
+      },
+      {
+        "file": "frontend/src/proactivity/proactivity.css",
+        "line": 6,
+        "match": ".proactivity-switcher__buttons {"
+      },
+      {
+        "file": "frontend/src/proactivity/proactivity.css",
+        "line": 12,
+        "match": ".proactivity-switcher__button[data-effective=\"true\"] {"
+      },
+      {
+        "file": "frontend/src/proactivity/proactivity.css",
+        "line": 16,
+        "match": ".proactivity-switcher__status {"
+      },
+      {
+        "file": "frontend/src/proactivity/proactivity.css",
+        "line": 24,
+        "match": ".proactivity-switcher__guard {"
+      },
+      {
+        "file": "frontend/src/proactivity/proactivity.css",
+        "line": 28,
+        "match": ".proactivity-approval {"
+      },
+      {
+        "file": "frontend/src/proactivity/proactivity.css",
+        "line": 37,
+        "match": ".proactivity-approval__card {"
+      },
+      {
+        "file": "frontend/src/proactivity/proactivity.css",
+        "line": 45,
+        "match": ".proactivity-approval__guard {"
+      },
+      {
+        "file": "frontend/src/proactivity/proactivity.css",
+        "line": 53,
+        "match": ".proactivity-approval__label {"
+      },
+      {
+        "file": "frontend/src/proactivity/proactivity.css",
+        "line": 59,
+        "match": ".proactivity-approval__label textarea {"
+      },
+      {
+        "file": "frontend/src/proactivity/proactivity.css",
+        "line": 68,
+        "match": ".proactivity-approval__checkbox {"
+      },
+      {
+        "file": "frontend/src/proactivity/proactivity.css",
+        "line": 75,
+        "match": ".proactivity-approval__actions {"
+      },
+      {
+        "file": "frontend/src/proactivity/useProactivity.test.ts",
+        "line": 4,
+        "match": "import { useProactivity, type UseProactivityReturn } from \"./useProactivity\";"
+      },
+      {
+        "file": "frontend/src/proactivity/useProactivity.test.ts",
+        "line": 6,
+        "match": "describe(\"useProactivity\", () => {"
+      },
+      {
+        "file": "frontend/src/proactivity/useProactivity.test.ts",
+        "line": 15,
+        "match": "degradeRail: [\"tsunami\", \"kraken\", \"ambisiøs\", \"proaktiv\", \"rolig\", \"usynlig\"],"
+      },
+      {
+        "file": "frontend/src/proactivity/useProactivity.test.ts",
+        "line": 15,
+        "match": "degradeRail: [\"tsunami\", \"kraken\", \"ambisiøs\", \"proaktiv\", \"rolig\", \"usynlig\"],"
+      },
+      {
+        "file": "frontend/src/proactivity/useProactivity.test.ts",
+        "line": 15,
+        "match": "degradeRail: [\"tsunami\", \"kraken\", \"ambisiøs\", \"proaktiv\", \"rolig\", \"usynlig\"],"
+      },
+      {
+        "file": "frontend/src/proactivity/useProactivity.test.ts",
+        "line": 15,
+        "match": "degradeRail: [\"tsunami\", \"kraken\", \"ambisiøs\", \"proaktiv\", \"rolig\", \"usynlig\"],"
+      },
+      {
+        "file": "frontend/src/proactivity/useProactivity.test.ts",
+        "line": 15,
+        "match": "degradeRail: [\"tsunami\", \"kraken\", \"ambisiøs\", \"proaktiv\", \"rolig\", \"usynlig\"],"
+      },
+      {
+        "file": "frontend/src/proactivity/useProactivity.test.ts",
+        "line": 35,
+        "match": "if (url.endsWith(\"/api/proactivity/state\") && method === \"GET\") {"
+      },
+      {
+        "file": "frontend/src/proactivity/useProactivity.test.ts",
+        "line": 41,
+        "match": "if (url.endsWith(\"/api/proactivity/state\") && method === \"POST\") {"
+      },
+      {
+        "file": "frontend/src/proactivity/useProactivity.test.ts",
+        "line": 50,
+        "match": "requested: requestedKey === \"kraken\" ? 5 : requestedKey === \"ambisiøs\" ? 4 : 3,"
+      },
+      {
+        "file": "frontend/src/proactivity/useProactivity.test.ts",
+        "line": 50,
+        "match": "requested: requestedKey === \"kraken\" ? 5 : requestedKey === \"ambisiøs\" ? 4 : 3,"
+      },
+      {
+        "file": "frontend/src/proactivity/useProactivity.test.ts",
+        "line": 52,
+        "match": "effective: effectiveKey === \"kraken\" ? 5 : effectiveKey === \"ambisiøs\" ? 4 : 3,"
+      },
+      {
+        "file": "frontend/src/proactivity/useProactivity.test.ts",
+        "line": 52,
+        "match": "effective: effectiveKey === \"kraken\" ? 5 : effectiveKey === \"ambisiøs\" ? 4 : 3,"
+      },
+      {
+        "file": "frontend/src/proactivity/useProactivity.test.ts",
+        "line": 68,
+        "match": "function Harness({ onChange }: { onChange: (value: UseProactivityReturn) => void }) {"
+      },
+      {
+        "file": "frontend/src/proactivity/useProactivity.test.ts",
+        "line": 69,
+        "match": "const proactivity = useProactivity();"
+      },
+      {
+        "file": "frontend/src/proactivity/useProactivity.test.ts",
+        "line": 71,
+        "match": "onChange(proactivity);"
+      },
+      {
+        "file": "frontend/src/proactivity/useProactivity.test.ts",
+        "line": 72,
+        "match": "}, [proactivity, onChange]);"
+      },
+      {
+        "file": "frontend/src/proactivity/useProactivity.test.ts",
+        "line": 77,
+        "match": "let latest: UseProactivityReturn | null = null;"
+      },
+      {
+        "file": "frontend/src/proactivity/useProactivity.test.ts",
+        "line": 78,
+        "match": "const handleChange = (value: UseProactivityReturn) => {"
+      },
+      {
+        "file": "frontend/src/proactivity/useProactivity.test.ts",
+        "line": 87,
+        "match": "await latest!.setMode(\"kraken\");"
+      },
+      {
+        "file": "frontend/src/proactivity/useProactivity.test.ts",
+        "line": 92,
+        "match": "await latest!.setMode(\"kraken\", { approved: true, reason: \"pilot\" });"
+      },
+      {
+        "file": "frontend/src/proactivity/useProactivity.test.ts",
+        "line": 94,
+        "match": "expect(latest?.state?.effectiveKey).toBe(\"kraken\");"
+      },
+      {
+        "file": "frontend/src/proactivity/useProactivity.ts",
+        "line": 3,
+        "match": "export type ProactivityModeKey = \"usynlig\" | \"rolig\" | \"proaktiv\" | \"ambisiøs\" | \"kraken\" | \"tsunami\";"
+      },
+      {
+        "file": "frontend/src/proactivity/useProactivity.ts",
+        "line": 3,
+        "match": "export type ProactivityModeKey = \"usynlig\" | \"rolig\" | \"proaktiv\" | \"ambisiøs\" | \"kraken\" | \"tsunami\";"
+      },
+      {
+        "file": "frontend/src/proactivity/useProactivity.ts",
+        "line": 3,
+        "match": "export type ProactivityModeKey = \"usynlig\" | \"rolig\" | \"proaktiv\" | \"ambisiøs\" | \"kraken\" | \"tsunami\";"
+      },
+      {
+        "file": "frontend/src/proactivity/useProactivity.ts",
+        "line": 3,
+        "match": "export type ProactivityModeKey = \"usynlig\" | \"rolig\" | \"proaktiv\" | \"ambisiøs\" | \"kraken\" | \"tsunami\";"
+      },
+      {
+        "file": "frontend/src/proactivity/useProactivity.ts",
+        "line": 3,
+        "match": "export type ProactivityModeKey = \"usynlig\" | \"rolig\" | \"proaktiv\" | \"ambisiøs\" | \"kraken\" | \"tsunami\";"
+      },
+      {
+        "file": "frontend/src/proactivity/useProactivity.ts",
+        "line": 3,
+        "match": "export type ProactivityModeKey = \"usynlig\" | \"rolig\" | \"proaktiv\" | \"ambisiøs\" | \"kraken\" | \"tsunami\";"
+      },
+      {
+        "file": "frontend/src/proactivity/useProactivity.ts",
+        "line": 5,
+        "match": "export const PROACTIVITY_ORDER: ProactivityModeKey[] = ["
+      },
+      {
+        "file": "frontend/src/proactivity/useProactivity.ts",
+        "line": 6,
+        "match": "\"usynlig\","
+      },
+      {
+        "file": "frontend/src/proactivity/useProactivity.ts",
+        "line": 7,
+        "match": "\"rolig\","
+      },
+      {
+        "file": "frontend/src/proactivity/useProactivity.ts",
+        "line": 9,
+        "match": "\"ambisiøs\","
+      },
+      {
+        "file": "frontend/src/proactivity/useProactivity.ts",
+        "line": 10,
+        "match": "\"kraken\","
+      },
+      {
+        "file": "frontend/src/proactivity/useProactivity.ts",
+        "line": 11,
+        "match": "\"tsunami\","
+      },
+      {
+        "file": "frontend/src/proactivity/useProactivity.ts",
+        "line": 14,
+        "match": "export type ProactivityState = {"
+      },
+      {
+        "file": "frontend/src/proactivity/useProactivity.ts",
+        "line": 17,
+        "match": "requestedKey: ProactivityModeKey;"
+      },
+      {
+        "file": "frontend/src/proactivity/useProactivity.ts",
+        "line": 19,
+        "match": "effectiveKey: ProactivityModeKey;"
+      },
+      {
+        "file": "frontend/src/proactivity/useProactivity.ts",
+        "line": 22,
+        "match": "degradeRail?: ProactivityModeKey[];"
+      },
+      {
+        "file": "frontend/src/proactivity/useProactivity.ts",
+        "line": 36,
+        "match": "key: ProactivityModeKey;"
+      },
+      {
+        "file": "frontend/src/proactivity/useProactivity.ts",
+        "line": 40,
+        "match": "reviewType: ProactivityState[\"uiHints\"] extends infer H"
+      },
+      {
+        "file": "frontend/src/proactivity/useProactivity.ts",
+        "line": 43,
+        "match": ": ProactivityState[\"uiHints\"][\"reviewType\"]"
+      },
+      {
+        "file": "frontend/src/proactivity/useProactivity.ts",
+        "line": 44,
+        "match": ": ProactivityState[\"uiHints\"][\"reviewType\"];"
+      },
+      {
+        "file": "frontend/src/proactivity/useProactivity.ts",
+        "line": 48,
+        "match": "export const MODE_META: Record<ProactivityModeKey, ModeMeta> = {"
+      },
+      {
+        "file": "frontend/src/proactivity/useProactivity.ts",
+        "line": 49,
+        "match": "usynlig: {"
+      },
+      {
+        "file": "frontend/src/proactivity/useProactivity.ts",
+        "line": 50,
+        "match": "key: \"usynlig\","
+      },
+      {
+        "file": "frontend/src/proactivity/useProactivity.ts",
+        "line": 51,
+        "match": "label: \"Usynlig\","
+      },
+      {
+        "file": "frontend/src/proactivity/useProactivity.ts",
+        "line": 57,
+        "match": "rolig: {"
+      },
+      {
+        "file": "frontend/src/proactivity/useProactivity.ts",
+        "line": 58,
+        "match": "key: \"rolig\","
+      },
+      {
+        "file": "frontend/src/proactivity/useProactivity.ts",
+        "line": 59,
+        "match": "label: \"Rolig\","
+      },
+      {
+        "file": "frontend/src/proactivity/useProactivity.ts",
+        "line": 71,
+        "match": "badge: \"Assistive\","
+      },
+      {
+        "file": "frontend/src/proactivity/useProactivity.ts",
+        "line": 73,
+        "match": "ambisiøs: {"
+      },
+      {
+        "file": "frontend/src/proactivity/useProactivity.ts",
+        "line": 74,
+        "match": "key: \"ambisiøs\","
+      },
+      {
+        "file": "frontend/src/proactivity/useProactivity.ts",
+        "line": 75,
+        "match": "label: \"Ambisiøs\","
+      },
+      {
+        "file": "frontend/src/proactivity/useProactivity.ts",
+        "line": 81,
+        "match": "kraken: {"
+      },
+      {
+        "file": "frontend/src/proactivity/useProactivity.ts",
+        "line": 82,
+        "match": "key: \"kraken\","
+      },
+      {
+        "file": "frontend/src/proactivity/useProactivity.ts",
+        "line": 83,
+        "match": "label: \"Kraken\","
+      },
+      {
+        "file": "frontend/src/proactivity/useProactivity.ts",
+        "line": 89,
+        "match": "tsunami: {"
+      },
+      {
+        "file": "frontend/src/proactivity/useProactivity.ts",
+        "line": 90,
+        "match": "key: \"tsunami\","
+      },
+      {
+        "file": "frontend/src/proactivity/useProactivity.ts",
+        "line": 91,
+        "match": "label: \"Tsunami\","
+      },
+      {
+        "file": "frontend/src/proactivity/useProactivity.ts",
+        "line": 99,
+        "match": "export type UseProactivityReturn = {"
+      },
+      {
+        "file": "frontend/src/proactivity/useProactivity.ts",
+        "line": 100,
+        "match": "state: ProactivityState | null;"
+      },
+      {
+        "file": "frontend/src/proactivity/useProactivity.ts",
+        "line": 103,
+        "match": "mode: ProactivityModeKey;"
+      },
+      {
+        "file": "frontend/src/proactivity/useProactivity.ts",
+        "line": 104,
+        "match": "effectiveMode: ProactivityModeKey;"
+      },
+      {
+        "file": "frontend/src/proactivity/useProactivity.ts",
+        "line": 105,
+        "match": "setMode: (mode: ProactivityModeKey, opts?: { approved?: boolean; reason?: string }) => Promise<void>;"
+      },
+      {
+        "file": "frontend/src/proactivity/useProactivity.ts",
+        "line": 110,
+        "match": "let cachedState: ProactivityState | null = null;"
+      },
+      {
+        "file": "frontend/src/proactivity/useProactivity.ts",
+        "line": 113,
+        "match": "async function fetchState(method: \"GET\" | \"POST\", body?: unknown): Promise<ProactivityState> {"
+      },
+      {
+        "file": "frontend/src/proactivity/useProactivity.ts",
+        "line": 119,
+        "match": "const res = await fetch(\"/api/proactivity/state\", init);"
+      },
+      {
+        "file": "frontend/src/proactivity/useProactivity.ts",
+        "line": 122,
+        "match": "throw new Error(`proactivity ${method} ${res.status}: ${text}`);"
+      },
+      {
+        "file": "frontend/src/proactivity/useProactivity.ts",
+        "line": 124,
+        "match": "const json = (await res.json()) as ProactivityState;"
+      },
+      {
+        "file": "frontend/src/proactivity/useProactivity.ts",
+        "line": 129,
+        "match": "function emitTelemetry(mode: ProactivityModeKey, payload: { approved?: boolean; reason?: string }) {"
+      },
+      {
+        "file": "frontend/src/proactivity/useProactivity.ts",
+        "line": 132,
+        "match": "globalLogger.track(\"proactivity_mode_change\", { mode, ...payload });"
+      },
+      {
+        "file": "frontend/src/proactivity/useProactivity.ts",
+        "line": 134,
+        "match": "console.info(\"[telemetry] proactivity_mode_change\", { mode, ...payload });"
+      },
+      {
+        "file": "frontend/src/proactivity/useProactivity.ts",
+        "line": 138,
+        "match": "function deriveGuard(state: ProactivityState | null): string | null {"
+      },
+      {
+        "file": "frontend/src/proactivity/useProactivity.ts",
+        "line": 147,
+        "match": "export function useProactivity(): UseProactivityReturn {"
+      },
+      {
+        "file": "frontend/src/proactivity/useProactivity.ts",
+        "line": 148,
+        "match": "const [state, setState] = useState<ProactivityState | null>(() => cachedState);"
+      },
+      {
+        "file": "frontend/src/proactivity/useProactivity.ts",
+        "line": 180,
+        "match": "async (mode: ProactivityModeKey, opts: { approved?: boolean; reason?: string } = {}) => {"
+      },
+      {
+        "file": "frontend/src/roles/rolePresentation.ts",
+        "line": 51,
+        "match": "policyChips: [\"All changes logged\", \"Requires approval for kraken mode\"],"
+      },
+      {
+        "file": "frontend/src/roles/rolePresentation.ts",
+        "line": 65,
+        "match": "policyChips: [\"Automation limited to read-only\", \"Requires advisory review for kraken\"],"
+      },
+      {
+        "file": "frontend/src/roles/rolePresentation.ts",
+        "line": 65,
+        "match": "policyChips: [\"Automation limited to read-only\", \"Requires advisory review for kraken\"],"
+      },
+      {
+        "file": "frontend/src/roles/rolePresentation.ts",
+        "line": 79,
+        "match": "policyChips: [\"Hands-off automation\", \"Proactivity limited to suggestions\"],"
+      },
+      {
+        "file": "frontend/src/roles/rolePresentation.ts",
+        "line": 93,
+        "match": "policyChips: [\"Code merges require CLI\", \"Kraken blocked for engineering\"],"
       },
       {
         "file": "grafana/dashboards/proactivity.json",
@@ -4955,6 +6621,46 @@
         "match": "PROACTIVITY: [],"
       },
       {
+        "file": "tools/analyze-workbuoy.mjs",
+        "line": 414,
+        "match": "{ key: 'PROACTIVITY', label: 'Proactivity', note: 'Mode definitions and UI keep proactivity controls available.' },"
+      },
+      {
+        "file": "tools/analyze-workbuoy.mjs",
+        "line": 427,
+        "match": "PROACTIVITY: ['src/core/proactivity/modes.ts', 'frontend/src/proactivity/useProactivity.ts', 'frontend/src/proactivity/ModeSwitcher.tsx'],"
+      },
+      {
+        "file": "tools/analyze-workbuoy.mjs",
+        "line": 429,
+        "match": "INFRA: ['deploy/helm/workbuoy/templates/deployment.yaml', 'observability/metrics/meta.ts', 'grafana/dashboards/proactivity.json'],"
+      },
+      {
+        "file": "tools/analyze-workbuoy.mjs",
+        "line": 479,
+        "match": "lines.push('## Proactivity UI');"
+      },
+      {
+        "file": "tools/analyze-workbuoy.mjs",
+        "line": 481,
+        "match": "lines.push('- `frontend/src/proactivity/useProactivity.ts` syncs requested vs. effective modes, degrade rails, and telemetry calls.');"
+      },
+      {
+        "file": "tools/analyze-workbuoy.mjs",
+        "line": 482,
+        "match": "lines.push('- `frontend/src/proactivity/ModeSwitcher.tsx` renders the multi-mode selector with pending, approval, and error states.');"
+      },
+      {
+        "file": "tools/analyze-workbuoy.mjs",
+        "line": 483,
+        "match": "lines.push('- `frontend/src/proactivity/ApprovalPanel.tsx` surfaces manual approval UI so operators can gate proactivity changes.');"
+      },
+      {
+        "file": "tools/analyze-workbuoy.mjs",
+        "line": 504,
+        "match": "lines.push('- `grafana/dashboards/proactivity.json` visualises proactivity adoption and degrade rails for operators.');"
+      },
+      {
         "file": "tsconfig.proactivity.json",
         "line": 8,
         "match": "\"src/core/proactivity/modes.ts\","
@@ -5487,6 +7193,51 @@
         "match": "/** Multi-tenant RBAC enforcement */"
       },
       {
+        "file": "frontend/src/roles/rolePresentation.ts",
+        "line": 1,
+        "match": "export type RolePresentation = {"
+      },
+      {
+        "file": "frontend/src/roles/rolePresentation.ts",
+        "line": 12,
+        "match": "const ROLE_LIBRARY: Record<string, RolePresentation> = {"
+      },
+      {
+        "file": "frontend/src/roles/rolePresentation.ts",
+        "line": 103,
+        "match": "const DEFAULT_PRESENTATION: RolePresentation = {"
+      },
+      {
+        "file": "frontend/src/roles/rolePresentation.ts",
+        "line": 117,
+        "match": "export function resolveRolePresentation(roleId: string): RolePresentation {"
+      },
+      {
+        "file": "frontend/src/roles/useCurrentRole.ts",
+        "line": 3,
+        "match": "type RoleEventDetail = {"
+      },
+      {
+        "file": "frontend/src/roles/useCurrentRole.ts",
+        "line": 9,
+        "match": "function readRole(): RoleEventDetail {"
+      },
+      {
+        "file": "frontend/src/roles/useCurrentRole.ts",
+        "line": 21,
+        "match": "const [state, setState] = useState<RoleEventDetail>(() => readRole());"
+      },
+      {
+        "file": "frontend/src/roles/useCurrentRole.ts",
+        "line": 25,
+        "match": "const custom = event as CustomEvent<RoleEventDetail>;"
+      },
+      {
+        "file": "frontend/src/roles/useCurrentRole.ts",
+        "line": 41,
+        "match": "export type { RoleEventDetail as RoleInfo };"
+      },
+      {
         "file": "ops/dashboards/workbuoy.json",
         "line": 11,
         "match": "\"title\": \"RBAC & Security\""
@@ -5824,6 +7575,21 @@
         "match": "- Governance: `.github/CODEOWNERS`, `SECURITY.md`, `CONTRIBUTING.md`"
       },
       {
+        "file": "WORKBUOY_AUDIT.md",
+        "line": 9,
+        "match": "| Secure | ✅ Present | Security modules and policy guards keep governance and approvals in place. Key files: `.github/workflows/policy-meta-rails.yml`, `META_ROUTE_README.md`, `META_ROUTE_RUNBOOK.md`. |"
+      },
+      {
+        "file": "WORKBUOY_AUDIT.md",
+        "line": 9,
+        "match": "| Secure | ✅ Present | Security modules and policy guards keep governance and approvals in place. Key files: `.github/workflows/policy-meta-rails.yml`, `META_ROUTE_README.md`, `META_ROUTE_RUNBOOK.md`. |"
+      },
+      {
+        "file": "WORKBUOY_AUDIT.md",
+        "line": 14,
+        "match": "| META | ✅ Present | META routers, genesis flows, and guard specs stay enforced. Key files: `.github/workflows/meta-pr1-ci.yml`, `.github/workflows/meta-pr2-ci.yml`, `.github/workflows/policy-meta-rails.yml`. |"
+      },
+      {
         "file": "backend/src/meta-evolution/genesis/need-analyzer.ts",
         "line": 38,
         "match": "area: 'governance',"
@@ -5847,6 +7613,11 @@
         "file": "backend/tests/genesis.autonomy.test.ts",
         "line": 42,
         "match": "error: 'approval_required',"
+      },
+      {
+        "file": "ci/policy-meta-rails.sh",
+        "line": 9,
+        "match": "echo \"No META route files found; skipping check.\""
       },
       {
         "file": "core/roles/roles.json",
@@ -6274,6 +8045,16 @@
         "match": "- [ ] CRM API (GET/POST/DELETE) in-memory with policy guard"
       },
       {
+        "file": "docs/proactivity-ui.md",
+        "line": 12,
+        "match": "| `kraken` | Kraken | Executes automations under guardrails | Yes |"
+      },
+      {
+        "file": "docs/proactivity-ui.md",
+        "line": 12,
+        "match": "| `kraken` | Kraken | Executes automations under guardrails | Yes |"
+      },
+      {
         "file": "docs/proactivity.md",
         "line": 11,
         "match": "| 5     | `kraken`  | Execute under policy guardrails                   | Call `impl.execute()`                          | Stream execution log |"
@@ -6302,6 +8083,26 @@
         "file": "docs/proactivity.md",
         "line": 32,
         "match": "`policyCheckRoleAware` now evaluates policy with the *effective* proactivity mode. Role feature caps still apply: the registry resolves feature autonomy caps, and the cap is injected into the resolution pipeline. Policy guardrails can provi"
+      },
+      {
+        "file": "docs/role-aware-buoy.md",
+        "line": 16,
+        "match": "policyChips: ['Requires approval before auto-execute', 'Surfaces revenue guardrails'],"
+      },
+      {
+        "file": "docs/role-aware-buoy.md",
+        "line": 16,
+        "match": "policyChips: ['Requires approval before auto-execute', 'Surfaces revenue guardrails'],"
+      },
+      {
+        "file": "docs/role-aware-buoy.md",
+        "line": 27,
+        "match": "- Renders policy chips as read-only badges (no secrets—these are public guardrail hints)."
+      },
+      {
+        "file": "docs/role-aware-buoy.md",
+        "line": 27,
+        "match": "- Renders policy chips as read-only badges (no secrets—these are public guardrail hints)."
       },
       {
         "file": "enterprise/PR_SUMMARY.md",
@@ -6764,6 +8565,61 @@
         "match": "<p>Enterprise-grade sikkerhet, compliance og governance for trygg AI i organisasjonen.</p>"
       },
       {
+        "file": "frontend/e2e/meta-rails.spec.ts",
+        "line": 9,
+        "match": "expect(body.error).toBe('approval_required');"
+      },
+      {
+        "file": "frontend/src/lib/api/mock.ts",
+        "line": 20,
+        "match": "kraken: { id: 5, banner: \"Executing with guardrails\", reviewType: \"execution\", requiresApproval: true },"
+      },
+      {
+        "file": "frontend/src/lib/api/mock.ts",
+        "line": 20,
+        "match": "kraken: { id: 5, banner: \"Executing with guardrails\", reviewType: \"execution\", requiresApproval: true },"
+      },
+      {
+        "file": "frontend/src/lib/api/mock.ts",
+        "line": 187,
+        "match": "error: \"approval_required\","
+      },
+      {
+        "file": "frontend/src/proactivity/useProactivity.ts",
+        "line": 84,
+        "match": "description: \"Executes automations under guardrails; health checks required.\","
+      },
+      {
+        "file": "frontend/src/proactivity/useProactivity.ts",
+        "line": 84,
+        "match": "description: \"Executes automations under guardrails; health checks required.\","
+      },
+      {
+        "file": "frontend/src/roles/rolePresentation.ts",
+        "line": 23,
+        "match": "policyChips: [\"Requires approval before auto-execute\", \"Surfaces revenue guardrails\"],"
+      },
+      {
+        "file": "frontend/src/roles/rolePresentation.ts",
+        "line": 23,
+        "match": "policyChips: [\"Requires approval before auto-execute\", \"Surfaces revenue guardrails\"],"
+      },
+      {
+        "file": "frontend/src/roles/rolePresentation.ts",
+        "line": 35,
+        "match": "tagline: \"Buoy AI spotlights the next best touch so you can close faster without missing policy checks.\","
+      },
+      {
+        "file": "frontend/src/roles/rolePresentation.ts",
+        "line": 112,
+        "match": "{ type: \"note\", id: \"note-guard\", label: \"Guardrails\" },"
+      },
+      {
+        "file": "frontend/src/roles/rolePresentation.ts",
+        "line": 112,
+        "match": "{ type: \"note\", id: \"note-guard\", label: \"Guardrails\" },"
+      },
+      {
         "file": "roles/roles.json",
         "line": 312,
         "match": "\"core_tasks\": [\"Definere KPI-tre\", \"Styremøter for GTM\", \"Allokere verktøybudsjett\", \"Lede endringsprogrammer\", \"Rapportere helhetlig vekst\", \"Koordinere data governance\"],"
@@ -7219,6 +9075,11 @@
         "match": "describe(\"CRM policy enforcement\", () => {"
       },
       {
+        "file": "tests/meta/meta-rails.test.ts",
+        "line": 11,
+        "match": "expect(res.body).toEqual(expect.objectContaining({ error: 'approval_required' }));"
+      },
+      {
         "file": "tests/meta/policy.test.ts",
         "line": 35,
         "match": "it('returns snapshot data from policy engine and metrics store', async () => {"
@@ -7250,17 +9111,42 @@
       },
       {
         "file": "tools/analyze-workbuoy.mjs",
-        "line": 579,
+        "line": 410,
+        "match": "{ key: 'SECURE', label: 'Secure', note: 'Security modules and policy guards keep governance and approvals in place.' },"
+      },
+      {
+        "file": "tools/analyze-workbuoy.mjs",
+        "line": 410,
+        "match": "{ key: 'SECURE', label: 'Secure', note: 'Security modules and policy guards keep governance and approvals in place.' },"
+      },
+      {
+        "file": "tools/analyze-workbuoy.mjs",
+        "line": 415,
+        "match": "{ key: 'META', label: 'META', note: 'META routers, genesis flows, and guard specs stay enforced.' },"
+      },
+      {
+        "file": "tools/analyze-workbuoy.mjs",
+        "line": 522,
+        "match": "const reason = violation.reason || 'Approval gate signal missing.';"
+      },
+      {
+        "file": "tools/analyze-workbuoy.mjs",
+        "line": 523,
+        "match": "checklist.push(`- [ ] Reaffirm the .evolution/APPROVED approval gate in code or docs: ${reason}`);"
+      },
+      {
+        "file": "tools/analyze-workbuoy.mjs",
+        "line": 723,
         "match": "violations.missing_approval_gate.push({ file: null, reason: 'No approval gate references detected (.evolution/APPROVED, approval_required, or evolution gatekeeper).' });"
       },
       {
         "file": "tools/analyze-workbuoy.mjs",
-        "line": 579,
+        "line": 723,
         "match": "violations.missing_approval_gate.push({ file: null, reason: 'No approval gate references detected (.evolution/APPROVED, approval_required, or evolution gatekeeper).' });"
       },
       {
         "file": "tools/analyze-workbuoy.mjs",
-        "line": 579,
+        "line": 723,
         "match": "violations.missing_approval_gate.push({ file: null, reason: 'No approval gate references detected (.evolution/APPROVED, approval_required, or evolution gatekeeper).' });"
       }
     ],
@@ -7270,6 +9156,26 @@
           "file": "README_BUOY_2.4.4.md",
           "line": 1,
           "match": "# Buoy AI OS v2.4.4 — Placement + MVP Endpoint"
+        },
+        {
+          "file": "WORKBUOY_AUDIT.md",
+          "line": 11,
+          "match": "| Buoy AI | ✅ Present | Single-assistant orchestration and chat UX live in buoy source modules. Key files: `.github/workflows/meta-pr1-ci.yml`, `.github/workflows/meta-pr2-ci.yml`, `.github/workflows/policy-meta-rails.yml`. |"
+        },
+        {
+          "file": "WORKBUOY_AUDIT.md",
+          "line": 18,
+          "match": "## Buoy AI (one assistant)"
+        },
+        {
+          "file": "WORKBUOY_AUDIT.md",
+          "line": 20,
+          "match": "- `src/buoy/agent.ts` orchestrates the request context and plan/execute pipeline, returning a single assistant response each turn."
+        },
+        {
+          "file": "WORKBUOY_AUDIT.md",
+          "line": 21,
+          "match": "- `frontend/src/features/buoy/useBuoy.ts` maintains one Buoy AI thread for the chat surface, keeping the assistant singular."
         },
         {
           "file": "azure-pipelines.yml",
@@ -7300,6 +9206,81 @@
           "file": "docs/auto/release_playbook.md",
           "line": 14,
           "match": "- Buoy AI smoke test: ⛔"
+        },
+        {
+          "file": "docs/navi-flipcard.md",
+          "line": 4,
+          "match": "The FlipCard is the primary shell that pairs the Buoy AI surface (front) with Navi context (back)."
+        },
+        {
+          "file": "docs/role-aware-buoy.md",
+          "line": 15,
+          "match": "tagline: 'Buoy AI keeps pipeline risk in focus so you can coach the team before quarter close.',"
+        },
+        {
+          "file": "docs/role-aware-buoy.md",
+          "line": 26,
+          "match": "- Shows the role tone and tagline so the operator knows how Buoy AI will respond."
+        },
+        {
+          "file": "frontend/src/buoy/BuoyPanel.tsx",
+          "line": 68,
+          "match": "Anchor Buoy AI to this record"
+        },
+        {
+          "file": "frontend/src/proactivity/ApprovalPanel.tsx",
+          "line": 35,
+          "match": "Confirm that you understand Buoy AI will request manual approval before executing tasks in this mode."
+        },
+        {
+          "file": "frontend/src/proactivity/ApprovalPanel.tsx",
+          "line": 44,
+          "match": "placeholder=\"Describe the outcome Buoy AI should pursue\""
+        },
+        {
+          "file": "frontend/src/proactivity/ApprovalPanel.tsx",
+          "line": 53,
+          "match": "I approve Buoy AI operating in {meta.label} mode for this tenant."
+        },
+        {
+          "file": "frontend/src/roles/rolePresentation.test.ts",
+          "line": 15,
+          "match": "expect(presentation.tagline).toMatch(/Buoy AI/i);"
+        },
+        {
+          "file": "frontend/src/roles/rolePresentation.ts",
+          "line": 17,
+          "match": "tagline: \"Buoy AI keeps pipeline risk in focus so you can coach the team before quarter close.\","
+        },
+        {
+          "file": "frontend/src/roles/rolePresentation.ts",
+          "line": 35,
+          "match": "tagline: \"Buoy AI spotlights the next best touch so you can close faster without missing policy checks.\","
+        },
+        {
+          "file": "frontend/src/roles/rolePresentation.ts",
+          "line": 49,
+          "match": "tagline: \"Buoy AI highlights data integrity so the forecast stays defensible for leadership.\","
+        },
+        {
+          "file": "frontend/src/roles/rolePresentation.ts",
+          "line": 63,
+          "match": "tagline: \"Buoy AI routes the urgent queues and reminds you which policies apply to each customer tier.\","
+        },
+        {
+          "file": "frontend/src/roles/rolePresentation.ts",
+          "line": 77,
+          "match": "tagline: \"Buoy AI preps the trendlines and context, leaving you to interpret what matters most.\","
+        },
+        {
+          "file": "frontend/src/roles/rolePresentation.ts",
+          "line": 91,
+          "match": "tagline: \"Buoy AI emphasises feature flags, telemetry, and rollout risk so changes ship safely.\","
+        },
+        {
+          "file": "frontend/src/roles/rolePresentation.ts",
+          "line": 107,
+          "match": "tagline: \"Buoy AI keeps operations aligned with approvals, surfacing nudges without overstepping.\","
         },
         {
           "file": "src/buoy/agent.ts",
