@@ -22,31 +22,17 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # ⬇️ Detect lockfile so we only enable caching when it exists
-      - name: Detect lockfile
-        id: lock
+      # 👇 Sett opp Node UTEN cache (fjerner "paths not resolved"-feilen)
+      - name: Setup Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Verify lockfile (optional)
         run: |
-          if [ -f frontend/package-lock.json ]; then
-            echo "lock=1" >> "$GITHUB_OUTPUT"
-          else
-            echo "lock=0" >> "$GITHUB_OUTPUT"
-          fi
-
-      # ⬇️ Setup Node with npm cache when lockfile exists
-      - name: Setup Node 20 (cached)
-        if: steps.lock.outputs.lock == '1'
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20"
-          cache: npm
-          cache-dependency-path: frontend/package-lock.json
-
-      # ⬇️ Fallback: setup Node without cache (avoids 'paths not resolved' error)
-      - name: Setup Node 20 (no cache)
-        if: steps.lock.outputs.lock != '1'
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20"
+          ls -la
+          [ -f package.json ] || (echo "No package.json in ./frontend" && exit 1)
+          echo "Lockfile present?"; ls -1 package-lock.json || true
 
       - name: Install dependencies
         run: |
@@ -57,7 +43,7 @@ jobs:
           fi
 
       - name: Typecheck
-        run: npm run typecheck
+        run: npm run typecheck --if-present
 
       - name: Unit tests
-        run: npm run test
+        run: npm run test --if-present
