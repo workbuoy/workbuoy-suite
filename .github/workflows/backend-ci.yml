@@ -2,23 +2,47 @@ name: Backend CI (in-memory)
 
 on:
   push:
-    paths: ['backend/**', 'src/**', 'tests/**', '.github/workflows/backend-ci.yml']
+    paths:
+      - 'backend/**'
+      - 'src/**'
+      - 'backend/tests/**'
+      - '.github/workflows/backend-ci.yml'
   pull_request:
-    paths: ['backend/**', 'src/**', 'tests/**', '.github/workflows/backend-ci.yml']
+    paths:
+      - 'backend/**'
+      - 'src/**'
+      - 'backend/tests/**'
+      - '.github/workflows/backend-ci.yml'
 
 jobs:
   test:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node 20
+        uses: actions/setup-node@v4
         with:
           node-version: '20'
-      - run: npm ci
 
-      # In-memory smoke tests only (no DB required)
+      - name: Install backend deps
+        run: |
+          if [ -f package-lock.json ]; then
+            npm ci --omit=optional --no-audit --fund=false
+          else
+            npm install --no-audit --fund=false
+          fi
+
       - name: Run in-memory API smoke tests
         env:
           FF_PERSISTENCE: 'false'
         run: |
-          npm test --             tests/features/active.api.test.ts             tests/usage/usage.api.test.ts             --runInBand --passWithNoTests
+          npm test -- \
+            tests/features/active.api.test.ts \
+            tests/usage/usage.api.test.ts \
+            --runInBand --passWithNoTests
