@@ -48,15 +48,6 @@ export function UndoToast({
     return;
   }, [open, onClose]);
 
-  useEffect(() => {
-    if (!open) return;
-    const observer = new MutationObserver(() => {
-      containerRef.current?.setAttribute("aria-live", "assertive");
-    });
-    if (containerRef.current) observer.observe(containerRef.current, { childList: true, subtree: true });
-    return () => observer.disconnect();
-  }, [open]);
-
   if (!open) return null;
 
   const actionLabel =
@@ -91,7 +82,8 @@ export function UndoToast({
     <div
       ref={containerRef}
       role="status"
-      aria-live="assertive"
+      aria-live="polite"
+      aria-atomic="true"
       className="fixed inset-x-0 bottom-6 z-[100] flex justify-center px-4"
     >
       <div className="w-full max-w-md rounded-lg border border-slate-800 bg-slate-900/95 p-4 shadow-xl">

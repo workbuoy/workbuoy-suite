@@ -1,14 +1,31 @@
-:root { --bg:#0b0c10; --card:#111318; --ink:#e9eef2; --muted:#b3bcc6; --accent:#8ab4ff; --ok:#24a148; --warn:#f1c21b; --err:#da1e28; }
-*{box-sizing:border-box}
-html,body,#root{height:100%}
-body{margin:0;background:linear-gradient(180deg,#0b0c10 0%, #12141b 100%);color:var(--ink);font:14px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
-button,input{font:inherit}
-button{cursor:pointer}
-a{color:var(--accent)}
-:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
-.perspective{perspective:1200px}
-.flipcard{transform-style:preserve-3d; transition:transform 600ms cubic-bezier(.2,.8,.2,1)}
-@media (prefers-reduced-motion: reduce){ .flipcard{transition:none} }
-.flipface{backface-visibility:hidden; position:absolute; inset:0; border-radius:16px; overflow:hidden}
-.cardbg{background:radial-gradient(1200px 600px at 10% -10%, rgba(255,255,255,.06), transparent), var(--card); border:1px solid rgba(255,255,255,.07)}
-.chip{border:1px solid rgba(255,255,255,.12); padding:6px 10px; border-radius:999px; color:var(--muted)}
+body {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.45;
+  font-family: inherit;
+}
+
+a {
+  color: var(--focus-ring);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
