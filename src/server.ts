@@ -60,6 +60,8 @@ safeMount('/', './src/routes/genesis.autonomy', 'metaGenesisRouter');
 safeMount('/api', '../backend/routes/proactivity');
 safeMount('/api', '../backend/routes/admin.subscription');
 safeMount('/api', '../backend/routes/explainability');
+safeMount('/api', '../backend/routes/features');
+safeMount('/api', '../backend/routes/usage');
 
 app.use('/api', knowledgeRouter);
 app.use('/api/audit', auditRouter());
