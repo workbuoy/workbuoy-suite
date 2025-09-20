@@ -1,32 +1,19 @@
-# Patch PR: Fix double `/api` in routers + OpenAPI, export app safely, and add minimal tests
+# Patch PR: Fix backend-ci test split + OpenAPI lint sandbox issue
 
-This PR bundle helps you quickly fix the "double /api" issue and get CI green.
+This PR bundle fixes two issues blocking CI:
 
-## What this includes
-1) **Router path fix script** — removes hardcoded `/api` inside `backend/routes/features.ts` and `backend/routes/usage.ts`.
-2) **OpenAPI path fix script** — rewrites any `/api/api/` occurrences to `/api/` in your OpenAPI spec files.
-3) **Minimal API tests** — verify `/api/features/active` and `/api/usage/*` work.
-4) **Server export note** — ensure `src/server.ts` exports the Express app without calling `listen()` when imported (so Supertest can use it).
+1. **backend-ci**: In-memory tests should run with `FF_PERSISTENCE=false`, DB tests with `FF_PERSISTENCE=true`.  
+   - Updated workflow splits jobs.  
+   - Test files (`active.api.test.ts`, `usage.api.test.ts`) skip automatically if `FF_PERSISTENCE=true`.
 
-## How to apply
+2. **openapi-lint**: Puppeteer "No usable sandbox!" in GH Actions.  
+   - Added `PUPPETEER_ARGS=--no-sandbox` env var to workflow.
+
+## Apply
 ```bash
-git checkout -b fix/api-paths-and-spec
-node scripts/apply-router-path-fix.mjs
-node scripts/apply-openapi-path-fix.mjs
-
-# Run tests in in-memory mode (no Postgres needed)
-FF_PERSISTENCE=false npm test
-
-git add backend/routes/features.ts backend/routes/usage.ts scripts/*.mjs tests/features/active.api.test.ts tests/usage/usage.api.test.ts
-git commit -m "fix(api): remove double /api in routers; fix OpenAPI paths; add minimal endpoint tests"
-git push -u origin fix/api-paths-and-spec
-```
-If any test still fails, ensure `src/server.ts` **exports** the app without listening:
-```ts
-// At the bottom of src/server.ts
-export default app;
-if (process.env.NODE_ENV !== 'test' && require.main === module) {
-  const port = process.env.PORT || 3000;
-  app.listen(port, () => console.log(`Listening on ${port}`));
-}
+git checkout -b fix/ci-openapi
+# Unpack zip in repo root
+git add .github/workflows backend/tests/features/active.api.test.ts backend/tests/usage/usage.api.test.ts
+git commit -m "ci: split in-memory vs db tests; fix openapi lint sandbox"
+git push -u origin fix/ci-openapi
 ```

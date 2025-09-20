@@ -2,8 +2,10 @@ import request from 'supertest';
 process.env.FF_PERSISTENCE = process.env.FF_PERSISTENCE ?? 'false';
 import app from '../../src/server';
 
+const itMaybe = process.env.FF_PERSISTENCE === 'true' ? it.skip : it;
+
 describe('Usage router public paths', () => {
-  it('POST /api/usage/feature', async () => {
+  itMaybe('POST /api/usage/feature', async () => {
     const res = await request(app)
       .post('/api/usage/feature')
       .set('content-type', 'application/json')
@@ -12,7 +14,7 @@ describe('Usage router public paths', () => {
     expect([200, 204]).toContain(res.status);
   });
 
-  it('GET /api/usage/aggregate/:userId', async () => {
+  itMaybe('GET /api/usage/aggregate/:userId', async () => {
     const res = await request(app)
       .get('/api/usage/aggregate/u1')
       .set('x-tenant', 'DEV');
