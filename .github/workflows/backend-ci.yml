@@ -8,8 +8,20 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: workbuoy
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres" --health-interval 10s --health-timeout 5s --health-retries 5
     env:
       CI: "true"
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/workbuoy
     steps:
       - uses: actions/checkout@v4
 
@@ -26,6 +38,14 @@ jobs:
           npm config set audit false
           npm config get registry
 
+      - name: Install root dependencies
+        run: |
+          if [ -f package-lock.json ]; then
+            npm ci
+          else
+            npm install --no-fund --no-audit
+          fi
+
       - name: Install dependencies
         working-directory: backend
         run: |
@@ -35,6 +55,11 @@ jobs:
             npm install --no-fund --no-audit
           fi
 
-      - name: Run smoke tests (temporary)
-        working-directory: backend
-        run: npx jest --ci --config jest.ci.config.cjs
+      - name: Apply Prisma migrations
+        run: npx prisma migrate deploy
+
+      - name: Run tests (FF_PERSISTENCE=false)
+        run: FF_PERSISTENCE=false npm test
+
+      - name: Run tests (FF_PERSISTENCE=true)
+        run: FF_PERSISTENCE=true npm test

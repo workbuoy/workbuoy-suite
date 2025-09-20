@@ -2,8 +2,10 @@ import { Router } from 'express';
 import { getSubscriptionForTenant, getSubscriptionCap, setSubscriptionForTenant } from '../../src/core/subscription/state';
 import { isSubscriptionPlan } from '../../src/core/subscription/entitlements';
 import { parseProactivityMode } from '../../src/core/proactivity/modes';
+import { rbac } from '../../src/core/security/rbac';
 
 const router: any = Router();
+const requireAdmin = rbac(['admin']);
 
 function tenantFrom(req: any) {
   return String(req.header('x-tenant') || req.header('x-tenant-id') || req.query?.tenant || 'demo');
@@ -22,12 +24,12 @@ function serialize(tenantId: string) {
   };
 }
 
-router.get('/admin/subscription', (req: any, res: any) => {
+router.get('/admin/subscription', requireAdmin, (req: any, res: any) => {
   const tenantId = tenantFrom(req);
   res.json(serialize(tenantId));
 });
 
-router.put('/admin/subscription', (req: any, res: any) => {
+router.put('/admin/subscription', requireAdmin, (req: any, res: any) => {
   const tenantId = tenantFrom(req);
   const { plan, killSwitch, secureTenant, maxOverride } = req.body || {};
   const overrideValue = maxOverride === null ? undefined : maxOverride;

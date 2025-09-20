@@ -27,6 +27,17 @@ Subscriptions define the ceiling:
 
 The `/api/admin/subscription` endpoint lets operations teams change plan, engage a kill-switch (`maxMode` becomes `usynlig`) or mark a tenant as secure-only (forcing the cap back to `proaktiv`). A `maxOverride` can temporarily tighten the ceiling for incident response.
 
+## Effective Mode Resolution
+
+Every proactivity decision now evaluates the minimum across four sources before the runner executes:
+
+1. **Requested mode** – what the caller or UI asked for.
+2. **Role & feature caps** – pulled from the role registry (DB-backed when `FF_PERSISTENCE=true`) including tenant overrides (`roleCap:<featureId>=<n>` basis entries).
+3. **Subscription plan & tenant flags** – plan ceilings (`tenantPlan:<plan>`) and `secureTenant` enforcement (`tenant<=3`).
+4. **Policy guardrails** – optional policy responses that downscope autonomy.
+
+The resolver walks the degrade rail (`tsunami → kraken → …`) until the lowest cap is satisfied. When a downgrade happens we stamp `degraded:<mode>` in the basis so explainability surfaces can render the reason. Kill switches add `kill`, and plan restrictions add `cap:tenantPlan:*` entries.
+
 ## Role & Policy Interactions
 
 `policyCheckRoleAware` now evaluates policy with the *effective* proactivity mode. Role feature caps still apply: the registry resolves feature autonomy caps, and the cap is injected into the resolution pipeline. Policy guardrails can provide their own caps by returning a lower `policyCap`, which folds into the degrade rail before execution.

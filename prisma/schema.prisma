@@ -43,3 +43,66 @@ model AuditChain {
   createdAt DateTime @default(now())
   headHash  String?
 }
+
+enum FeatureUsageAction {
+  open
+  complete
+  dismiss
+}
+
+model Role {
+  role_id     String   @id
+  title       String
+  inherits    String[] @default([])
+  featureCaps Json?
+  scopeHints  Json?
+  profile     Json?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Feature {
+  id                  String   @id
+  title               String
+  description         String?
+  defaultAutonomyCap  Int      @default(3)
+  capabilities        String[]
+  metadata            Json?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+}
+
+model OrgRoleOverride {
+  tenant_id        String
+  role_id          String
+  featureCaps      Json?
+  disabledFeatures String[] @default([])
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@id([tenant_id, role_id])
+  @@index([role_id])
+}
+
+model UserRole {
+  user_id        String  @id
+  tenant_id      String
+  primaryRole    String
+  secondaryRoles String[] @default([])
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model FeatureUsage {
+  id        String             @id @default(uuid())
+  userId    String
+  tenantId  String
+  featureId String
+  action    FeatureUsageAction
+  ts        DateTime           @default(now())
+  metadata  Json?
+
+  @@index([userId])
+  @@index([featureId])
+  @@index([tenantId])
+}

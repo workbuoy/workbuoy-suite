@@ -57,8 +57,11 @@ safeMount('/api/insights', './src/routes/insights', 'insightsRouter');
 safeMount('/api/finance', './src/routes/finance.reminder', 'financeReminderRouter');
 safeMount('/api', './src/routes/manual.complete', 'manualCompleteRouter');
 safeMount('/', './src/routes/genesis.autonomy', 'metaGenesisRouter');
+safeMount('/api', '../backend/routes/usage');
+safeMount('/api', '../backend/routes/features');
 safeMount('/api', '../backend/routes/proactivity');
 safeMount('/api', '../backend/routes/admin.subscription');
+safeMount('/api', '../backend/routes/admin.roles');
 safeMount('/api', '../backend/routes/explainability');
 
 app.use('/api', knowledgeRouter);

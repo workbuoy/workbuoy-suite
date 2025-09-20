@@ -34,6 +34,7 @@ export async function runCapabilityWithRole<T>(
       basis: proactivity.basis,
     },
     mode: modeToKey(mode),
+    effectiveMode: proactivity.effectiveKey,
   };
 
   let outcome: T | undefined;
