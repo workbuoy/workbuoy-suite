@@ -1,14 +1,14 @@
 import React from "react";
-import { vi } from "vitest";
+import { vi, describe, it, test, expect } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import FlipCard from "./FlipCard";
 import { ActiveContextProvider, useActiveContext } from "@/core/ActiveContext";
 
-describe("FlipCard", () => {
-  function renderWithProviders(ui: React.ReactElement) {
-    return render(<ActiveContextProvider>{ui}</ActiveContextProvider>);
-  }
+function renderWithProviders(ui: React.ReactElement) {
+  return render(<ActiveContextProvider>{ui}</ActiveContextProvider>);
+}
 
+describe("FlipCard", () => {
   test("renders front by default and flips to back", async () => {
     const onFlip = vi.fn();
     renderWithProviders(
@@ -57,8 +57,40 @@ describe("FlipCard", () => {
       />,
     );
 
-    const connectButton = await screen.findByRole("button", { name: /connect contact:ada/i });
+    const connectButton = await screen.findByRole("button", {
+      name: /connect contact:ada/i,
+    });
     fireEvent.click(connectButton);
-    await waitFor(() => expect(onConnect).toHaveBeenCalledWith(expect.objectContaining({ type: "contact", id: "contact-1" })));
+    await waitFor(() =>
+      expect(onConnect).toHaveBeenCalledWith(
+        expect.objectContaining({ type: "contact", id: "contact-1" }),
+      ),
+    );
+  });
+
+  it("activates connect without flipping when Enter is pressed (toolbar button)", () => {
+    const onConnect = vi.fn();
+    renderWithProviders(
+      <FlipCard
+        front={<div>Front</div>}
+        back={<div>Back</div>}
+        onConnect={onConnect}
+      />,
+    );
+
+    // Front face should be visible initially
+    const frontSection = screen.getByLabelText(/buoy panel/i);
+    expect(frontSection.getAttribute("aria-hidden")).not.toBe("true");
+
+    const connectButton = screen.getByRole("button", { name: /connect/i });
+    connectButton.focus();
+
+    // Pressing Enter on the toolbar "Connect" must not flip the card
+    fireEvent.keyDown(connectButton, { key: "Enter", code: "Enter" });
+    fireEvent.keyUp(connectButton, { key: "Enter", code: "Enter" });
+
+    expect(onConnect).toHaveBeenCalledTimes(1);
+    // Still on front
+    expect(frontSection.getAttribute("aria-hidden")).not.toBe("true");
   });
 });
