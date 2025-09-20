@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { randomUUID, createHash } from 'crypto';
 import { selectRepo } from '../core/persist/select';
+import { policyGuardWrite } from '../core/policy/guard';
 
 export type AuditRow = {
   id: string;
@@ -79,11 +80,19 @@ export { auditLog };
 export function auditRouter() {
   const r = Router();
 
-  r.post('/', async (req, res, next) => {
+  r.post('/', policyGuardWrite('audit'), async (req, res, next) => {
     try {
+      const route =
+        typeof req.body?.route === 'string' && req.body.route.length
+          ? req.body.route
+          : req.originalUrl;
+      const method =
+        typeof req.body?.method === 'string' && req.body.method.length
+          ? req.body.method
+          : req.method ?? 'GET';
       const base = {
-        route: (req.body?.route as string) || req.originalUrl,
-        method: (req.body?.method as string) || req.method,
+        route,
+        method,
         status: req.body?.status as number | undefined,
         wb: req.wb,
         explanations: req.body?.explanations
