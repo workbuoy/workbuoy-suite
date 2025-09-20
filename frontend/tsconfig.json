@@ -24,3 +24,37 @@
     "src"
   ]
 }
+ {
+   "compilerOptions": {
+     "target": "ES2020",
+     "useDefineForClassFields": true,
+     "lib": [
+       "ES2020",
+       "DOM",
+       "DOM.Iterable"
+     ],
+     "module": "ESNext",
+     "skipLibCheck": true,
+     "jsx": "react-jsx",
+     "moduleResolution": "Bundler",
+     "resolveJsonModule": true,
+     "isolatedModules": true,
+     "noEmit": true,
+     "strict": true,
+     "baseUrl": "./src",
+     "paths": {
+       "@/*": ["./*"]
+     }
+   },
+-  "include": [
+-    "src"
+-  ]
++  "include": ["src"],
++  "exclude": [
++    "node_modules",
++    "dist",
++    "**/*.test.ts",
++    "**/*.test.tsx",
++    "**/__tests__/**"
++  ]
+ }
