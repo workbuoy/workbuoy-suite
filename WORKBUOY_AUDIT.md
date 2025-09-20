@@ -1,16 +1,14 @@
-# WorkBuoy Suite Audit (df3cc2b)
-
 ## Pillar coverage
 | Pillar | Status | Highlights |
 | --- | --- | --- |
 | Core | ✅ Present | Express CRM CRUD with RBAC audit logging anchors the domain API surface.【F:backend/src/app.ts†L1-L88】 |
 | Flex | ✅ Present | Dynamics connector orchestrates OAuth/mapping/metrics while the TS SDK wraps CRM endpoints for integrators.【F:connectors/dynamics/connector.js†L1-L39】【F:sdk/ts/workbuoy.ts†L1-L21】 |
 | Secure | ✅ Present | Secure bootstrap enables helmet/CORS/rate limiting and META scope checks on protected routes.【F:backend/src/app.secure.ts†L1-L22】【F:backend/meta/security.ts†L1-L21】 |
-| Navi | ✅ Present | Production FlipCard pairs the role-aware Buoy front with Navi context, complete with resize/connect tooling and persistence.【F:frontend/src/components/FlipCard/FlipCard.tsx†L1-L214】【F:frontend/src/buoy/BuoyPanel.tsx†L1-L80】【F:frontend/src/navi/NaviPanel.tsx†L1-L78】 |
+
+| Navi | ✅ Present | Flip-card stitches Buoy chat with Navi grid, exposes keyboard flip controls, and surfaces introspection/health badges.【F:frontend/src/components/FlipCard.tsx†L1-L52】【F:frontend/src/features/navi/NaviGrid.tsx†L1-L74】 |
 | Buoy AI | ✅ Present | Single agent builds request context and runs plan/execute pipeline consumed by the chat UI.【F:src/buoy/agent.ts†L1-L95】【F:frontend/src/features/buoy/useBuoy.ts†L1-L18】 |
-| Roles | ✅ Present | Role registry composes feature caps and the UI mapping adapts Buoy/Navi tone, priorities, and policy chips per role.【F:src/roles/registry.ts†L1-L49】【F:frontend/src/roles/rolePresentation.ts†L1-L94】【F:frontend/src/buoy/BuoyPanel.tsx†L1-L80】 |
-| Proactivity | ✅ Present | Six named modes power backend context and the new Mode Switcher that gates approvals before POSTing to `/api/proactivity/state`.【F:src/core/proactivity/modes.ts†L1-L145】【F:frontend/src/proactivity/useProactivity.ts†L1-L154】【F:frontend/src/proactivity/ModeSwitcher.tsx†L1-L63】 |
-| Meta | ✅ Present | META router instruments health/policy metrics, the genesis gatekeeper enforces `.evolution/APPROVED`, and CI now greps routes for forbidden git/fs usage.【F:backend/meta/router.ts†L1-L123】【F:src/routes/genesis.autonomy.ts†L70-L118】【F:ci/policy-meta-rails.sh†L1-L32】 |
+| Roles | ✅ Present | Role registry composes feature caps from seeded profiles and drives role-aware proactivity APIs.【F:src/roles/registry.ts†L1-L49】【F:roles/roles.json†L10880-L10915】【F:backend/routes/proactivity.ts†L1-L60】 |
+| Proactivity | ✅ Present | Six named modes with degrade rails flow through context builders and telemetry-backed REST endpoints.【F:src/core/proactivity/modes.ts†L1-L170】【F:src/core/proactivity/context.ts†L1-L86】【F:backend/routes/proactivity.ts†L1-L60】 |
 | Infra | ✅ Present | Helm deployment, Prometheus alert rules, and a Grafana proactivity dashboard ship with the repo.【F:deploy/helm/workbuoy/templates/deployment.yaml†L1-L22】【F:observability/alerts/workbuoy_alerts.yaml†L1-L10】【F:grafana/dashboards/proactivity.json†L1-L30】 |
 | Adoption | ✅ Present | Multi-step onboarding, guarded demo seeding API, and deterministic insight nudges are delivered as code.【F:enterprise/onboarding.js†L1-L23】【F:crm/pages/api/onboarding/demo.ts†L1-L15】【F:src/insights/engine.ts†L1-L59】 |
 
@@ -20,28 +18,28 @@
 - The analysis tool confirms no plural assistant references in the tree (`plural_hits` is empty).【F:workbuoy-analysis.json†L7300-L7325】
 
 ## Navi Flip-card UX
-- `frontend/src/components/FlipCard/FlipCard.tsx` renders Buoy (front) and Navi (back) faces with keyboard flip support, pointer/keyboard resize, and the new connect dialog.【F:frontend/src/components/FlipCard/FlipCard.tsx†L1-L214】
-- `BuoyPanel` and `NaviPanel` consume role presentation hints and share connections through `useConnections`, keeping both faces in sync.【F:frontend/src/buoy/BuoyPanel.tsx†L1-L80】【F:frontend/src/navi/NaviPanel.tsx†L1-L78】【F:frontend/src/navi/useConnections.ts†L1-L48】
-- `IntrospectionBadge` still surfaces awareness state while the header now hosts the Mode Switcher so autonomy context and health badges travel with the card.【F:frontend/src/components/IntrospectionBadge.tsx†L1-L52】【F:frontend/src/proactivity/ModeSwitcher.tsx†L1-L63】
+- `frontend/src/components/FlipCard.tsx` renders Buoy (front) and Navi (back) faces with keyboard-driven flips, embeds `IntrospectionBadge`, and shows live health chips in the header.【F:frontend/src/components/FlipCard.tsx†L1-L52】
+- `IntrospectionBadge` fetches awareness snapshots (stubbed today) and adjusts UI states; wiring is ready for live data.【F:frontend/src/components/IntrospectionBadge.tsx†L1-L52】【F:frontend/src/api/introspection.ts†L1-L24】
+- `NaviGrid` + `useAddonsStore` hydrate the back of the card with manifest-driven tiles, filters, and CRM/O365 panels to emulate contextual navigation.【F:frontend/src/features/navi/NaviGrid.tsx†L1-L74】【F:frontend/src/features/addons/AddonsStore.ts†L20-L76】
 
 ## Proactivity modes
 - `src/core/proactivity/modes.ts` enumerates the six required modes (usynlig→tsunami) with copy, UI hints, and degrade rail definitions.【F:src/core/proactivity/modes.ts†L1-L145】
 - `buildProactivityContext` composes subscription caps, role feature caps, and policy overrides into an effective mode with traceable basis strings.【F:src/core/proactivity/context.ts†L1-L86】
 - `backend/routes/proactivity.ts` exposes GET/POST APIs that resolve requested vs effective modes per tenant/role, logging telemetry via `logModusskift`.【F:backend/routes/proactivity.ts†L1-L60】【F:src/core/proactivity/telemetry.ts†L1-L24】
 - Proactivity data also powers Grafana dashboards and enterprise config presets (e.g., `core.config.json`), showing the modes are baked into config and observability layers.【F:grafana/dashboards/proactivity.json†L1-L30】【F:enterprise/public/config/core.config.json†L1-L44】
-- The new Mode Switcher hook (`useProactivity`) fronts `/api/proactivity/state`, enforces approvals for high modes, and documents UX flows in `docs/proactivity-ui.md`.【F:frontend/src/proactivity/useProactivity.ts†L1-L154】【F:frontend/src/proactivity/ModeSwitcher.tsx†L1-L63】【F:docs/proactivity-ui.md†L1-L57】
+
 
 ## Meta rails
 - `backend/meta/router.ts` instruments every META endpoint with rate limits, `meta:read` scope enforcement, and histogram logging for metrics collection.【F:backend/meta/router.ts†L1-L123】【F:observability/metrics/meta.ts†L76-L118】
 - The `metaGenesisRouter` (exposed under `/genesis/*`) serves awareness snapshots, proposal scaffolding, and strictly requires `.evolution/APPROVED` before acknowledging evolution implementation, responding with a manual checklist instead of merging anything automatically.【F:src/routes/genesis.autonomy.ts†L70-L118】
 - META observability is backed by Prometheus counters/histograms and Grafana dashboards documented in `META_ROUTE_RUNBOOK.md`, aligning with the platform’s “rails” expectations.【F:observability/metrics/meta.ts†L1-L129】【F:META_ROUTE_RUNBOOK.md†L1-L60】
-- CI now runs `ci/policy-meta-rails.sh` and regression tests (`frontend/e2e/meta-rails.spec.ts`, `tests/meta/meta-rails.test.ts`) to ensure HTTP handlers never regain git/fs write access without manual approval tokens.【F:ci/policy-meta-rails.sh†L1-L32】【F:frontend/e2e/meta-rails.spec.ts†L1-L9】【F:tests/meta/meta-rails.test.ts†L1-L9】
+
 
 ## Roles
 - The seeded role library (`roles/roles.json`) captures domains, KPIs, autonomy caps, and policy hints consumed by runtime services.【F:roles/roles.json†L10880-L10915】
 - `RoleRegistry` resolves inherited roles, tenant overrides, and feature caps; it is wired directly into proactivity APIs and feature activation routes.【F:src/roles/registry.ts†L1-L49】【F:backend/routes/proactivity.ts†L1-L33】【F:backend/routes/features.ts†L1-L16】
 - Capability execution uses `runCapabilityWithRole` to enforce policy and proactivity behavior per resolved caps, linking role context back to Buoy AI/autonomy flows.【F:src/core/capabilityRunnerRole.ts†L1-L79】
-- The front-end mirrors these hints through `useCurrentRole` + `rolePresentation`, adapting Buoy tone, policy chips, and Navi ordering without exposing backend secrets.【F:frontend/src/roles/useCurrentRole.ts†L1-L34】【F:frontend/src/roles/rolePresentation.ts†L1-L94】【F:docs/role-aware-buoy.md†L1-L42】
+
 
 ## Infra & observability
 - The Helm chart (`deploy/helm/workbuoy`) and Kubernetes deployment manifest set up container images, env vars, and services for cluster operation.【F:deploy/helm/workbuoy/templates/deployment.yaml†L1-L22】
