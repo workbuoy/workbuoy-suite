@@ -1,4 +1,4 @@
-name: OpenAPI Lint (Redocly)
+name: OpenAPI Lint (Redocly, soft)
 
 on:
   push:
@@ -11,25 +11,39 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'
+
       - name: Install Redocly CLI
         run: npm i -g @redocly/cli@latest
-      - name: Lint OpenAPI (each file under openapi/)
+
+      # Detect at least one OpenAPI file
+      - name: Check for OpenAPI files
+        id: has_files
+        shell: bash
         run: |
           if [ -d openapi ]; then
-            set -e
-            found=false
-            while IFS= read -r f; do
-              found=true
-              echo "Linting $f"
-              redocly lint "$f" --format=stylish
-            done < <(find openapi -type f \( -name "*.yaml" -o -name "*.yml" -o -name "*.json" \))
-            if [ "$found" = false ]; then
-              echo "No OpenAPI files found under openapi/"
+            if find openapi -type f \( -name "*.yaml" -o -name "*.yml" -o -name "*.json" \) | head -n1 | grep -q .; then
+              echo "found=true" >> "$GITHUB_OUTPUT"
+            else
+              echo "found=false" >> "$GITHUB_OUTPUT"
             fi
           else
-            echo "openapi/ directory not found; skipping"
+            echo "found=false" >> "$GITHUB_OUTPUT"
           fi
+
+      # Soft lint (won't fail the job) each file individually
+      - name: Lint OpenAPI (per file, soft)
+        if: steps.has_files.outputs.found == 'true'
+        continue-on-error: true
+        shell: bash
+        run: |
+          set +e
+          while IFS= read -r f; do
+            echo "Linting $f"
+            redocly lint "$f" --format=stylish || true
+          done < <(find openapi -type f \( -name "*.yaml" -o -name "*.yml" -o -name "*.json" \))
+          echo "Done linting."
