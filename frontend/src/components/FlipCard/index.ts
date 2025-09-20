@@ -1,2 +1,2 @@
-export { FlipCard as default } from "./FlipCard";
+export { default, default as FlipCard } from "./FlipCard";
 export type { FlipCardProps, FlipCardSize } from "./FlipCard";

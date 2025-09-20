@@ -1,9 +1,15 @@
-import React, { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useId,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { useActiveContext } from "@/core/ActiveContext";
 import "./FlipCard.css";
 
 export type FlipCardSize = "sm" | "md" | "lg" | "xl";
-
 type Side = "front" | "back";
 
 type ConnectLink = { type: string; id: string; label?: string };
@@ -28,7 +34,7 @@ const DIMENSIONS: Record<FlipCardSize, { width: string; height: string }> = {
   xl: { width: "min(1040px, 98vw)", height: "min(820px, 86vh)" },
 };
 
-export function FlipCard({
+function FlipCard({
   front,
   back,
   size = "lg",
@@ -45,7 +51,11 @@ export function FlipCard({
   const [manualId, setManualId] = useState("");
   const [manualLabel, setManualLabel] = useState("");
   const manualIdRef = useRef<HTMLInputElement | null>(null);
-  const dragRef = useRef<{ pointerId: number; startX: number; originIndex: number } | null>(null);
+  const dragRef = useRef<{
+    pointerId: number;
+    startX: number;
+    originIndex: number;
+  } | null>(null);
   const { selectedEntity, setSelectedEntity } = useActiveContext();
 
   useEffect(() => {
@@ -80,8 +90,8 @@ export function FlipCard({
   );
 
   const toggleSide = useCallback(() => {
-    changeSide(side === "front" ? "back" : "front");
-  }, [changeSide, side]);
+    changeSide(isFlipped ? "front" : "back");
+  }, [changeSide, isFlipped]);
 
   const emitResize = useCallback(
     (next: FlipCardSize) => {
@@ -94,24 +104,35 @@ export function FlipCard({
   const nudgeSize = useCallback(
     (direction: 1 | -1) => {
       const index = ORDER.indexOf(cardSize);
-      const nextIndex = Math.min(Math.max(index + direction, 0), ORDER.length - 1);
+      const nextIndex = Math.min(
+        Math.max(index + direction, 0),
+        ORDER.length - 1,
+      );
       const next = ORDER[nextIndex];
       if (next !== cardSize) emitResize(next);
     },
     [cardSize, emitResize],
   );
 
+  // Container keyboard handler (flip + resize).
+  // Toolbar-knapper stopper propagation på Enter/Space for å unngå utilsiktet flip.
   const handleKeyDown = useCallback(
     (event: React.KeyboardEvent<HTMLDivElement>) => {
       if (event.key === "Enter" || event.key === " ") {
         event.preventDefault();
         toggleSide();
       }
-      if (event.shiftKey && (event.key === "ArrowRight" || event.key === "ArrowUp")) {
+      if (
+        event.shiftKey &&
+        (event.key === "ArrowRight" || event.key === "ArrowUp")
+      ) {
         event.preventDefault();
         nudgeSize(1);
       }
-      if (event.shiftKey && (event.key === "ArrowLeft" || event.key === "ArrowDown")) {
+      if (
+        event.shiftKey &&
+        (event.key === "ArrowLeft" || event.key === "ArrowDown")
+      ) {
         event.preventDefault();
         nudgeSize(-1);
       }
@@ -119,42 +140,65 @@ export function FlipCard({
     [toggleSide, nudgeSize],
   );
 
-  const handlePointerDown = useCallback((event: React.PointerEvent<HTMLButtonElement>) => {
-    if (event.button !== 0) return;
-    dragRef.current = { pointerId: event.pointerId, startX: event.clientX, originIndex: ORDER.indexOf(cardSize) };
-    (event.target as HTMLElement).setPointerCapture(event.pointerId);
-  }, [cardSize]);
+  const handlePointerDown = useCallback(
+    (event: React.PointerEvent<HTMLButtonElement>) => {
+      if (event.button !== 0) return;
+      dragRef.current = {
+        pointerId: event.pointerId,
+        startX: event.clientX,
+        originIndex: ORDER.indexOf(cardSize),
+      };
+      (event.target as HTMLElement).setPointerCapture(event.pointerId);
+    },
+    [cardSize],
+  );
 
-  const handlePointerMove = useCallback((event: React.PointerEvent<HTMLButtonElement>) => {
-    const drag = dragRef.current;
-    if (!drag || drag.pointerId !== event.pointerId) return;
-    const delta = event.clientX - drag.startX;
-    if (Math.abs(delta) < 80) return;
-    const direction: 1 | -1 = delta > 0 ? 1 : -1;
-    const nextIndex = Math.min(Math.max(drag.originIndex + direction, 0), ORDER.length - 1);
-    const nextSize = ORDER[nextIndex];
-    dragRef.current = { pointerId: drag.pointerId, startX: event.clientX, originIndex: nextIndex };
-    emitResize(nextSize);
-  }, [emitResize]);
+  const handlePointerMove = useCallback(
+    (event: React.PointerEvent<HTMLButtonElement>) => {
+      const drag = dragRef.current;
+      if (!drag || drag.pointerId !== event.pointerId) return;
+      const delta = event.clientX - drag.startX;
+      if (Math.abs(delta) < 80) return;
+      const direction: 1 | -1 = delta > 0 ? 1 : -1;
+      const nextIndex = Math.min(
+        Math.max(drag.originIndex + direction, 0),
+        ORDER.length - 1,
+      );
+      const nextSize = ORDER[nextIndex];
+      dragRef.current = {
+        pointerId: drag.pointerId,
+        startX: event.clientX,
+        originIndex: nextIndex,
+      };
+      emitResize(nextSize);
+    },
+    [emitResize],
+  );
 
-  const handlePointerUp = useCallback((event: React.PointerEvent<HTMLButtonElement>) => {
-    if (dragRef.current && dragRef.current.pointerId === event.pointerId) {
-      dragRef.current = null;
-      (event.target as HTMLElement).releasePointerCapture(event.pointerId);
-    }
-  }, []);
+  const handlePointerUp = useCallback(
+    (event: React.PointerEvent<HTMLButtonElement>) => {
+      if (dragRef.current && dragRef.current.pointerId === event.pointerId) {
+        dragRef.current = null;
+        (event.target as HTMLElement).releasePointerCapture(event.pointerId);
+      }
+    },
+    [],
+  );
 
-  const commitConnection = useCallback((link: ConnectLink) => {
-    if (!onConnect) return;
-    onConnect(link);
-    if (["contact", "deal", "invoice", "task", "note"].includes(link.type)) {
-      setSelectedEntity({
-        type: link.type as any,
-        id: link.id,
-        name: link.label ?? link.id,
-      });
-    }
-  }, [onConnect, setSelectedEntity]);
+  const commitConnection = useCallback(
+    (link: ConnectLink) => {
+      if (!onConnect) return;
+      onConnect(link);
+      if (["contact", "deal", "invoice", "task", "note"].includes(link.type)) {
+        setSelectedEntity({
+          type: link.type as any,
+          id: link.id,
+          name: link.label ?? link.id,
+        });
+      }
+    },
+    [onConnect, setSelectedEntity],
+  );
 
   const handleConnect = useCallback(() => {
     if (!onConnect) return;
@@ -173,10 +217,13 @@ export function FlipCard({
 
   const handleConnectKeyDown = useCallback(
     (event: React.KeyboardEvent<HTMLButtonElement>) => {
-      if (event.key !== "Enter" && event.key !== " ") return;
+      // Bare håndter Enter/Space – og hindre flip via container
+      if (!(event.key === "Enter" || event.key === " ")) return;
       event.preventDefault();
       event.stopPropagation();
-      if (event.repeat) return;
+      // Ignorer auto-repeated keydown (holder kortet på front)
+      // @ts-expect-error - repeat finnes på UIEvent i runtime, ikke i TS-typen
+      if ((event as any).repeat) return;
       handleConnect();
     },
     [handleConnect],
@@ -193,7 +240,6 @@ export function FlipCard({
     });
     setConnectOpen(false);
   }, [commitConnection, manualId, manualLabel, manualType]);
-
   useEffect(() => {
     if (!connectOpen) return;
     function onKey(event: KeyboardEvent) {
@@ -212,7 +258,9 @@ export function FlipCard({
       data-testid="flip-card"
     >
       <div
-        className={`flip-card flipcard cardbg flip-card--${cardSize} ${isFlipped ? "flip-card--flipped" : ""}`}
+        className={`flip-card flipcard cardbg flip-card--${cardSize} ${
+          isFlipped ? "flip-card--flipped" : ""
+        }`}
         role="group"
         aria-roledescription="flip card"
         onKeyDown={handleKeyDown}
@@ -221,11 +269,21 @@ export function FlipCard({
       >
         <div className="flip-card-toolbar">
           <div className="flip-card-toolbar__side" aria-live="polite">
-            <span className="chip" data-testid="flip-card-side">{isFlipped ? "Navi" : "Buoy"}</span>
+            <span className="chip" data-testid="flip-card-side">
+              {isFlipped ? "Navi" : "Buoy"}
+            </span>
             <button
               type="button"
               className="chip flip-card-toolbar__flip"
               onClick={toggleSide}
+              onKeyDown={(e) => {
+                // Hindre at Enter/Space på selve flip-knappen dobbel-flipper via container
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  toggleSide();
+                }
+              }}
               aria-label={isFlipped ? "Show Buoy" : "Show Navi"}
             >
               {isFlipped ? "Show Buoy" : "Show Navi"}
@@ -236,7 +294,16 @@ export function FlipCard({
               type="button"
               className="chip flip-card-toolbar__connect"
               onClick={handleConnect}
+            <button
+              type="button"
+              className="chip flip-card-toolbar__connect"
+              onClick={handleConnect}
               onKeyDown={handleConnectKeyDown}
+              aria-haspopup="dialog"
+              aria-label={`Connect ${connectLabel}`}
+            >
+              Connect
+            </button>
               aria-haspopup="dialog"
               aria-label={`Connect ${connectLabel}`}
             >
@@ -250,13 +317,24 @@ export function FlipCard({
               onPointerMove={handlePointerMove}
               onPointerUp={handlePointerUp}
               onKeyDown={(event) => {
-                if (event.key === "ArrowRight" || event.key === "ArrowUp") {
+                if (
+                  event.key === "ArrowRight" ||
+                  event.key === "ArrowUp" ||
+                  event.key === "ArrowLeft" ||
+                  event.key === "ArrowDown"
+                ) {
                   event.preventDefault();
+                }
+                if (event.key === "ArrowRight" || event.key === "ArrowUp") {
                   nudgeSize(1);
                 }
                 if (event.key === "ArrowLeft" || event.key === "ArrowDown") {
-                  event.preventDefault();
                   nudgeSize(-1);
+                }
+                // Enter/Space på resize skal ikke flippe kortet
+                if (event.key === "Enter" || event.key === " ") {
+                  event.preventDefault();
+                  event.stopPropagation();
                 }
               }}
             >
@@ -285,14 +363,23 @@ export function FlipCard({
           </div>
         </section>
       </div>
+
       {connectOpen ? (
-        <div role="dialog" aria-modal="true" className="flip-card-connect" data-testid="flip-card-connect-dialog">
+        <div
+          role="dialog"
+          aria-modal="true"
+          className="flip-card-connect"
+          data-testid="flip-card-connect-dialog"
+        >
           <form className="flip-card-connect__form" onSubmit={handleManualSubmit}>
             <h2>Link to Navi</h2>
             <p>Select the record type and identifier to connect.</p>
             <label className="flip-card-connect__label">
               Type
-              <select value={manualType} onChange={(event) => setManualType(event.target.value)}>
+              <select
+                value={manualType}
+                onChange={(event) => setManualType(event.target.value)}
+              >
                 <option value="note">Note</option>
                 <option value="contact">Contact</option>
                 <option value="deal">Deal</option>
@@ -318,10 +405,18 @@ export function FlipCard({
               />
             </label>
             <div className="flip-card-connect__actions">
-              <button type="submit" className="chip" disabled={!manualId.trim()}>
+              <button
+                type="submit"
+                className="chip"
+                disabled={!manualId.trim()}
+              >
                 Connect to Navi
               </button>
-              <button type="button" className="chip" onClick={() => setConnectOpen(false)}>
+              <button
+                type="button"
+                className="chip"
+                onClick={() => setConnectOpen(false)}
+              >
                 Cancel
               </button>
             </div>
@@ -333,3 +428,4 @@ export function FlipCard({
 }
 
 export default FlipCard;
+export type { FlipCardProps };
