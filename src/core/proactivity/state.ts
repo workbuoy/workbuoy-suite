@@ -1,10 +1,12 @@
-import { DEFAULT_DEGRADE_RAIL, ProactivityMode, modeToKey } from './modes';
+import { DEFAULT_DEGRADE_RAIL, ProactivityMode } from './modes';
 
 export interface ProactivityCap {
   id: string;
   label?: string;
   mode: ProactivityMode;
   enforced?: boolean;
+  basis?: string[];
+  degradeTag?: string;
 }
 
 export interface ResolveEffectiveModeInput {
@@ -57,24 +59,31 @@ export function resolveEffectiveMode(input: ResolveEffectiveModeInput): Proactiv
   }));
 
   const basis = new Set<string>(input.basis ?? []);
-  basis.add(`requested:${modeToKey(input.requested)}`);
+  const requested = clampToRail(input.requested, rail);
+  basis.add(`mode:requested=${requested}`);
 
-  let effective = clampToRail(input.requested, rail);
+  let effective = requested;
 
   if (input.killSwitch) {
     effective = ProactivityMode.Usynlig;
-    basis.add('cap:killswitch');
+    basis.add('kill');
+    basis.add('degraded:kill');
   }
 
   for (const cap of caps) {
     if (effective > cap.mode) {
       effective = degradeDown(effective, cap.mode, rail);
-      basis.add(`cap:${cap.id}:${modeToKey(cap.mode)}`);
+      if (Array.isArray(cap.basis)) {
+        for (const entry of cap.basis) basis.add(entry);
+      }
+      basis.add(`degraded:${cap.degradeTag ?? cap.id}`);
     }
   }
 
+  basis.add(`mode:effective=${effective}`);
+
   return {
-    requested: clampToRail(input.requested, rail),
+    requested,
     effective,
     basis: Array.from(basis),
     caps,

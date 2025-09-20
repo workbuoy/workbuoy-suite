@@ -1,22 +1,28 @@
-export type CircuitState = 'closed'|'open'|'half-open';
+export type CircuitState = 'closed' | 'open' | 'half-open';
 
 export interface CircuitOptions {
   failureThreshold?: number;
   halfOpenAfterMs?: number;
   resetTimeoutMs?: number;
+  failureWindowMs?: number;
 }
 
 export class CircuitBreaker {
   private state: CircuitState = 'closed';
-  private failures = 0;
+  private failureTimestamps: number[] = [];
   private lastOpenedAt = 0;
 
   constructor(private opts: CircuitOptions = {}) {}
 
+  private pruneFailures(now: number) {
+    const windowMs = this.opts.failureWindowMs ?? 60_000;
+    this.failureTimestamps = this.failureTimestamps.filter(ts => now - ts <= windowMs);
+  }
+
   isOpen(now = Date.now()): boolean {
     if (this.state === 'open') {
-      const wait = this.opts.halfOpenAfterMs ?? 10000;
-      if ((now - this.lastOpenedAt) >= wait) {
+      const wait = this.opts.halfOpenAfterMs ?? 10_000;
+      if (now - this.lastOpenedAt >= wait) {
         this.state = 'half-open';
         return false;
       }
@@ -31,38 +37,41 @@ export class CircuitBreaker {
 
     try {
       const res = await fn();
-      this.onSuccess();
+      this.onSuccess(now);
       return res;
     } catch (e) {
-      this.onFailure();
+      this.onFailure(now);
       throw e;
     }
   }
 
-  onSuccess() {
+  onSuccess(now = Date.now()) {
     if (this.state === 'half-open') {
       this.state = 'closed';
-      this.failures = 0;
+      this.failureTimestamps = [];
       return;
     }
     if (this.state === 'closed') {
-      this.failures = 0;
+      this.pruneFailures(now);
     }
   }
 
-  onFailure() {
+  onFailure(now = Date.now()) {
     const threshold = this.opts.failureThreshold ?? 3;
+    this.failureTimestamps.push(now);
+    this.pruneFailures(now);
     if (this.state === 'half-open') {
-      this.open();
+      this.open(now);
       return;
     }
-    this.failures += 1;
-    if (this.failures >= threshold) this.open();
+    if (this.failureTimestamps.length >= threshold) {
+      this.open(now);
+    }
   }
 
-  private open() {
+  private open(now = Date.now()) {
     this.state = 'open';
-    this.lastOpenedAt = Date.now();
+    this.lastOpenedAt = now;
   }
 
   getState(): CircuitState {
@@ -70,6 +79,7 @@ export class CircuitBreaker {
   }
 
   getFailures(): number {
-    return this.failures;
+    this.pruneFailures(Date.now());
+    return this.failureTimestamps.length;
   }
 }

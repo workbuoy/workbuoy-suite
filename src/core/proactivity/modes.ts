@@ -22,11 +22,17 @@ export interface ProactivityModeMeta {
   description: string;
   degradeHint?: string;
   uiHints: {
+    surface: 'none' | 'passive' | 'cards' | 'draft' | 'backstage' | 'dom-overlay';
     overlay?: boolean;
     callToAction?: string;
     banner?: string;
     healthChecks?: boolean;
     reviewType?: 'none' | 'passive' | 'suggestion' | 'approval' | 'execution';
+  };
+  chip: {
+    key: string;
+    label: string;
+    icon: string;
   };
   basisExamples: string[];
 }
@@ -39,12 +45,14 @@ export const PROACTIVITY_MODE_META: Record<ProactivityMode, ProactivityModeMeta>
     description: 'Observe quietly with no UI surfaces or interventions.',
     degradeHint: 'baseline fall-back when tenant kill switch is engaged',
     uiHints: {
+      surface: 'none',
       overlay: false,
       banner: 'Observing silently',
       callToAction: undefined,
       healthChecks: false,
       reviewType: 'none',
     },
+    chip: { key: 'usynlig', label: 'Usynlig', icon: '🫧' },
     basisExamples: ['subscription:killswitch', 'policy:deny', 'roleCap:disabled'],
   },
   [ProactivityMode.Rolig]: {
@@ -54,12 +62,14 @@ export const PROACTIVITY_MODE_META: Record<ProactivityMode, ProactivityModeMeta>
     description: 'Observe system state and surface telemetry passively with no call to action.',
     degradeHint: 'fallback when automation is paused but monitoring continues',
     uiHints: {
+      surface: 'passive',
       overlay: false,
       banner: 'Monitoring in read-only mode',
       callToAction: undefined,
       healthChecks: false,
       reviewType: 'passive',
     },
+    chip: { key: 'rolig', label: 'Rolig', icon: '🌿' },
     basisExamples: ['roleCap:2', 'tenant:readonly'],
   },
   [ProactivityMode.Proaktiv]: {
@@ -69,12 +79,14 @@ export const PROACTIVITY_MODE_META: Record<ProactivityMode, ProactivityModeMeta>
     description: 'Suggest actions with lightweight call-to-action buttons.',
     degradeHint: 'default supervised mode when higher tiers not permitted',
     uiHints: {
+      surface: 'cards',
       overlay: false,
       banner: 'Suggestions ready',
       callToAction: 'Show suggestions',
       healthChecks: false,
       reviewType: 'suggestion',
     },
+    chip: { key: 'proaktiv', label: 'Proaktiv', icon: '💡' },
     basisExamples: ['plan:flex', 'roleCap:3'],
   },
   [ProactivityMode.Ambisiøs]: {
@@ -84,12 +96,14 @@ export const PROACTIVITY_MODE_META: Record<ProactivityMode, ProactivityModeMeta>
     description: 'Prepare changes, generate previews and require approval before execution.',
     degradeHint: 'requires reviewer sign-off before running automations',
     uiHints: {
+      surface: 'draft',
       overlay: false,
       banner: 'Previews prepared',
       callToAction: 'Review & approve',
       healthChecks: false,
       reviewType: 'approval',
     },
+    chip: { key: 'ambisiøs', label: 'Ambisiøs', icon: '✍️' },
     basisExamples: ['plan:flex', 'policy:requires_approval'],
   },
   [ProactivityMode.Kraken]: {
@@ -99,12 +113,14 @@ export const PROACTIVITY_MODE_META: Record<ProactivityMode, ProactivityModeMeta>
     description: 'Execute automations directly under policy guardrails.',
     degradeHint: 'falls back when execution guard fails',
     uiHints: {
+      surface: 'backstage',
       overlay: false,
       banner: 'Executing with guardrails',
       callToAction: 'View execution log',
       healthChecks: true,
       reviewType: 'execution',
     },
+    chip: { key: 'kraken', label: 'Kraken', icon: '🐙' },
     basisExamples: ['plan:secure', 'roleCap:5', 'policy:execute_allowed'],
   },
   [ProactivityMode.Tsunami]: {
@@ -114,12 +130,14 @@ export const PROACTIVITY_MODE_META: Record<ProactivityMode, ProactivityModeMeta>
     description: 'Execute, project overlay changes and continuously run health checks.',
     degradeHint: 'will degrade to Kraken on overlay or health-check failure',
     uiHints: {
+      surface: 'dom-overlay',
       overlay: true,
       banner: 'Hands-free automation engaged',
       callToAction: 'Inspect live overlay',
       healthChecks: true,
       reviewType: 'execution',
     },
+    chip: { key: 'tsunami', label: 'Tsunami', icon: '🌊' },
     basisExamples: ['plan:enterprise', 'roleCap:6', 'telemetry:overlay_ready'],
   },
 };

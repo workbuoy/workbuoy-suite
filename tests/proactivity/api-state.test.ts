@@ -23,6 +23,9 @@ describe('GET /api/proactivity/state', () => {
     expect(res.body.requestedKey).toBe('tsunami');
     expect(res.body.effectiveKey).toBe('ambisiøs');
     expect(res.body.uiHints).toHaveProperty('callToAction');
+    expect(res.body.uiHints.surface).toBe('draft');
+    expect(res.body.chip).toEqual(expect.objectContaining({ key: 'ambisiøs', icon: '✍️' }));
+    expect(res.body.basis).toEqual(expect.arrayContaining(['mode:requested=6', 'mode:effective=4']));
     expect(res.body.subscription.plan).toBe('flex');
     const events = getRecentProactivityEvents(1);
     expect(events[0].tenantId).toBe('TENANT');
@@ -40,6 +43,7 @@ describe('GET /api/proactivity/state', () => {
 
     expect(res.status).toBe(200);
     expect(res.body.effective).toBe(ProactivityMode.Kraken);
-    expect(Array.isArray(res.body.basis)).toBe(true);
+    expect(res.body.uiHints.surface).toBe('backstage');
+    expect(res.body.basis).toEqual(expect.arrayContaining(['mode:requested=5', 'mode:effective=5']));
   });
 });
