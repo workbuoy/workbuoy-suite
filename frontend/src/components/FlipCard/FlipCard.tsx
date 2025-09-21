@@ -14,6 +14,13 @@ type Side = "front" | "back";
 
 type ConnectLink = { type: string; id: string; label?: string };
 
+export type FlipCardStrings = {
+  flipToNavi: string;
+  flipToBuoy: string;
+  connect: string;
+  resize: string;
+};
+
 export type FlipCardProps = {
   front: React.ReactNode;
   back: React.ReactNode;
@@ -23,9 +30,22 @@ export type FlipCardProps = {
   onConnect?: (link: ConnectLink) => void;
   ariaLabelFront?: string;
   ariaLabelBack?: string;
+  className?: string;
+  toolbarExtras?: React.ReactNode;
+  motionProfile?: "default" | "calm";
+  side?: Side;
+  allowedSizes?: FlipCardSize[];
+  strings?: FlipCardStrings;
 };
 
 const ORDER: FlipCardSize[] = ["sm", "md", "lg", "xl"];
+
+const DEFAULT_STRINGS: FlipCardStrings = {
+  flipToNavi: "Show Navi",
+  flipToBuoy: "Show Buoy",
+  connect: "Connect",
+  resize: "Resize",
+};
 
 const DIMENSIONS: Record<FlipCardSize, { width: string; height: string }> = {
   sm: { width: "min(420px, 92vw)", height: "min(540px, 70vh)" },
@@ -43,9 +63,25 @@ function FlipCard({
   onConnect,
   ariaLabelFront = "Buoy panel",
   ariaLabelBack = "Navi panel",
+  className,
+  toolbarExtras,
+  motionProfile = "default",
+  side: controlledSide,
+  allowedSizes,
+  strings = DEFAULT_STRINGS,
 }: FlipCardProps) {
-  const [side, setSide] = useState<Side>("front");
-  const [cardSize, setCardSize] = useState<FlipCardSize>(size);
+  const sizeOrder = useMemo(() => {
+    if (allowedSizes && allowedSizes.length > 0) {
+      return allowedSizes.filter((value, index, array) => array.indexOf(value) === index);
+    }
+    return ORDER;
+  }, [allowedSizes]);
+  const [internalSide, setInternalSide] = useState<Side>(controlledSide ?? "front");
+  const side = controlledSide ?? internalSide;
+  const [cardSize, setCardSize] = useState<FlipCardSize>(() => {
+    if (sizeOrder.includes(size)) return size;
+    return sizeOrder[0] ?? "sm";
+  });
   const [connectOpen, setConnectOpen] = useState(false);
   const [manualType, setManualType] = useState("note");
   const [manualId, setManualId] = useState("");
@@ -59,8 +95,21 @@ function FlipCard({
   const { selectedEntity, setSelectedEntity } = useActiveContext();
 
   useEffect(() => {
+    if (controlledSide !== undefined) {
+      setInternalSide(controlledSide);
+    }
+  }, [controlledSide]);
+
+  useEffect(() => {
+    if (!sizeOrder.includes(size)) return;
     setCardSize(size);
-  }, [size]);
+  }, [size, sizeOrder]);
+
+  useEffect(() => {
+    if (sizeOrder.includes(cardSize)) return;
+    const fallback = sizeOrder.includes(size) ? size : sizeOrder[0] ?? "sm";
+    setCardSize(fallback);
+  }, [cardSize, size, sizeOrder]);
 
   useEffect(() => {
     if (!connectOpen) return;
@@ -83,10 +132,12 @@ function FlipCard({
 
   const changeSide = useCallback(
     (next: Side) => {
-      setSide(next);
+      if (controlledSide === undefined) {
+        setInternalSide(next);
+      }
       onFlip?.(next);
     },
-    [onFlip],
+    [controlledSide, onFlip],
   );
 
   const toggleSide = useCallback(() => {
@@ -95,29 +146,40 @@ function FlipCard({
 
   const emitResize = useCallback(
     (next: FlipCardSize) => {
+      if (!sizeOrder.includes(next)) return;
       setCardSize(next);
       onResize?.(next);
     },
-    [onResize],
+    [onResize, sizeOrder],
   );
 
   const nudgeSize = useCallback(
     (direction: 1 | -1) => {
-      const index = ORDER.indexOf(cardSize);
+      const index = sizeOrder.indexOf(cardSize);
       const nextIndex = Math.min(
         Math.max(index + direction, 0),
-        ORDER.length - 1,
+        sizeOrder.length - 1,
       );
-      const next = ORDER[nextIndex];
+      const next = sizeOrder[nextIndex];
       if (next !== cardSize) emitResize(next);
     },
-    [cardSize, emitResize],
+    [cardSize, emitResize, sizeOrder],
   );
 
   // Container keyboard handler (flip + resize).
   // Toolbar-knapper stopper propagation på Enter/Space for å unngå utilsiktet flip.
   const handleKeyDown = useCallback(
     (event: React.KeyboardEvent<HTMLDivElement>) => {
+      const target = event.target as HTMLElement | null;
+      const tagName = target?.tagName.toLowerCase();
+      if (
+        tagName === "input" ||
+        tagName === "textarea" ||
+        tagName === "select" ||
+        target?.isContentEditable
+      ) {
+        return;
+      }
       if (event.key === "Enter" || event.key === " ") {
         event.preventDefault();
         toggleSide();
@@ -146,11 +208,11 @@ function FlipCard({
       dragRef.current = {
         pointerId: event.pointerId,
         startX: event.clientX,
-        originIndex: ORDER.indexOf(cardSize),
+        originIndex: Math.max(sizeOrder.indexOf(cardSize), 0),
       };
       (event.target as HTMLElement).setPointerCapture(event.pointerId);
     },
-    [cardSize],
+    [cardSize, sizeOrder],
   );
 
   const handlePointerMove = useCallback(
@@ -162,9 +224,9 @@ function FlipCard({
       const direction: 1 | -1 = delta > 0 ? 1 : -1;
       const nextIndex = Math.min(
         Math.max(drag.originIndex + direction, 0),
-        ORDER.length - 1,
+        sizeOrder.length - 1,
       );
-      const nextSize = ORDER[nextIndex];
+      const nextSize = sizeOrder[nextIndex];
       dragRef.current = {
         pointerId: drag.pointerId,
         startX: event.clientX,
@@ -172,7 +234,7 @@ function FlipCard({
       };
       emitResize(nextSize);
     },
-    [emitResize],
+    [emitResize, sizeOrder],
   );
 
   const handlePointerUp = useCallback(
@@ -252,9 +314,10 @@ function FlipCard({
 
   return (
     <div
-      className="flip-card-host flip-host"
+      className={`flip-card-host flip-host${className ? ` ${className}` : ""}`}
       style={{ width: dimensions.width, height: dimensions.height }}
       data-testid="flip-card"
+      data-size={cardSize}
     >
       <div
         className={`flip-card flipcard cardbg flip-card--${cardSize} ${
@@ -265,6 +328,7 @@ function FlipCard({
         onKeyDown={handleKeyDown}
         tabIndex={0}
         data-side={side}
+        data-motion={motionProfile}
       >
         <div className="flip-card-toolbar">
           <div className="flip-card-toolbar__side" aria-live="polite">
@@ -283,9 +347,9 @@ function FlipCard({
                   toggleSide();
                 }
               }}
-              aria-label={isFlipped ? "Show Buoy" : "Show Navi"}
+              aria-label={isFlipped ? strings.flipToBuoy : strings.flipToNavi}
             >
-              {isFlipped ? "Show Buoy" : "Show Navi"}
+              {isFlipped ? strings.flipToBuoy : strings.flipToNavi}
             </button>
           </div>
           <div className="flip-card-toolbar__actions">
@@ -295,14 +359,14 @@ function FlipCard({
               onClick={handleConnect}
               onKeyDown={handleConnectKeyDown}
               aria-haspopup="dialog"
-              aria-label={`Connect ${connectLabel}`}
+              aria-label={`${strings.connect} ${connectLabel}`}
             >
-              Connect
+              {strings.connect}
             </button>
             <button
               type="button"
               className="chip flip-card-toolbar__resize"
-              aria-label={`Resize card (${cardSize})`}
+              aria-label={`${strings.resize} card (${cardSize})`}
               onPointerDown={handlePointerDown}
               onPointerMove={handlePointerMove}
               onPointerUp={handlePointerUp}
@@ -328,8 +392,9 @@ function FlipCard({
                 }
               }}
             >
-              Resize
+              {strings.resize}
             </button>
+            {toolbarExtras}
           </div>
         </div>
         <section

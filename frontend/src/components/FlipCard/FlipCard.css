@@ -13,6 +13,10 @@
   overflow: hidden;
 }
 
+.flip-card[data-motion="calm"] {
+  transition: transform 420ms cubic-bezier(0.22, 0.8, 0.26, 1);
+}
+
 .flip-card--flipped {
   transform: rotateY(180deg);
 }
@@ -34,6 +38,7 @@
   align-items: center;
   gap: 8px;
   pointer-events: auto;
+  flex-wrap: wrap;
 }
 
 .flip-card-toolbar__flip,
