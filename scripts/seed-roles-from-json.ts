@@ -1,13 +1,14 @@
+#!/usr/bin/env node
 // scripts/seed-roles-from-json.ts
-// ESM entrypoint: run with
-//   node --loader ts-node/esm scripts/seed-roles-from-json.ts
-import { seedRolesFromJson } from './seed-roles-lib.js'; // ts-node/esm resolves .ts too
+import { seedRoles } from './seed-roles-lib.ts';
 
-seedRolesFromJson()
-  .then((res) => {
-    console.log(JSON.stringify({ ok: true, ...res }));
-  })
-  .catch((err) => {
-    console.error('[seed-roles-from-json] failed:', err);
+(async () => {
+  try {
+    const res = await seedRoles();
+    console.log(JSON.stringify({ ok: true, result: res }));
+    process.exit(0);
+  } catch (err) {
+    console.error('[seed-roles-from-json] failed:', err?.message || String(err));
     process.exit(1);
-  });
+  }
+})();
