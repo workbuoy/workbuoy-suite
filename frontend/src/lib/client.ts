@@ -1,4 +1,5 @@
 // frontend/src/lib/client.ts
+import { emitApiStatus } from "@/features/core/useApiStatus";
 export type Options = RequestInit & {
   correlationId?: string;
   autonomyLevel?: number;
@@ -40,10 +41,20 @@ export async function apiFetch<T=any>(path: string, opts: Options = {}): Promise
   delete (init as any).autonomyLevel;
   delete (init as any).role;
 
-  const res = await fetch(path, init);
-  if (!res.ok) throw new Error(`apiFetch ${path} ${res.status}`);
-  const ct = res.headers.get('content-type') || '';
-  return ct.includes('application/json') ? res.json() : (res.text() as any);
+  let statusEmitted = false;
+  try {
+    const res = await fetch(path, init);
+    emitApiStatus({ status: res.status, ok: res.ok });
+    statusEmitted = true;
+    if (!res.ok) throw new Error(`apiFetch ${path} ${res.status}`);
+    const ct = res.headers.get('content-type') || '';
+    return ct.includes('application/json') ? res.json() : (res.text() as any);
+  } catch (error) {
+    if (!statusEmitted) {
+      emitApiStatus({ status: 0, ok: false });
+    }
+    throw error;
+  }
 }
 export const api = apiFetch;
 export default apiFetch;

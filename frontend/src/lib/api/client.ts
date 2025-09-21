@@ -1,4 +1,5 @@
 import { useActiveContext } from "@/core/ActiveContext";
+import { emitApiStatus } from "@/features/core/useApiStatus";
 
 export type Extra = {
   intent?: string;             // e.g., "contacts.create"
@@ -39,8 +40,18 @@ export function useApi(){
     // Always send JSON content-type for bodies
     if (init?.body && !headers.has('Content-Type')) headers.set('Content-Type','application/json');
 
-    const res = await fetch(input, { ...init, headers });
-    return res;
+    let statusEmitted = false;
+    try {
+      const res = await fetch(input, { ...init, headers });
+      emitApiStatus({ status: res.status, ok: res.ok });
+      statusEmitted = true;
+      return res;
+    } catch (error) {
+      if (!statusEmitted) {
+        emitApiStatus({ status: 0, ok: false });
+      }
+      throw error;
+    }
   }
 
   return { withContext };

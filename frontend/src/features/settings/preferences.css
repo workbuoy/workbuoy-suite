@@ -59,6 +59,10 @@
   padding-bottom: 0;
 }
 
+.settings-row--reset {
+  align-items: center;
+}
+
 .settings-row__body {
   flex: 1;
   min-width: 0;
@@ -182,6 +186,30 @@
   outline-offset: 2px;
 }
 
+.settings-reset-button {
+  background: rgba(129, 140, 248, 0.18);
+  border: 1px solid rgba(129, 140, 248, 0.6);
+  border-radius: var(--radius-md, 12px);
+  padding: 6px 14px;
+  color: var(--fg-default, #f8fbff);
+  font-size: 0.8rem;
+  cursor: pointer;
+  margin-left: auto;
+  transition: background var(--transition-fast, 150ms ease),
+    border-color var(--transition-fast, 150ms ease),
+    color var(--transition-fast, 150ms ease);
+}
+
+.settings-reset-button:hover {
+  background: rgba(129, 140, 248, 0.28);
+  border-color: rgba(129, 140, 248, 0.85);
+}
+
+.settings-reset-button:focus-visible {
+  outline: 2px solid var(--focus-ring, #8bb4ff);
+  outline-offset: 2px;
+}
+
 .settings-panel__demo-status {
   font-size: 0.72rem;
   color: var(--fg-muted, rgba(248, 251, 255, 0.72));
@@ -196,5 +224,11 @@
 
   .settings-switch {
     align-self: flex-end;
+  }
+
+  .settings-reset-button {
+    align-self: flex-start;
+    margin-left: 0;
+    margin-top: 8px;
   }
 }

@@ -1,6 +1,18 @@
 import { useSyncExternalStore } from "react";
+import type { FlipCardSize } from "@/components/FlipCard";
 import { Flags } from "@/lib/flags";
 import { prefersReducedAudio } from "@/features/peripheral/AudioCue";
+
+export type DockSizeSetting = Exclude<FlipCardSize, "xl">;
+export type DockPosition = { x: number; y: number };
+
+const DOCK_SIZE_VALUES: DockSizeSetting[] = ["sm", "md", "lg"];
+const DOCK_POSITION_TEMPLATE: DockPosition = { x: 0, y: 0 };
+
+export const DEFAULT_DOCK_SIZE: DockSizeSetting = "sm";
+export function createDefaultDockPosition(): DockPosition {
+  return { ...DOCK_POSITION_TEMPLATE };
+}
 
 type SettingsKey =
   | "audioCues"
@@ -13,7 +25,8 @@ type SettingsKey =
   | "enablePeripheralCues"
   | "dockHotkeys"
   | "reducedMotion"
-  | "reducedSound";
+  | "reducedSound"
+  | "fastFlip";
 
 export type { SettingsKey };
 
@@ -31,6 +44,9 @@ export type SettingsState = {
   reducedSound: boolean;
   systemReducedMotion: boolean;
   systemReducedSound: boolean;
+  dockSize: DockSizeSetting;
+  dockPosition: DockPosition;
+  fastFlip: boolean;
 };
 
 const STORAGE_KEY = "wb.settings";
@@ -41,7 +57,9 @@ const SOUND_QUERIES = [
   "(prefers-reduced-motion: reduce)",
 ];
 
-const PERSISTED_KEYS: SettingsKey[] = [
+type PersistedKey = SettingsKey | "dockSize" | "dockPosition";
+
+const PERSISTED_KEYS: PersistedKey[] = [
   "audioCues",
   "enableO365Panel",
   "enableCollabPanel",
@@ -53,9 +71,12 @@ const PERSISTED_KEYS: SettingsKey[] = [
   "dockHotkeys",
   "reducedMotion",
   "reducedSound",
+  "fastFlip",
+  "dockSize",
+  "dockPosition",
 ];
 
-type PersistedRecord = Record<SettingsKey, boolean>;
+type PersistedRecord = Pick<SettingsState, PersistedKey>;
 
 const listeners = new Set<() => void>();
 
@@ -90,8 +111,23 @@ function readFromStorage(): Partial<PersistedRecord> {
     const next: Partial<PersistedRecord> = {};
     for (const key of PERSISTED_KEYS) {
       const value = parsed[key];
-      if (typeof value === "boolean") {
-        next[key] = value;
+      if (typeof value === "boolean" && key !== "dockSize" && key !== "dockPosition") {
+        (next as Record<string, boolean>)[key] = value;
+        continue;
+      }
+      if (key === "dockSize" && typeof value === "string") {
+        if ((DOCK_SIZE_VALUES as string[]).includes(value)) {
+          (next as Record<string, DockSizeSetting>)[key] = value as DockSizeSetting;
+        }
+        continue;
+      }
+      if (key === "dockPosition" && value && typeof value === "object") {
+        const candidate = value as Partial<Record<"x" | "y", unknown>>;
+        const x = typeof candidate.x === "number" ? candidate.x : Number(candidate.x);
+        const y = typeof candidate.y === "number" ? candidate.y : Number(candidate.y);
+        if (Number.isFinite(x) && Number.isFinite(y)) {
+          (next as Record<string, DockPosition>)[key] = { x, y };
+        }
       }
     }
     return next;
@@ -104,7 +140,7 @@ function writeToStorage(state: SettingsState) {
   if (typeof window === "undefined") return;
   const payload: Partial<PersistedRecord> = {};
   for (const key of PERSISTED_KEYS) {
-    payload[key] = state[key];
+    (payload as Record<string, unknown>)[key] = state[key as keyof SettingsState];
   }
   try {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
@@ -128,6 +164,9 @@ function baseState(): SettingsState {
     reducedSound: false,
     systemReducedMotion: false,
     systemReducedSound: false,
+    dockSize: DEFAULT_DOCK_SIZE,
+    dockPosition: createDefaultDockPosition(),
+    fastFlip: false,
   };
 }
 
@@ -158,6 +197,15 @@ function computeInitialState(): SettingsState {
     reducedSound: systemReducedSound ? true : persisted.reducedSound ?? base.reducedSound,
     systemReducedMotion,
     systemReducedSound,
+    dockSize:
+      persisted.dockSize && DOCK_SIZE_VALUES.includes(persisted.dockSize)
+        ? persisted.dockSize
+        : base.dockSize,
+    dockPosition: persisted.dockPosition
+      ? { ...persisted.dockPosition }
+      : base.dockPosition,
+    fastFlip:
+      typeof persisted.fastFlip === "boolean" ? persisted.fastFlip : base.fastFlip,
   });
 
   if (systemReducedSound) {
@@ -202,6 +250,26 @@ function toggleSetting(key: SettingsKey) {
 
 function setSetting(key: SettingsKey, value: boolean) {
   updateState({ [key]: value } as Partial<SettingsState>);
+}
+
+function setDockSize(size: DockSizeSetting) {
+  if (!DOCK_SIZE_VALUES.includes(size)) return;
+  updateState({ dockSize: size });
+}
+
+function setDockPosition(position: DockPosition) {
+  const next = {
+    x: Number.isFinite(position.x) ? position.x : DOCK_POSITION_TEMPLATE.x,
+    y: Number.isFinite(position.y) ? position.y : DOCK_POSITION_TEMPLATE.y,
+  };
+  updateState({ dockPosition: next });
+}
+
+function resetDockLayout() {
+  updateState({
+    dockSize: DEFAULT_DOCK_SIZE,
+    dockPosition: createDefaultDockPosition(),
+  });
 }
 
 function syncSystemMotion(matches?: boolean) {
@@ -264,10 +332,20 @@ export const settingsStore = {
   setState: updateState,
   set: setSetting,
   toggle: toggleSetting,
+  setDockSize,
+  setDockPosition,
+  resetDock: resetDockLayout,
   reset() {
     state = computeInitialState();
     emit();
   },
 };
 
-export { setSetting, toggleSetting, getState as getSettingsState };
+export {
+  setSetting,
+  toggleSetting,
+  getState as getSettingsState,
+  setDockSize,
+  setDockPosition,
+  resetDockLayout,
+};

@@ -1,6 +1,8 @@
 .flip-card-host {
   position: relative;
   margin: 0 auto;
+  will-change: transform;
+  transform: translateZ(0);
 }
 
 .flip-card {
@@ -11,6 +13,7 @@
   transform-style: preserve-3d;
   transition: transform var(--transition-slow);
   overflow: hidden;
+  will-change: transform;
 }
 
 .flip-card[data-motion="calm"] {
@@ -19,6 +22,44 @@
 
 .flip-card--flipped {
   transform: rotateY(180deg);
+}
+
+.flip-card[data-style="fast"] {
+  transform-style: flat;
+  transition: none;
+}
+
+.flip-card[data-style="fast"].flip-card--flipped {
+  transform: none;
+}
+
+.flip-card[data-style="fast"] .flip-card-face {
+  backface-visibility: visible;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 220ms ease, transform 220ms ease;
+  will-change: opacity, transform;
+}
+
+.flip-card[data-style="fast"][data-motion="calm"] .flip-card-face {
+  transition-duration: 280ms;
+  transition-timing-function: cubic-bezier(0.24, 0.82, 0.25, 1);
+}
+
+.flip-card[data-style="fast"][data-side="front"] .flip-card-face--front,
+.flip-card[data-style="fast"][data-side="back"] .flip-card-face--back {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.flip-card[data-style="fast"][data-side="front"] .flip-card-face--back {
+  opacity: 0;
+  transform: translateY(12px);
+}
+
+.flip-card[data-style="fast"][data-side="back"] .flip-card-face--front {
+  opacity: 0;
+  transform: translateY(-12px);
 }
 
 .flip-card-toolbar {
@@ -118,6 +159,10 @@
 
 @media (prefers-reduced-motion: reduce) {
   .flip-card {
+    transition: none;
+  }
+
+  .flip-card[data-style="fast"] .flip-card-face {
     transition: none;
   }
 }
