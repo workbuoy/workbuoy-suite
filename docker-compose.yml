@@ -1,34 +1,46 @@
 version: "3.9"
+
 services:
   db:
-    image: postgres:15-alpine
+    image: postgres:16
     environment:
-      POSTGRES_USER: workbuoy
-      POSTGRES_PASSWORD: workbuoy
-      POSTGRES_DB: workbuoy
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: wb
     ports:
       - "5432:5432"
     volumes:
-      - db_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U workbuoy"]
-      interval: 5s
-      timeout: 3s
-      retries: 10
-  app:
-    image: node:20
-    working_dir: /workspace/workbuoy-suite
-    command: >-
-      sh -c "npm install --prefix backend && NODE_PATH=backend/node_modules node -r ts-node/register src/bin/www.ts"
-    environment:
-      PORT: 3000
-      PERSIST_MODE: file
-      NODE_PATH: backend/node_modules
+      - wb_pg:/var/lib/postgresql/data
+
+  mailhog:
+    image: mailhog/mailhog:latest
     ports:
-      - "3000:3000"
-    volumes:
-      - .:/workspace/workbuoy-suite
+      - "1025:1025"
+      - "8025:8025"
+
+  backend:
+    build:
+      context: ./backend
     depends_on:
       - db
+      - mailhog
+    environment:
+      PORT: 4000
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/wb?schema=public
+      MAILHOG_HOST: mailhog
+      MAILHOG_PORT: 1025
+    ports:
+      - "4000:4000"
+
+  frontend:
+    build:
+      context: ./frontend
+    depends_on:
+      - backend
+    environment:
+      VITE_API_BASE_URL: http://backend:4000/api/v1
+    ports:
+      - "5173:5173"
+
 volumes:
-  db_data:
+  wb_pg:

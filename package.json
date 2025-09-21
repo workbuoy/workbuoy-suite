@@ -4,7 +4,8 @@
   "scripts": {
     "build": "tsc --noEmit -p tsconfig.proactivity.json",
     "test": "npm run test --prefix backend",
-    "typecheck": "tsc --noEmit -p tsconfig.meta.json"
+    "typecheck": "tsc --noEmit -p tsconfig.meta.json",
+    "seed": "node -r ts-node/register prisma/seed.ts"
   },
   "dependencies": {
     "@prisma/client": "^5.14.0",
