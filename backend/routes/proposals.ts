@@ -4,6 +4,9 @@ import { loadRolesFromRepo, loadFeaturesFromRepo } from '../../src/roles/loader'
 import { requiresProMode } from '../../src/core/proactivity/guards';
 import { ProactivityMode } from '../../src/core/proactivity/modes';
 import { resolveProactivityForRequest } from './utils/proactivityContext';
+import { envBool } from '../../src/core/env';
+import { getRoleRegistry, resolveUserBinding } from '../../src/roles/service';
+import type { UserRoleBinding } from '../../src/roles/types';
 import {
   listProposals,
   createProposal as recordProposal,
@@ -21,7 +24,25 @@ import { policyCheck } from '../../src/core/policy';
 import { logIntent } from '../../src/core/intentLog';
 
 const router = Router();
-const roleRegistry = new RoleRegistry(loadRolesFromRepo(), loadFeaturesFromRepo(), []);
+const fallbackRegistry = new RoleRegistry(loadRolesFromRepo(), loadFeaturesFromRepo(), []);
+const usePersistence = envBool('FF_PERSISTENCE', false);
+
+async function selectRegistry() {
+  if (usePersistence) {
+    return getRoleRegistry();
+  }
+  return fallbackRegistry;
+}
+
+async function resolveBinding(req: any): Promise<{ tenantId: string; userId: string; role: string; binding: UserRoleBinding }>
+{
+  const tenantId = String(req.header('x-tenant') || req.header('x-tenant-id') || 'demo');
+  const userId = String(req.header('x-user') || req.header('x-user-id') || 'demo-user');
+  const role = String(req.header('x-role') || req.header('x-user-role') || 'sales_rep');
+  const fallback: UserRoleBinding = { userId, primaryRole: role };
+  const binding = (await resolveUserBinding(tenantId, userId, fallback)) ?? fallback;
+  return { tenantId, userId, role, binding };
+}
 
 function headerIdempotencyKey(req: any): string | undefined {
   const header = req.header('idempotency-key') || req.header('Idempotency-Key');
@@ -34,10 +55,19 @@ function headerIdempotencyKey(req: any): string | undefined {
   return undefined;
 }
 
-router.use((req, _res, next) => {
-  const context = resolveProactivityForRequest(roleRegistry, req as any, { logEvent: false });
-  (req as any).proactivityContext = context;
-  next();
+router.use(async (req, _res, next) => {
+  try {
+    const registry = await selectRegistry();
+    const { binding } = await resolveBinding(req);
+    const context = resolveProactivityForRequest(registry, req as any, {
+      logEvent: false,
+      roleBinding: binding,
+    });
+    (req as any).proactivityContext = context;
+    next();
+  } catch (err) {
+    next(err);
+  }
 });
 
 router.get('/proposals', async (req, res) => {
@@ -107,13 +137,13 @@ router.post('/proposals/:id/approve', requiresProMode(ProactivityMode.Kraken), a
 
   try {
     const result = await runCapabilityWithRole(
-      roleRegistry,
+      ctx.registry,
       proposal.capabilityId,
       proposal.featureId,
       proposal.payload,
       {
         tenantId: ctx.tenantId,
-        roleBinding: { userId: ctx.userId, primaryRole: ctx.role },
+        roleBinding: ctx.roleBinding,
         requestedMode: ctx.state.requested,
         compatMode: req.header('x-proactivity-compat'),
         idempotencyKey,

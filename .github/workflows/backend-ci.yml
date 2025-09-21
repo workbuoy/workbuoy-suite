@@ -46,3 +46,64 @@ jobs:
             tests/features/active.api.test.ts \
             tests/usage/usage.api.test.ts \
             --runInBand --passWithNoTests
+
+  test-persistence:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: workbuoy
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgres://postgres:postgres@localhost:5432/workbuoy
+      FF_PERSISTENCE: 'true'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install root deps
+        run: |
+          if [ -f package-lock.json ]; then
+            npm ci --omit=optional --no-audit --fund=false
+          else
+            npm install --no-audit --fund=false
+          fi
+
+      - name: Install backend deps
+        working-directory: backend
+        run: |
+          if [ -f package-lock.json ]; then
+            npm ci --omit=optional --no-audit --fund=false
+          else
+            npm install --no-audit --fund=false
+          fi
+
+      - name: Run Prisma migrations
+        run: npx prisma migrate deploy
+
+      - name: Run persistence tests
+        working-directory: backend
+        run: |
+          npm test -- \
+            tests/roles/db.registry.test.ts \
+            tests/usage/db.usage.test.ts \
+            tests/features/active.api.test.ts \
+            tests/admin/roles.api.test.ts \
+            tests/proactivity/context.integration.test.ts \
+            --runInBand --passWithNoTests
