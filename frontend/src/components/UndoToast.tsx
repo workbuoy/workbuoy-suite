@@ -28,24 +28,24 @@ export function UndoToast({
   const undoButtonRef = useRef<HTMLButtonElement | null>(null);
 
   useEffect(() => {
-    if (open) {
-      setStatus("idle");
-      const timer = window.setTimeout(() => {
-        undoButtonRef.current?.focus({ preventScroll: true });
-      }, 40);
-      const onKey = (event: KeyboardEvent) => {
-        if (event.key === "Escape") {
-          event.stopPropagation();
-          onClose?.();
-        }
-      };
-      document.addEventListener("keydown", onKey);
-      return () => {
-        window.clearTimeout(timer);
-        document.removeEventListener("keydown", onKey);
-      };
-    }
-    return;
+    if (!open) return;
+    setStatus("idle");
+    const timer = window.setTimeout(() => {
+      undoButtonRef.current?.focus({ preventScroll: true });
+    }, 40);
+
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        event.stopPropagation();
+        onClose?.();
+      }
+    };
+
+    document.addEventListener("keydown", onKey);
+    return () => {
+      window.clearTimeout(timer);
+      document.removeEventListener("keydown", onKey);
+    };
   }, [open, onClose]);
 
   if (!open) return null;
@@ -73,7 +73,7 @@ export function UndoToast({
           onClose?.();
         }, 1200);
       }
-    } catch (error) {
+    } catch {
       setStatus("error");
     }
   }

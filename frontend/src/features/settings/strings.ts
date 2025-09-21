@@ -44,6 +44,12 @@ export const preferencesStrings = {
     reducedMotionHint: "Gir roligere demoer og lettere fokus.",
   },
   footnote: "Endringer lagres lokalt og påvirker kun denne nettleseren.",
+  demo: {
+    start: "Start demo",
+    stop: "Avslutt demo",
+    statusOn: "Demo-modus er aktiv. Panelet viser mock-data og snarveier.",
+    statusOff: "Aktiver en guidet demo for WorkBuoy-panelet.",
+  },
 };
 
 export type PreferencesStrings = typeof preferencesStrings;

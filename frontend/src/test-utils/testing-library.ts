@@ -1,5 +1,6 @@
 import React from "react";
 import { createRoot, Root } from "react-dom/client";
+import { act as reactAct } from "react";
 
 type Matcher = string | RegExp;
 
@@ -10,6 +11,11 @@ type RenderResult = {
 };
 
 const roots = new Set<Root>();
+const containers = new Map<Root, HTMLElement>();
+
+function act(callback: () => void | Promise<void>) {
+  return reactAct(callback);
+}
 
 function matchesText(node: Element, matcher: Matcher): boolean {
   const text = node.textContent ?? "";
@@ -27,10 +33,14 @@ function queryAllByText(matcher: Matcher) {
   return nodes;
 }
 
-function getByText(matcher: Matcher) {
+function getAllByText(matcher: Matcher) {
   const result = queryAllByText(matcher);
   if (result.length === 0) throw new Error(`Unable to find text: ${matcher}`);
-  return result[0] as HTMLElement;
+  return result as HTMLElement[];
+}
+
+function getByText(matcher: Matcher) {
+  return getAllByText(matcher)[0];
 }
 
 function getByPlaceholderText(matcher: Matcher) {
@@ -67,15 +77,54 @@ function getByLabelText(matcher: Matcher) {
   throw new Error(`Unable to find label: ${matcher}`);
 }
 
+const implicitRoles: Record<string, string> = {
+  button: "button",
+  summary: "button",
+  form: "form",
+  dialog: "dialog",
+  table: "table",
+  thead: "rowgroup",
+  tbody: "rowgroup",
+  tr: "row",
+  th: "columnheader",
+  td: "cell",
+  ul: "list",
+  ol: "list",
+  li: "listitem",
+  h1: "heading",
+  h2: "heading",
+  h3: "heading",
+  h4: "heading",
+  h5: "heading",
+  h6: "heading",
+  section: "region",
+};
+
+function matchesRole(element: HTMLElement, role: string): boolean {
+  const explicit = element.getAttribute("role");
+  if (explicit) return explicit === role;
+  const tag = element.tagName.toLowerCase();
+  const implicit = implicitRoles[tag];
+  if (!implicit) return false;
+  if (role === "heading") {
+    return implicit === "heading" && /^h[1-6]$/.test(tag);
+  }
+  return implicit === role;
+}
+
 function getByRole(role: string, { name }: { name?: Matcher } = {}) {
   const elements = Array.from(document.body.querySelectorAll<HTMLElement>("*"));
   for (const el of elements) {
-    if (el.getAttribute("role") === role) {
-      if (!name) return el;
-      const accessible = el.getAttribute("aria-label") || el.textContent || "";
-      if (typeof name === "string" ? accessible.includes(name) : name.test(accessible)) {
-        return el;
-      }
+    if (!matchesRole(el, role)) continue;
+    if (!name) return el;
+    const labelledBy = el.getAttribute("aria-labelledby");
+    let accessible = el.getAttribute("aria-label") || el.textContent || "";
+    if (labelledBy) {
+      const labelElement = document.getElementById(labelledBy);
+      if (labelElement) accessible = labelElement.textContent || accessible;
+    }
+    if (typeof name === "string" ? accessible.includes(name) : name.test(accessible)) {
+      return el;
     }
   }
   throw new Error(`Unable to find role: ${role}`);
@@ -98,6 +147,10 @@ function findByText(matcher: Matcher) {
   return waitFor(() => getByText(matcher));
 }
 
+function findAllByText(matcher: Matcher) {
+  return waitFor(() => getAllByText(matcher));
+}
+
 function findByLabelText(matcher: Matcher) {
   return waitFor(() => getByLabelText(matcher));
 }
@@ -111,50 +164,76 @@ export function render(ui: React.ReactElement): RenderResult {
   document.body.appendChild(container);
   const root = createRoot(container);
   roots.add(root);
-  root.render(ui);
+  containers.set(root, container);
+  act(() => {
+    root.render(ui);
+  });
 
   return {
     container,
     rerender(next) {
-      root.render(next);
+      act(() => {
+        root.render(next);
+      });
     },
     unmount() {
-      root.unmount();
+      act(() => {
+        root.unmount();
+      });
       roots.delete(root);
+      containers.delete(root);
       container.remove();
     },
   };
 }
 
 export async function cleanup() {
-  roots.forEach((root) => root.unmount());
+  roots.forEach((root) => {
+    act(() => {
+      root.unmount();
+    });
+  });
   roots.clear();
+  containers.forEach((container) => {
+    if (container.parentNode) container.parentNode.removeChild(container);
+  });
+  containers.clear();
   document.body.innerHTML = "";
 }
 
 export const fireEvent = {
   click(element: Element) {
-    element.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
+    return act(async () => {
+      element.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
+    });
   },
   change(element: Element, init: { target?: { value?: any } } = {}) {
-    const target = element as HTMLInputElement;
-    if (init.target && "value" in init.target) {
-      target.value = init.target.value;
-    }
-    element.dispatchEvent(new Event("input", { bubbles: true }));
-    element.dispatchEvent(new Event("change", { bubbles: true }));
+    return act(async () => {
+      const target = element as HTMLInputElement;
+      if (init.target && "value" in init.target) {
+        target.value = init.target.value;
+      }
+      element.dispatchEvent(new Event("input", { bubbles: true }));
+      element.dispatchEvent(new Event("change", { bubbles: true }));
+    });
   },
   keyDown(element: Element, init: KeyboardEventInit) {
-    element.dispatchEvent(new KeyboardEvent("keydown", { bubbles: true, cancelable: true, ...init }));
+    return act(async () => {
+      element.dispatchEvent(new KeyboardEvent("keydown", { bubbles: true, cancelable: true, ...init }));
+    });
   },
   keyUp(element: Element, init: KeyboardEventInit) {
-    element.dispatchEvent(new KeyboardEvent("keyup", { bubbles: true, cancelable: true, ...init }));
+    return act(async () => {
+      element.dispatchEvent(new KeyboardEvent("keyup", { bubbles: true, cancelable: true, ...init }));
+    });
   },
 };
 
 export const screen = {
   getByText,
+  getAllByText,
   findByText,
+  findAllByText,
   getByLabelText,
   findByLabelText,
   getByRole,
@@ -163,3 +242,4 @@ export const screen = {
 };
 
 export { waitFor };
+export { act };

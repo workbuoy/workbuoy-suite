@@ -8,6 +8,7 @@ import {
   type SettingsState,
 } from "@/store/settings";
 import "./preferences.css";
+import { useDemoMode } from "@/features/demo/useDemoMode";
 
 type ToggleDescriptor = {
   key: SettingsKey;
@@ -100,7 +101,13 @@ const GROUPS: ToggleGroup[] = [
   },
 ];
 
-function PreferenceToggle({ descriptor, state }: { descriptor: ToggleDescriptor; state: SettingsState }) {
+function PreferenceToggle({
+  descriptor,
+  state,
+}: {
+  descriptor: ToggleDescriptor;
+  state: SettingsState;
+}) {
   const id = React.useId();
   const labelId = `${id}-label`;
   const descriptionId = `${id}-description`;
@@ -152,9 +159,11 @@ function PreferenceToggle({ descriptor, state }: { descriptor: ToggleDescriptor;
 
 export default function Preferences() {
   const settings = useSettings((state) => state);
+  const { active: demoActive, start: startDemo, stop: stopDemo } = useDemoMode();
 
   useEffect(() => {
-    const enabled = settings.audioCues && !settings.reducedSound && !settings.systemReducedSound;
+    const enabled =
+      settings.audioCues && !settings.reducedSound && !settings.systemReducedSound;
     audioCue.setEnabled(enabled);
   }, [settings.audioCues, settings.reducedSound, settings.systemReducedSound]);
 
@@ -167,7 +176,12 @@ export default function Preferences() {
       </header>
       <div className="settings-panel__groups">
         {GROUPS.map((group) => (
-          <div key={group.id} className="settings-group" role="group" aria-labelledby={`${group.id}-heading`}>
+          <div
+            key={group.id}
+            className="settings-group"
+            role="group"
+            aria-labelledby={`${group.id}-heading`}
+          >
             <h3 id={`${group.id}-heading`} className="settings-group__title">
               {group.title}
             </h3>
@@ -177,7 +191,25 @@ export default function Preferences() {
           </div>
         ))}
       </div>
-      <p className="settings-panel__footnote">{strings.footnote}</p>
+      <footer className="settings-panel__footer">
+        <p className="settings-panel__footnote">{strings.footnote}</p>
+        <div className="settings-panel__demo">
+          <button
+            type="button"
+            onClick={demoActive ? stopDemo : startDemo}
+            aria-pressed={demoActive}
+          >
+            {demoActive ? strings.demo.stop : strings.demo.start}
+          </button>
+          <span
+            className="settings-panel__demo-status"
+            role="status"
+            aria-live="polite"
+          >
+            {demoActive ? strings.demo.statusOn : strings.demo.statusOff}
+          </span>
+        </div>
+      </footer>
     </section>
   );
 }

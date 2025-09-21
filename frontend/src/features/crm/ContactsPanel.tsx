@@ -8,6 +8,8 @@ import UndoToast from "@/components/UndoToast";
 import { contactsStrings as strings } from "./strings";
 import TemporalLayer from "@/features/time/TemporalLayer";
 import { audioCue } from "@/features/peripheral/AudioCue";
+import { useDemoMode, publishDemoEvent } from "@/features/demo/useDemoMode";
+import { demoContacts } from "@/features/demo/data";
 import ContactMap from "./ContactMap";
 
 type FormState = { id: string; name: string; email: string; phone: string };
@@ -17,6 +19,7 @@ type UndoInfo = {
   message: string;
   token?: string;
   applyLocalUndo?: () => void;
+  demoContext?: { entity: "contact"; id: string };
 };
 
 const initialForm: FormState = { id: "", name: "", email: "", phone: "" };
@@ -33,16 +36,25 @@ export function ContactsPanel({ onClose }: ContactsPanelProps = {}) {
   const [undoInfo, setUndoInfo] = useState<UndoInfo | null>(null);
   const [toastOpen, setToastOpen] = useState(false);
   const [showTemporal, setShowTemporal] = useState(false);
+  const { active: demoActive } = useDemoMode();
   const [showMap, setShowMap] = useState(false);
 
   async function load() {
+    if (demoActive) {
+      setContacts(demoContacts.map((contact) => ({ ...contact })));
+      return;
+    }
     const res = await apiFetch<Contact[]>('/api/crm/contacts');
     setContacts(res);
   }
 
   useEffect(() => {
+    if (demoActive) {
+      setContacts(demoContacts.map((contact) => ({ ...contact })));
+      return;
+    }
     load().catch(() => setContacts([]));
-  }, []);
+  }, [demoActive]);
 
   useEffect(() => {
     if (!open) return;
@@ -60,16 +72,38 @@ export function ContactsPanel({ onClose }: ContactsPanelProps = {}) {
     if (!form.name.trim()) return;
     setSaving(true);
     try {
+      if (demoActive) {
+        const created: Contact = {
+          ...form,
+          id: `demo-contact-${Date.now()}`,
+          createdAt: new Date().toISOString(),
+        };
+        setContacts((current) => [created, ...current]);
+        audioCue.play('success');
+        setUndoInfo({
+          message: strings.toast.created(created.name),
+          token: created.id,
+          applyLocalUndo: () =>
+            setContacts((current) => current.filter((c) => c.id !== created.id)),
+          demoContext: { entity: 'contact', id: created.id },
+        });
+        setToastOpen(true);
+        setOpen(false);
+        setForm(initialForm);
+        publishDemoEvent({ type: 'contact-created', contact: created });
+        return;
+      }
+
       const created = await apiFetch<Contact & { undoToken?: string }>(
         '/api/crm/contacts',
         { method: 'POST', body: JSON.stringify(form) }
       );
-      setContacts(current => [created, ...current]);
+      setContacts((current) => [created, ...current]);
       audioCue.play('success');
       setUndoInfo({
         message: strings.toast.created(created.name),
         token: created.undoToken,
-        applyLocalUndo: () => setContacts(current => current.filter(c => c.id !== created.id)),
+        applyLocalUndo: () => setContacts((current) => current.filter((c) => c.id !== created.id)),
       });
       setToastOpen(true);
       setOpen(false);
@@ -85,16 +119,32 @@ export function ContactsPanel({ onClose }: ContactsPanelProps = {}) {
 
   async function remove(contact: Contact) {
     try {
-      const result = await apiFetch<{ undoToken?: string; restored?: Contact }>('/api/crm/contacts', {
-        method: 'DELETE',
-        body: JSON.stringify({ id: contact.id }),
-      });
-      setContacts(current => current.filter(c => c.id !== contact.id));
+      if (demoActive) {
+        setContacts((current) => current.filter((c) => c.id !== contact.id));
+        audioCue.play('success');
+        setUndoInfo({
+          message: strings.toast.deleted(contact.name || contact.id),
+          token: contact.id,
+          applyLocalUndo: () => setContacts((current) => [contact, ...current]),
+          demoContext: { entity: 'contact', id: contact.id },
+        });
+        setToastOpen(true);
+        return;
+      }
+
+      const result = await apiFetch<{ undoToken?: string; restored?: Contact }>(
+        '/api/crm/contacts',
+        {
+          method: 'DELETE',
+          body: JSON.stringify({ id: contact.id }),
+        }
+      );
+      setContacts((current) => current.filter((c) => c.id !== contact.id));
       audioCue.play('success');
       setUndoInfo({
         message: strings.toast.deleted(contact.name || contact.id),
         token: result?.undoToken,
-        applyLocalUndo: () => setContacts(current => [contact, ...current]),
+        applyLocalUndo: () => setContacts((current) => [contact, ...current]),
       });
       setToastOpen(true);
     } catch (error) {
@@ -105,9 +155,26 @@ export function ContactsPanel({ onClose }: ContactsPanelProps = {}) {
   }
 
   async function performUndo() {
-    if (!undoInfo?.token) {
+    if (!undoInfo) {
       return false;
     }
+
+    if (demoActive) {
+      undoInfo.applyLocalUndo?.();
+      if (undoInfo.demoContext) {
+        publishDemoEvent({
+          type: 'undo',
+          entity: undoInfo.demoContext.entity,
+          id: undoInfo.demoContext.id,
+        });
+      }
+      return true;
+    }
+
+    if (!undoInfo.token) {
+      return false;
+    }
+
     try {
       await apiFetch('/core/undo', {
         method: 'POST',
@@ -121,22 +188,24 @@ export function ContactsPanel({ onClose }: ContactsPanelProps = {}) {
     }
   }
 
-  const temporalItems = useMemo(() =>
-    contacts.map((contact) => {
-      const created = contact.createdAt || new Date().toISOString();
-      const createdDate = new Date(created);
-      const diff = createdDate.getTime() - Date.now();
-      let state: 'past' | 'now' | 'future' = 'now';
-      if (diff < -86400000) state = 'past';
-      else if (diff > 86400000) state = 'future';
-      return {
-        id: contact.id,
-        title: contact.name || contact.id,
-        start: created,
-        state,
-      };
-    }),
-  [contacts]);
+  const temporalItems = useMemo(
+    () =>
+      contacts.map((contact) => {
+        const created = contact.createdAt || new Date().toISOString();
+        const createdDate = new Date(created);
+        const diff = createdDate.getTime() - Date.now();
+        let state: 'past' | 'now' | 'future' = 'now';
+        if (diff < -86400000) state = 'past';
+        else if (diff > 86400000) state = 'future';
+        return {
+          id: contact.id,
+          title: contact.name || contact.id,
+          start: created,
+          state,
+        };
+      }),
+    [contacts]
+  );
 
   return (
     <Card className="m-2">
