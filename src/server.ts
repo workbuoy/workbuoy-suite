@@ -9,6 +9,10 @@ import { debugBusHandler } from './routes/_debug.bus';
 import knowledgeRouter from './routes/knowledge.router';
 import { auditRouter } from './routes/audit';
 import { bus } from './core/eventBusV2';
+import { maybeMountPersistenceV2 } from './src/routes/_autoload.persistence.v2';
+...
+maybeMountPersistenceV2(app);
+
 
 const app = express();
 app.use(express.json());
