@@ -1,11 +1,16 @@
-Patch: fix ESM cycle in seed script by using tsx runner and lazy dynamic import.
+Fix CI seed step to avoid ts-node ESM cycle
 
-Files:
-- package.json (adds devDep 'tsx' and script 'seed:roles')
-- .github/workflows/ci.yml (use 'npm run seed:roles' instead of node --loader ts-node/esm ...)
-- scripts/seed-roles-from-json.ts (no shebang, lazy dynamic import, no extension imports)
-- scripts/roles-io.ts (no extension in import path to match tsx)
+What this patch does
+- Adds an npm script "seed:roles" that runs seed with `tsx` (no loader cycles)
+- Updates .github/workflows/ci.yml to call `npm run seed:roles`
 
-How to apply:
-1) Create a branch and unzip into repo root.
-2) Commit and open PR. CI will run the seed step via `npm run seed:roles`.
+How to apply
+1) Create a new branch.
+2) Unzip this archive into the repo root (overwriting existing files if prompted).
+3) Commit and push, then open a PR.
+
+Notes
+- If you have multiple workflow files, ensure any other occurrences of
+  `node --loader ts-node/esm scripts/seed-roles-from-json.ts` are replaced
+  with `npm run seed:roles`.
+- This patch does not modify your seed script itself.
