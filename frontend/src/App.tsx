@@ -6,6 +6,7 @@ import { useConnections } from "./navi/useConnections";
 import ModeSwitcher from "./proactivity/ModeSwitcher";
 import { ActiveContextProvider } from "./core/ActiveContext";
 import { IntrospectionBadge } from "./components/IntrospectionBadge";
+import DockWidget from "@/features/dock/DockWidget";
 
 function HealthBadge() {
   const [status, setStatus] = useState<"ok" | "wait" | "err">("wait");
@@ -72,6 +73,7 @@ export default function App() {
   return (
     <ActiveContextProvider>
       <Shell />
+      <DockWidget />
     </ActiveContextProvider>
   );
 }

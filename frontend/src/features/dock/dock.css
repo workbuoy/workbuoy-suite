@@ -1,0 +1,278 @@
+:root {
+  --wb-edge-ok: rgba(94, 234, 212, 0.7);
+  --wb-edge-warn: rgba(251, 191, 36, 0.8);
+  --wb-edge-error: rgba(248, 113, 113, 0.88);
+  --wb-edge-thinking: rgba(129, 140, 248, 0.75);
+}
+
+@keyframes wbGlow {
+  0%,
+  100% {
+    opacity: 0.15;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+
+@keyframes wbPulse {
+  0%,
+  100% {
+    opacity: 0.25;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+@keyframes wbScan {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 140% 50%;
+  }
+}
+
+.wb-bubble {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 56px;
+  height: 56px;
+  border-radius: 9999px;
+  border: 1px solid rgba(148, 163, 184, 0.32);
+  background: rgba(15, 23, 42, 0.86);
+  color: #f8fbff;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  box-shadow: 0 18px 40px -18px rgba(15, 23, 42, 0.6);
+  transition: transform 220ms ease, box-shadow 220ms ease;
+  z-index: 1000;
+}
+
+.wb-bubble[data-open="true"] {
+  transform: scale(0.96);
+  box-shadow: 0 12px 28px -16px rgba(15, 23, 42, 0.65);
+}
+
+.wb-bubble:focus-visible {
+  outline: 2px solid var(--focus-ring, rgba(139, 180, 255, 0.9));
+  outline-offset: 2px;
+}
+
+.wb-bubble__icon {
+  font-size: 22px;
+}
+
+.wb-bubble__halo {
+  position: absolute;
+  inset: -10px;
+  border-radius: 9999px;
+  background: radial-gradient(circle, rgba(129, 140, 248, 0.4), transparent 65%);
+  opacity: 0;
+  pointer-events: none;
+  animation: wbGlow 3s ease-in-out infinite;
+}
+
+.wb-bubble[data-open="false"] .wb-bubble__halo {
+  opacity: 1;
+}
+
+.wb-bubble__badge {
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  width: 10px;
+  height: 10px;
+  border-radius: 9999px;
+  background: rgb(248, 113, 113);
+  box-shadow: 0 0 0 2px rgba(15, 23, 42, 0.9);
+}
+
+.wb-dock__panel {
+  position: fixed;
+  bottom: 20px;
+  right: calc(20px + 56px + 16px);
+  z-index: 995;
+}
+
+.wb-dock__surface {
+  position: relative;
+  background: rgba(15, 23, 42, 0.86);
+  border: 1px solid rgba(148, 163, 184, 0.24);
+  border-radius: 20px;
+  box-shadow: 0 28px 60px -24px rgba(15, 23, 42, 0.75);
+  padding: 12px;
+  display: grid;
+  overflow: visible;
+}
+
+.wb-dock__surface:focus-visible {
+  outline: 2px solid var(--focus-ring, rgba(139, 180, 255, 0.9));
+  outline-offset: 4px;
+}
+
+.wb-dock__flipcard {
+  margin: 0;
+}
+
+.wb-dock__flipcard .flip-card-toolbar {
+  padding: 12px;
+}
+
+.wb-dock__flipcard .flip-card-face {
+  padding-top: calc(var(--space-xl, 24px) * 1.2);
+}
+
+.wb-dock__popout {
+  background: rgba(79, 70, 229, 0.22);
+  border-color: rgba(129, 140, 248, 0.6);
+}
+
+.wb-dock__popout:hover {
+  background: rgba(79, 70, 229, 0.32);
+  border-color: rgba(165, 180, 252, 0.8);
+}
+
+.wb-peripheral {
+  position: absolute;
+  pointer-events: none;
+  border-radius: 999px;
+  z-index: -1;
+}
+
+.wb-peripheral--right-edge {
+  top: 8px;
+  bottom: 8px;
+  right: -2px;
+  width: 4px;
+}
+
+.wb-peripheral--full-right {
+  top: 0;
+  bottom: 0;
+  right: -6px;
+  width: 6px;
+}
+
+.wb-peripheral--ok {
+  background: linear-gradient(180deg, var(--wb-edge-ok), transparent);
+  opacity: 0.4;
+}
+
+.wb-peripheral--warn {
+  background: linear-gradient(180deg, var(--wb-edge-warn), transparent);
+  animation: wbPulse 2.8s ease-in-out infinite;
+}
+
+.wb-peripheral--error {
+  background: linear-gradient(180deg, var(--wb-edge-error), transparent);
+  animation: wbPulse 2.4s ease-in-out infinite;
+}
+
+.wb-peripheral--thinking {
+  background: linear-gradient(120deg, transparent, var(--wb-edge-thinking), transparent);
+  background-size: 180% 180%;
+  animation: wbScan 3.6s ease-in-out infinite;
+  opacity: 0.5;
+}
+
+.wb-dock-host {
+  position: fixed;
+  inset: 0;
+  z-index: 1050;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 20px;
+}
+
+.wb-dock-host__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(2, 6, 23, 0.75);
+  backdrop-filter: blur(6px);
+}
+
+.wb-dock-host__dialog {
+  position: relative;
+  width: min(1280px, 96vw);
+  max-height: 90vh;
+  background: rgba(15, 23, 42, 0.95);
+  border: 1px solid rgba(148, 163, 184, 0.32);
+  border-radius: 24px;
+  box-shadow: 0 40px 80px -36px rgba(15, 23, 42, 0.8);
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  gap: 12px;
+  padding: 20px;
+  overflow: hidden;
+}
+
+.wb-dock-host__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.wb-dock-host__title-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.wb-dock-host__title-group h2 {
+  margin: 0;
+  font-size: 1.1rem;
+  letter-spacing: 0.04em;
+}
+
+.wb-dock-host__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.wb-dock-host__body {
+  position: relative;
+  min-height: 0;
+  display: grid;
+  place-items: center;
+  padding: 8px;
+}
+
+.wb-dock-host__body .wb-peripheral {
+  right: -8px;
+}
+
+.wb-dock-host__footer {
+  font-size: 0.85rem;
+  color: rgba(226, 232, 240, 0.72);
+  text-align: right;
+}
+
+@media (max-width: 720px) {
+  .wb-dock__panel {
+    right: 20px;
+    left: 20px;
+  }
+
+  .wb-dock__surface {
+    padding: 8px;
+  }
+}
+
+@media (max-width: 960px) {
+  .wb-dock-host {
+    padding: 16px;
+  }
+
+  .wb-dock-host__dialog {
+    width: min(960px, 96vw);
+    padding: 16px;
+  }
+}

@@ -3,6 +3,7 @@ export const preferencesStrings = {
   groups: {
     audio: "Varsler og lyd",
     integrations: "Integrasjonspaneler",
+    dock: "Dock & Widget",
     accessibility: "Tilgjengelighet",
   },
   toggles: {
@@ -29,6 +30,22 @@ export const preferencesStrings = {
     enableVismaPanel: {
       label: "Visma innsikt",
       description: "Slå på KPI-oversikten for ERP-demoen.",
+    },
+    enableDockWidget: {
+      label: "Dock-widget",
+      description: "Vis flytende Workbuoy i hjørnet.",
+    },
+    dockInitialCollapsed: {
+      label: "Start minimert",
+      description: "Åpne som boble ved oppstart.",
+    },
+    enablePeripheralCues: {
+      label: "Kantglød (status)",
+      description: "Subtile statusindikatorer i kantene.",
+    },
+    dockHotkeys: {
+      label: "Globale snarveier",
+      description: "Ctrl+Space for flip, Ctrl+Shift+Space til Navi.",
     },
     reducedMotion: {
       label: "Redusert animasjon",

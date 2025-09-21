@@ -81,6 +81,32 @@ const GROUPS: ToggleGroup[] = [
     ],
   },
   {
+    id: "dock",
+    title: strings.groups.dock,
+    toggles: [
+      {
+        key: "enableDockWidget",
+        label: strings.toggles.enableDockWidget.label,
+        description: strings.toggles.enableDockWidget.description,
+      },
+      {
+        key: "dockInitialCollapsed",
+        label: strings.toggles.dockInitialCollapsed.label,
+        description: strings.toggles.dockInitialCollapsed.description,
+      },
+      {
+        key: "enablePeripheralCues",
+        label: strings.toggles.enablePeripheralCues.label,
+        description: strings.toggles.enablePeripheralCues.description,
+      },
+      {
+        key: "dockHotkeys",
+        label: strings.toggles.dockHotkeys.label,
+        description: strings.toggles.dockHotkeys.description,
+      },
+    ],
+  },
+  {
     id: "accessibility",
     title: strings.groups.accessibility,
     toggles: [

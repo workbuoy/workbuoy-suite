@@ -8,6 +8,10 @@ type SettingsKey =
   | "enableCollabPanel"
   | "enableGwsPanel"
   | "enableVismaPanel"
+  | "enableDockWidget"
+  | "dockInitialCollapsed"
+  | "enablePeripheralCues"
+  | "dockHotkeys"
   | "reducedMotion"
   | "reducedSound";
 
@@ -19,6 +23,10 @@ export type SettingsState = {
   enableCollabPanel: boolean;
   enableGwsPanel: boolean;
   enableVismaPanel: boolean;
+  enableDockWidget: boolean;
+  dockInitialCollapsed: boolean;
+  enablePeripheralCues: boolean;
+  dockHotkeys: boolean;
   reducedMotion: boolean;
   reducedSound: boolean;
   systemReducedMotion: boolean;
@@ -39,6 +47,10 @@ const PERSISTED_KEYS: SettingsKey[] = [
   "enableCollabPanel",
   "enableGwsPanel",
   "enableVismaPanel",
+  "enableDockWidget",
+  "dockInitialCollapsed",
+  "enablePeripheralCues",
+  "dockHotkeys",
   "reducedMotion",
   "reducedSound",
 ];
@@ -108,6 +120,10 @@ function baseState(): SettingsState {
     enableCollabPanel: Flags.enableCollabPanel,
     enableGwsPanel: Flags.enableGwsPanel,
     enableVismaPanel: Flags.enableVismaPanel,
+    enableDockWidget: true,
+    dockInitialCollapsed: true,
+    enablePeripheralCues: true,
+    dockHotkeys: true,
     reducedMotion: false,
     reducedSound: false,
     systemReducedMotion: false,

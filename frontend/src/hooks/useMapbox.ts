@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import mapboxgl, { Map } from 'mapbox-gl';
+import mapboxgl from 'mapbox-gl';
 
 type MarkerInput = {
   id: string;
@@ -18,7 +18,7 @@ type UseMapboxOptions = {
 };
 
 export function useMapbox(containerRef: React.RefObject<HTMLDivElement>, options: UseMapboxOptions) {
-  const [map, setMap] = useState<Map | null>(null);
+  const [map, setMap] = useState<mapboxgl.Map | null>(null);
   const markersRef = useRef<Map<string, mapboxgl.Marker>>(new Map());
   const viteEnv = typeof import.meta !== 'undefined' ? (import.meta as any).env || {} : {};
   const token = options.token || viteEnv.VITE_MAPBOX_TOKEN || (window as any)?.MAPBOX_TOKEN;

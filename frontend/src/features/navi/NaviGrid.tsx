@@ -11,6 +11,10 @@ import VismaImpactPanel from "@/features/integrations/visma/VismaImpactPanel";
 import Preferences from "@/features/settings/Preferences";
 import { useSettings } from "@/store/settings";
 
+type NaviGridProps = {
+  variant?: "page" | "panel";
+};
+
 type IntegrationTileDescriptor = {
   id: "collab" | "gws" | "visma";
   name: string;
@@ -18,7 +22,8 @@ type IntegrationTileDescriptor = {
   icon: string;
 };
 
-export default function NaviGrid() {
+export default function NaviGrid({ variant = "page" }: NaviGridProps = {}) {
+  const isPanel = variant === "panel";
   const { addons, loading, error, toggle } = useAddonsStore();
   const [filter, setFilter] = useState(strings.filterAll);
   const [open, setOpen] = useState<string | null>(null);
@@ -107,13 +112,18 @@ export default function NaviGrid() {
     <div
       role="region"
       aria-label={strings.regionLabel}
-      style={{ display: "grid", gridTemplateRows: "auto auto 1fr", height: "100%" }}
+      style={{
+        display: "grid",
+        gridTemplateRows: isPanel ? "auto 1fr" : "auto auto 1fr",
+        height: "100%",
+        minHeight: 0,
+      }}
     >
       <div
         style={{
           display: "flex",
           gap: "var(--space-md)",
-          padding: "var(--space-md)",
+          padding: isPanel ? "var(--space-sm) var(--space-sm) 0" : "var(--space-md)",
           alignItems: "center",
         }}
       >
@@ -140,11 +150,19 @@ export default function NaviGrid() {
         <SynchBadge status={loading ? "pending" : "ok"} />
       </div>
 
-      <div style={{ padding: "0 var(--space-md)" }}>
-        <Preferences />
-      </div>
+      {!isPanel ? (
+        <div style={{ padding: "0 var(--space-md)" }}>
+          <Preferences />
+        </div>
+      ) : null}
 
-      <div style={{ position: "relative", padding: "var(--space-md)", height: "100%" }}>
+      <div
+        style={{
+          position: "relative",
+          padding: isPanel ? "var(--space-sm)" : "var(--space-md)",
+          height: "100%",
+        }}
+      >
         {error && (
           <div
             role="alert"
@@ -162,6 +180,7 @@ export default function NaviGrid() {
               gridTemplateColumns: "repeat(auto-fill, minmax(220px,1fr))",
               overflow: "auto",
               height: "100%",
+              padding: isPanel ? "var(--space-xs)" : undefined,
             }}
           >
             {(!loading &&
@@ -205,11 +224,12 @@ export default function NaviGrid() {
           <div
             style={{
               position: "absolute",
-              inset: "var(--space-md)",
+              inset: isPanel ? "var(--space-sm)" : "var(--space-md)",
               overflow: "auto",
               border: "1px solid var(--stroke-hairline)",
               borderRadius: "var(--radius-lg)",
-              padding: "var(--space-md)",
+              padding: isPanel ? "var(--space-sm)" : "var(--space-md)",
+              background: isPanel ? "rgba(15,23,42,0.75)" : undefined,
             }}
           >
             {open === "crm" && <ContactsPanel onClose={() => setOpen(null)} />}
