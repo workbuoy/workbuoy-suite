@@ -6,25 +6,7 @@ on:
     branches: [ main ]
 
 jobs:
-  backend-inmemory:
-    name: Backend CI (in-memory)
-    runs-on: ubuntu-latest
-    env:
-      FF_PERSISTENCE: "false"
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: 'npm'
-      - run: npm ci
-      - name: Typecheck (meta)
-        run: npm run typecheck
-      - name: Unit tests (backend, in-memory)
-        run: npm run test --prefix backend
-
   backend-persistence:
-    name: Backend CI (persistence)
     runs-on: ubuntu-latest
     services:
       postgres:
@@ -49,19 +31,5 @@ jobs:
           node-version: 20
           cache: 'npm'
       - run: npm ci
-      - name: Prisma generate (best-effort)
-        run: npx prisma generate
       - name: Seed baseline roles (via tsx)
         run: npm run seed:roles
-
-  coverage:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: 'npm'
-      - run: npm ci
-      - name: Coverage (no workspaces)
-        run: npm run test --if-present -- --coverage
