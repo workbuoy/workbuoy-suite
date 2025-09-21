@@ -32,7 +32,9 @@ function setupWindow(prefs: MediaPrefs = {}) {
   const matchMedia = (query: string): MediaQueryList => {
     const matches =
       (prefs.motion && query.includes("prefers-reduced-motion")) ||
-      (prefs.sound && (query.includes("prefers-reduced-sound") || query.includes("prefers-reduced-transparency"))) ||
+      (prefs.sound &&
+        (query.includes("prefers-reduced-sound") ||
+          query.includes("prefers-reduced-transparency"))) ||
       false;
     return {
       matches,
@@ -60,6 +62,7 @@ function setupWindow(prefs: MediaPrefs = {}) {
   };
 
   const localStorage = createLocalStorage();
+
   const location = {
     href: "https://demo.workbuoy.local/",
     search: "",
@@ -110,7 +113,9 @@ describe("Preferences", () => {
     setupWindow();
     const storeModule = await import("@/store/settings");
     storeModule.settingsStore.toggle("enableCollabPanel");
-    expect(globalThis.localStorage.getItem("wb.settings")).toContain("\"enableCollabPanel\":true");
+    expect(globalThis.localStorage.getItem("wb.settings")).toContain(
+      '"enableCollabPanel":true',
+    );
 
     storeModule.settingsStore.reset();
     const Preferences = (await import("./Preferences")).default;

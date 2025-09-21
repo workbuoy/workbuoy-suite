@@ -1,12 +1,11 @@
 import { Router } from 'express';
-import { RoleRegistry } from '../../src/roles/registry';
-import { loadRolesFromRepo, loadFeaturesFromRepo } from '../../src/roles/loader';
 import { runCapabilityWithRole } from '../../src/core/capabilityRunnerRole';
 import { testCaps } from '../../src/capabilities/testCaps';
 import { parseProactivityMode } from '../../src/core/proactivity/modes';
+import { getRoleRegistry, resolveUserBinding } from '../../src/roles/service';
+import type { UserRoleBinding } from '../../src/roles/types';
 
 const router: any = Router();
-const rr = new RoleRegistry(loadRolesFromRepo(), loadFeaturesFromRepo(), []);
 
 async function policyAllowAlways() { return { allowed: true, basis: ['dev:allow'] }; }
 async function logIntent(event: any) { console.log('[intent]', JSON.stringify(event)); }
@@ -24,16 +23,24 @@ router.post('/dev/run', async (req: any, res: any) => {
   const userId = String(req.header('x-user') ?? 'dev-user');
   const role = String(req.header('x-role') ?? 'sales_rep');
   const requestedHeader = req.header('x-proactivity');
+  const compatHeader = req.header('x-proactivity-compat');
+  const idempotencyHeader = req.header('idempotency-key') || req.header('Idempotency-Key');
+
+  const registry = await getRoleRegistry();
+  const fallback: UserRoleBinding = { userId, primaryRole: role };
+  const binding = (await resolveUserBinding(tenantId, userId, fallback)) ?? fallback;
 
   const result = await runCapabilityWithRole(
-    rr,
+    registry,
     capability,
     featureId,
     payload,
     {
       tenantId,
-      roleBinding: { userId, primaryRole: role },
+      roleBinding: binding,
       requestedMode: parseProactivityMode(requestedHeader ?? req.body?.mode),
+      compatMode: compatHeader,
+      idempotencyKey: typeof idempotencyHeader === 'string' ? idempotencyHeader : undefined,
     },
     impl,
     policyAllowAlways,

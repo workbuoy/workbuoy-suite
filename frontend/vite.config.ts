@@ -16,7 +16,7 @@ export default defineConfig({
     },
   },
   test: {
-    environment: "jsdom",
+    environment: "node",
     globals: true,
     setupFiles: "./vitest.setup.ts",
     include: [
@@ -25,6 +25,7 @@ export default defineConfig({
       "src/__tests__/uiSnapshots.test.tsx",
       "src/__tests__/slider.test.tsx",
       "src/__tests__/whyDrawer.test.tsx",
+      // Nytt i denne PR
       "src/features/demo/useDemoMode.test.ts",
       "src/components/UndoToast.test.tsx",
       "src/features/integrations/__tests__/CollabPanel.test.tsx",

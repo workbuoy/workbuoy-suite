@@ -6,6 +6,7 @@ import { installDom } from "./src/test-utils/domShim";
 // Enable React act() warnings integration
 (globalThis as any).IS_REACT_ACT_ENVIRONMENT = true;
 
+// Minimal DOM for node test environment
 installDom();
 
 afterEach(() => {

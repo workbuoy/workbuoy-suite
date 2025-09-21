@@ -29,16 +29,18 @@ export function UndoToast({
 
   useEffect(() => {
     if (!open) return;
-    setStatus((prev) => (prev === "idle" ? prev : "idle"));
+    setStatus("idle");
     const timer = window.setTimeout(() => {
       undoButtonRef.current?.focus({ preventScroll: true });
     }, 40);
+
     const onKey = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
         event.stopPropagation();
         onClose?.();
       }
     };
+
     document.addEventListener("keydown", onKey);
     return () => {
       window.clearTimeout(timer);
@@ -71,7 +73,7 @@ export function UndoToast({
           onClose?.();
         }, 1200);
       }
-    } catch (error) {
+    } catch {
       setStatus("error");
     }
   }

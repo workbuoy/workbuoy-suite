@@ -1140,6 +1140,7 @@ class SimpleWindow extends SimpleEventTarget implements Window {
     super();
     this.document = document;
     document.defaultView = this;
+    // Ensure these constructors are also available as window properties (some libs expect it)
     (this as any).Node = SimpleNode;
     (this as any).HTMLElement = SimpleHTMLElement;
     (this as any).Element = SimpleElement;

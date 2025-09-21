@@ -138,6 +138,7 @@
   transform: translateX(20px);
 }
 
+/* Footer + demo controls */
 .settings-panel__footer {
   display: flex;
   align-items: flex-start;

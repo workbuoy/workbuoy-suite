@@ -60,6 +60,6 @@ describe('runCapabilityWithRole', () => {
     }
     expect(result.proactivity.effective).toBeLessThanOrEqual(mode);
     const logEvent = (logIntent.mock.calls[0] || [])[0];
-    expect(logEvent?.proactivity?.basis?.some((entry: string) => entry.startsWith('requested:'))).toBe(true);
+    expect(logEvent?.proactivity?.basis?.some((entry: string) => entry.startsWith('mode:requested='))).toBe(true);
   });
 });

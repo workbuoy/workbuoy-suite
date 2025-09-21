@@ -22,12 +22,15 @@ export default function NaviGrid() {
   const { addons, loading, error, toggle } = useAddonsStore();
   const [filter, setFilter] = useState(strings.filterAll);
   const [open, setOpen] = useState<string | null>(null);
-  const { enableO365Panel, enableCollabPanel, enableGwsPanel, enableVismaPanel } = useSettings((state) => ({
-    enableO365Panel: state.enableO365Panel,
-    enableCollabPanel: state.enableCollabPanel,
-    enableGwsPanel: state.enableGwsPanel,
-    enableVismaPanel: state.enableVismaPanel,
-  }));
+
+  const { enableO365Panel, enableCollabPanel, enableGwsPanel, enableVismaPanel } = useSettings(
+    (state) => ({
+      enableO365Panel: state.enableO365Panel,
+      enableCollabPanel: state.enableCollabPanel,
+      enableGwsPanel: state.enableGwsPanel,
+      enableVismaPanel: state.enableVismaPanel,
+    }),
+  );
 
   const categories = useMemo(() => {
     const unique = new Set<string>();
@@ -115,26 +118,55 @@ export default function NaviGrid() {
         }}
       >
         <span className="chip">Navi</span>
-        <select aria-label={strings.filterLabel} value={filter} onChange={e=>setFilter(e.target.value)}
-                style={{background:"transparent", color:"var(--fg-default)", border:"1px solid var(--stroke-subtle)", borderRadius:"var(--radius-md)",
-padding:"var(--space-xs) var(--space-sm)"}}>
-          {categories.map(c=> <option key={c} value={c} style={{color:"#000"}}>{c}</option>)}
+        <select
+          aria-label={strings.filterLabel}
+          value={filter}
+          onChange={(e) => setFilter(e.target.value)}
+          style={{
+            background: "transparent",
+            color: "var(--fg-default)",
+            border: "1px solid var(--stroke-subtle)",
+            borderRadius: "var(--radius-md)",
+            padding: "var(--space-xs) var(--space-sm)",
+          }}
+        >
+          {categories.map((c) => (
+            <option key={c} value={c} style={{ color: "#000" }}>
+              {c}
+            </option>
+          ))}
         </select>
-        <span style={{flex:1}}/>
+        <span style={{ flex: 1 }} />
         <SynchBadge status={loading ? "pending" : "ok"} />
       </div>
-      <div style={{padding:"0 var(--space-md)"}}>
+
+      <div style={{ padding: "0 var(--space-md)" }}>
         <Preferences />
       </div>
-      <div style={{position:"relative", padding:"var(--space-md)", height:"100%"}}>
+
+      <div style={{ position: "relative", padding: "var(--space-md)", height: "100%" }}>
         {error && (
-          <div role="alert" className="mb-4 rounded-md border border-red-500/60 bg-red-900/30 p-3 text-sm text-red-200">
+          <div
+            role="alert"
+            className="mb-4 rounded-md border border-red-500/60 bg-red-900/30 p-3 text-sm text-red-200"
+          >
             {strings.manifestError}
           </div>
         )}
+
         {!open ? (
-          <div style={{display:"grid", gap:"var(--space-lg)", gridTemplateColumns:"repeat(auto-fill, minmax(220px,1fr))", overflow:"auto", height:"100%"}}>
-            {(!loading && visibleAddons.length === 0 && (filter !== strings.filterAll || integrationTiles.length === 0)) ? (
+          <div
+            style={{
+              display: "grid",
+              gap: "var(--space-lg)",
+              gridTemplateColumns: "repeat(auto-fill, minmax(220px,1fr))",
+              overflow: "auto",
+              height: "100%",
+            }}
+          >
+            {(!loading &&
+              visibleAddons.length === 0 &&
+              (filter !== strings.filterAll || integrationTiles.length === 0)) ? (
               <div className="rounded-lg border border-slate-800 bg-slate-900/50 p-6 text-center text-sm text-slate-300">
                 {strings.emptyState}
               </div>
@@ -170,12 +202,21 @@ padding:"var(--space-xs) var(--space-sm)"}}>
             )}
           </div>
         ) : (
-          <div style={{position:"absolute", inset:"var(--space-md)", overflow:"auto", border:"1px solid var(--stroke-hairline)", borderRadius:"var(--radius-lg)", padding:"var(--space-md)"}}>
-            {open==="crm" && <ContactsPanel onClose={()=>setOpen(null)}/>}
-            {open==="o365" && enableO365Panel && <O365Panel onClose={()=>setOpen(null)} />}
-            {open==="collab" && enableCollabPanel && <CollabPanel onClose={()=>setOpen(null)} />}
-            {open==="gws" && enableGwsPanel && <GWorkspacePanel onClose={()=>setOpen(null)} />}
-            {open==="visma" && enableVismaPanel && <VismaImpactPanel onClose={()=>setOpen(null)} />}
+          <div
+            style={{
+              position: "absolute",
+              inset: "var(--space-md)",
+              overflow: "auto",
+              border: "1px solid var(--stroke-hairline)",
+              borderRadius: "var(--radius-lg)",
+              padding: "var(--space-md)",
+            }}
+          >
+            {open === "crm" && <ContactsPanel onClose={() => setOpen(null)} />}
+            {open === "o365" && enableO365Panel && <O365Panel onClose={() => setOpen(null)} />}
+            {open === "collab" && enableCollabPanel && <CollabPanel onClose={() => setOpen(null)} />}
+            {open === "gws" && enableGwsPanel && <GWorkspacePanel onClose={() => setOpen(null)} />}
+            {open === "visma" && enableVismaPanel && <VismaImpactPanel onClose={() => setOpen(null)} />}
           </div>
         )}
       </div>

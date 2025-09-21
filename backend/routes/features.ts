@@ -1,19 +1,50 @@
 import { Router } from 'express';
-import { loadRolesFromRepo, loadFeaturesFromRepo } from '../../src/roles/loader';
-import { RoleRegistry } from '../../src/roles/registry';
+import type { UserRoleBinding } from '../../src/roles/types';
+import { getRoleRegistry, resolveUserBinding } from '../../src/roles/service';
 import { getActiveFeatures } from '../../src/features/activation/featureActivation';
-import { aggregateFeatureUseCount } from '../../src/telemetry/usageSignals';
+import { aggregateFeatureUseCount as aggregateInMemory } from '../../src/telemetry/usageSignals';
+import { aggregateFeatureUseCount as aggregateFromDb } from '../../src/telemetry/usageSignals.db';
+import { envBool } from '../../src/core/env';
 
 const r = Router();
-const rr = new RoleRegistry(loadRolesFromRepo(), loadFeaturesFromRepo(), []);
+const usePersistence = envBool('FF_PERSISTENCE', false);
 
-r.get('/api/features/active', (req, res) => {
+// NB: Router mountes under /api i server.ts, så path her skal ikke ha /api-prefiks.
+r.get('/features/active', async (req, res) => {
   const tenantId = String(req.header('x-tenant') ?? 'DEV');
   const userId = String(req.header('x-user') ?? 'dev-user');
   const role = String(req.header('x-role') ?? 'sales_rep');
-  const usage = aggregateFeatureUseCount(userId);
-  const list = getActiveFeatures(rr, { tenantId, userId, roleBinding: { userId, primaryRole: role }, workPatterns: { featureUseCount: usage } });
-  res.json(list);
+
+  try {
+    const registry = await getRoleRegistry();
+    const fallback: UserRoleBinding = { userId, primaryRole: role };
+    const binding =
+      (await resolveUserBinding(tenantId, userId, fallback)) ?? fallback;
+
+    const usage = usePersistence
+      ? await aggregateFromDb(userId, tenantId)
+      : aggregateInMemory(userId, tenantId);
+
+    const orgContext = {
+      industry: req.header('x-industry') ?? undefined,
+      region: req.header('x-region') ?? undefined,
+      size: (req.header('x-tenant-size') as 'smb' | 'mid' | 'ent' | undefined) ?? undefined,
+    };
+
+    const list = getActiveFeatures(registry, {
+      tenantId,
+      userId,
+      roleBinding: binding,
+      workPatterns: { featureUseCount: usage },
+      orgContext,
+    });
+
+    res.json(list);
+  } catch (err: any) {
+    res
+      .status(500)
+      .json({ error: 'feature_activation_failed', message: err?.message || String(err) });
+  }
 });
 
 export default r;

@@ -1,8 +1,11 @@
+import crypto from 'node:crypto';
 import { RoleRegistry } from '../roles/registry';
+import { executeConnectorAction } from '../connectors/execution';
 import { policyCheckRoleAware, RoleAwareContext } from './policyRoleAware';
+import { createProposal, sanitizeProposal } from './proposals/service';
 import { modeToKey, ProactivityMode } from './proactivity/modes';
 
-interface CapabilityImpl<T> {
+export interface CapabilityImpl<T> {
   observe?: () => Promise<void>;
   suggest?: () => Promise<T>;
   prepare?: () => Promise<T>;
@@ -34,12 +37,16 @@ export async function runCapabilityWithRole<T>(
       basis: proactivity.basis,
     },
     mode: modeToKey(mode),
+    effectiveMode: proactivity.effectiveKey,
   };
 
   let outcome: T | undefined;
+  const logExtra: Record<string, any> = {};
+  let proposalResult: any;
+  let executionKey = ctx.idempotencyKey;
 
   if (!policy.allowed) {
-    await logIntent({ ...logBase, degraded_mode: 'ask_approval' });
+    await logIntent({ ...logBase, ...logExtra, degraded_mode: 'ask_approval' });
     return { policy, proactivity };
   }
 
@@ -53,14 +60,58 @@ export async function runCapabilityWithRole<T>(
         outcome = await impl.suggest?.();
         break;
       case ProactivityMode.Ambisiøs:
-        outcome = await impl.prepare?.();
+        outcome = await (impl.prepare?.() ?? impl.suggest?.());
+        proposalResult = await createProposal({
+          tenantId: ctx.tenantId,
+          userId: ctx.roleBinding.userId,
+          featureId,
+          capabilityId,
+          payload,
+          preview: outcome,
+          idempotencyKey: executionKey ?? null,
+          basis: proactivity.basis,
+          requestedMode: proactivity.requested,
+          effectiveMode: proactivity.effective,
+        });
+        logExtra.proposalId = proposalResult.id;
+        if (proposalResult.idempotencyKey) logExtra.idempotencyKey = proposalResult.idempotencyKey;
         break;
       case ProactivityMode.Kraken:
-        outcome = await impl.execute?.();
+        if (impl.execute) {
+          executionKey = ensureIdempotencyKey(executionKey);
+          const connector = ctx.connectorName ?? capabilityId.split('.')[0] ?? 'capability';
+          const { response } = await executeConnectorAction(
+            {
+              connector,
+              capabilityId,
+              action: capabilityId,
+              payload,
+              idempotencyKey: executionKey,
+            },
+            () => impl.execute!(),
+          );
+          outcome = response as T;
+          logExtra.idempotencyKey = executionKey;
+        } else {
+          outcome = await impl.prepare?.();
+        }
         break;
       case ProactivityMode.Tsunami: {
         if (impl.execute) {
-          outcome = await impl.execute();
+          executionKey = ensureIdempotencyKey(executionKey);
+          const connector = ctx.connectorName ?? capabilityId.split('.')[0] ?? 'capability';
+          const { response } = await executeConnectorAction(
+            {
+              connector,
+              capabilityId,
+              action: capabilityId,
+              payload,
+              idempotencyKey: executionKey,
+            },
+            () => impl.execute!(),
+          );
+          outcome = response as T;
+          logExtra.idempotencyKey = executionKey;
         }
         if (impl.overlay) {
           const overlayResult = await impl.overlay();
@@ -73,8 +124,18 @@ export async function runCapabilityWithRole<T>(
         break;
     }
   } finally {
-    await logIntent({ ...logBase, outcome });
+    await logIntent({ ...logBase, ...logExtra, outcome });
   }
 
-  return { outcome, policy, proactivity };
+  if (proposalResult) {
+    return { policy, proactivity, proposal: sanitizeProposal(proposalResult), outcome };
+  }
+
+  return { outcome, policy, proactivity, idempotencyKey: executionKey };
+}
+
+function ensureIdempotencyKey(existing?: string): string {
+  if (existing && existing.length > 0) return existing;
+  if (typeof crypto.randomUUID === 'function') return crypto.randomUUID();
+  return `idemp-${Date.now()}-${Math.random().toString(36).slice(2)}`;
 }

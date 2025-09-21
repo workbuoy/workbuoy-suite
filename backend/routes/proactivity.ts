@@ -1,38 +1,26 @@
 import { Router } from 'express';
 import { RoleRegistry } from '../../src/roles/registry';
 import { loadRolesFromRepo, loadFeaturesFromRepo } from '../../src/roles/loader';
-import { buildProactivityContext } from '../../src/core/proactivity/context';
-import { parseProactivityMode } from '../../src/core/proactivity/modes';
-import { logModusskift } from '../../src/core/proactivity/telemetry';
+import type { ProactivityState } from '../../src/core/proactivity/context';
+import { resolveProactivityForRequest } from './utils/proactivityContext';
 
 const router: any = Router();
-const roleRegistry = new RoleRegistry(loadRolesFromRepo(), loadFeaturesFromRepo(), []);
 
-function resolveHeaders(req: any) {
-  const tenantId = String(req.header('x-tenant') || req.header('x-tenant-id') || 'demo');
-  const userId = String(req.header('x-user') || req.header('x-user-id') || 'demo-user');
-  const role = String(req.header('x-role') || req.header('x-user-role') || 'sales_rep');
-  const requestedHeader = req.header('x-proactivity');
-  return { tenantId, userId, role, requestedHeader };
+function buildRoleRegistry() {
+  const features = loadFeaturesFromRepo();
+  try {
+    const roles = loadRolesFromRepo();
+    return new RoleRegistry(roles, features, []);
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : String(err);
+    console.warn('[proactivity.router] failed to load roles.json; continuing with defaults', message);
+    return new RoleRegistry([], features, []);
+  }
 }
 
-function computeState(req: any, overrideMode?: any) {
-  const { tenantId, userId, role, requestedHeader } = resolveHeaders(req);
-  const requested = overrideMode ?? req.body?.requested ?? req.body?.mode ?? requestedHeader;
-  const featureId = req.body?.featureId || req.query?.featureId || undefined;
-  const state = buildProactivityContext({
-    tenantId,
-    roleRegistry,
-    roleBinding: { userId, primaryRole: role },
-    requestedMode: parseProactivityMode(requested),
-    featureId,
-  });
-  req.proactivity = state;
-  logModusskift(state, { tenantId, userId, source: 'api/proactivity' });
-  return { tenantId, userId, state };
-}
+const roleRegistry = buildRoleRegistry();
 
-function toResponse(state: ReturnType<typeof buildProactivityContext>) {
+function toResponse(state: ProactivityState) {
   return {
     tenantId: state.tenantId,
     requested: state.requested,
@@ -43,19 +31,22 @@ function toResponse(state: ReturnType<typeof buildProactivityContext>) {
     caps: state.caps,
     degradeRail: state.degradeRail,
     uiHints: state.uiHints,
+    chip: state.chip,
     subscription: state.subscription,
     featureId: state.featureId,
     timestamp: state.timestamp,
   };
 }
 
+// NB: Router mountes under /api i server.ts, så path her skal ikke ha /api-prefiks.
 router.get('/proactivity/state', (req: any, res: any) => {
-  const { state } = computeState(req);
+  const { state } = resolveProactivityForRequest(roleRegistry, req);
   res.json(toResponse(state));
 });
 
 router.post('/proactivity/state', (req: any, res: any) => {
-  const { state } = computeState(req, req.body?.requestedMode ?? req.body?.requested ?? req.body?.mode);
+  const override = req.body?.requestedMode ?? req.body?.requested ?? req.body?.mode;
+  const { state } = resolveProactivityForRequest(roleRegistry, req, { requestedOverride: override });
   res.json(toResponse(state));
 });
 

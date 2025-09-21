@@ -10,6 +10,7 @@ import TemporalLayer from "@/features/time/TemporalLayer";
 import { audioCue } from "@/features/peripheral/AudioCue";
 import { useDemoMode, publishDemoEvent } from "@/features/demo/useDemoMode";
 import { demoContacts } from "@/features/demo/data";
+import ContactMap from "./ContactMap";
 
 type FormState = { id: string; name: string; email: string; phone: string };
 type Contact = { id: string; name: string; email?: string; phone?: string; createdAt?: string };
@@ -36,6 +37,7 @@ export function ContactsPanel({ onClose }: ContactsPanelProps = {}) {
   const [toastOpen, setToastOpen] = useState(false);
   const [showTemporal, setShowTemporal] = useState(false);
   const { active: demoActive } = useDemoMode();
+  const [showMap, setShowMap] = useState(false);
 
   async function load() {
     if (demoActive) {
@@ -130,10 +132,13 @@ export function ContactsPanel({ onClose }: ContactsPanelProps = {}) {
         return;
       }
 
-      const result = await apiFetch<{ undoToken?: string; restored?: Contact }>('/api/crm/contacts', {
-        method: 'DELETE',
-        body: JSON.stringify({ id: contact.id }),
-      });
+      const result = await apiFetch<{ undoToken?: string; restored?: Contact }>(
+        '/api/crm/contacts',
+        {
+          method: 'DELETE',
+          body: JSON.stringify({ id: contact.id }),
+        }
+      );
       setContacts((current) => current.filter((c) => c.id !== contact.id));
       audioCue.play('success');
       setUndoInfo({
@@ -157,7 +162,11 @@ export function ContactsPanel({ onClose }: ContactsPanelProps = {}) {
     if (demoActive) {
       undoInfo.applyLocalUndo?.();
       if (undoInfo.demoContext) {
-        publishDemoEvent({ type: 'undo', entity: undoInfo.demoContext.entity, id: undoInfo.demoContext.id });
+        publishDemoEvent({
+          type: 'undo',
+          entity: undoInfo.demoContext.entity,
+          id: undoInfo.demoContext.id,
+        });
       }
       return true;
     }
@@ -179,22 +188,24 @@ export function ContactsPanel({ onClose }: ContactsPanelProps = {}) {
     }
   }
 
-  const temporalItems = useMemo(() =>
-    contacts.map((contact) => {
-      const created = contact.createdAt || new Date().toISOString();
-      const createdDate = new Date(created);
-      const diff = createdDate.getTime() - Date.now();
-      let state: 'past' | 'now' | 'future' = 'now';
-      if (diff < -86400000) state = 'past';
-      else if (diff > 86400000) state = 'future';
-      return {
-        id: contact.id,
-        title: contact.name || contact.id,
-        start: created,
-        state,
-      };
-    }),
-  [contacts]);
+  const temporalItems = useMemo(
+    () =>
+      contacts.map((contact) => {
+        const created = contact.createdAt || new Date().toISOString();
+        const createdDate = new Date(created);
+        const diff = createdDate.getTime() - Date.now();
+        let state: 'past' | 'now' | 'future' = 'now';
+        if (diff < -86400000) state = 'past';
+        else if (diff > 86400000) state = 'future';
+        return {
+          id: contact.id,
+          title: contact.name || contact.id,
+          start: created,
+          state,
+        };
+      }),
+    [contacts]
+  );
 
   return (
     <Card className="m-2">
@@ -209,6 +220,14 @@ export function ContactsPanel({ onClose }: ContactsPanelProps = {}) {
               aria-pressed={showTemporal}
             >
               {strings.overlayToggle}
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowMap((prev) => !prev)}
+              aria-pressed={showMap}
+            >
+              {showMap ? "Skjul kart" : "Vis kart"}
             </Button>
             {onClose && (
               <Button variant="ghost" size="sm" onClick={onClose} aria-label={strings.close}>
@@ -283,6 +302,11 @@ export function ContactsPanel({ onClose }: ContactsPanelProps = {}) {
             </tbody>
           </table>
         </div>
+        {showMap && (
+          <div className="mt-4">
+            <ContactMap contacts={contacts} />
+          </div>
+        )}
       </CardContent>
       {showTemporal && (
         <TemporalLayer
