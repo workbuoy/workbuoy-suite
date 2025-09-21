@@ -24,6 +24,7 @@ export type DockHostProps = {
   hotkeysEnabled?: boolean;
   status?: PeripheralStatus;
   enablePeripheralCue?: boolean;
+  fastFlip?: boolean;
   onResize?: (size: FlipCardSize) => void;
   onConnect?: NonNullable<FlipCardProps["onConnect"]>;
 };
@@ -31,6 +32,12 @@ export type DockHostProps = {
 const FOCUSABLE_SELECTOR =
   'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
 const HOST_SIZE_ORDER: FlipCardSize[] = ["md", "lg", "xl"];
+
+function getFocusableElements(node: HTMLElement): HTMLElement[] {
+  return Array.from(node.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR)).filter(
+    (element) => !element.hasAttribute("data-dock-sentinel"),
+  );
+}
 
 function emitDockEvent(action: string, meta?: Record<string, unknown>) {
   if (typeof window === "undefined") return;
@@ -48,6 +55,7 @@ export default function DockHost({
   hotkeysEnabled = true,
   status = "ok",
   enablePeripheralCue = true,
+  fastFlip = false,
   onResize,
   onConnect,
 }: DockHostProps) {
@@ -60,6 +68,22 @@ export default function DockHost({
   const titleId = useId();
 
   const side = controlledSide ?? localSide;
+
+  const focusFirstElement = useCallback(() => {
+    const node = dialogRef.current;
+    if (!node) return;
+    const focusable = getFocusableElements(node);
+    if (focusable.length === 0) return;
+    focusable[0].focus();
+  }, []);
+
+  const focusLastElement = useCallback(() => {
+    const node = dialogRef.current;
+    if (!node) return;
+    const focusable = getFocusableElements(node);
+    if (focusable.length === 0) return;
+    focusable[focusable.length - 1].focus();
+  }, []);
 
   useEffect(() => {
     if (controlledSide !== undefined) {
@@ -90,7 +114,7 @@ export default function DockHost({
     if (!node) return;
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key !== "Tab") return;
-      const focusable = node.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR);
+      const focusable = getFocusableElements(node);
       if (focusable.length === 0) return;
       const first = focusable[0];
       const last = focusable[focusable.length - 1];
@@ -194,6 +218,13 @@ export default function DockHost({
         ref={dialogRef}
         tabIndex={-1}
       >
+        <div
+          tabIndex={0}
+          data-dock-sentinel="start"
+          className="wb-dock-host__sentinel"
+          onFocus={focusLastElement}
+          aria-hidden="true"
+        />
         <header className="wb-dock-host__header">
           <div className="wb-dock-host__title-group">
             <h2 id={titleId}>{dockStrings.host.title}</h2>
@@ -251,6 +282,7 @@ export default function DockHost({
             side={side}
             allowedSizes={HOST_SIZE_ORDER}
             motionProfile="calm"
+            fastFlip={fastFlip}
             strings={{
               flipToBuoy: dockStrings.toolbar.flipToBuoy,
               flipToNavi: dockStrings.toolbar.flipToNavi,
@@ -266,6 +298,13 @@ export default function DockHost({
           />
         </div>
         <footer className="wb-dock-host__footer">{dockStrings.host.statusLine}</footer>
+        <div
+          tabIndex={0}
+          data-dock-sentinel="end"
+          className="wb-dock-host__sentinel"
+          onFocus={focusFirstElement}
+          aria-hidden="true"
+        />
       </div>
     </div>
   );

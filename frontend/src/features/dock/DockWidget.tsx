@@ -2,7 +2,8 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import FlipCard, { type FlipCardProps, type FlipCardSize } from "@/components/FlipCard";
 import BuoyChat from "@/features/buoy/BuoyChat";
 import NaviGrid from "@/features/navi/NaviGrid";
-import { useSettings } from "@/store/settings";
+import useDockStatus from "@/features/core/useDockStatus";
+import { useSettings, setDockPosition, setDockSize } from "@/store/settings";
 import DockBubble from "./DockBubble";
 import DockHost from "./DockHost";
 import PeripheralCue, { type PeripheralStatus } from "./PeripheralCue";
@@ -32,7 +33,7 @@ export default function DockWidget({
   onClose,
   front,
   back,
-  status = "thinking",
+  status: statusOverride,
   hasActivity = false,
 }: DockWidgetProps) {
   const settings = useSettings((state) => ({
@@ -40,21 +41,62 @@ export default function DockWidget({
     dockInitialCollapsed: state.dockInitialCollapsed,
     enablePeripheralCues: state.enablePeripheralCues,
     dockHotkeys: state.dockHotkeys,
+    dockSize: state.dockSize,
+    dockPosition: state.dockPosition,
+    fastFlip: state.fastFlip,
   }));
 
   const [open, setOpen] = useState<boolean>(() => !settings.dockInitialCollapsed);
   const [showHost, setShowHost] = useState(false);
-  const [size, setSize] = useState<FlipCardSize>(defaultSize);
   const [side, setSide] = useState<Side>("front");
+  const [size, setSize] = useState<FlipCardSize>(() => {
+    if (settings.dockSize && WIDGET_SIZES.includes(settings.dockSize)) {
+      return settings.dockSize;
+    }
+    return defaultSize;
+  });
+  const [position, setPosition] = useState<{ x: number; y: number }>(() => ({
+    x: settings.dockPosition?.x ?? 0,
+    y: settings.dockPosition?.y ?? 0,
+  }));
   const bubbleRef = useRef<HTMLButtonElement | null>(null);
   const cardRef = useRef<HTMLDivElement | null>(null);
+  const panelRef = useRef<HTMLDivElement | null>(null);
+  const dragRef = useRef<{
+    pointerId: number;
+    startX: number;
+    startY: number;
+    originX: number;
+    originY: number;
+  } | null>(null);
+  const fastFlipTelemetryRef = useRef(settings.fastFlip);
 
   const frontContent = front ?? <BuoyChat />;
   const backContent = back ?? <NaviGrid variant="panel" />;
+  const dockStatus = useDockStatus();
 
   useEffect(() => {
-    setSize(defaultSize);
-  }, [defaultSize]);
+    const nextSize =
+      settings.dockSize && WIDGET_SIZES.includes(settings.dockSize)
+        ? settings.dockSize
+        : defaultSize;
+    setSize((prev) => (prev === nextSize ? prev : nextSize));
+  }, [settings.dockSize, defaultSize]);
+
+  useEffect(() => {
+    const next = settings.dockPosition ?? { x: 0, y: 0 };
+    setPosition((prev) =>
+      prev.x === next.x && prev.y === next.y ? prev : { x: next.x, y: next.y },
+    );
+  }, [settings.dockPosition]);
+
+  useEffect(() => {
+    if (fastFlipTelemetryRef.current === settings.fastFlip) {
+      return;
+    }
+    fastFlipTelemetryRef.current = settings.fastFlip;
+    emitDockEvent("flip_style", { style: settings.fastFlip ? "fast" : "3d" });
+  }, [settings.fastFlip]);
 
   useEffect(() => {
     if (!settings.enableDockWidget) {
@@ -99,8 +141,9 @@ export default function DockWidget({
   const handleResize = useCallback((next: FlipCardSize) => {
     if (!WIDGET_SIZES.includes(next)) return;
     setSize(next);
+    setDockSize(next as typeof settings.dockSize);
     emitDockEvent(`dock_resize_${next}`);
-  }, []);
+  }, [settings.dockSize]);
 
   const handleSideChange = useCallback((next: Side) => {
     setSide(next);
@@ -123,11 +166,76 @@ export default function DockWidget({
     emitDockEvent("dock_connect", { type: link.type });
   }, []);
 
+  const handleDragPointerDown = useCallback(
+    (event: React.PointerEvent<HTMLDivElement>) => {
+      if (event.button !== 0) return;
+      if (event.target !== event.currentTarget) return;
+      dragRef.current = {
+        pointerId: event.pointerId,
+        startX: event.clientX,
+        startY: event.clientY,
+        originX: position.x,
+        originY: position.y,
+      };
+      event.currentTarget.setPointerCapture(event.pointerId);
+    },
+    [position.x, position.y],
+  );
+
+  const handleDragPointerMove = useCallback(
+    (event: React.PointerEvent<HTMLDivElement>) => {
+      const drag = dragRef.current;
+      if (!drag || drag.pointerId !== event.pointerId) return;
+      const deltaX = event.clientX - drag.startX;
+      const deltaY = event.clientY - drag.startY;
+      setPosition({ x: drag.originX + deltaX, y: drag.originY + deltaY });
+    },
+    [],
+  );
+
+  const commitPosition = useCallback(
+    (drag: {
+      originX: number;
+      originY: number;
+      startX: number;
+      startY: number;
+    }, event: React.PointerEvent<HTMLDivElement>) => {
+      const deltaX = event.clientX - drag.startX;
+      const deltaY = event.clientY - drag.startY;
+      const next = { x: drag.originX + deltaX, y: drag.originY + deltaY };
+      setPosition(next);
+      setDockPosition(next);
+      emitDockEvent("dock_reposition", { x: next.x, y: next.y });
+      return next;
+    },
+    [],
+  );
+
+  const handleDragPointerUp = useCallback(
+    (event: React.PointerEvent<HTMLDivElement>) => {
+      const drag = dragRef.current;
+      if (!drag || drag.pointerId !== event.pointerId) return;
+      dragRef.current = null;
+      event.currentTarget.releasePointerCapture?.(event.pointerId);
+      commitPosition(drag, event);
+    },
+    [commitPosition],
+  );
+
+  const handleDragPointerCancel = useCallback((event: React.PointerEvent<HTMLDivElement>) => {
+    const drag = dragRef.current;
+    if (!drag || drag.pointerId !== event.pointerId) return;
+    dragRef.current = null;
+    event.currentTarget.releasePointerCapture?.(event.pointerId);
+    setPosition({ x: drag.originX, y: drag.originY });
+  }, []);
+
   if (!settings.enableDockWidget) {
     return null;
   }
 
-  const cueStatus: PeripheralStatus = side === "back" ? "ok" : status;
+  const resolvedStatus = statusOverride ?? dockStatus;
+  const cueStatus: PeripheralStatus = side === "back" ? "ok" : resolvedStatus;
 
   return (
     <>
@@ -136,6 +244,12 @@ export default function DockWidget({
           className="wb-dock__panel"
           role="region"
           aria-label="Workbuoy dock"
+          ref={panelRef}
+          style={{ transform: `translate3d(${position.x}px, ${position.y}px, 0)` }}
+          onPointerDown={handleDragPointerDown}
+          onPointerMove={handleDragPointerMove}
+          onPointerUp={handleDragPointerUp}
+          onPointerCancel={handleDragPointerCancel}
         >
           <div
             className="wb-dock__surface"
@@ -153,6 +267,7 @@ export default function DockWidget({
               side={side}
               allowedSizes={WIDGET_SIZES}
               motionProfile="calm"
+              fastFlip={settings.fastFlip}
               strings={{
                 flipToBuoy: dockStrings.toolbar.flipToBuoy,
                 flipToNavi: dockStrings.toolbar.flipToNavi,
@@ -173,8 +288,11 @@ export default function DockWidget({
                     }
                   }}
                   aria-label={dockStrings.toolbar.popout}
+                  title={dockStrings.toolbar.popout}
                 >
-                  {dockStrings.toolbar.popout}
+                  <span aria-hidden="true" className="wb-dock__popout-icon">
+                    ⤢
+                  </span>
                 </button>
               }
             />
@@ -206,7 +324,13 @@ export default function DockWidget({
           status={cueStatus}
           enablePeripheralCue={settings.enablePeripheralCues}
           hotkeysEnabled={settings.dockHotkeys}
-          onResize={(next) => emitDockEvent(`dock_resize_${next}`)}
+          fastFlip={settings.fastFlip}
+          onResize={(next) => {
+            emitDockEvent(`dock_resize_${next}`);
+            if (WIDGET_SIZES.includes(next)) {
+              setDockSize(next as typeof settings.dockSize);
+            }
+          }}
           onConnect={handleConnect}
         />
       ) : null}

@@ -7,6 +7,7 @@ import React, {
   useState,
 } from "react";
 import { useActiveContext } from "@/core/ActiveContext";
+import { audioCue } from "@/features/peripheral/AudioCue";
 import "./FlipCard.css";
 
 export type FlipCardSize = "sm" | "md" | "lg" | "xl";
@@ -36,6 +37,7 @@ export type FlipCardProps = {
   side?: Side;
   allowedSizes?: FlipCardSize[];
   strings?: FlipCardStrings;
+  fastFlip?: boolean;
 };
 
 const ORDER: FlipCardSize[] = ["sm", "md", "lg", "xl"];
@@ -69,6 +71,7 @@ function FlipCard({
   side: controlledSide,
   allowedSizes,
   strings = DEFAULT_STRINGS,
+  fastFlip = false,
 }: FlipCardProps) {
   const sizeOrder = useMemo(() => {
     if (allowedSizes && allowedSizes.length > 0) {
@@ -135,9 +138,12 @@ function FlipCard({
       if (controlledSide === undefined) {
         setInternalSide(next);
       }
+      if (side !== next) {
+        audioCue.play("success");
+      }
       onFlip?.(next);
     },
-    [controlledSide, onFlip],
+    [controlledSide, onFlip, side],
   );
 
   const toggleSide = useCallback(() => {
@@ -329,6 +335,7 @@ function FlipCard({
         tabIndex={0}
         data-side={side}
         data-motion={motionProfile}
+        data-style={fastFlip ? "fast" : "3d"}
       >
         <div className="flip-card-toolbar">
           <div className="flip-card-toolbar__side" aria-live="polite">

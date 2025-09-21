@@ -23,12 +23,18 @@ vi.mock("@/store/settings", async () => {
     dockInitialCollapsed: boolean;
     enablePeripheralCues: boolean;
     dockHotkeys: boolean;
+    dockSize: "sm" | "md" | "lg";
+    dockPosition: { x: number; y: number };
+    fastFlip: boolean;
   };
   const initialState: State = {
     enableDockWidget: true,
     dockInitialCollapsed: true,
     enablePeripheralCues: true,
     dockHotkeys: true,
+    dockSize: "sm",
+    dockPosition: { x: 0, y: 0 },
+    fastFlip: false,
   };
   let state: State = { ...initialState };
   const listeners = new Set<() => void>();
@@ -47,6 +53,16 @@ vi.mock("@/store/settings", async () => {
     return selected;
   }
 
+  function setDockSize(value: State["dockSize"]) {
+    state = { ...state, dockSize: value };
+    notify();
+  }
+
+  function setDockPosition(value: State["dockPosition"]) {
+    state = { ...state, dockPosition: { ...value } };
+    notify();
+  }
+
   const settingsStore = {
     reset() {
       state = { ...initialState };
@@ -56,9 +72,11 @@ vi.mock("@/store/settings", async () => {
       state = { ...state, [key]: value };
       notify();
     },
+    setDockSize,
+    setDockPosition,
   };
 
-  return { useSettings, settingsStore };
+  return { useSettings, settingsStore, setDockSize, setDockPosition };
 });
 
 const { settingsStore } = await import("@/store/settings");

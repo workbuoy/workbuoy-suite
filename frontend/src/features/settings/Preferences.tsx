@@ -6,6 +6,7 @@ import {
   toggleSetting,
   type SettingsKey,
   type SettingsState,
+  resetDockLayout,
 } from "@/store/settings";
 import "./preferences.css";
 import { useDemoMode } from "@/features/demo/useDemoMode";
@@ -104,6 +105,11 @@ const GROUPS: ToggleGroup[] = [
         label: strings.toggles.dockHotkeys.label,
         description: strings.toggles.dockHotkeys.description,
       },
+      {
+        key: "fastFlip",
+        label: strings.toggles.fastFlip.label,
+        description: strings.toggles.fastFlip.description,
+      },
     ],
   },
   {
@@ -145,7 +151,15 @@ function PreferenceToggle({
 
   function handleToggle() {
     if (disabled) return;
+    const nextState = !checked;
     toggleSetting(descriptor.key);
+    if (descriptor.key === "fastFlip" && typeof window !== "undefined") {
+      window.dispatchEvent(
+        new CustomEvent("wb:ux", {
+          detail: { action: "flip_style", style: nextState ? "fast" : "3d" },
+        }),
+      );
+    }
   }
 
   return (
@@ -193,6 +207,13 @@ export default function Preferences() {
     audioCue.setEnabled(enabled);
   }, [settings.audioCues, settings.reducedSound, settings.systemReducedSound]);
 
+  const handleResetDock = React.useCallback(() => {
+    resetDockLayout();
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new CustomEvent("wb:ux", { detail: { action: "dock_reset" } }));
+    }
+  }, []);
+
   return (
     <section className="settings-panel" aria-labelledby="settings-preferences-heading">
       <header className="settings-panel__header">
@@ -214,6 +235,23 @@ export default function Preferences() {
             {group.toggles.map((toggle) => (
               <PreferenceToggle key={toggle.key} descriptor={toggle} state={settings} />
             ))}
+            {group.id === "dock" ? (
+              <div className="settings-row settings-row--reset">
+                <div className="settings-row__body">
+                  <span className="settings-row__label">{strings.actions.resetDock}</span>
+                  <p className="settings-row__description">
+                    {strings.actions.resetDockDescription}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  className="settings-reset-button"
+                  onClick={handleResetDock}
+                >
+                  {strings.actions.resetDock}
+                </button>
+              </div>
+            ) : null}
           </div>
         ))}
       </div>
