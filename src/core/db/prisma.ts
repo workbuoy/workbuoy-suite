@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 import type { PrismaClient } from '@prisma/client';
+import { envBool } from '../env';
 
 declare global {
   // eslint-disable-next-line no-var
@@ -12,12 +13,19 @@ type PrismaClientConstructor = new (...args: unknown[]) => PrismaClient;
 
 let PrismaClientCtor: PrismaClientConstructor | undefined;
 
-try {
-  const mod = require('@prisma/client') as PrismaModule;
-  PrismaClientCtor = mod.PrismaClient as PrismaClientConstructor;
-} catch (error) {
-  if (process.env.FF_PERSISTENCE === 'true') {
-    throw error;
+function loadPrismaCtor(): PrismaClientConstructor | undefined {
+  if (PrismaClientCtor) {
+    return PrismaClientCtor;
+  }
+  try {
+    const mod = require('@prisma/client') as PrismaModule;
+    PrismaClientCtor = mod.PrismaClient as PrismaClientConstructor;
+    return PrismaClientCtor;
+  } catch (error) {
+    if (process.env.FF_PERSISTENCE === 'true') {
+      throw error;
+    }
+    return undefined;
   }
 }
 
@@ -36,8 +44,44 @@ function createNoopClient(): PrismaClient {
   return new Proxy({}, handler) as PrismaClient;
 }
 
-const prismaInstance = PrismaClientCtor ? new PrismaClientCtor() : createNoopClient();
+const noopClient = createNoopClient();
+let realClient: PrismaClient | null = null;
 
-export const prisma: PrismaClient = global.__prisma__ ?? prismaInstance;
+function resolveClient(): PrismaClient {
+  if (envBool('FF_PERSISTENCE', false)) {
+    if (!realClient) {
+      const ctor = loadPrismaCtor();
+      if (!ctor) {
+        throw new Error('Prisma client is not available. Install @prisma/client or disable FF_PERSISTENCE.');
+      }
+      if (global.__prisma__ && global.__prisma__ !== noopClient) {
+        realClient = global.__prisma__;
+      } else {
+        realClient = new ctor();
+        if (process.env.NODE_ENV !== 'production') {
+          global.__prisma__ = realClient;
+        }
+      }
+    }
+    return realClient;
+  }
+  if (process.env.NODE_ENV !== 'production') {
+    global.__prisma__ = noopClient;
+  }
+  return noopClient;
+}
 
-if (process.env.NODE_ENV !== 'production') global.__prisma__ = prisma;
+export const prisma: PrismaClient = new Proxy(noopClient, {
+  get(_target, prop, receiver) {
+    const client = resolveClient();
+    const value = Reflect.get(client as unknown as Record<string, unknown>, prop, receiver);
+    if (typeof value === 'function') {
+      return value.bind(client);
+    }
+    return value;
+  },
+  set(_target, prop, value, receiver) {
+    const client = resolveClient();
+    return Reflect.set(client as unknown as Record<string, unknown>, prop, value, receiver);
+  },
+});

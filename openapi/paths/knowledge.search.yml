@@ -1,4 +1,5 @@
 get:
+  operationId: searchKnowledge
   summary: Search knowledge
   parameters:
     - in: query
