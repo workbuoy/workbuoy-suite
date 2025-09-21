@@ -7,33 +7,129 @@ servers:
 paths:
   /api/v1/crm/contacts:
     get:
+      operationId: v1ListContacts
       summary: List contacts
-      parameters: [{ name: x-tenant-id, in: header, required: true, schema: { type: string } }]
-      responses: { '200': { description: OK } }
+      parameters:
+        - name: x-tenant-id
+          in: header
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: OK }
     post:
+      operationId: v1CreateContact
       summary: Create contact
-      parameters: [{ name: x-tenant-id, in: header, required: true, schema: { type: string } }]
-      responses: { '201': { description: Created } }
+      parameters:
+        - name: x-tenant-id
+          in: header
+          required: true
+          schema: { type: string }
+      responses:
+        '201': { description: Created }
   /api/v1/crm/contacts/{id}:
-    get: { summary: Get contact, parameters: [
-      { name: x-tenant-id, in: header, required: true, schema: { type: string } },
-      { name: id, in: path, required: true, schema: { type: string } }
-    ], responses: { '200': { description: OK } } }
-    patch: { summary: Update contact, parameters: [
-      { name: x-tenant-id, in: header, required: true, schema: { type: string } },
-      { name: id, in: path, required: true, schema: { type: string } }
-    ], responses: { '200': { description: OK } } }
-    delete: { summary: Delete contact, parameters: [
-      { name: x-tenant-id, in: header, required: true, schema: { type: string } },
-      { name: id, in: path, required: true, schema: { type: string } }
-    ], responses: { '204': { description: No Content } } }
+    get:
+      operationId: v1GetContact
+      summary: Get contact
+      parameters:
+        - name: x-tenant-id
+          in: header
+          required: true
+          schema: { type: string }
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: OK }
+    patch:
+      operationId: v1UpdateContact
+      summary: Update contact
+      parameters:
+        - name: x-tenant-id
+          in: header
+          required: true
+          schema: { type: string }
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: OK }
+    delete:
+      operationId: v1DeleteContact
+      summary: Delete contact
+      parameters:
+        - name: x-tenant-id
+          in: header
+          required: true
+          schema: { type: string }
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '204': { description: No Content }
   /api/v1/crm/opportunities:
-    get: { summary: List opportunities, parameters: [{ name: x-tenant-id, in: header, required: true, schema: { type: string } }], responses: { '200': { description: OK } } }
-    post: { summary: Create opportunity, parameters: [{ name: x-tenant-id, in: header, required: true, schema: { type: string } }], responses: { '201': { description: Created } } }
+    get:
+      operationId: v1ListOpportunities
+      summary: List opportunities
+      parameters:
+        - name: x-tenant-id
+          in: header
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: OK }
+    post:
+      operationId: v1CreateOpportunity
+      summary: Create opportunity
+      parameters:
+        - name: x-tenant-id
+          in: header
+          required: true
+          schema: { type: string }
+      responses:
+        '201': { description: Created }
   /api/v1/crm/pipelines:
-    get: { summary: List pipelines, parameters: [{ name: x-tenant-id, in: header, required: true, schema: { type: string } }], responses: { '200': { description: OK } } }
-    post: { summary: Create pipeline, parameters: [{ name: x-tenant-id, in: header, required: true, schema: { type: string } }], responses: { '201': { description: Created } } }
+    get:
+      operationId: v1ListPipelines
+      summary: List pipelines
+      parameters:
+        - name: x-tenant-id
+          in: header
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: OK }
+    post:
+      operationId: v1CreatePipeline
+      summary: Create pipeline
+      parameters:
+        - name: x-tenant-id
+          in: header
+          required: true
+          schema: { type: string }
+      responses:
+        '201': { description: Created }
   /api/v1/crm/import:
-    post: { summary: Batch import CSV/JSON, parameters: [{ name: x-tenant-id, in: header, required: true, schema: { type: string } }], responses: { '200': { description: OK } } }
+    post:
+      operationId: v1ImportCrm
+      summary: Batch import CSV/JSON
+      parameters:
+        - name: x-tenant-id
+          in: header
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: OK }
   /api/v1/crm/export:
-    get: { summary: Export JSON/CSV, parameters: [{ name: x-tenant-id, in: header, required: true, schema: { type: string } }], responses: { '200': { description: OK } } }
+    get:
+      operationId: v1ExportCrm
+      summary: Export JSON/CSV
+      parameters:
+        - name: x-tenant-id
+          in: header
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: OK }

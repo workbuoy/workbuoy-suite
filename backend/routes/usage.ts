@@ -3,14 +3,21 @@ import {
   recordFeatureUsage as recordInMemory,
   aggregateFeatureUseCount as aggregateInMemory,
 } from '../../src/telemetry/usageSignals';
-import {
-  recordFeatureUsage as recordDbUsage,
-  aggregateFeatureUseCount as aggregateFromDb,
-} from '../../src/telemetry/usageSignals.db';
 import { envBool } from '../../src/core/env';
 
 const r = Router();
 const usePersistence = envBool('FF_PERSISTENCE', false);
+
+type UsageDbModule = typeof import('../../src/telemetry/usageSignals.db');
+let dbModule: UsageDbModule | null = null;
+
+function ensureDbModule(): UsageDbModule {
+  if (!dbModule) {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    dbModule = require('../../src/telemetry/usageSignals.db') as UsageDbModule;
+  }
+  return dbModule;
+}
 
 // NB: Router mountes under /api i server.ts, så path her skal ikke ha /api-prefiks.
 r.post('/usage/feature', async (req, res) => {
@@ -22,6 +29,7 @@ r.post('/usage/feature', async (req, res) => {
     }
 
     if (usePersistence) {
+      const { recordFeatureUsage: recordDbUsage } = ensureDbModule();
       await recordDbUsage({ userId, tenantId, featureId, action });
     } else {
       recordInMemory({
@@ -47,7 +55,7 @@ r.get('/usage/aggregate/:userId', async (req, res) => {
     const userId = String(req.params.userId);
 
     const usage = usePersistence
-      ? await aggregateFromDb(userId, tenantId)
+      ? await ensureDbModule().aggregateFeatureUseCount(userId, tenantId)
       : aggregateInMemory(userId, tenantId);
 
     res.json(usage);

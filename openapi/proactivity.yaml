@@ -7,6 +7,7 @@ servers:
 paths:
   /api/proactivity/state:
     get:
+      operationId: getProactivityState
       summary: Get proactivity state for current tenant/user
       parameters:
         - in: header
@@ -36,6 +37,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ProactivityState'
     post:
+      operationId: requestProactivityState
       summary: Request a new proactivity mode
       parameters:
         - in: header
@@ -73,6 +75,7 @@ paths:
                 $ref: '#/components/schemas/ProactivityState'
   /api/admin/subscription:
     get:
+      operationId: getSubscriptionState
       summary: Get subscription configuration for tenant
       parameters:
         - in: header
@@ -87,6 +90,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/SubscriptionState'
     put:
+      operationId: updateSubscriptionState
       summary: Update subscription configuration
       parameters:
         - in: header
@@ -119,6 +123,7 @@ paths:
                 $ref: '#/components/schemas/SubscriptionState'
   /api/features/active:
     get:
+      operationId: listActiveFeatures
       summary: List active features ranked for the current user
       parameters:
         - in: header
@@ -147,6 +152,7 @@ paths:
                   $ref: '#/components/schemas/ActiveFeature'
   /api/usage/feature:
     post:
+      operationId: recordFeatureUsageEvent
       summary: Record a feature usage event
       parameters:
         - in: header
@@ -170,6 +176,7 @@ paths:
                   ok: { type: boolean }
   /api/usage/aggregate/{userId}:
     get:
+      operationId: aggregateFeatureUsage
       summary: Aggregate usage counts for a user
       parameters:
         - in: path
@@ -189,6 +196,7 @@ paths:
                 additionalProperties: { type: integer }
   /api/admin/roles/import:
     post:
+      operationId: importAdminRoles
       summary: Import roles.json into Postgres
       parameters:
         - in: header
@@ -211,6 +219,7 @@ paths:
                       features: { type: integer }
   /api/admin/roles/{roleId}:
     get:
+      operationId: getAdminRole
       summary: Inspect role caps for a tenant
       parameters:
         - in: path
@@ -233,6 +242,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/RoleInspection'
     put:
+      operationId: updateAdminRoleOverride
       summary: Set tenant-specific role overrides
       parameters:
         - in: path
@@ -262,6 +272,7 @@ paths:
                 $ref: '#/components/schemas/RoleInspection'
   /api/explain/last:
     get:
+      operationId: getExplainabilityEvents
       summary: Fetch recent proactivity events for explainability UI
       responses:
         '200':
@@ -277,6 +288,7 @@ paths:
                       $ref: '#/components/schemas/TelemetryEvent'
   /api/proposals:
     get:
+      operationId: listProposals
       summary: List proposals for the tenant
       parameters:
         - in: query
@@ -293,6 +305,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ProposalListResponse'
     post:
+      operationId: createProposal
       summary: Manually create a proposal (usually generated via runner)
       parameters:
         - in: header
@@ -316,6 +329,7 @@ paths:
           description: Missing capability id
   /api/proposals/{id}/approve:
     post:
+      operationId: approveProposal
       summary: Approve a proposal and execute the underlying capability
       parameters:
         - in: path
@@ -341,6 +355,7 @@ paths:
           description: Execution failed
   /api/proposals/{id}/reject:
     post:
+      operationId: rejectProposal
       summary: Reject a proposal without executing it
       parameters:
         - in: path
@@ -366,6 +381,7 @@ paths:
           description: Proposal already executed
   /api/connectors/{name}/health:
     get:
+      operationId: getConnectorHealth
       summary: Retrieve circuit breaker state for a connector
       parameters:
         - in: path
@@ -387,6 +403,7 @@ paths:
                 $ref: '#/components/schemas/ConnectorHealth'
   /api/connectors/health:
     get:
+      operationId: listConnectorHealth
       summary: List health for all known connector breakers
       responses:
         '200':

@@ -1,11 +1,15 @@
-import { FeatureUsageAction } from '@prisma/client';
 import { prisma } from '../core/db/prisma';
+
+type PrismaFeatureUsageAction = import('@prisma/client').FeatureUsageAction;
+type FeatureUsageEventAction = PrismaFeatureUsageAction extends string
+  ? PrismaFeatureUsageAction | 'open' | 'complete' | 'dismiss'
+  : 'open' | 'complete' | 'dismiss';
 
 export interface FeatureUsageEvent {
   userId: string;
   tenantId: string;
   featureId: string;
-  action: FeatureUsageAction | 'open' | 'complete' | 'dismiss';
+  action: FeatureUsageEventAction;
   ts?: Date;
   metadata?: Record<string, unknown>;
 }
@@ -16,7 +20,7 @@ export async function recordFeatureUsage(evt: FeatureUsageEvent): Promise<void> 
       userId: evt.userId,
       tenantId: evt.tenantId,
       featureId: evt.featureId,
-      action: evt.action as FeatureUsageAction,
+      action: evt.action as PrismaFeatureUsageAction,
       ts: evt.ts ?? new Date(),
       metadata: evt.metadata,
     },
