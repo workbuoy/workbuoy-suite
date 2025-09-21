@@ -4,7 +4,8 @@
   "scripts": {
     "build": "tsc --noEmit -p tsconfig.proactivity.json",
     "test": "npm run test --prefix backend",
-    "typecheck": "tsc --noEmit -p tsconfig.meta.json"
+    "typecheck": "tsc --noEmit -p tsconfig.meta.json",
+    "seed:roles": "tsx scripts/seed-roles-from-json.ts"
   },
   "dependencies": {
     "@prisma/client": "^5.14.0",
@@ -13,6 +14,7 @@
   "devDependencies": {
     "prisma": "^5.14.0",
     "ts-node": "^10.9.2",
-    "@types/jest": "^29.5.12"
+    "@types/jest": "^29.5.12",
+    "tsx": "^4.19.0"
   }
 }

@@ -26,7 +26,6 @@ jobs:
   backend-persistence:
     name: Backend CI (persistence)
     runs-on: ubuntu-latest
-    continue-on-error: true  # TEMP until schema errors are fixed
     services:
       postgres:
         image: postgres:16
@@ -52,8 +51,8 @@ jobs:
       - run: npm ci
       - name: Prisma generate (best-effort)
         run: npx prisma generate
-      - name: Seed baseline roles
-        run: node --loader ts-node/esm scripts/seed-roles-from-json.ts
+      - name: Seed baseline roles (via tsx)
+        run: npm run seed:roles
 
   coverage:
     runs-on: ubuntu-latest
