@@ -12,6 +12,7 @@
   },
   "devDependencies": {
     "prisma": "^5.14.0",
-    "ts-node": "^10.9.2"
+    "ts-node": "^10.9.2",
+    "@types/jest": "^29.5.12"
   }
 }
