@@ -63,9 +63,10 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
+
     env:
-      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/workbuoy?schema=public
       FF_PERSISTENCE: 'true'
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/workbuoy?schema=public
 
     steps:
       - name: Checkout
@@ -76,20 +77,14 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Install root tooling deps
+      # NOTE: only install in backend/, never at repo root.
+      - name: Install backend deps
+        working-directory: backend
         run: |
           if [ -f package-lock.json ]; then
             npm ci --omit=optional --no-audit --fund=false
           else
             npm install --no-audit --fund=false
-          fi
-
-      - name: Install backend deps
-        run: |
-          if [ -f backend/package-lock.json ]; then
-            npm ci --prefix backend --omit=optional --no-audit --fund=false
-          else
-            npm install --prefix backend --no-audit --fund=false
           fi
 
       - name: Generate Prisma client
@@ -100,9 +95,14 @@ jobs:
 
       - name: Seed baseline roles
         run: node --loader ts-node/esm scripts/seed-roles-from-json.ts
-  env:
-    FF_PERSISTENCE: 'true'
-    DATABASE_URL: ${{ env.DATABASE_URL }}
 
+      - name: Run persistence tests
         working-directory: backend
-        run: npx jest --config jest.persistence.config.cjs --runInBand --passWithNoTests
+        run: |
+          npm test -- \
+            tests/roles/db.registry.test.ts \
+            tests/usage/db.usage.test.ts \
+            tests/features/active.api.test.ts \
+            tests/admin/roles.api.test.ts \
+            tests/proactivity/context.integration.test.ts \
+            --runInBand --passWithNoTests
