@@ -100,7 +100,9 @@ jobs:
 
       - name: Seed baseline roles
         run: node --loader ts-node/esm scripts/seed-roles-from-json.ts
+  env:
+    FF_PERSISTENCE: 'true'
+    DATABASE_URL: ${{ env.DATABASE_URL }}
 
-      - name: Run persistence tests
         working-directory: backend
         run: npx jest --config jest.persistence.config.cjs --runInBand --passWithNoTests
