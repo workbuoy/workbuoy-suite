@@ -1,0 +1,57 @@
+paths:
+  /api/features/active:
+    get:
+      summary: Get active features ranked
+      responses:
+        '200':
+          description: Ranked features
+  /api/usage/feature:
+    post:
+      summary: Record feature usage
+      responses:
+        '204':
+          description: Recorded
+  /api/usage/aggregate/{userId}:
+    get:
+      summary: Aggregate usage by user
+      parameters:
+        - in: path
+          name: userId
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: Aggregate }
+  /api/admin/roles/import:
+    post:
+      summary: Import roles from JSON
+      responses:
+        '200': { description: Imported }
+  /api/admin/roles/{roleId}/overrides:
+    put:
+      summary: Set org override for role
+      parameters:
+        - in: path
+          name: roleId
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: Updated }
+  /api/admin/roles/{roleId}:
+    get:
+      summary: Inspect role and override
+      parameters:
+        - in: path
+          name: roleId
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: Role data }
+  /api/admin/subscription:
+    get:
+      summary: Get subscription settings
+      responses:
+        '200': { description: Subscription }
+    put:
+      summary: Update subscription settings
+      responses:
+        '200': { description: Updated }
