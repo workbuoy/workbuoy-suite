@@ -39,6 +39,7 @@ export default defineConfig({
       "src/features/dock/__tests__/DockPersistence.test.tsx",
       "src/features/core/__tests__/DockStatus.test.tsx",
       "src/components/FlipCard/FlipCardFastFlip.test.tsx",
+      "src/proposals/ProposalsPanel.test.tsx",
     ],
     exclude: ["e2e/**"],
   },
