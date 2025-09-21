@@ -46,3 +46,61 @@ jobs:
             tests/features/active.api.test.ts \
             tests/usage/usage.api.test.ts \
             --runInBand --passWithNoTests
+
+  test-persistence:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        ports:
+          - 5432:5432
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: workbuoy
+        options: >-
+          --health-cmd "pg_isready -U postgres -d workbuoy"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/workbuoy?schema=public
+      FF_PERSISTENCE: 'true'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install root tooling deps
+        run: |
+          if [ -f package-lock.json ]; then
+            npm ci --omit=optional --no-audit --fund=false
+          else
+            npm install --no-audit --fund=false
+          fi
+
+      - name: Install backend deps
+        run: |
+          if [ -f backend/package-lock.json ]; then
+            npm ci --prefix backend --omit=optional --no-audit --fund=false
+          else
+            npm install --prefix backend --no-audit --fund=false
+          fi
+
+      - name: Generate Prisma client
+        run: npx prisma generate --schema=prisma/schema.prisma
+
+      - name: Apply Prisma migrations
+        run: npx prisma migrate deploy --schema=prisma/schema.prisma
+
+      - name: Seed baseline roles
+        run: node --loader ts-node/esm scripts/seed-roles-from-json.ts
+
+      - name: Run persistence tests
+        working-directory: backend
+        run: npx jest --config jest.persistence.config.cjs --runInBand --passWithNoTests
