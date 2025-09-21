@@ -16,7 +16,6 @@ async function main() {
   const roles = loadRolesFromRepo();
   const features = loadFeaturesFromRepo();
 
-  // Dynamically import importer (prefer built JS; fall back to TS in dev)
   let importer: any;
   try {
     importer = await import('../src/roles/service/importer.js');
