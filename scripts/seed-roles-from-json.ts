@@ -1,8 +1,5 @@
-//!/usr/bin/env node
 // scripts/seed-roles-from-json.ts
-// Run with: node --loader ts-node/esm scripts/seed-roles-from-json.ts
-
-import { loadRolesFromRepo, loadFeaturesFromRepo } from './roles-io.ts';
+import { loadRolesFromRepo, loadFeaturesFromRepo } from './roles-io';
 
 async function main() {
   if ((process.env.FF_PERSISTENCE || '').toLowerCase() !== 'true') {
@@ -16,13 +13,9 @@ async function main() {
   const roles = loadRolesFromRepo();
   const features = loadFeaturesFromRepo();
 
-  let importer: any;
-  try {
-    importer = await import('../src/roles/service/importer.js');
-  } catch {
-    importer = await import('../src/roles/service/importer.ts');
-  }
-  const { importRolesAndFeatures } = importer;
+  // Lazy import AFTER IO/env checks to avoid loader cycles
+  const { importRolesAndFeatures } = await import('../src/roles/service/importer');
+
   const summary = await importRolesAndFeatures(roles, features);
   console.log(JSON.stringify({ ok: true, summary }));
 }
