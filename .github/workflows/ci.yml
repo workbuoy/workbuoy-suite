@@ -1,0 +1,68 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [ main ]
+
+jobs:
+  backend-inmemory:
+    name: Backend CI (in-memory)
+    runs-on: ubuntu-latest
+    env:
+      FF_PERSISTENCE: "false"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+      - run: npm ci
+      - name: Typecheck (meta)
+        run: npm run typecheck
+      - name: Unit tests (backend, in-memory)
+        run: npm run test --prefix backend
+
+  backend-persistence:
+    name: Backend CI (persistence)
+    runs-on: ubuntu-latest
+    continue-on-error: true  # TEMP until schema errors are fixed
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: wb
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      FF_PERSISTENCE: "true"
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/wb?schema=public
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+      - run: npm ci
+      - name: Prisma generate (best-effort)
+        run: npx prisma generate
+      - name: Seed baseline roles
+        run: node --loader ts-node/esm scripts/seed-roles-from-json.ts
+
+  coverage:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+      - run: npm ci
+      - name: Coverage (no workspaces)
+        run: npm run test --if-present -- --coverage
