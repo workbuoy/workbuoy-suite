@@ -9,7 +9,7 @@ export const dockStrings = {
     flipToBuoy: "Gå til Buoy",
     connect: "Koble",
     resize: "Endre størrelse",
-    popout: "Utvid",
+    popout: "Åpne stort",
     close: "Lukk",
   },
   host: {

@@ -15,6 +15,7 @@ on:
       - '.github/workflows/backend-ci.yml'
 
 jobs:
+  # ---- In-memory baseline (må forbli grønn) ----
   test:
     runs-on: ubuntu-latest
     defaults:
@@ -30,11 +31,13 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Install backend deps
+      - name: Install backend deps (lock-aware)
         run: |
           if [ -f package-lock.json ]; then
+            echo "backend/package-lock.json finnes → npm ci"
             npm ci --omit=optional --no-audit --fund=false
           else
+            echo "Ingen backend/package-lock.json → npm install"
             npm install --no-audit --fund=false
           fi
 
@@ -47,25 +50,29 @@ jobs:
             tests/usage/usage.api.test.ts \
             --runInBand --passWithNoTests
 
+  # ---- Postgres/persistence jobb (FF_PERSISTENCE=true) ----
   test-persistence:
     runs-on: ubuntu-latest
+
     services:
       postgres:
-        image: postgres:15
+        image: postgres:16
+        ports:
+          - 5432:5432
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
           POSTGRES_DB: workbuoy
-        ports:
-          - 5432:5432
         options: >-
-          --health-cmd "pg_isready -U postgres"
+          --health-cmd "pg_isready -U postgres -d workbuoy"
           --health-interval 10s
           --health-timeout 5s
-          --health-retries 10
+          --health-retries 5
+
     env:
-      DATABASE_URL: postgres://postgres:postgres@localhost:5432/workbuoy
       FF_PERSISTENCE: 'true'
+      # standard URL som Prisma/klienter forventer
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/workbuoy?schema=public
 
     steps:
       - name: Checkout
@@ -75,35 +82,42 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
 
-      - name: Install root deps
+      # Root verktøy (lint-scripts osv.) hvis lock finnes, ellers fall-back
+      - name: Install root deps (lock-aware)
         run: |
           if [ -f package-lock.json ]; then
+            echo "root/package-lock.json finnes → npm ci"
             npm ci --omit=optional --no-audit --fund=false
           else
+            echo "Ingen root/package-lock.json → npm install"
             npm install --no-audit --fund=false
           fi
 
-      - name: Install backend deps
-        working-directory: backend
+      # Backend deps – sjekk backend/package-lock.json spesifikt
+      - name: Install backend deps (lock-aware)
         run: |
-          if [ -f package-lock.json ]; then
-            npm ci --omit=optional --no-audit --fund=false
+          if [ -f backend/package-lock.json ]; then
+            echo "backend/package-lock.json finnes → npm ci --prefix backend"
+            npm ci --prefix backend --omit=optional --no-audit --fund=false
           else
-            npm install --no-audit --fund=false
+            echo "Ingen backend/package-lock.json → npm install --prefix backend"
+            npm install --prefix backend --no-audit --fund=false
           fi
 
-      - name: Run Prisma migrations
-        run: npx prisma migrate deploy
+      # Prisma generering/migrering kjøres fra repo-rot mot prisma/schema.prisma
+      - name: Generate Prisma client
+        run: npx prisma generate --schema=prisma/schema.prisma
 
+      - name: Apply Prisma migrations
+        run: npx prisma migrate deploy --schema=prisma/schema.prisma
+
+      # Seed roller fra roles/roles.json via ESM loader
+      - name: Seed baseline roles
+        run: node --loader ts-node/esm scripts/seed-roles-from-json.ts
+
+      # Kjør persistens-testene med egen jest-config
       - name: Run persistence tests
         working-directory: backend
         run: |
-          npm test -- \
-            tests/roles/db.registry.test.ts \
-            tests/usage/db.usage.test.ts \
-            tests/features/active.api.test.ts \
-            tests/admin/roles.api.test.ts \
-            tests/proactivity/context.integration.test.ts \
-            --runInBand --passWithNoTests
+          npx jest --config jest.persistence.config.cjs --runInBand --passWithNoTests

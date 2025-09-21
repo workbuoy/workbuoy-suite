@@ -47,6 +47,10 @@ export const preferencesStrings = {
       label: "Globale snarveier",
       description: "Ctrl+Space for flip, Ctrl+Shift+Space til Navi.",
     },
+    fastFlip: {
+      label: "Fast flip",
+      description: "Bruk fade/slide i stedet for 3D-rotasjon.",
+    },
     reducedMotion: {
       label: "Redusert animasjon",
       description: "Tone ned overgangene og bevegelse i grensesnittet.",
@@ -66,6 +70,10 @@ export const preferencesStrings = {
     stop: "Avslutt demo",
     statusOn: "Demo-modus er aktiv. Panelet viser mock-data og snarveier.",
     statusOff: "Aktiver en guidet demo for WorkBuoy-panelet.",
+  },
+  actions: {
+    resetDock: "Tilbakestill dock",
+    resetDockDescription: "Nullstill størrelse og plassering til standard.",
   },
 };
 
