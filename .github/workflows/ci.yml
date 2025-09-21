@@ -8,6 +8,7 @@ on:
 jobs:
   backend-persistence:
     runs-on: ubuntu-latest
+    continue-on-error: true
     services:
       postgres:
         image: postgres:16

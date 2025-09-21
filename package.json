@@ -5,6 +5,7 @@
     "seed:roles": "tsx scripts/seed-roles-from-json.ts"
   },
   "devDependencies": {
+    "@types/jest": "^29.5.12",
     "tsx": "^4.19.0"
   }
 }

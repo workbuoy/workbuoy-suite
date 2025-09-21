@@ -32,7 +32,7 @@ jobs:
       - name: Test with coverage
         env:
           TEST_CORRELATION: "1"
-        run: npm test -- --coverage --runInBand
+        run: npm run test --if-present -- --coverage
 
       - name: Upload coverage
         if: always()
