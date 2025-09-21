@@ -23,6 +23,11 @@ paths:
           schema:
             type: string
             description: Desired mode (numeric 1-6 or keyword)
+        - in: header
+          name: x-proactivity-compat
+          schema:
+            type: string
+            description: Legacy mode (0-3) mapped to 1-6
       responses:
         '200':
           description: Current proactivity posture
@@ -42,6 +47,11 @@ paths:
         - in: header
           name: x-role
           schema: { type: string }
+        - in: header
+          name: x-proactivity-compat
+          schema:
+            type: string
+            description: Legacy mode (0-3) mapped to 1-6
       requestBody:
         required: false
         content:
@@ -265,6 +275,126 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/TelemetryEvent'
+  /api/proposals:
+    get:
+      summary: List proposals for the tenant
+      parameters:
+        - in: query
+          name: status
+          schema:
+            type: string
+            enum: [proposed, approved, rejected, executed, failed]
+          description: Filter by proposal status
+      responses:
+        '200':
+          description: List of proposals
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProposalListResponse'
+    post:
+      summary: Manually create a proposal (usually generated via runner)
+      parameters:
+        - in: header
+          name: Idempotency-Key
+          schema: { type: string }
+          description: Optional idempotency key for the proposal record
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProposalCreateRequest'
+      responses:
+        '201':
+          description: Proposal created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProposalCreateResponse'
+        '400':
+          description: Missing capability id
+  /api/proposals/{id}/approve:
+    post:
+      summary: Approve a proposal and execute the underlying capability
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+        - in: header
+          name: Idempotency-Key
+          schema: { type: string }
+          description: Override idempotency key for connector execution
+      responses:
+        '200':
+          description: Proposal executed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProposalApproveResponse'
+        '404':
+          description: Proposal or capability not found
+        '409':
+          description: Proposal already rejected or executed
+        '500':
+          description: Execution failed
+  /api/proposals/{id}/reject:
+    post:
+      summary: Reject a proposal without executing it
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProposalRejectRequest'
+      responses:
+        '200':
+          description: Proposal rejected
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProposalRejectResponse'
+        '404':
+          description: Proposal not found
+        '409':
+          description: Proposal already executed
+  /api/connectors/{name}/health:
+    get:
+      summary: Retrieve circuit breaker state for a connector
+      parameters:
+        - in: path
+          name: name
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Circuit breaker state
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConnectorHealth'
+        '404':
+          description: Connector unknown
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConnectorHealth'
+  /api/connectors/health:
+    get:
+      summary: List health for all known connector breakers
+      responses:
+        '200':
+          description: Aggregate circuit breaker states
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConnectorHealthList'
 components:
   schemas:
     ProactivityState:
@@ -286,21 +416,125 @@ components:
               id: { type: string }
               label: { type: string }
               mode: { type: integer, minimum: 1, maximum: 6 }
+              enforced: { type: boolean, nullable: true }
+              basis:
+                type: array
+                items: { type: string }
+                nullable: true
+              degradeTag: { type: string, nullable: true }
         degradeRail:
           type: array
           items: { type: integer, minimum: 1, maximum: 6 }
         uiHints:
           type: object
           properties:
+            surface:
+              type: string
+              enum: [none, passive, cards, draft, backstage, dom-overlay]
             overlay: { type: boolean }
             callToAction: { type: string }
             banner: { type: string }
             healthChecks: { type: boolean }
-            reviewType: { type: string }
+            reviewType:
+              type: string
+              enum: [none, passive, suggestion, approval, execution]
+        chip:
+          type: object
+          properties:
+            key: { type: string }
+            label: { type: string }
+            icon: { type: string }
         subscription:
           $ref: '#/components/schemas/SubscriptionState'
         featureId: { type: string, nullable: true }
         timestamp: { type: string, format: date-time }
+    Proposal:
+      type: object
+      properties:
+        id: { type: string }
+        tenantId: { type: string }
+        userId: { type: string }
+        featureId: { type: string, nullable: true }
+        capabilityId: { type: string }
+        status: { type: string, enum: [proposed, approved, rejected, executed, failed] }
+        preview:
+          type: object
+          nullable: true
+          additionalProperties: true
+        basis:
+          type: array
+          items: { type: string }
+        idempotencyKey: { type: string, nullable: true }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+        approvedBy: { type: string, nullable: true }
+        rejectedBy: { type: string, nullable: true }
+        requestedMode: { type: integer, nullable: true }
+        effectiveMode: { type: integer, nullable: true }
+        executionResult:
+          type: object
+          nullable: true
+          additionalProperties: true
+        failureReason: { type: string, nullable: true }
+    ProposalCreateRequest:
+      type: object
+      required: [capabilityId]
+      properties:
+        capabilityId: { type: string }
+        featureId: { type: string }
+        payload:
+          type: object
+          additionalProperties: true
+        preview:
+          type: object
+          nullable: true
+          additionalProperties: true
+    ProposalCreateResponse:
+      type: object
+      properties:
+        proposal:
+          $ref: '#/components/schemas/Proposal'
+    ProposalListResponse:
+      type: object
+      properties:
+        proposals:
+          type: array
+          items:
+            $ref: '#/components/schemas/Proposal'
+    ProposalApproveResponse:
+      type: object
+      properties:
+        proposal:
+          $ref: '#/components/schemas/Proposal'
+        outcome:
+          type: object
+          nullable: true
+          additionalProperties: true
+        idempotencyKey: { type: string }
+        basis:
+          type: array
+          items: { type: string }
+    ProposalRejectRequest:
+      type: object
+      properties:
+        reason: { type: string }
+    ProposalRejectResponse:
+      type: object
+      properties:
+        proposal:
+          $ref: '#/components/schemas/Proposal'
+    ConnectorHealth:
+      type: object
+      properties:
+        connector: { type: string }
+        state: { type: string, enum: [open, half-open, closed, unknown] }
+    ConnectorHealthList:
+      type: object
+      properties:
+        connectors:
+          type: array
+          items:
+            $ref: '#/components/schemas/ConnectorHealth'
     SubscriptionState:
       type: object
       properties:

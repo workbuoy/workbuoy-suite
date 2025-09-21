@@ -7,9 +7,9 @@
   position: relative;
   height: 100%;
   width: 100%;
-  border-radius: var(--radius-lg, 16px);
+  border-radius: var(--radius-lg);
   transform-style: preserve-3d;
-  transition: transform var(--trans-slow, 480ms cubic-bezier(.2,.8,.2,1));
+  transition: transform var(--transition-slow);
   overflow: hidden;
 }
 
@@ -23,8 +23,8 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 12px 16px;
-  z-index: 3;
+  padding: var(--space-md) var(--space-lg);
+  z-index: var(--z-overlay);
   pointer-events: none;
 }
 
@@ -40,8 +40,8 @@
 .flip-card-toolbar__connect,
 .flip-card-toolbar__resize {
   background: rgba(12, 16, 24, 0.65);
-  border-color: rgba(255,255,255,.18);
-  color: var(--ink);
+  border-color: var(--stroke-subtle);
+  color: var(--fg-default);
 }
 
 .flip-card-toolbar__resize {
@@ -52,7 +52,7 @@
   position: absolute;
   inset: 0;
   backface-visibility: hidden;
-  padding: 64px 18px 18px;
+  padding: calc(var(--space-xl) * 2) var(--space-md) var(--space-md);
   display: flex;
 }
 
@@ -77,17 +77,17 @@
   background: rgba(5, 8, 12, 0.72);
   display: grid;
   place-items: center;
-  z-index: 5;
+  z-index: var(--z-dialog);
 }
 
 .flip-card-connect__form {
-  background: var(--bg-elev, rgba(14,18,26,0.95));
-  border: 1px solid rgba(255,255,255,.1);
-  border-radius: var(--radius-md, 12px);
-  padding: 24px;
+  background: var(--surface-elevated);
+  border: 1px solid var(--stroke-hairline);
+  border-radius: var(--radius-md);
+  padding: var(--space-xl);
   width: min(320px, 90vw);
   display: grid;
-  gap: 14px;
+  gap: var(--space-lg);
 }
 
 .flip-card-connect__label {
@@ -99,15 +99,15 @@
 .flip-card-connect__label input,
 .flip-card-connect__label select {
   background: rgba(12, 16, 24, 0.65);
-  border: 1px solid rgba(255,255,255,.14);
-  border-radius: 8px;
-  padding: 8px 10px;
-  color: var(--ink);
+  border: 1px solid var(--stroke-subtle);
+  border-radius: var(--radius-md);
+  padding: var(--space-sm) var(--space-md);
+  color: var(--fg-default);
 }
 
 .flip-card-connect__actions {
   display: flex;
-  gap: 10px;
+  gap: var(--space-md);
   justify-content: flex-end;
 }
 
@@ -119,11 +119,11 @@
 
 @media (max-width: 720px) {
   .flip-card-face {
-    padding: 60px 14px 14px;
+    padding: calc(var(--space-xl) * 1.75) var(--space-sm) var(--space-sm);
   }
 
   .flip-card-toolbar {
-    padding: 10px 12px;
+    padding: var(--space-sm) var(--space-md);
   }
 }
 

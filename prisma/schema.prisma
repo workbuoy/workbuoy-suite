@@ -44,6 +44,10 @@ model AuditChain {
   headHash  String?
 }
 
+//
+// ---- Role/Feature/Usage domain (Codex branch) ----
+//
+
 enum FeatureUsageAction {
   open
   complete
@@ -105,4 +109,61 @@ model FeatureUsage {
   @@index([userId])
   @@index([featureId])
   @@index([tenantId])
+}
+
+//
+// ---- Proposals / Connector calls (main) ----
+//
+
+enum ProposalStatus {
+  proposed
+  approved
+  rejected
+  executed
+  failed
+}
+
+enum ConnectorCallStatus {
+  pending
+  success
+  failed
+}
+
+model Proposal {
+  id              String          @id @default(uuid())
+  tenantId        String          @map("tenant_id")
+  userId          String          @map("user_id")
+  featureId       String?         @map("feature_id")
+  capabilityId    String          @map("capability_id")
+  payload         Json
+  preview         Json?
+  status          ProposalStatus  @default(proposed)
+  idempotencyKey  String?         @map("idempotency_key")
+  basis           Json?
+  requestedMode   Int?            @map("requested_mode")
+  effectiveMode   Int?            @map("effective_mode")
+  executionResult Json?           @map("execution_result")
+  failureReason   String?         @map("failure_reason")
+  approvedBy      String?         @map("approved_by")
+  rejectedBy      String?         @map("rejected_by")
+  createdAt       DateTime        @default(now()) @map("created_at")
+  updatedAt       DateTime        @updatedAt      @map("updated_at")
+
+  @@map("proposals")
+}
+
+model ConnectorCall {
+  key           String              @id
+  connector     String
+  capabilityId  String              @map("capability_id")
+  action        String?
+  requestHash   String              @map("request_hash")
+  status        ConnectorCallStatus @default(pending)
+  response      Json?
+  retries       Int                 @default(0)
+  lastError     String?             @map("last_error")
+  createdAt     DateTime            @default(now()) @map("created_at")
+  updatedAt     DateTime            @updatedAt      @map("updated_at")
+
+  @@map("connector_calls")
 }

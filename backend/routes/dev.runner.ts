@@ -23,6 +23,8 @@ router.post('/dev/run', async (req: any, res: any) => {
   const userId = String(req.header('x-user') ?? 'dev-user');
   const role = String(req.header('x-role') ?? 'sales_rep');
   const requestedHeader = req.header('x-proactivity');
+  const compatHeader = req.header('x-proactivity-compat');
+  const idempotencyHeader = req.header('idempotency-key') || req.header('Idempotency-Key');
 
   const registry = await getRoleRegistry();
   const fallback: UserRoleBinding = { userId, primaryRole: role };
@@ -37,6 +39,8 @@ router.post('/dev/run', async (req: any, res: any) => {
       tenantId,
       roleBinding: binding,
       requestedMode: parseProactivityMode(requestedHeader ?? req.body?.mode),
+      compatMode: compatHeader,
+      idempotencyKey: typeof idempotencyHeader === 'string' ? idempotencyHeader : undefined,
     },
     impl,
     policyAllowAlways,

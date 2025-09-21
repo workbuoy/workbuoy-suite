@@ -1,13 +1,13 @@
-import { render, screen, fireEvent } from "@testing-library/react";
 import React from "react";
-import { AutonomySlider } from "../components/AutonomySlider";
+import { describe, expect, it, vi } from "vitest";
+import { AutonomySlider } from "@/components/AutonomySlider";
 
 describe("AutonomySlider", () => {
-  it("renders and changes value", () => {
-    let v=0;
-    render(<AutonomySlider value={v} onChange={(x)=>{v=x;}} />);
-    const input = screen.getByRole("slider");
-    fireEvent.change(input, { target: { value: "2" } });
-    expect(v).toBe(2);
+  it("invokes the change handler with numeric values", () => {
+    const onChange = vi.fn();
+    const element = AutonomySlider({ value: 0, onChange });
+    const [, input] = (element.props.children as React.ReactNode[]) as any[];
+    input.props.onChange({ target: { value: "2" } });
+    expect(onChange).toHaveBeenCalledWith(2);
   });
 });

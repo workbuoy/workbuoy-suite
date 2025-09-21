@@ -9,22 +9,28 @@ import { envBool } from '../../src/core/env';
 const r = Router();
 const usePersistence = envBool('FF_PERSISTENCE', false);
 
-r.get('/api/features/active', async (req, res) => {
+// NB: Router mountes under /api i server.ts, så path her skal ikke ha /api-prefiks.
+r.get('/features/active', async (req, res) => {
   const tenantId = String(req.header('x-tenant') ?? 'DEV');
   const userId = String(req.header('x-user') ?? 'dev-user');
   const role = String(req.header('x-role') ?? 'sales_rep');
+
   try {
     const registry = await getRoleRegistry();
     const fallback: UserRoleBinding = { userId, primaryRole: role };
-    const binding = (await resolveUserBinding(tenantId, userId, fallback)) ?? fallback;
+    const binding =
+      (await resolveUserBinding(tenantId, userId, fallback)) ?? fallback;
+
     const usage = usePersistence
       ? await aggregateFromDb(userId, tenantId)
       : aggregateInMemory(userId, tenantId);
+
     const orgContext = {
       industry: req.header('x-industry') ?? undefined,
       region: req.header('x-region') ?? undefined,
-      size: (req.header('x-tenant-size') as 'smb'|'mid'|'ent' | undefined) ?? undefined,
+      size: (req.header('x-tenant-size') as 'smb' | 'mid' | 'ent' | undefined) ?? undefined,
     };
+
     const list = getActiveFeatures(registry, {
       tenantId,
       userId,
@@ -32,9 +38,12 @@ r.get('/api/features/active', async (req, res) => {
       workPatterns: { featureUseCount: usage },
       orgContext,
     });
+
     res.json(list);
   } catch (err: any) {
-    res.status(500).json({ error: 'feature_activation_failed', message: err?.message || String(err) });
+    res
+      .status(500)
+      .json({ error: 'feature_activation_failed', message: err?.message || String(err) });
   }
 });
 

@@ -36,3 +36,14 @@ Miljø:
 
 ## Rollback
 Sett env-variabler for å disable provider (unngå å konfigurere webhook/polling) eller fjern Ingress-route.
+
+## Idempotency & Resilience
+
+- **Idempotency-Key** – hver `execute()` må inkludere `Idempotency-Key`. Backend lagrer rader i `connector_calls`
+  (`key`, `connector`, `capability_id`, `request_hash`, `status`, `response`, `retries`). Gjentatte kall med samme nøkkel
+  returnerer hurtigbufret respons uten å treffe leverandøren igjen.
+- **Retry & backoff** – eksponentiell backoff (`250ms * 2^forsøk`) med jitter. Respekter `Retry-After`. Maks fem forsøk,
+  hopper over nye forsøk for deterministiske 4xx-feil (unntatt 408/429).
+- **DLQ** – etter maks forsøk markeres kallet som `failed` og `eventbus.dlq` emitteres med kontekst (`connector`, `capabilityId`, `key`, `error`).
+- **Circuit breaker** – én per connector. Åpner ved flere feil i glidende vindu, går til `half-open` etter cooldown og lukkes på suksess.
+  Helseendepunkt: `GET /api/connectors/{name}/health` (`open|half-open|closed`) eller `GET /api/connectors/health` for oversikt.
