@@ -58,6 +58,80 @@ paths:
         '404': { $ref: '#/components/responses/NotFound' }
         '403': { $ref: '#/components/responses/Forbidden' }
 
+  /api/v1/crm/contacts:
+    get:
+      summary: List contacts (v1)
+      operationId: listContactsV1
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items: { $ref: '#/components/schemas/Contact' }
+                  correlationId: { type: string }
+    post:
+      summary: Create contact (v1)
+      operationId: createContactV1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/NewContact' }
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  item: { $ref: '#/components/schemas/Contact' }
+                  correlationId: { type: string }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  /api/v1/crm/contacts/{id}:
+    patch:
+      summary: Update contact (v1)
+      operationId: updateContactV1
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Contact' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+    delete:
+      summary: Delete contact (v1)
+      operationId: deleteContactV1
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        '204': { description: Deleted }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
   /api/tasks:
     get:
       summary: List tasks
@@ -142,6 +216,157 @@ paths:
         '403': { $ref: '#/components/responses/Forbidden' }
         '404': { $ref: '#/components/responses/NotFound' }
 
+  /api/v1/crm/opportunities:
+    get:
+      summary: List opportunities (v1)
+      operationId: listOpportunitiesV1
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items: { $ref: '#/components/schemas/Opportunity' }
+    post:
+      summary: Create opportunity (v1)
+      operationId: createOpportunityV1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/NewOpportunity' }
+      responses:
+        '201': { description: Created }
+        '400': { $ref: '#/components/responses/BadRequest' }
+
+  /api/v1/crm/opportunities/{id}:
+    patch:
+      summary: Update opportunity (v1)
+      operationId: updateOpportunityV1
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        '200': { description: OK }
+        '404': { $ref: '#/components/responses/NotFound' }
+    delete:
+      summary: Delete opportunity (v1)
+      operationId: deleteOpportunityV1
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        '204': { description: Deleted }
+
+  /api/v1/crm/pipelines:
+    get:
+      summary: List pipelines (v1)
+      operationId: listPipelinesV1
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items: { $ref: '#/components/schemas/Pipeline' }
+
+  /api/v1/geo/geocode:
+    post:
+      summary: Batch geocode addresses
+      operationId: geocodeAddresses
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                addresses:
+                  type: array
+                  items: { type: string }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        lat: { type: number }
+                        lng: { type: number }
+                        precision: { type: string }
+                        label: { type: string }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '503': { description: Missing Mapbox token }
+
+  /api/v1/geo/territory/assign:
+    post:
+      summary: Assign territory for a point
+      operationId: assignTerritory
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                point:
+                  type: object
+                  properties:
+                    lat: { type: number }
+                    lng: { type: number }
+                  required: [lat, lng]
+                territories:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      id: { type: string }
+                      polygon: { type: object }
+                      shape: { type: object }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  territory:
+                    oneOf:
+                      - type: 'null'
+                      - type: object
+                        properties:
+                          id: { type: string }
+                          properties:
+                            type: object
+                            additionalProperties: true
+        '400': { $ref: '#/components/responses/BadRequest' }
+
   /api/log:
     get:
       summary: List logs
@@ -214,6 +439,35 @@ components:
         name: { type: string }
         email: { type: string, format: email }
         phone: { type: string }
+
+    Opportunity:
+      type: object
+      required: [id, name]
+      properties:
+        id: { type: string }
+        name: { type: string }
+        amount: { type: number }
+        stage: { type: string }
+        ownerId: { type: string }
+
+    NewOpportunity:
+      type: object
+      required: [name]
+      properties:
+        name: { type: string }
+        amount: { type: number }
+        stage: { type: string }
+        ownerId: { type: string }
+
+    Pipeline:
+      type: object
+      required: [id, name]
+      properties:
+        id: { type: string }
+        name: { type: string }
+        stages:
+          type: array
+          items: { type: string }
 
     Task:
       type: object

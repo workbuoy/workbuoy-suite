@@ -1,6 +1,12 @@
 import { RoleRegistry } from '../../roles/registry';
 import type { UserRoleBinding } from '../../roles/types';
-import { PROACTIVITY_MODE_META, ProactivityMode, modeToKey, parseProactivityMode, DEFAULT_DEGRADE_RAIL } from './modes';
+import {
+  PROACTIVITY_MODE_META,
+  ProactivityMode,
+  modeToKey,
+  parseProactivityMode,
+  DEFAULT_DEGRADE_RAIL,
+} from './modes';
 import { resolveEffectiveMode, ProactivityCap, ProactivityResolution } from './state';
 import { getSubscriptionCap } from '../subscription/state';
 import type { SubscriptionCapSummary } from '../subscription/state';
@@ -40,7 +46,10 @@ function resolveRoleCap(
   const featureWithCap = featureIdHint
     ? userCtx.features.find(f => f.id === featureIdHint)
     : userCtx.features.reduce<{ feature?: typeof userCtx.features[number]; cap?: ProactivityMode }>((best, f) => {
-        const cap = (userCtx.featureCaps[f.id] ?? f.autonomyCap ?? f.defaultAutonomyCap ?? ProactivityMode.Proaktiv) as ProactivityMode;
+        const cap = (userCtx.featureCaps[f.id] ??
+          f.autonomyCap ??
+          f.defaultAutonomyCap ??
+          ProactivityMode.Proaktiv) as ProactivityMode;
         if (!best.feature || (best.cap ?? ProactivityMode.Usynlig) < cap) {
           return { feature: f, cap };
         }
@@ -48,23 +57,31 @@ function resolveRoleCap(
       }, {} as { feature?: typeof userCtx.features[number]; cap?: ProactivityMode }).feature;
 
   if (!featureWithCap) return {};
-  const cap = (userCtx.featureCaps[featureWithCap.id] ?? featureWithCap.autonomyCap ?? featureWithCap.defaultAutonomyCap ?? ProactivityMode.Proaktiv) as ProactivityMode;
+  const cap = (userCtx.featureCaps[featureWithCap.id] ??
+    featureWithCap.autonomyCap ??
+    featureWithCap.defaultAutonomyCap ??
+    ProactivityMode.Proaktiv) as ProactivityMode;
   return { cap, featureId: featureWithCap.id };
 }
 
 export function buildProactivityContext(input: ProactivityContextInput): ProactivityState {
   const subscription = getSubscriptionCap(input.tenantId);
+
   const caps: ProactivityCap[] = [
     {
       id: `subscription:${subscription.plan}`,
       label: `plan:${subscription.plan}`,
       mode: subscription.maxMode,
-      basis: [`tenantPlan:${subscription.plan}`].concat(subscription.secureTenant ? ['tenant<=3'] : []),
+      basis: [`tenantPlan:${subscription.plan}`].concat(
+        subscription.secureTenant ? ['tenant<=3'] : [],
+      ),
       degradeTag: 'subscription',
     },
   ];
+
   const basis = new Set<string>(input.basis ?? []);
   basis.add(`tenantPlan:${subscription.plan}`);
+  if (subscription.killSwitch) basis.add('kill');
   if (subscription.secureTenant) basis.add('tenant<=3');
 
   const compatRequested = mapCompatMode(input.compatMode);
@@ -72,9 +89,17 @@ export function buildProactivityContext(input: ProactivityContextInput): Proacti
     input.requestedMode ?? compatRequested ?? undefined,
     compatRequested ?? undefined,
   );
-  const rail = input.degradeRail && input.degradeRail.length ? input.degradeRail : DEFAULT_DEGRADE_RAIL;
+  const rail =
+    input.degradeRail && input.degradeRail.length
+      ? input.degradeRail
+      : DEFAULT_DEGRADE_RAIL;
 
-  const { cap: roleCap, featureId } = resolveRoleCap(input.roleRegistry, input.tenantId, input.roleBinding, input.featureId);
+  const { cap: roleCap, featureId } = resolveRoleCap(
+    input.roleRegistry,
+    input.tenantId,
+    input.roleBinding,
+    input.featureId,
+  );
   if (roleCap) {
     const featureTag = featureId ?? 'default';
     caps.push({
@@ -105,6 +130,11 @@ export function buildProactivityContext(input: ProactivityContextInput): Proacti
     basis: Array.from(basis),
   });
 
+  const basisSet = new Set(resolution.basis);
+  if (resolution.effective < resolution.requested) {
+    basisSet.add(`degraded:${modeToKey(resolution.effective)}`);
+  }
+
   const meta = PROACTIVITY_MODE_META[resolution.effective];
   const state: ProactivityState = {
     ...resolution,
@@ -117,6 +147,7 @@ export function buildProactivityContext(input: ProactivityContextInput): Proacti
     subscription,
     featureId,
     timestamp: new Date().toISOString(),
+    basis: Array.from(basisSet),
   };
   return state;
 }

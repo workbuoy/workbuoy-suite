@@ -44,6 +44,77 @@ model AuditChain {
   headHash  String?
 }
 
+//
+// ---- Role/Feature/Usage domain (Codex branch) ----
+//
+
+enum FeatureUsageAction {
+  open
+  complete
+  dismiss
+}
+
+model Role {
+  role_id     String   @id
+  title       String
+  inherits    String[] @default([])
+  featureCaps Json?
+  scopeHints  Json?
+  profile     Json?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Feature {
+  id                  String   @id
+  title               String
+  description         String?
+  defaultAutonomyCap  Int      @default(3)
+  capabilities        String[]
+  metadata            Json?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+}
+
+model OrgRoleOverride {
+  tenant_id        String
+  role_id          String
+  featureCaps      Json?
+  disabledFeatures String[] @default([])
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@id([tenant_id, role_id])
+  @@index([role_id])
+}
+
+model UserRole {
+  user_id        String  @id
+  tenant_id      String
+  primaryRole    String
+  secondaryRoles String[] @default([])
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model FeatureUsage {
+  id        String             @id @default(uuid())
+  userId    String
+  tenantId  String
+  featureId String
+  action    FeatureUsageAction
+  ts        DateTime           @default(now())
+  metadata  Json?
+
+  @@index([userId])
+  @@index([featureId])
+  @@index([tenantId])
+}
+
+//
+// ---- Proposals / Connector calls (main) ----
+//
+
 enum ProposalStatus {
   proposed
   approved
@@ -59,40 +130,40 @@ enum ConnectorCallStatus {
 }
 
 model Proposal {
-  id             String          @id @default(uuid())
-  tenantId       String          @map("tenant_id")
-  userId         String          @map("user_id")
-  featureId      String?         @map("feature_id")
-  capabilityId   String          @map("capability_id")
-  payload        Json
-  preview        Json?
-  status         ProposalStatus  @default(proposed)
-  idempotencyKey String?         @map("idempotency_key")
-  basis          Json?
-  requestedMode  Int?            @map("requested_mode")
-  effectiveMode  Int?            @map("effective_mode")
-  executionResult Json?          @map("execution_result")
-  failureReason  String?         @map("failure_reason")
-  approvedBy     String?         @map("approved_by")
-  rejectedBy     String?         @map("rejected_by")
-  createdAt      DateTime        @default(now()) @map("created_at")
-  updatedAt      DateTime        @updatedAt      @map("updated_at")
+  id              String          @id @default(uuid())
+  tenantId        String          @map("tenant_id")
+  userId          String          @map("user_id")
+  featureId       String?         @map("feature_id")
+  capabilityId    String          @map("capability_id")
+  payload         Json
+  preview         Json?
+  status          ProposalStatus  @default(proposed)
+  idempotencyKey  String?         @map("idempotency_key")
+  basis           Json?
+  requestedMode   Int?            @map("requested_mode")
+  effectiveMode   Int?            @map("effective_mode")
+  executionResult Json?           @map("execution_result")
+  failureReason   String?         @map("failure_reason")
+  approvedBy      String?         @map("approved_by")
+  rejectedBy      String?         @map("rejected_by")
+  createdAt       DateTime        @default(now()) @map("created_at")
+  updatedAt       DateTime        @updatedAt      @map("updated_at")
 
   @@map("proposals")
 }
 
 model ConnectorCall {
-  key          String              @id
-  connector    String
-  capabilityId String              @map("capability_id")
-  action       String?
-  requestHash  String              @map("request_hash")
-  status       ConnectorCallStatus @default(pending)
-  response     Json?
-  retries      Int                 @default(0)
-  lastError    String?             @map("last_error")
-  createdAt    DateTime            @default(now()) @map("created_at")
-  updatedAt    DateTime            @updatedAt      @map("updated_at")
+  key           String              @id
+  connector     String
+  capabilityId  String              @map("capability_id")
+  action        String?
+  requestHash   String              @map("request_hash")
+  status        ConnectorCallStatus @default(pending)
+  response      Json?
+  retries       Int                 @default(0)
+  lastError     String?             @map("last_error")
+  createdAt     DateTime            @default(now()) @map("created_at")
+  updatedAt     DateTime            @updatedAt      @map("updated_at")
 
   @@map("connector_calls")
 }

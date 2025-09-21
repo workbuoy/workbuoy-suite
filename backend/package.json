@@ -10,10 +10,13 @@
     "start:compliance": "node dist/compliance/server.js"
   },
   "dependencies": {
+    "@turf/boolean-point-in-polygon": "^6.5.0",
     "express": "^4.19.2",
     "express-rate-limit": "^6.10.0",
+    "js-yaml": "^4.1.0",
     "prom-client": "^15.1.0",
-    "uuid": "^9.0.1"
+    "uuid": "^9.0.1",
+    "@prisma/client": "^5.14.0"
   },
   "devDependencies": {
     "typescript": "^5.4.5",

@@ -91,7 +91,10 @@ export function resolveEffectiveMode(input: ResolveEffectiveModeInput): Proactiv
   };
 }
 
-export function degradeOnError(current: ProactivityMode, rail: ProactivityMode[] = DEFAULT_DEGRADE_RAIL): ProactivityMode {
+export function degradeOnError(
+  current: ProactivityMode,
+  rail: ProactivityMode[] = DEFAULT_DEGRADE_RAIL
+): ProactivityMode {
   const idx = rail.indexOf(current);
   if (idx === -1) {
     const fallback = Math.max(current - 1, ProactivityMode.Usynlig) as ProactivityMode;

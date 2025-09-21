@@ -42,7 +42,7 @@ function safeMount(path: string, modPath: string, factory?: string) {
       app.use(path, router);
       console.log(`[server] mounted ${modPath} -> ${path}`);
     }
-  } catch (e) {
+  } catch {
     // missing module is fine in delta mode
   }
 }
@@ -57,11 +57,14 @@ safeMount('/api/insights', './src/routes/insights', 'insightsRouter');
 safeMount('/api/finance', './src/routes/finance.reminder', 'financeReminderRouter');
 safeMount('/api', './src/routes/manual.complete', 'manualCompleteRouter');
 safeMount('/', './src/routes/genesis.autonomy', 'metaGenesisRouter');
+
+// Backend routers (mounted under /api)
+safeMount('/api', '../backend/routes/usage');
+safeMount('/api', '../backend/routes/features');
 safeMount('/api', '../backend/routes/proactivity');
 safeMount('/api', '../backend/routes/admin.subscription');
+safeMount('/api', '../backend/routes/admin.roles');
 safeMount('/api', '../backend/routes/explainability');
-safeMount('/api', '../backend/routes/features');
-safeMount('/api', '../backend/routes/usage');
 safeMount('/api', '../backend/routes/proposals');
 safeMount('/api', '../backend/routes/connectors.health');
 

@@ -117,6 +117,149 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SubscriptionState'
+  /api/features/active:
+    get:
+      summary: List active features ranked for the current user
+      parameters:
+        - in: header
+          name: x-tenant
+          required: true
+          schema: { type: string }
+        - in: header
+          name: x-user
+          required: true
+          schema: { type: string }
+        - in: header
+          name: x-role
+          required: true
+          schema: { type: string }
+        - in: header
+          name: x-industry
+          schema: { type: string }
+      responses:
+        '200':
+          description: Ranked feature list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ActiveFeature'
+  /api/usage/feature:
+    post:
+      summary: Record a feature usage event
+      parameters:
+        - in: header
+          name: x-tenant
+          required: false
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UsageEvent'
+      responses:
+        '200':
+          description: Event recorded
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+  /api/usage/aggregate/{userId}:
+    get:
+      summary: Aggregate usage counts for a user
+      parameters:
+        - in: path
+          name: userId
+          required: true
+          schema: { type: string }
+        - in: header
+          name: x-tenant
+          schema: { type: string }
+      responses:
+        '200':
+          description: Aggregated counts
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: { type: integer }
+  /api/admin/roles/import:
+    post:
+      summary: Import roles.json into Postgres
+      parameters:
+        - in: header
+          name: x-role-id
+          required: true
+          schema: { type: string, enum: [admin] }
+      responses:
+        '200':
+          description: Import summary
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+                  imported:
+                    type: object
+                    properties:
+                      roles: { type: integer }
+                      features: { type: integer }
+  /api/admin/roles/{roleId}:
+    get:
+      summary: Inspect role caps for a tenant
+      parameters:
+        - in: path
+          name: roleId
+          required: true
+          schema: { type: string }
+        - in: header
+          name: x-role-id
+          required: true
+          schema: { type: string, enum: [admin] }
+        - in: header
+          name: x-tenant
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Effective caps
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoleInspection'
+    put:
+      summary: Set tenant-specific role overrides
+      parameters:
+        - in: path
+          name: roleId
+          required: true
+          schema: { type: string }
+        - in: header
+          name: x-role-id
+          required: true
+          schema: { type: string, enum: [admin] }
+        - in: header
+          name: x-tenant
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RoleOverrideRequest'
+      responses:
+        '200':
+          description: Updated override
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoleInspection'
   /api/explain/last:
     get:
       summary: Fetch recent proactivity events for explainability UI
@@ -415,3 +558,60 @@ components:
           type: array
           items: { type: string }
         source: { type: string, nullable: true }
+    ActiveFeature:
+      type: object
+      properties:
+        id: { type: string }
+        title: { type: string }
+        description: { type: string }
+        autonomyCap: { type: integer, minimum: 0, maximum: 6 }
+        score: { type: number }
+        rankBasis:
+          type: object
+          properties:
+            autonomyCap: { type: integer }
+            usage: { type: integer }
+            usageWeight: { type: number }
+            industryBoost: { type: number }
+    UsageEvent:
+      type: object
+      required: [userId, featureId, action]
+      properties:
+        userId: { type: string }
+        tenantId: { type: string }
+        featureId: { type: string }
+        action: { type: string, enum: [open, complete, dismiss] }
+        ts: { type: string, format: date-time }
+    RoleOverrideRequest:
+      type: object
+      properties:
+        featureCaps:
+          type: object
+          additionalProperties: { type: integer, minimum: 0, maximum: 6 }
+        disabledFeatures:
+          type: array
+          items: { type: string }
+    RoleInspection:
+      type: object
+      properties:
+        tenantId: { type: string }
+        roleId: { type: string }
+        override:
+          $ref: '#/components/schemas/RoleOverrideRequest'
+        effective:
+          type: object
+          properties:
+            rolesResolved:
+              type: array
+              items:
+                type: object
+                properties:
+                  role_id: { type: string }
+                  title: { type: string }
+            featureCaps:
+              type: object
+              additionalProperties: { type: integer }
+            features:
+              type: array
+              items:
+                $ref: '#/components/schemas/ActiveFeature'

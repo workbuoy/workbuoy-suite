@@ -12,10 +12,12 @@
   "lint": "tsc --noEmit"
 },
   "dependencies": {
+    "mapbox-gl": "^2.15.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
   },
   "devDependencies": {
+    "@types/mapbox-gl": "^2.7.21",
     "@playwright/test": "^1.47.0",
     "@testing-library/jest-dom": "^6.4.6",
     "@testing-library/react": "^14.2.1",

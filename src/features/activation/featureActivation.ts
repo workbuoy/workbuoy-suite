@@ -10,10 +10,25 @@ export interface UserContext {
 
 export function getActiveFeatures(rr: RoleRegistry, uc: UserContext){
   const ctx = rr.getUserContext(uc.tenantId, uc.roleBinding);
+  const usageMap = uc.workPatterns?.featureUseCount ?? {};
   return ctx.features.map((f: any) => {
-    const usage = uc.workPatterns?.featureUseCount?.[f.id] ?? 0;
-    const industryBoost = (uc.orgContext?.industry === 'finance' && f.id.includes('cashflow')) ? 1 : 0;
-    const score = (f.autonomyCap ?? 3) + usage * 0.1 + industryBoost;
-    return { ...f, score };
+    const usage = usageMap[f.id] ?? 0;
+    const usageWeight = Math.min(Math.log(usage + 1) * 1.2, 3);
+    const industryBoost = (uc.orgContext?.industry === 'finance' && f.id.includes('cashflow')) ? 1
+      : (uc.orgContext?.industry === 'sales' && f.id.includes('lead')) ? 0.5
+      : 0;
+    const autonomyCap = f.autonomyCap ?? f.defaultAutonomyCap ?? 3;
+    const score = autonomyCap + usageWeight + industryBoost;
+    return {
+      ...f,
+      autonomyCap,
+      score,
+      rankBasis: {
+        autonomyCap,
+        usage,
+        usageWeight,
+        industryBoost,
+      },
+    };
   }).sort((a,b)=> b.score - a.score);
 }
