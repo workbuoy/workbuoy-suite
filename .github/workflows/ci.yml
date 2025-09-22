@@ -23,13 +23,15 @@ jobs:
           --health-retries 5
     env:
       FF_PERSISTENCE: "true"
-      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/wb?schema=public
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/workbuoy?schema=public
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'npm'
-      - run: npm ci
-      - name: Seed baseline roles (via tsx)
-        run: npm run seed:roles
+      - name: Install deps (no lockfile requirement)
+        run: npm install
+      - name: Prisma generate
+        run: npx prisma generate --schema=prisma/schema.prisma
+      - name: Seed baseline roles
+        run: node --loader ts-node/esm scripts/seed-roles-from-json.ts
