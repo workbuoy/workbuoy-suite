@@ -1,9 +1,8 @@
-name: Backend Persistence CI
+name: Backend Persistence
 
 on:
+  workflow_dispatch:
   pull_request:
-  push:
-    branches: [ main ]
 
 jobs:
   backend-persistence:
@@ -29,7 +28,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-      - name: Install dependencies
+      - name: Install dependencies (no lockfile required)
         run: npm install
       - name: Generate Prisma client
         run: npx prisma generate --schema=prisma/schema.prisma
