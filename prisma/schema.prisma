@@ -7,13 +7,189 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Contact {
-  id        String   @id @default(uuid())
+model Tenant {
+  id                 String             @id @default(cuid())
+  name               String?
+  // Opposite sides
+  stages             Stage[]            @relation("TenantStages")
+  activities         Activity[]         @relation("TenantActivities")
+  customFieldDefs    CustomFieldDef[]   @relation("TenantCFDefs")
+  customFieldValues  CustomFieldValue[] @relation("TenantCFVals")
+  opportunities      Opportunity[]      @relation("TenantOpps")
+  users              User[]             @relation("TenantUsers")
+
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+}
+
+model User {
+  id            String         @id @default(cuid())
+  email         String?        @unique
+  name          String?
+  // Opposite of Tenant.users
+  tenantId      String?
+  tenant        Tenant?        @relation("TenantUsers", fields: [tenantId], references: [id])
+
+  // Opposite of Contact.owner / Opportunity.owner
+  contacts      Contact[]      @relation("UserContacts")
+  opportunities Opportunity[]  @relation("UserOpps")
+
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+}
+
+model Organization {
+  id        String               @id @default(cuid())
   name      String
-  email     String?  @unique
-  phone     String?
+  contacts  Contact[]
+  opps      Opportunity[]
+  // Opposite of CustomFieldValue.organization
+  custom    CustomFieldValue[]   @relation("OrgCF")
+
+  createdAt DateTime             @default(now())
+  updatedAt DateTime             @updatedAt
+}
+
+model Contact {
+  id             String               @id @default(cuid())
+  name           String
+  email          String?              @unique
+  phone          String?
+  organizationId String?
+  organization   Organization?        @relation(fields: [organizationId], references: [id])
+
+  // Opposite of User.contacts
+  ownerId        String?
+  owner          User?                @relation("UserContacts", fields: [ownerId], references: [id])
+
+  tags           String[]
+  // Opposite of CustomFieldValue.contact
+  custom         CustomFieldValue[]   @relation("ContactCF")
+
+  createdAt      DateTime             @default(now())
+  updatedAt      DateTime             @updatedAt
+}
+
+model Pipeline {
+  id        String        @id @default(cuid())
+  name      String
+  stages    Stage[]
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+}
+
+model Stage {
+  id           String         @id @default(cuid())
+  name         String
+  tenantId     String
+  // Opposite of Tenant.stages
+  tenant       Tenant         @relation("TenantStages", fields: [tenantId], references: [id])
+
+  pipelineId   String?
+  pipeline     Pipeline?      @relation(fields: [pipelineId], references: [id])
+
+  // Opposite of Opportunity.stage
+  opportunities Opportunity[] @relation("StageOpps")
+
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+}
+
+model Opportunity {
+  id             String        @id @default(cuid())
+
+  tenantId       String
+  // Opposite of Tenant.opportunities
+  tenant         Tenant        @relation("TenantOpps", fields: [tenantId], references: [id])
+
+  organizationId String?
+  organization   Organization? @relation(fields: [organizationId], references: [id])
+
+  stageId        String
+  // Opposite of Stage.opportunities
+  stage          Stage         @relation("StageOpps", fields: [stageId], references: [id])
+
+  ownerId        String?
+  // Opposite of User.opportunities
+  owner          User?         @relation("UserOpps", fields: [ownerId], references: [id])
+
+  title          String?
+  tags           String[]
+
+  // Opposite of CustomFieldValue.opportunity
+  custom         CustomFieldValue[] @relation("OppCF")
+
+  // Opposite of Activity.opportunity
+  activities     Activity[]     @relation("OppActivities")
+
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+}
+
+model Activity {
+  id             String   @id @default(cuid())
+
+  tenantId       String
+  // Opposite of Tenant.activities
+  tenant         Tenant   @relation("TenantActivities", fields: [tenantId], references: [id])
+
+  // Opposite of Opportunity.activities
+  opportunityId  String?
+  opportunity    Opportunity? @relation("OppActivities", fields: [opportunityId], references: [id])
+
+  kind           String
+  payload        Json?
+
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model CustomFieldDef {
+  id        String   @id @default(cuid())
+
+  tenantId  String
+  // Opposite of Tenant.customFieldDefs
+  tenant    Tenant   @relation("TenantCFDefs", fields: [tenantId], references: [id])
+
+  entity    String   // organization|contact|opportunity
+  key       String
+  type      String   // string|number|bool|date|json
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model CustomFieldValue {
+  id             String        @id @default(cuid())
+
+  tenantId       String
+  // Opposite of Tenant.customFieldValues
+  tenant         Tenant        @relation("TenantCFVals", fields: [tenantId], references: [id])
+
+  entity         String        // organization|contact|opportunity
+  entityId       String
+  key            String
+
+  stringVal      String?
+  numberVal      Float?
+  boolVal        Boolean?
+  dateVal        DateTime?
+  jsonVal        Json?
+
+  // Optional typed relations to satisfy both sides
+  organizationId String?
+  organization   Organization? @relation("OrgCF", fields: [organizationId], references: [id])
+
+  contactId      String?
+  contact        Contact?      @relation("ContactCF", fields: [contactId], references: [id])
+
+  opportunityId  String?
+  opportunity    Opportunity?  @relation("OppCF", fields: [opportunityId], references: [id])
+
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  @@index([tenantId, entity, entityId])
 }
 
 model Task {
@@ -42,128 +218,4 @@ model AuditChain {
   id        String   @id @default(uuid())
   createdAt DateTime @default(now())
   headHash  String?
-}
-
-//
-// ---- Role/Feature/Usage domain (Codex branch) ----
-//
-
-enum FeatureUsageAction {
-  open
-  complete
-  dismiss
-}
-
-model Role {
-  role_id     String   @id
-  title       String
-  inherits    String[] @default([])
-  featureCaps Json?
-  scopeHints  Json?
-  profile     Json?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-}
-
-model Feature {
-  id                  String   @id
-  title               String
-  description         String?
-  defaultAutonomyCap  Int      @default(3)
-  capabilities        String[]
-  metadata            Json?
-  createdAt           DateTime @default(now())
-  updatedAt           DateTime @updatedAt
-}
-
-model OrgRoleOverride {
-  tenant_id        String
-  role_id          String
-  featureCaps      Json?
-  disabledFeatures String[] @default([])
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
-
-  @@id([tenant_id, role_id])
-  @@index([role_id])
-}
-
-model UserRole {
-  user_id        String  @id
-  tenant_id      String
-  primaryRole    String
-  secondaryRoles String[] @default([])
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-}
-
-model FeatureUsage {
-  id        String             @id @default(uuid())
-  userId    String
-  tenantId  String
-  featureId String
-  action    FeatureUsageAction
-  ts        DateTime           @default(now())
-  metadata  Json?
-
-  @@index([userId])
-  @@index([featureId])
-  @@index([tenantId])
-}
-
-//
-// ---- Proposals / Connector calls (main) ----
-//
-
-enum ProposalStatus {
-  proposed
-  approved
-  rejected
-  executed
-  failed
-}
-
-enum ConnectorCallStatus {
-  pending
-  success
-  failed
-}
-
-model Proposal {
-  id              String          @id @default(uuid())
-  tenantId        String          @map("tenant_id")
-  userId          String          @map("user_id")
-  featureId       String?         @map("feature_id")
-  capabilityId    String          @map("capability_id")
-  payload         Json
-  preview         Json?
-  status          ProposalStatus  @default(proposed)
-  idempotencyKey  String?         @map("idempotency_key")
-  basis           Json?
-  requestedMode   Int?            @map("requested_mode")
-  effectiveMode   Int?            @map("effective_mode")
-  executionResult Json?           @map("execution_result")
-  failureReason   String?         @map("failure_reason")
-  approvedBy      String?         @map("approved_by")
-  rejectedBy      String?         @map("rejected_by")
-  createdAt       DateTime        @default(now()) @map("created_at")
-  updatedAt       DateTime        @updatedAt      @map("updated_at")
-
-  @@map("proposals")
-}
-
-model ConnectorCall {
-  key           String              @id
-  connector     String
-  capabilityId  String              @map("capability_id")
-  action        String?
-  requestHash   String              @map("request_hash")
-  status        ConnectorCallStatus @default(pending)
-  response      Json?
-  retries       Int                 @default(0)
-  lastError     String?             @map("last_error")
-  createdAt     DateTime            @default(now()) @map("created_at")
-  updatedAt     DateTime            @updatedAt      @map("updated_at")
-
-  @@map("connector_calls")
 }
