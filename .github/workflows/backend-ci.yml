@@ -31,20 +31,15 @@ jobs:
           node-version: '20'
 
       - name: Install backend deps
-        run: |
-          if [ -f package-lock.json ]; then
-            npm ci --omit=optional --no-audit --fund=false
-          else
-            npm install --no-audit --fund=false
-          fi
+        run: npm install --no-audit --fund=false
 
       - name: Run in-memory API smoke tests
         env:
           FF_PERSISTENCE: 'false'
         run: |
           npm test -- \
-            tests/features/active.api.test.ts \
-            tests/usage/usage.api.test.ts \
+            ../tests/features/active.api.test.ts \
+            ../tests/usage/usage.api.test.ts \
             --runInBand --passWithNoTests
 
   test-persistence:
@@ -67,6 +62,8 @@ jobs:
     env:
       FF_PERSISTENCE: 'true'
       DATABASE_URL: postgresql://postgres:postgres@localhost:5432/workbuoy?schema=public
+      ROLES_PATH: core/roles/roles.json
+      FEATURES_PATH: core/roles/features.json
 
     steps:
       - name: Checkout
@@ -80,12 +77,7 @@ jobs:
       # NOTE: only install in backend/, never at repo root.
       - name: Install backend deps
         working-directory: backend
-        run: |
-          if [ -f package-lock.json ]; then
-            npm ci --omit=optional --no-audit --fund=false
-          else
-            npm install --no-audit --fund=false
-          fi
+        run: npm install --no-audit --fund=false
 
       - name: Generate Prisma client
         run: npx prisma generate --schema=prisma/schema.prisma
@@ -94,15 +86,16 @@ jobs:
         run: npx prisma migrate deploy --schema=prisma/schema.prisma
 
       - name: Seed baseline roles
-        run: node --loader ts-node/esm scripts/seed-roles-from-json.ts
+        working-directory: backend
+        run: npm run seed:roles
 
       - name: Run persistence tests
         working-directory: backend
         run: |
           npm test -- \
-            tests/roles/db.registry.test.ts \
-            tests/usage/db.usage.test.ts \
-            tests/features/active.api.test.ts \
-            tests/admin/roles.api.test.ts \
-            tests/proactivity/context.integration.test.ts \
+            ../tests/roles/db.registry.test.ts \
+            ../tests/usage/db.usage.test.ts \
+            ../tests/features/active.api.test.ts \
+            ../tests/admin/roles.api.test.ts \
+            ../tests/proactivity/context.integration.test.ts \
             --runInBand --passWithNoTests
