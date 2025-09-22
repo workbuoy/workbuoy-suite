@@ -5,14 +5,10 @@
     "build": "tsc --noEmit -p tsconfig.proactivity.json",
     "test": "npm run test --prefix backend",
     "typecheck": "tsc --noEmit -p tsconfig.meta.json",
-    "seed": "node -r ts-node/register prisma/seed.ts"
-  },
-  "dependencies": {
-    "@prisma/client": "^5.14.0",
-    "js-yaml": "^4.1.0"
+    "seed": "node -r ts-node/register prisma/seed.ts",
+    "seed:roles": "tsx scripts/seed-roles-from-json.ts"
   },
   "devDependencies": {
-    "prisma": "^5.14.0",
-    "ts-node": "^10.9.2"
+    "tsx": "^4.19.0"
   }
 }
