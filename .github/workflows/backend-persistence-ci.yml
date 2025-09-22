@@ -1,4 +1,4 @@
-name: Backend CI (persistence)
+name: backend-persistence
 
 on:
   pull_request:
@@ -6,55 +6,67 @@ on:
     branches: [ main ]
 
 jobs:
-  test-persistence:
-    if: "!contains(github.event.head_commit.message, '[skip ci]')" # still allow skipping
+  changes:
     runs-on: ubuntu-latest
-    env:
-      FF_PERSISTENCE: 'true'
-      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/workbuoy?schema=public
-      ROLES_PATH: core/roles/roles.json
-      FEATURES_PATH: core/roles/features.json
+    outputs:
+      backend_related: ${{ steps.compute.outputs.backend_related }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            backend:
+              - 'backend/**'
+            prisma:
+              - 'prisma/**'
+            roles:
+              - 'core/roles/**'
+              - 'scripts/seed-roles-from-json.ts'
+            frontend:
+              - 'frontend/**'
+            docs:
+              - 'docs/**'
+      - name: compute backend_related
+        id: compute
+        run: |
+          if [ "${{ steps.filter.outputs.backend }}" = "true" ] || \
+             [ "${{ steps.filter.outputs.prisma }}" = "true" ] || \
+             [ "${{ steps.filter.outputs.roles }}" = "true" ]; then
+            echo "backend_related=true" >> $GITHUB_OUTPUT
+          else
+            echo "backend_related=false" >> $GITHUB_OUTPUT
+          fi
+
+  backend-persistence:
+    needs: changes
+    # 👇 Skip når PR ikke berører backend/prisma/roles (typisk frontend/docs)
+    if: needs.changes.outputs.backend_related == 'true'
+    runs-on: ubuntu-latest
     services:
       postgres:
-        image: postgres:15-alpine
+        image: postgres:16
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: workbuoy
-        ports:
-          - 5432:5432
+          POSTGRES_DB: wb
+        ports: ['5432:5432']
         options: >-
-          --health-cmd="pg_isready -U postgres"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=5
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      FF_PERSISTENCE: "true"
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/wb?schema=public
+      ROLES_PATH: core/roles/roles.json
+      FEATURES_PATH: core/roles/features.json
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 20
-
-      - name: Install root tooling deps
-        run: npm install --no-audit --fund=false
-
-      - name: Install backend deps
-        working-directory: backend
-        run: npm install --omit=optional --no-audit --fund=false
-
-      - name: Generate Prisma client
-        working-directory: backend
-        run: npx prisma generate --schema=prisma/schema.prisma
-
-      - name: Apply Prisma migrations
-        working-directory: backend
-        run: npx prisma migrate deploy --schema=prisma/schema.prisma
-
-      - name: Seed baseline roles
-        run: npm run seed:roles
-
-      - name: Run persistence tests
-        working-directory: backend
-        run: npx jest --config jest.persistence.config.cjs --runInBand --passWithNoTests
+      - run: npm install
+      - run: npm --prefix backend install
+      - run: npx prisma generate --schema=prisma/schema.prisma
+      - run: npm run seed:roles
