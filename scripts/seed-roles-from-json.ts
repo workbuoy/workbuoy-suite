@@ -1,12 +1,9 @@
 // scripts/seed-roles-from-json.ts
-// This runner intentionally avoids importing ./seed-roles-lib.ts to prevent cycles when executed via ts-node/esm.
-// It only uses local IO helpers and lazily imports the importer module after env/file checks.
-
-import { loadRolesFromRepo, loadFeaturesFromRepo } from './roles-io.ts';
+// Minimal, cycle-free runner. Works with `tsx`.
+import { loadRolesFromRepo, loadFeaturesFromRepo } from './roles-io';
 
 async function main() {
-  const persist = (process.env.FF_PERSISTENCE || '').toLowerCase() === 'true';
-  if (!persist) {
+  if ((process.env.FF_PERSISTENCE || '').toLowerCase() !== 'true') {
     console.log(JSON.stringify({ ok: true, skipped: 'FF_PERSISTENCE=false' }));
     return;
   }
@@ -14,23 +11,13 @@ async function main() {
     throw new Error('DATABASE_URL must be set when FF_PERSISTENCE=true');
   }
 
-  // IO first (no external imports)
   const roles = loadRolesFromRepo();
   const features = loadFeaturesFromRepo();
 
-  // Lazy dynamic import after IO/env to avoid loader recursion
-  let importer: any;
-  try {
-    importer = await import('../src/roles/service/importer.ts');
-  } catch {
-    importer = await import('../src/roles/service/importer.js');
-  }
+  // Lazy dynamic import (tsx resolves .ts automatically)
+  const { importRolesAndFeatures } = await import('../src/roles/service/importer');
 
-  if (!importer?.importRolesAndFeatures) {
-    throw new Error('importRolesAndFeatures not found in importer module');
-  }
-
-  const summary = await importer.importRolesAndFeatures(roles, features);
+  const summary = await importRolesAndFeatures(roles, features);
   console.log(JSON.stringify({ ok: true, summary }));
 }
 
