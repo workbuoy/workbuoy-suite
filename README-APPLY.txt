@@ -1,31 +1,16 @@
-Workbuoy Suite — CI Fix Patch (Wave 1)
-=====================================
+Fix CI seed step to avoid ts-node ESM cycle
 
-This patch addresses:
-1) TS typecheck failing due to missing '@types/jest' and missing 'types' in tsconfig.meta.json.
-2) Seed script ESM require cycle by refactoring the runner to avoid importing seed-roles-lib.ts.
-
-Files included (relative to repo root):
-- package.json                      (adds devDep @types/jest)
-- tsconfig.meta.json                (adds compilerOptions.types = ['jest','node'])
-- scripts/roles-io.ts               (new — JSON helpers extracted)
-- scripts/seed-roles-from-json.ts   (updated — imports roles-io and uses dynamic import of importer)
+What this patch does
+- Adds an npm script "seed:roles" that runs seed with `tsx` (no loader cycles)
+- Updates .github/workflows/ci.yml to call `npm run seed:roles`
 
 How to apply
-------------
-1) Create a new branch, then copy files over the repo root:
-   unzip wb-wave1-ci-fixes.zip -d /path/to/your/checkout
+1) Create a new branch.
+2) Unzip this archive into the repo root (overwriting existing files if prompted).
+3) Commit and push, then open a PR.
 
-2) Install dependencies at repo root:
-   npm install
-
-3) (Optional) Format:
-   npx prettier -w tsconfig.meta.json scripts/*.ts
-
-4) Run typecheck locally:
-   npm run typecheck
-
-5) Commit & push, open PR:
-   git add -A
-   git commit -m "fix(ci): jest types + seed script esm refactor"
-   git push -u origin <your-branch>
+Notes
+- If you have multiple workflow files, ensure any other occurrences of
+  `node --loader ts-node/esm scripts/seed-roles-from-json.ts` are replaced
+  with `npm run seed:roles`.
+- This patch does not modify your seed script itself.
