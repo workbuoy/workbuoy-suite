@@ -10,12 +10,15 @@ datasource db {
 model Tenant {
   id                 String             @id @default(cuid())
   name               String?
-  users              User[]             @relation("TenantUsers")
+
+  // Opposite sides
   stages             Stage[]            @relation("TenantStages")
   activities         Activity[]         @relation("TenantActivities")
-  opportunities      Opportunity[]      @relation("TenantOpps")
   customFieldDefs    CustomFieldDef[]   @relation("TenantCFDefs")
   customFieldValues  CustomFieldValue[] @relation("TenantCFVals")
+  opportunities      Opportunity[]      @relation("TenantOpps")
+  users              User[]             @relation("TenantUsers")
+
   createdAt          DateTime           @default(now())
   updatedAt          DateTime           @updatedAt
 }
@@ -24,11 +27,15 @@ model User {
   id            String         @id @default(cuid())
   email         String?        @unique
   name          String?
+
   // Opposite of Tenant.users
   tenantId      String?
   tenant        Tenant?        @relation("TenantUsers", fields: [tenantId], references: [id])
+
+  // Opposite of Contact.owner / Opportunity.owner
   contacts      Contact[]      @relation("UserContacts")
   opportunities Opportunity[]  @relation("UserOpps")
+
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
 }
@@ -38,7 +45,10 @@ model Organization {
   name      String
   contacts  Contact[]
   opps      Opportunity[]
+
+  // Opposite of CustomFieldValue.organization
   custom    CustomFieldValue[]   @relation("OrgCF")
+
   createdAt DateTime             @default(now())
   updatedAt DateTime             @updatedAt
 }
@@ -46,16 +56,23 @@ model Organization {
 model Contact {
   id             String               @id @default(cuid())
   name           String
-  email          String?               @unique
+  email          String?              @unique
   phone          String?
+
   organizationId String?
-  organization   Organization?         @relation(fields: [organizationId], references: [id])
+  organization   Organization?        @relation(fields: [organizationId], references: [id])
+
+  // Opposite of User.contacts
   ownerId        String?
-  owner          User?                 @relation("UserContacts", fields: [ownerId], references: [id])
+  owner          User?                @relation("UserContacts", fields: [ownerId], references: [id])
+
   tags           String[]
-  custom         CustomFieldValue[]    @relation("ContactCF")
-  createdAt      DateTime              @default(now())
-  updatedAt      DateTime              @updatedAt
+
+  // Opposite of CustomFieldValue.contact
+  custom         CustomFieldValue[]   @relation("ContactCF")
+
+  createdAt      DateTime             @default(now())
+  updatedAt      DateTime             @updatedAt
 }
 
 model Pipeline {
@@ -69,75 +86,112 @@ model Pipeline {
 model Stage {
   id           String         @id @default(cuid())
   name         String
+
   tenantId     String
+  // Opposite of Tenant.stages
   tenant       Tenant         @relation("TenantStages", fields: [tenantId], references: [id])
+
   pipelineId   String?
   pipeline     Pipeline?      @relation(fields: [pipelineId], references: [id])
+
+  // Opposite of Opportunity.stage
   opportunities Opportunity[] @relation("StageOpps")
+
   createdAt    DateTime       @default(now())
   updatedAt    DateTime       @updatedAt
 }
 
 model Opportunity {
   id             String        @id @default(cuid())
+
   tenantId       String
+  // Opposite of Tenant.opportunities
   tenant         Tenant        @relation("TenantOpps", fields: [tenantId], references: [id])
+
   organizationId String?
   organization   Organization? @relation(fields: [organizationId], references: [id])
+
   stageId        String
+  // Opposite of Stage.opportunities
   stage          Stage         @relation("StageOpps", fields: [stageId], references: [id])
+
   ownerId        String?
+  // Opposite of User.opportunities
   owner          User?         @relation("UserOpps", fields: [ownerId], references: [id])
+
   title          String?
   tags           String[]
+
+  // Opposite of CustomFieldValue.opportunity
   custom         CustomFieldValue[] @relation("OppCF")
+
+  // Opposite of Activity.opportunity
   activities     Activity[]     @relation("OppActivities")
+
   createdAt      DateTime       @default(now())
   updatedAt      DateTime       @updatedAt
 }
 
 model Activity {
   id             String   @id @default(cuid())
+
   tenantId       String
+  // Opposite of Tenant.activities
   tenant         Tenant   @relation("TenantActivities", fields: [tenantId], references: [id])
+
   // Opposite of Opportunity.activities
   opportunityId  String?
   opportunity    Opportunity? @relation("OppActivities", fields: [opportunityId], references: [id])
+
   kind           String
   payload        Json?
+
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 }
 
 model CustomFieldDef {
   id        String   @id @default(cuid())
+
   tenantId  String
+  // Opposite of Tenant.customFieldDefs
   tenant    Tenant   @relation("TenantCFDefs", fields: [tenantId], references: [id])
+
   entity    String   // organization|contact|opportunity
   key       String
   type      String   // string|number|bool|date|json
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
 model CustomFieldValue {
   id             String        @id @default(cuid())
+
   tenantId       String
+  // Opposite of Tenant.customFieldValues
   tenant         Tenant        @relation("TenantCFVals", fields: [tenantId], references: [id])
+
   entity         String        // organization|contact|opportunity
   entityId       String
   key            String
+
   stringVal      String?
   numberVal      Float?
   boolVal        Boolean?
   dateVal        DateTime?
   jsonVal        Json?
+
+  // Optional typed relations to satisfy both sides
   organizationId String?
   organization   Organization? @relation("OrgCF", fields: [organizationId], references: [id])
+
   contactId      String?
   contact        Contact?      @relation("ContactCF", fields: [contactId], references: [id])
+
   opportunityId  String?
   opportunity    Opportunity?  @relation("OppCF", fields: [opportunityId], references: [id])
+
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt
 
