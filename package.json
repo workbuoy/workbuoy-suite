@@ -9,6 +9,8 @@
     "seed:roles": "tsx scripts/seed-roles-from-json.ts"
   },
   "devDependencies": {
-    "tsx": "^4.19.0"
+    "tsx": "^4.20.5",
+    "@types/jest": "^29.5.12",
+    "@types/node": "^20.14.12"
   }
 }
