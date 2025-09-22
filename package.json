@@ -1,10 +1,7 @@
 {
   "name": "workbuoy-suite",
   "private": true,
-  "scripts": {
-    "seed:roles": "tsx scripts/seed-roles-from-json.ts"
-  },
   "devDependencies": {
-    "tsx": "^4.19.0"
+    "ts-node": "^10.9.2"
   }
 }
