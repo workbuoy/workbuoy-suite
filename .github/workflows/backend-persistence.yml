@@ -32,5 +32,5 @@ jobs:
         run: npm install
       - name: Generate Prisma client
         run: npx prisma generate --schema=prisma/schema.prisma
-      - name: Seed baseline roles
-        run: node --loader ts-node/esm scripts/seed-roles-from-json.ts
+      - name: Seed baseline roles (tsx)
+        run: npm run seed:roles
