@@ -1,6 +1,6 @@
 //!/usr/bin/env node
 // scripts/seed-roles-from-json.ts
-// Run with: node --loader ts-node/esm scripts/seed-roles-from-json.ts
+// Run with: npm run seed:roles
 
 import { loadRolesFromRepo, loadFeaturesFromRepo } from './roles-io.ts';
 

@@ -11,10 +11,12 @@ export function loadJSON(filePath: string) {
 
 export function loadRolesFromRepo(): any[] {
   const rolesPathCandidates = [
+    process.env.ROLES_PATH,
+    'core/roles/roles.json',
     'roles/roles.json',
     'backend/roles/roles.json',
     'data/roles.json',
-  ];
+  ].filter((p): p is string => Boolean(p));
   for (const p of rolesPathCandidates) {
     try {
       const json = loadJSON(p);
@@ -27,10 +29,12 @@ export function loadRolesFromRepo(): any[] {
 
 export function loadFeaturesFromRepo(): any[] {
   const featureCandidates = [
+    process.env.FEATURES_PATH,
+    'core/roles/features.json',
     'roles/features.json',
     'backend/roles/features.json',
     'data/features.json',
-  ];
+  ].filter((p): p is string => Boolean(p));
   for (const p of featureCandidates) {
     try {
       const json = loadJSON(p);
