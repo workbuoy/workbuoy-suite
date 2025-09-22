@@ -1,4 +1,4 @@
-name: Backend Persistence CI
+name: backend-persistence
 
 on:
   pull_request:
@@ -23,7 +23,8 @@ jobs:
           --health-retries 5
     env:
       FF_PERSISTENCE: "true"
-      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/workbuoy?schema=public
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/wb?schema=public
+      # 👇 pek direkte til rollene slik at seed ALDRI feiler på path
       ROLES_PATH: core/roles/roles.json
       FEATURES_PATH: core/roles/features.json
     steps:
@@ -31,9 +32,13 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-      - name: Install dependencies
+      - name: Install root deps
         run: npm install
+      - name: Install backend deps
+        run: npm --prefix backend install
       - name: Generate Prisma client
         run: npx prisma generate --schema=prisma/schema.prisma
-      - name: Seed baseline roles
+      - name: Seed baseline roles (via tsx)
         run: npm run seed:roles
+      # (valgfritt) kjør persistens-tester her hvis dere har dem
+      # - run: npm test -- --runInBand
