@@ -13,8 +13,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: npm
-      - run: npm ci
+      - run: npm install
       - run: npm run --if-present lint
       - run: npm run --if-present typecheck
       - run: npm run --if-present test
@@ -26,6 +25,5 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: npm
-      - run: npm ci
-      - run: npm run test --workspaces --if-present -- --coverage
+      - run: npm install
+      - run: npm run test -- --coverage
