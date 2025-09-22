@@ -29,9 +29,13 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-      - name: Install dependencies
-        run: npm install
+      - name: Install root dependencies
+        run: npm install --no-audit --fund=false
+
+      - name: Install backend dependencies
+        working-directory: backend
+        run: npm install --no-audit --fund=false
       - name: Generate Prisma client
         run: npx prisma generate --schema=prisma/schema.prisma
       - name: Seed baseline roles
-        run: node --loader ts-node/esm scripts/seed-roles-from-json.ts
+        run: npm run seed:roles

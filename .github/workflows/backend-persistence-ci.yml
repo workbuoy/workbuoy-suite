@@ -35,21 +35,12 @@ jobs:
         with:
           node-version: 20
 
-      - name: Install root tooling deps
-        run: |
-          if [ -f package-lock.json ]; then
-            npm ci --omit=optional --no-audit --fund=false
-          else
-            npm install --no-audit --fund=false
-          fi
+      - name: Install root dependencies
+        run: npm install --no-audit --fund=false
 
-      - name: Install backend deps
-        run: |
-          if [ -f backend/package-lock.json ]; then
-            npm ci --prefix backend --omit=optional --no-audit --fund=false
-          else
-            npm install --prefix backend --no-audit --fund=false
-          fi
+      - name: Install backend dependencies
+        working-directory: backend
+        run: npm install --no-audit --fund=false
 
       - name: Generate Prisma client
         working-directory: backend
@@ -59,9 +50,8 @@ jobs:
         working-directory: backend
         run: npx prisma migrate deploy --schema=prisma/schema.prisma
 
-      - name: Seed baseline roles (ESM)
-        working-directory: backend
-        run: node --loader ts-node/esm scripts/seed-roles-from-json.ts
+      - name: Seed baseline roles
+        run: npm run seed:roles
 
       - name: Run persistence tests
         working-directory: backend
