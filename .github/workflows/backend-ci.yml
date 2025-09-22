@@ -1,4 +1,4 @@
-name: CI
+name: backend-ci
 
 on:
   pull_request:
@@ -12,8 +12,6 @@ jobs:
       backend: ${{ steps.filter.outputs.backend }}
       prisma: ${{ steps.filter.outputs.prisma }}
       roles: ${{ steps.filter.outputs.roles }}
-      frontend: ${{ steps.filter.outputs.frontend }}
-      docs: ${{ steps.filter.outputs.docs }}
       backend_related: ${{ steps.compute.outputs.backend_related }}
     steps:
       - uses: actions/checkout@v4
@@ -28,10 +26,6 @@ jobs:
             roles:
               - 'core/roles/**'
               - 'scripts/seed-roles-from-json.ts'
-            frontend:
-              - 'frontend/**'
-            docs:
-              - 'docs/**'
       - name: compute backend_related
         id: compute
         run: |
@@ -43,9 +37,8 @@ jobs:
             echo "backend_related=false" >> $GITHUB_OUTPUT
           fi
 
-  build-test:
+  test:
     needs: changes
-    # Alminnelig bygg/test kjører alltid (frontend må fortsatt type-sjekkes etc.)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -58,20 +51,6 @@ jobs:
       - run: npm run --if-present typecheck
       - run: npm run --if-present test
 
-  coverage:
-    needs: changes
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-      - run: npm install
-      - run: npm --prefix backend install
-      - run: npm run test -- --coverage
-
-  # Denne var tidligere "test-persistence" i in-memory workflow.
-  # Vi skipper den når PR-en kun endrer frontend/docs.
   test-persistence:
     needs: changes
     if: needs.changes.outputs.backend_related == 'true'
@@ -83,4 +62,4 @@ jobs:
           node-version: 20
       - run: npm install
       - run: npm --prefix backend install
-      - run: echo "persistence-style tests would run here only for backend/prisma/roles changes"
+      - run: echo "persistence-style tests would run here only when backend/prisma/roles changed"
