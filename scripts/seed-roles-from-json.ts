@@ -18,8 +18,10 @@ async function loadImporter(): Promise<ImportRolesAndFeatures> {
   const backendRoot = getBackendRoot();
   const candidates = [
     path.join(backendRoot, 'src/roles/service.ts'),
-    path.join(backendRoot, 'src/roles/service.tsx'),
+    path.join(backendRoot, 'src/roles/service/index.ts'),
+    path.join(backendRoot, 'src/roles/service/importer.ts'),
     path.join(backendRoot, 'src/roles/service.mts'),
+    path.join(backendRoot, 'src/roles/service.js'),
     path.join(backendRoot, 'dist/roles/service.js'),
     path.join(backendRoot, 'dist/roles/service.mjs'),
   ];
