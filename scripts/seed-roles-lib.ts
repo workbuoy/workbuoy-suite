@@ -1,4 +1,7 @@
 // scripts/seed-roles-lib.ts
+import path from 'node:path';
+import { pathToFileURL } from 'node:url';
+
 import { resolveFeaturesSource, resolveRolesSource } from './roles-io.ts';
 import type { FeatureDef, RoleProfile } from '../apps/backend/src/roles/types';
 
@@ -14,18 +17,29 @@ function shouldPersist(): boolean {
   return (process.env.FF_PERSISTENCE || '').toLowerCase() === 'true';
 }
 
-type ImportRolesAndFeatures = (
+export type ImportRolesAndFeatures = (
   roles: RoleProfile[],
   features: FeatureDef[]
 ) => Promise<{ roles: number; features: number }>;
 
 async function loadImporter(): Promise<ImportRolesAndFeatures> {
-  const mod = await import('../apps/backend/src/roles/service');
-  const fn = mod?.importRolesAndFeatures;
-  if (typeof fn !== 'function') {
-    throw new Error('importRolesAndFeatures not found in ../apps/backend/src/roles/service');
+  const tsPath = path.resolve(process.cwd(), 'apps/backend/src/roles/service.ts');
+  const jsPath = path.resolve(process.cwd(), 'apps/backend/dist/roles/service.js');
+
+  try {
+    const tsMod = await import(pathToFileURL(tsPath).href);
+    const tsFn = tsMod?.importRolesAndFeatures;
+    if (typeof tsFn === 'function') {
+      return tsFn as ImportRolesAndFeatures;
+    }
+  } catch {}
+
+  const jsMod = await import(pathToFileURL(jsPath).href);
+  const jsFn = jsMod?.importRolesAndFeatures;
+  if (typeof jsFn !== 'function') {
+    throw new Error('importRolesAndFeatures not exported by backend roles service');
   }
-  return fn as ImportRolesAndFeatures;
+  return jsFn as ImportRolesAndFeatures;
 }
 
 export async function runSeed(importer?: ImportRolesAndFeatures): Promise<SeedSummary> {
