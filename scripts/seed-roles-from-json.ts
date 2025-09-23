@@ -1,9 +1,10 @@
 // scripts/seed-roles-from-json.ts
 import { seedRolesFromJson } from './seed-roles-lib.ts';
+import { importRolesAndFeatures } from '../src/roles/service';
 
 async function main() {
   try {
-    const result = await seedRolesFromJson();
+    const result = await seedRolesFromJson(importRolesAndFeatures);
     if (result.summary) {
       console.log(
         JSON.stringify({

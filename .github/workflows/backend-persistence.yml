@@ -39,17 +39,12 @@ jobs:
     env:
       FF_PERSISTENCE: 'true'
       DATABASE_URL: postgresql://postgres:postgres@localhost:5432/wb?schema=public
-      ROLES_PATH: core/roles/roles.json
-      FEATURES_PATH: core/roles/features.json
     steps:
       - uses: actions/checkout@v4
 
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-
-      - name: Install root dependencies
-        run: npm install --no-audit --fund=false
 
       - name: Install backend dependencies
         run: npm --prefix backend install --no-audit --fund=false
@@ -65,11 +60,13 @@ jobs:
         run: npx --yes -p prisma@6.16.2 prisma migrate deploy --schema=backend/prisma/schema.prisma
 
       - name: Seed baseline roles/features
-        run: npm run seed:roles
+        env:
+          FF_PERSISTENCE: true
+          DATABASE_URL: ${{ env.DATABASE_URL }}
+        run: npm --prefix backend exec tsx ${{ github.workspace }}/scripts/seed-roles-from-json.ts
 
       - name: Run persistence tests
-        working-directory: backend
         env:
-          ROLES_PATH: ./scripts/fixtures/minimal-roles.json
-          FEATURES_PATH: ./scripts/fixtures/minimal-features.json
-        run: npx jest --config jest.meta.config.cjs --runInBand --passWithNoTests
+          FF_PERSISTENCE: true
+          DATABASE_URL: ${{ env.DATABASE_URL }}
+        run: npm --prefix backend test -- --runInBand --passWithNoTests

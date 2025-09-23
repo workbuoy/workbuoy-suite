@@ -21,15 +21,20 @@ jobs:
       - name: Install backend dependencies
         run: npm --prefix backend install --no-audit --fund=false
 
-      - name: Install frontend dependencies
-        run: npm --prefix frontend install --no-audit --fund=false
-
       - name: Check roles JSON (non-blocking)
         run: npm run --if-present check:roles
         continue-on-error: true
 
       - name: Lint (if present)
         run: npm run lint --if-present
+
+      - name: Install frontend deps
+        run: |
+          if [ -f frontend/package-lock.json ]; then
+            npm --prefix frontend ci --no-audit --fund=false
+          else
+            npm --prefix frontend install --no-audit --fund=false
+          fi
 
       - name: Typecheck (meta config)
         run: npm run typecheck --if-present
