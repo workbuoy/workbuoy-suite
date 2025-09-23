@@ -69,4 +69,7 @@ jobs:
 
       - name: Run persistence tests
         working-directory: backend
+        env:
+          ROLES_PATH: ./scripts/fixtures/minimal-roles.json
+          FEATURES_PATH: ./scripts/fixtures/minimal-features.json
         run: npx jest --config jest.meta.config.cjs --runInBand --passWithNoTests

@@ -1,26 +1,43 @@
 [
   {
+    "id": "cashflow_forecast",
+    "title": "Cashflow Forecast",
+    "defaultAutonomyCap": 5,
+    "capabilities": [
+      "finance.cashflow.forecast",
+      "sales.pipeline.projection"
+    ]
+  },
+  {
     "id": "lead_qualification",
     "title": "Lead Qualification",
     "defaultAutonomyCap": 3,
-    "capabilities": ["crm.lead.qualify"]
+    "capabilities": [
+      "crm.lead.qualify"
+    ]
   },
   {
     "id": "pipeline_forecast",
     "title": "Pipeline Forecast",
     "defaultAutonomyCap": 4,
-    "capabilities": ["crm.pipeline.forecast"]
+    "capabilities": [
+      "crm.pipeline.forecast"
+    ]
   },
   {
     "id": "customer_health",
     "title": "Customer Health",
     "defaultAutonomyCap": 4,
-    "capabilities": ["cs.health.score"]
+    "capabilities": [
+      "cs.health.score"
+    ]
   },
   {
     "id": "contract_compliance",
     "title": "Contract Compliance",
     "defaultAutonomyCap": 3,
-    "capabilities": ["ops.contract.monitor"]
+    "capabilities": [
+      "ops.contract.monitor"
+    ]
   }
 ]

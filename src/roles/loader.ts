@@ -22,19 +22,20 @@ const FALLBACK_ROLES_PATH = path.resolve(REPO_ROOT, 'scripts', 'fixtures', 'mini
 const FALLBACK_FEATURES_PATH = path.resolve(REPO_ROOT, 'scripts', 'fixtures', 'minimal-features.json');
 
 function normalizeCandidates(envPath: string | undefined, fallbacks: string[]): string[] {
-  const entries: string[] = [];
-  if (envPath && envPath.trim()) {
-    entries.push(envPath.trim());
+  const override = envPath?.trim();
+  if (override) {
+    return [override];
   }
-  entries.push(...fallbacks);
 
   const seen = new Set<string>();
   const deduped: string[] = [];
-  for (const entry of entries) {
-    const key = path.normalize(entry);
+  for (const entry of fallbacks) {
+    const normalized = entry.trim();
+    if (!normalized) continue;
+    const key = path.normalize(normalized);
     if (seen.has(key)) continue;
     seen.add(key);
-    deduped.push(entry);
+    deduped.push(normalized);
   }
   return deduped;
 }

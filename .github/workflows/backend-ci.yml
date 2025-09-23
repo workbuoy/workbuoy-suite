@@ -41,4 +41,7 @@ jobs:
         run: npm --prefix backend install --no-audit --fund=false
 
       - name: Run backend Jest suite
+        env:
+          ROLES_PATH: ./scripts/fixtures/minimal-roles.json
+          FEATURES_PATH: ./scripts/fixtures/minimal-features.json
         run: npm --prefix backend test -- --runInBand --passWithNoTests
