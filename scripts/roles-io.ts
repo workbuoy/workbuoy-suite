@@ -1,12 +1,13 @@
 // scripts/roles-io.ts
 import fs from 'node:fs';
 import path from 'node:path';
-import { defaultFeatures } from '../apps/backend/src/roles/seed/features.ts';
-
-const DEFAULT_FEATURE_SOURCE =
-  'apps/backend/src/roles/seed/features.ts (defaultFeatures export)';
 const FALLBACK_ROLES_PATH = path.resolve(__dirname, 'fixtures', 'minimal-roles.json');
 const FALLBACK_FEATURES_PATH = path.resolve(__dirname, 'fixtures', 'minimal-features.json');
+
+const CORE_ROLES_CANDIDATE = path.join('core', 'roles', 'roles.json');
+const CORE_FEATURES_CANDIDATE = path.join('core', 'roles', 'features.json');
+const MINIMAL_ROLES_CANDIDATE = path.join('scripts', 'fixtures', 'minimal-roles.json');
+const MINIMAL_FEATURES_CANDIDATE = path.join('scripts', 'fixtures', 'minimal-features.json');
 
 type JsonCandidate = unknown;
 
@@ -103,10 +104,8 @@ function fallbackFromParseError(kind: 'roles' | 'features', error: JsonParseErro
 export function resolveRolesSource(): LoadResult<any> {
   const envOverride = process.env.ROLES_PATH;
   const candidates = normalizeCandidates(envOverride, [
-    path.join('core', 'roles', 'roles.json'),
-    path.join('roles', 'roles.json'),
-    path.join('apps', 'backend', 'roles', 'roles.json'),
-    path.join('data', 'roles.json'),
+    CORE_ROLES_CANDIDATE,
+    MINIMAL_ROLES_CANDIDATE,
   ]);
   try {
     const loaded = tryLoadList(candidates, 'roles');
@@ -131,10 +130,8 @@ export function resolveRolesSource(): LoadResult<any> {
 export function resolveFeaturesSource(): LoadResult<any> {
   const envOverride = process.env.FEATURES_PATH;
   const candidates = normalizeCandidates(envOverride, [
-    path.join('core', 'roles', 'features.json'),
-    path.join('roles', 'features.json'),
-    path.join('apps', 'backend', 'roles', 'features.json'),
-    path.join('data', 'features.json'),
+    CORE_FEATURES_CANDIDATE,
+    MINIMAL_FEATURES_CANDIDATE,
   ]);
   try {
     const loaded = tryLoadList(candidates, 'features');
@@ -153,7 +150,16 @@ export function resolveFeaturesSource(): LoadResult<any> {
     }
     throw err;
   }
-  return { data: defaultFeatures as any[], path: DEFAULT_FEATURE_SOURCE };
+  if (strictRolesEnabled()) {
+    throw new Error(
+      `FF_STRICT_ROLES=true, no features dataset found. Checked: ${candidates.join(', ')}`
+    );
+  }
+  const fallback = loadJSON(FALLBACK_FEATURES_PATH) as any[];
+  console.warn(
+    `[roles-io] Falling back to minimal features dataset at ${FALLBACK_FEATURES_PATH}`
+  );
+  return { data: fallback, path: FALLBACK_FEATURES_PATH };
 }
 
 export function loadRolesFromRepo(): any[] {
@@ -163,5 +169,3 @@ export function loadRolesFromRepo(): any[] {
 export function loadFeaturesFromRepo(): any[] {
   return resolveFeaturesSource().data;
 }
-
-export { DEFAULT_FEATURE_SOURCE };
