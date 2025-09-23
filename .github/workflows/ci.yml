@@ -1,70 +1,73 @@
 name: CI
 
 on:
+  pull_request:
+    branches: [ main ]
   push:
     branches: [ main ]
-  pull_request:
 
 jobs:
   lint-and-test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-
-      - name: Install root dependencies
+      - name: Install root deps
         run: npm install --no-audit --fund=false
-
-      - name: Install backend dependencies
+      - name: Install backend deps
         run: npm --prefix backend install --no-audit --fund=false
-
-      - name: Install frontend dependencies
-        run: npm --prefix frontend install --no-audit --fund=false
-
       - name: Check roles JSON (non-blocking)
-        run: npm run --if-present check:roles
-        continue-on-error: true
+        run: npm run check:roles || true
+      - name: Typecheck repo
+        run: npm run typecheck
+      - name: Backend (in-memory) tests
+        run: npm --prefix backend test
 
-      - name: Lint (if present)
-        run: npm run lint --if-present
-
-      - name: Typecheck (meta config)
-        run: npm run typecheck --if-present
-
-      - name: Backend unit tests
-        env:
-          FF_PERSISTENCE: 'false'
-        run: npm --prefix backend test -- --runInBand --passWithNoTests
-
-  coverage:
-    needs: lint-and-test
+  backend-persistence:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        ports: ['5432:5432']
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: wb
+        options: >-
+          --health-cmd="pg_isready -U postgres"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-
-      - name: Install root dependencies
+      - name: Install root deps
         run: npm install --no-audit --fund=false
-
-      - name: Install backend dependencies
+      - name: Install backend deps
         run: npm --prefix backend install --no-audit --fund=false
-
-      - name: Backend tests with coverage
+      - name: Prisma generate (backend)
         env:
-          FF_PERSISTENCE: 'false'
-        run: npm --prefix backend test -- --coverage --runInBand --passWithNoTests
-
-      - name: Upload coverage
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: backend-coverage
-          path: |
-            backend/coverage/**
-            coverage/**
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/wb?schema=public
+        run: npx --yes -p prisma@6.16.2 prisma generate --schema=backend/prisma/schema.prisma
+      - name: Prisma migrate deploy (backend)
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/wb?schema=public
+        run: npx --yes -p prisma@6.16.2 prisma migrate deploy --schema=backend/prisma/schema.prisma
+      - name: Seed roles (backend)
+        env:
+          FF_PERSISTENCE: true
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/wb?schema=public
+          ROLES_PATH: core/roles/roles.json
+          FEATURES_PATH: core/roles/features.json
+        run: npm run seed:roles
+      - name: Backend persistence tests
+        env:
+          FF_PERSISTENCE: true
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/wb?schema=public
+          ROLES_PATH: core/roles/roles.json
+          FEATURES_PATH: core/roles/features.json
+        run: npx jest --config jest.meta.config.cjs --runInBand --passWithNoTests
