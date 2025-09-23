@@ -7,7 +7,8 @@
     "build": "tsc -p tsconfig.json",
     "test": "jest --passWithNoTests --config jest.meta.config.cjs",
     "typecheck": "tsc --noEmit -p tsconfig.typecheck.json",
-    "start:compliance": "node dist/compliance/server.js"
+    "start:compliance": "node dist/compliance/server.js",
+    "seed:roles": "tsx ../scripts/seed-roles-from-json.ts"
   },
   "dependencies": {
     "@turf/boolean-point-in-polygon": "^6.5.0",
@@ -16,7 +17,7 @@
     "js-yaml": "^4.1.0",
     "prom-client": "^15.1.0",
     "uuid": "^9.0.1",
-    "@prisma/client": "^5.14.0"
+    "@prisma/client": "6.16.2"
   },
   "devDependencies": {
     "typescript": "^5.4.5",
@@ -26,6 +27,8 @@
     "ts-jest": "^29.1.1",
     "@types/jest": "^29.5.12",
     "supertest": "^7.0.0",
-    "@types/supertest": "^2.0.16"
+    "@types/supertest": "^2.0.16",
+    "prisma": "6.16.2",
+    "tsx": "^4.19.0"
   }
 }

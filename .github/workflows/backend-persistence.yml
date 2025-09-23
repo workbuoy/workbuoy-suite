@@ -1,9 +1,24 @@
 name: Backend Persistence CI
 
 on:
-  pull_request:
   push:
-    branches: [ main ]
+    paths:
+      - 'backend/**'
+      - 'prisma/**'
+      - 'core/roles/**'
+      - 'scripts/seed-roles-from-json.ts'
+      - 'scripts/seed-roles-lib.ts'
+      - 'scripts/roles-io.ts'
+      - '.github/workflows/**'
+  pull_request:
+    paths:
+      - 'backend/**'
+      - 'prisma/**'
+      - 'core/roles/**'
+      - 'scripts/seed-roles-from-json.ts'
+      - 'scripts/seed-roles-lib.ts'
+      - 'scripts/roles-io.ts'
+      - '.github/workflows/**'
 
 jobs:
   backend-persistence:
@@ -22,16 +37,37 @@ jobs:
           --health-timeout 5s
           --health-retries 5
     env:
-      FF_PERSISTENCE: "true"
-      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/workbuoy?schema=public
+      FF_PERSISTENCE: 'true'
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/wb?schema=public
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-      - name: Install dependencies
-        run: npm install
+
+      - name: Install root dependencies
+        run: npm install --no-audit --fund=false
+
+      - name: Install backend dependencies
+        run: npm --prefix backend install --no-audit --fund=false
+
+      - name: Check roles JSON (non-blocking)
+        run: npm run check:roles
+        continue-on-error: true
+
       - name: Generate Prisma client
-        run: npx prisma generate --schema=prisma/schema.prisma
-      - name: Seed baseline roles
-        run: node --loader ts-node/esm scripts/seed-roles-from-json.ts
+        env:
+          PRISMA_CLI_QUERY_ENGINE_TYPE: binary
+        run: npx --yes -p prisma@6.16.2 prisma generate --schema=backend/prisma/schema.prisma
+
+      - name: Apply Prisma migrations
+        env:
+          PRISMA_CLI_QUERY_ENGINE_TYPE: binary
+        run: npx --yes -p prisma@6.16.2 prisma migrate deploy --schema=backend/prisma/schema.prisma
+
+      - name: Seed baseline roles/features
+        run: npm run seed:roles
+
+      - name: Run persistence tests
+        run: npm --prefix backend test -- --runInBand --passWithNoTests

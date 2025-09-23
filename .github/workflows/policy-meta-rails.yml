@@ -1,9 +1,17 @@
 name: policy-meta-rails
 
 on:
-  pull_request:
   push:
     branches: [ main ]
+    paths:
+      - 'backend/**'
+      - 'ci/policy-meta-rails.sh'
+      - '.github/workflows/policy-meta-rails.yml'
+  pull_request:
+    paths:
+      - 'backend/**'
+      - 'ci/policy-meta-rails.sh'
+      - '.github/workflows/policy-meta-rails.yml'
 
 jobs:
   meta-rails:
