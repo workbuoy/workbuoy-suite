@@ -60,6 +60,8 @@ jobs:
         run: npx --yes -p prisma@6.16.2 prisma generate --schema=backend/prisma/schema.prisma
 
       - name: Apply Prisma migrations
+        env:
+          PRISMA_CLI_QUERY_ENGINE_TYPE: binary
         run: npx --yes -p prisma@6.16.2 prisma migrate deploy --schema=backend/prisma/schema.prisma
 
       - name: Seed baseline roles/features
