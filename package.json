@@ -1,7 +1,9 @@
 {
   "name": "workbuoy-monorepo",
   "private": true,
-  "workspaces": ["apps/*", "packages/*"],
+  "workspaces": [
+    "apps/*"
+  ],
   "scripts": {
     "bootstrap": "npm install --workspaces --include-workspace-root",
     "build:all": "npm run build -w @workbuoy/backend || true",
@@ -9,7 +11,8 @@
     "typecheck:all": "npm run typecheck -w @workbuoy/backend || true",
     "seed:roles": "npm run seed:roles -w @workbuoy/backend",
     "check:roles": "tsx scripts/check-roles-json.ts",
-    "typecheck": "tsc -p tsconfig.meta.json",
+    "typecheck:meta": "tsc -p tsconfig.meta.json",
+    "typecheck": "npm run typecheck -w @workbuoy/backend && npm run typecheck -w @workbuoy/frontend",
     "lint": "eslint . --ext .ts,.tsx,.js,.cjs --max-warnings=0",
     "lint:fix": "eslint . --ext .ts,.tsx,.js,.cjs --fix",
     "format": "prettier --check .",
