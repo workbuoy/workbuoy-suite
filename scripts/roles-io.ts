@@ -12,15 +12,32 @@ type LoadResult<T> = {
   path: string;
 };
 
+class JsonParseError extends Error {
+  constructor(filePath: string, original: unknown) {
+    const details = original instanceof Error ? original.message : String(original);
+    super(`parse error for ${filePath}: ${details}`);
+    this.name = 'JsonParseError';
+  }
+}
+
 function normalizeCandidates(envPath: string | undefined, fallbacks: string[]): string[] {
   const list: string[] = [];
   if (envPath && envPath.trim()) {
     list.push(envPath.trim());
   }
-  for (const candidate of fallbacks) {
-    list.push(candidate);
+  list.push(...fallbacks);
+
+  const seen = new Set<string>();
+  const deduped: string[] = [];
+  for (const entry of list) {
+    const normalized = entry.trim();
+    if (!normalized) continue;
+    const key = path.normalize(normalized);
+    if (seen.has(key)) continue;
+    seen.add(key);
+    deduped.push(normalized);
   }
-  return list;
+  return deduped;
 }
 
 function resolvePath(candidate: string): string {
@@ -34,7 +51,11 @@ function loadJSON(filePath: string): JsonCandidate {
     throw new Error(`Missing file: ${abs}`);
   }
   const raw = fs.readFileSync(abs, 'utf8');
-  return JSON.parse(raw);
+  try {
+    return JSON.parse(raw);
+  } catch (err) {
+    throw new JsonParseError(abs, err);
+  }
 }
 
 function tryLoadList(candidatePaths: string[], key: 'roles' | 'features'): LoadResult<any> | null {
@@ -50,33 +71,48 @@ function tryLoadList(candidatePaths: string[], key: 'roles' | 'features'): LoadR
         return { data: json[key], path: abs };
       }
     } catch (err) {
-      console.warn(`[roles-io] Failed to parse ${abs}:`, err);
+      if (err instanceof JsonParseError) {
+        throw err;
+      }
+      console.warn(`[roles-io] Failed to load ${abs}:`, err);
     }
   }
   return null;
 }
 
 export function resolveRolesSource(): LoadResult<any> {
-  const candidates = normalizeCandidates(process.env.ROLES_PATH, [
+  const envOverride = process.env.ROLES_PATH;
+  const candidates = normalizeCandidates(envOverride, [
     path.join('core', 'roles', 'roles.json'),
-    path.join('roles', 'roles.json'),
-    path.join('backend', 'roles', 'roles.json'),
-    path.join('data', 'roles.json'),
   ]);
   const loaded = tryLoadList(candidates, 'roles');
-  if (loaded) return loaded;
+  if (loaded) {
+    if (envOverride && envOverride.trim()) {
+      const envPath = resolvePath(envOverride.trim());
+      if (path.resolve(loaded.path) === envPath) {
+        console.log(`[roles-io] Using ROLES_PATH override: ${loaded.path}`);
+      }
+    }
+    return loaded;
+  }
   throw new Error(`Could not locate roles.json. Checked: ${candidates.join(', ')}`);
 }
 
 export function resolveFeaturesSource(): LoadResult<any> {
-  const candidates = normalizeCandidates(process.env.FEATURES_PATH, [
+  const envOverride = process.env.FEATURES_PATH;
+  const candidates = normalizeCandidates(envOverride, [
     path.join('core', 'roles', 'features.json'),
-    path.join('roles', 'features.json'),
-    path.join('backend', 'roles', 'features.json'),
-    path.join('data', 'features.json'),
   ]);
   const loaded = tryLoadList(candidates, 'features');
-  if (loaded) return loaded;
+  if (loaded) {
+    if (envOverride && envOverride.trim()) {
+      const envPath = resolvePath(envOverride.trim());
+      if (path.resolve(loaded.path) === envPath) {
+        console.log(`[roles-io] Using FEATURES_PATH override: ${loaded.path}`);
+      }
+    }
+    return loaded;
+  }
   return { data: defaultFeatures as any[], path: DEFAULT_FEATURE_SOURCE };
 }
 

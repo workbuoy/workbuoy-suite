@@ -21,6 +21,9 @@ jobs:
       - name: Install backend dependencies
         run: npm --prefix backend install --no-audit --fund=false
 
+      - name: Install frontend dependencies
+        run: npm --prefix frontend install --no-audit --fund=false
+
       - name: Lint (if present)
         run: npm run lint --if-present
 
