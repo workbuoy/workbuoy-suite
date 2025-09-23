@@ -14,7 +14,8 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["frontend/src/*"],
-      "prom-client": ["backend/node_modules/prom-client"]
+      "prom-client": ["backend/node_modules/prom-client"],
+      "@prisma/client": ["backend/node_modules/@prisma/client"]
     },
     "types": ["node", "jest", "prisma__client"],
     "typeRoots": ["./types", "./node_modules/@types", "./backend/node_modules/@types"]

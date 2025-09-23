@@ -1,0 +1,8 @@
+[
+  {
+    "id": "core",
+    "title": "Core",
+    "capabilities": [],
+    "default_autonomy_cap": 1
+  }
+]

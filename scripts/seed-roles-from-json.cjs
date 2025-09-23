@@ -5,7 +5,7 @@
   try {
     try { require('ts-node/register'); } catch {}
     const lib = require('./seed-roles-lib.ts'); // ts-node/register will hook this
-    const res = await lib.seedRolesFromJson();
+    const res = await lib.runSeed();
     console.log(JSON.stringify({ ok: true, ...res }));
   } catch (err) {
     console.error('[seed-roles-from-json.cjs] failed:', err);

@@ -51,3 +51,10 @@ intent-log.jsonl
 .env
 .env.local
 .env.*.local
+.turbo/
+.next/
+prisma/*.db
+prisma/migrations/*/steps.json
+test-results/
+playwright-report/
+blob-report/
