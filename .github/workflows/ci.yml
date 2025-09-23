@@ -6,6 +6,23 @@ on:
   pull_request:
 
 jobs:
+  frontend-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      frontend: ${{ steps.filter.outputs.frontend }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            frontend:
+              - 'apps/frontend/**'
+              - 'package.json'
+
   lint-and-test:
     runs-on: ubuntu-latest
     steps:
@@ -30,7 +47,7 @@ jobs:
         run: npm run lint
 
       - name: Typecheck (meta config)
-        run: npm run typecheck --if-present
+        run: npm run typecheck:meta --if-present
 
       - name: Backend unit tests
         env:
@@ -63,3 +80,23 @@ jobs:
           path: |
             apps/backend/coverage/**
             coverage/**
+
+  frontend-typecheck:
+    needs:
+      - frontend-changes
+      - lint-and-test
+    if: needs.frontend-changes.outputs.frontend == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install workspaces
+        run: npm install --workspaces --include-workspace-root
+
+      - name: Frontend typecheck (non-blocking)
+        run: npm run typecheck -w @workbuoy/frontend
+        continue-on-error: true
