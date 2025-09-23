@@ -2,7 +2,7 @@
   "name": "workbuoy-suite",
   "private": true,
   "scripts": {
-    "seed:roles": "tsx scripts/seed-roles-from-json.ts",
+    "seed:roles": "npm --prefix backend run seed:roles",
     "check:roles": "tsx scripts/check-roles-json.ts",
     "typecheck": "tsc -p tsconfig.meta.json"
   },
