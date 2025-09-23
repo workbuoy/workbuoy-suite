@@ -7482,11 +7482,6 @@
         "line": 267,
         "match": "/role-based/i,"
       },
-      {
-        "file": "workbuoy_pr_az/ai/buoy/explanations.ts",
-        "line": 5,
-        "match": "hints: result.status===200 ? 'OK' : 'Kontroller input/RBAC/rate-limit'"
-      }
     ],
     "SECURE_RAILS": [
       {
@@ -9286,21 +9281,6 @@
           "file": "src/buoy/agent.ts",
           "line": 2,
           "match": "* Buoy AI OS — agent orchestrator (v2.4.4)"
-        },
-        {
-          "file": "workbuoy_pr_ay/ai/policy/tool_allowlist.yaml",
-          "line": 1,
-          "match": "# Allowlist of methods+paths Buoy AI is allowed to call via the action layer."
-        },
-        {
-          "file": "workbuoy_pr_ay/docs/AI_OPENAPI_TOOLS.md",
-          "line": 1,
-          "match": "# Buoy AI – OpenAPI action layer"
-        },
-        {
-          "file": "workbuoy_pr_az/docs/AI_BUOY_INTEGRATION.md",
-          "line": 1,
-          "match": "# Buoy AI – integrasjon"
         }
       ],
       "plural_hits": []
