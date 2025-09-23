@@ -1,165 +1,133 @@
 // scripts/roles-io.ts
 import fs from 'node:fs';
 import path from 'node:path';
-const FALLBACK_ROLES_PATH = path.resolve(__dirname, 'fixtures', 'minimal-roles.json');
-const FALLBACK_FEATURES_PATH = path.resolve(__dirname, 'fixtures', 'minimal-features.json');
 
-const CORE_ROLES_CANDIDATE = path.join('core', 'roles', 'roles.json');
-const CORE_FEATURES_CANDIDATE = path.join('core', 'roles', 'features.json');
-const MINIMAL_ROLES_CANDIDATE = path.join('scripts', 'fixtures', 'minimal-roles.json');
-const MINIMAL_FEATURES_CANDIDATE = path.join('scripts', 'fixtures', 'minimal-features.json');
-
-type JsonCandidate = unknown;
+import { embeddedMinimalFeatures, embeddedMinimalRoles } from './fixtures/embedded.ts';
 
 type LoadResult<T> = {
   data: T[];
   path: string;
 };
 
-class JsonParseError extends Error {
-  constructor(filePath: string, original: unknown) {
-    const details = original instanceof Error ? original.message : String(original);
-    super(`parse error for ${filePath}: ${details}`);
-    this.name = 'JsonParseError';
-  }
-}
+type DataKey = 'roles' | 'features';
 
 function strictRolesEnabled(): boolean {
   return (process.env.FF_STRICT_ROLES || '').toLowerCase() === 'true';
 }
 
-function normalizeCandidates(envPath: string | undefined, fallbacks: string[]): string[] {
-  const list: string[] = [];
-  if (envPath && envPath.trim()) {
-    list.push(envPath.trim());
+function findRepoRoot(): string {
+  let current = process.cwd();
+  while (true) {
+    if (fs.existsSync(path.join(current, '.git'))) {
+      return current;
+    }
+    const parent = path.dirname(current);
+    if (parent === current) {
+      break;
+    }
+    current = parent;
   }
-  list.push(...fallbacks);
+  return process.cwd();
+}
 
+const repoRoot = findRepoRoot();
+const backendRoot = path.join(repoRoot, 'apps/backend');
+
+function resolveCandidate(candidate: string | null | undefined): string | null {
+  if (!candidate) return null;
+  if (path.isAbsolute(candidate)) return path.normalize(candidate);
+  return path.resolve(repoRoot, candidate);
+}
+
+function dedupeCandidates(candidates: (string | null | undefined)[]): string[] {
   const seen = new Set<string>();
-  const deduped: string[] = [];
-  for (const entry of list) {
-    const normalized = entry.trim();
-    if (!normalized) continue;
-    const key = path.normalize(normalized);
+  const resolved: string[] = [];
+  for (const candidate of candidates) {
+    const abs = resolveCandidate(candidate);
+    if (!abs) continue;
+    const key = path.normalize(abs);
     if (seen.has(key)) continue;
     seen.add(key);
-    deduped.push(normalized);
+    resolved.push(abs);
   }
-  return deduped;
+  return resolved;
 }
 
-function resolvePath(candidate: string): string {
-  if (path.isAbsolute(candidate)) return candidate;
-  return path.resolve(process.cwd(), candidate);
+function tryLoadJson(candidate: string): any | null {
+  if (!fs.existsSync(candidate)) {
+    return null;
+  }
+  const raw = fs.readFileSync(candidate, 'utf8');
+  return JSON.parse(raw);
 }
 
-function loadJSON(filePath: string): JsonCandidate {
-  const abs = resolvePath(filePath);
-  if (!fs.existsSync(abs)) {
-    throw new Error(`Missing file: ${abs}`);
-  }
-  const raw = fs.readFileSync(abs, 'utf8');
-  try {
-    return JSON.parse(raw);
-  } catch (err) {
-    throw new JsonParseError(abs, err);
-  }
-}
-
-function tryLoadList(candidatePaths: string[], key: 'roles' | 'features'): LoadResult<any> | null {
-  for (const candidate of candidatePaths) {
-    const abs = resolvePath(candidate);
-    if (!fs.existsSync(abs)) continue;
-    try {
-      const json = loadJSON(candidate) as any;
-      if (Array.isArray(json)) {
-        return { data: json, path: abs };
-      }
-      if (Array.isArray(json?.[key])) {
-        return { data: json[key], path: abs };
-      }
-    } catch (err) {
-      if (err instanceof JsonParseError) {
-        throw err;
-      }
-      console.warn(`[roles-io] Failed to load ${abs}:`, err);
-    }
-  }
+function ensureArray(json: any, key: DataKey): any[] | null {
+  if (Array.isArray(json)) return json;
+  if (json && Array.isArray(json[key])) return json[key];
   return null;
 }
 
-function fallbackFromParseError(kind: 'roles' | 'features', error: JsonParseError): LoadResult<any> {
-  const label = kind === 'roles' ? 'roles' : 'features';
-  const fallbackPath = kind === 'roles' ? FALLBACK_ROLES_PATH : FALLBACK_FEATURES_PATH;
-  console.error(`[roles-io] JsonParseError: ${error.message}`);
+function logParseError(candidate: string, err: unknown): void {
+  const message = err instanceof Error ? err.message : String(err);
+  console.warn(`[roles-io] failed to parse ${candidate}: ${message}`);
+}
+
+function embeddedFallback(kind: DataKey): LoadResult<any> {
   if (strictRolesEnabled()) {
-    console.error('[roles-io] FF_STRICT_ROLES=true, aborting instead of using fallback dataset.');
-    throw error;
+    throw new Error(`FF_STRICT_ROLES=true, unable to resolve ${kind} dataset`);
   }
-  console.warn(`[roles-io] Falling back to minimal ${label} dataset at ${fallbackPath}`);
-  const fallback = loadJSON(fallbackPath) as any[];
-  return { data: fallback, path: fallbackPath };
+  if (kind === 'roles') {
+    console.warn('[roles-io] no roles.json found; using embeddedMinimalRoles');
+    return {
+      data: embeddedMinimalRoles.map((entry) => ({ ...entry })),
+      path: '<embedded>',
+    };
+  }
+  console.warn('[roles-io] no features.json found; using embeddedMinimalFeatures');
+  return {
+    data: embeddedMinimalFeatures.map((entry) => ({ ...entry })),
+    path: '<embedded>',
+  };
+}
+
+function resolveSource(kind: DataKey): LoadResult<any> {
+  const envVar = kind === 'roles' ? process.env.ROLES_PATH : process.env.FEATURES_PATH;
+  const envCandidate = resolveCandidate(envVar ?? undefined);
+
+  const candidates = dedupeCandidates([
+    envCandidate,
+    path.join(repoRoot, 'core/roles', kind === 'roles' ? 'roles.json' : 'features.json'),
+    path.join(backendRoot, 'core/roles', kind === 'roles' ? 'roles.json' : 'features.json'),
+    path.join(repoRoot, 'core', kind === 'roles' ? 'roles.json' : 'features.json'),
+    path.join(backendRoot, 'core', kind === 'roles' ? 'roles.json' : 'features.json'),
+    path.join(repoRoot, 'scripts/fixtures', kind === 'roles' ? 'minimal-roles.json' : 'minimal-features.json'),
+  ]);
+
+  for (const candidate of candidates) {
+    try {
+      const json = tryLoadJson(candidate);
+      if (!json) continue;
+      const data = ensureArray(json, kind);
+      if (!data) continue;
+      if (envCandidate && path.resolve(candidate) === path.resolve(envCandidate)) {
+        console.log(`[roles-io] Using ${kind === 'roles' ? 'ROLES_PATH' : 'FEATURES_PATH'} override: ${candidate}`);
+      }
+      return { data, path: candidate };
+    } catch (err) {
+      logParseError(candidate, err);
+      continue;
+    }
+  }
+
+  return embeddedFallback(kind);
 }
 
 export function resolveRolesSource(): LoadResult<any> {
-  const envOverride = process.env.ROLES_PATH;
-  const candidates = normalizeCandidates(envOverride, [
-    CORE_ROLES_CANDIDATE,
-    MINIMAL_ROLES_CANDIDATE,
-  ]);
-  try {
-    const loaded = tryLoadList(candidates, 'roles');
-    if (loaded) {
-      if (envOverride && envOverride.trim()) {
-        const envPath = resolvePath(envOverride.trim());
-        if (path.resolve(loaded.path) === envPath) {
-          console.log(`[roles-io] Using ROLES_PATH override: ${loaded.path}`);
-        }
-      }
-      return loaded;
-    }
-  } catch (err) {
-    if (err instanceof JsonParseError) {
-      return fallbackFromParseError('roles', err);
-    }
-    throw err;
-  }
-  throw new Error(`Could not locate roles.json. Checked: ${candidates.join(', ')}`);
+  return resolveSource('roles');
 }
 
 export function resolveFeaturesSource(): LoadResult<any> {
-  const envOverride = process.env.FEATURES_PATH;
-  const candidates = normalizeCandidates(envOverride, [
-    CORE_FEATURES_CANDIDATE,
-    MINIMAL_FEATURES_CANDIDATE,
-  ]);
-  try {
-    const loaded = tryLoadList(candidates, 'features');
-    if (loaded) {
-      if (envOverride && envOverride.trim()) {
-        const envPath = resolvePath(envOverride.trim());
-        if (path.resolve(loaded.path) === envPath) {
-          console.log(`[roles-io] Using FEATURES_PATH override: ${loaded.path}`);
-        }
-      }
-      return loaded;
-    }
-  } catch (err) {
-    if (err instanceof JsonParseError) {
-      return fallbackFromParseError('features', err);
-    }
-    throw err;
-  }
-  if (strictRolesEnabled()) {
-    throw new Error(
-      `FF_STRICT_ROLES=true, no features dataset found. Checked: ${candidates.join(', ')}`
-    );
-  }
-  const fallback = loadJSON(FALLBACK_FEATURES_PATH) as any[];
-  console.warn(
-    `[roles-io] Falling back to minimal features dataset at ${FALLBACK_FEATURES_PATH}`
-  );
-  return { data: fallback, path: FALLBACK_FEATURES_PATH };
+  return resolveSource('features');
 }
 
 export function loadRolesFromRepo(): any[] {

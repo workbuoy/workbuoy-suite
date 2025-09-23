@@ -39,6 +39,8 @@ jobs:
     env:
       FF_PERSISTENCE: 'true'
       DATABASE_URL: postgresql://postgres:postgres@localhost:5432/wb?schema=public
+      ROLES_PATH: scripts/fixtures/minimal-roles.json
+      FEATURES_PATH: scripts/fixtures/minimal-features.json
     steps:
       - uses: actions/checkout@v4
 
