@@ -28,6 +28,14 @@ jobs:
       - name: Lint (if present)
         run: npm run lint --if-present
 
+      - name: Install frontend deps
+        run: |
+          if [ -f frontend/package-lock.json ]; then
+            npm --prefix frontend ci --no-audit --fund=false
+          else
+            npm --prefix frontend install --no-audit --fund=false
+          fi
+
       - name: Typecheck (meta config)
         run: npm run typecheck --if-present
 
