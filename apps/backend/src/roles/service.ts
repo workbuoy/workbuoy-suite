@@ -1,1 +1,1 @@
-export * from './roles/service/index';
+export * from '../../../../src/roles/service';

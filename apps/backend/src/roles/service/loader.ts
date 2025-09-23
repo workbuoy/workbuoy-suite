@@ -1,21 +1,25 @@
 import path from 'node:path';
-import { pathToFileURL } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 
-const SERVICE_RELATIVE_PATH = '../../../../../src/roles/service.ts';
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
-type ServiceModule = Record<string, unknown>;
+// Prefer source barrel first, then JS fallbacks
+const candidates = [
+  path.resolve(__dirname, './index.ts'),
+  path.resolve(__dirname, './index.js'),
+  path.resolve(__dirname, '../index.ts'),
+  path.resolve(__dirname, '../index.js'),
+];
 
-let modulePromise: Promise<ServiceModule> | null = null;
-
-export async function loadServiceModule(): Promise<ServiceModule> {
-  if (!modulePromise) {
-    const target = pathToFileURL(path.resolve(__dirname, SERVICE_RELATIVE_PATH)).href;
-    modulePromise = import(target) as Promise<ServiceModule>;
+export async function loadServiceModule(): Promise<any> {
+  let lastErr: unknown = new Error('roles service module not found');
+  for (const abs of candidates) {
+    try {
+      return await import(pathToFileURL(abs).href);
+    } catch (e) {
+      lastErr = e;
+    }
   }
-  try {
-    return await modulePromise;
-  } catch (err) {
-    modulePromise = null;
-    throw err;
-  }
+  throw lastErr;
 }

@@ -1,6 +1,6 @@
-export { importRolesAndFeatures } from './importer';
 export type { ImportRolesAndFeatures } from './importer';
 export {
+  importRolesAndFeatures,
   getRoleRegistry,
   resolveUserBinding,
   setOverride,
@@ -9,4 +9,4 @@ export {
   listRoles,
   listFeatures,
   upsertRoleBinding,
-} from './service';
+} from '../service';
