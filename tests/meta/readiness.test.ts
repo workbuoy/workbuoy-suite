@@ -1,9 +1,11 @@
 import express from 'express';
-import type { NextFunction, Request, Response, Router as ExpressRouter } from 'express';
 import request from 'supertest';
-import { createMetaRouter } from '../../backend/meta/router';
-import type { Probe, ProbeResult } from '../../backend/meta/probes';
+
 import * as readinessModule from '../../backend/meta/readiness';
+import { createMetaRouter } from '../../backend/meta/router';
+
+import type { Probe, ProbeResult } from '../../backend/meta/probes';
+import type { NextFunction, Request, Response, Router as ExpressRouter } from 'express';
 
 const makeProbe = (result: Omit<ProbeResult, 'latency_ms'> & { latency_ms?: number }): Probe => ({
   name: result.name,
@@ -25,10 +27,7 @@ const withUser = (router: ExpressRouter) => {
 describe('META: /meta/readiness', () => {
   it('returns ready when every probe is ok', async () => {
     const router = createMetaRouter({
-      probes: [
-        makeProbe({ name: 'db', status: 'ok' }),
-        makeProbe({ name: 'queue', status: 'ok' }),
-      ],
+      probes: [makeProbe({ name: 'db', status: 'ok' }), makeProbe({ name: 'queue', status: 'ok' })],
     });
     const app = withUser(router);
 
@@ -40,7 +39,11 @@ describe('META: /meta/readiness', () => {
     expect(response.body.checks).toHaveLength(2);
     for (const check of response.body.checks) {
       expect(check).toEqual(
-        expect.objectContaining({ name: expect.any(String), status: expect.any(String), latency_ms: expect.any(Number) }),
+        expect.objectContaining({
+          name: expect.any(String),
+          status: expect.any(String),
+          latency_ms: expect.any(Number),
+        }),
       );
     }
   });
@@ -75,7 +78,9 @@ describe('META: /meta/readiness', () => {
 
     expect(response.status).toBe(200);
     expect(response.body.status).toBe('not_ready');
-    const outboundCheck = response.body.checks.find((check: ProbeResult) => check.name === 'outbound');
+    const outboundCheck = response.body.checks.find(
+      (check: ProbeResult) => check.name === 'outbound',
+    );
     expect(outboundCheck.status).toBe('fail');
     expect(outboundCheck.reason).toBe('timeout');
   });
@@ -90,16 +95,20 @@ describe('META: /meta/readiness', () => {
     });
     const app = withUser(router);
 
-    const response = await request(app).get('/api/meta/readiness').query({ include: ['db', 'queue,outbound'] });
+    const response = await request(app)
+      .get('/api/meta/readiness')
+      .query({ include: ['db', 'queue,outbound'] });
 
     expect(response.status).toBe(200);
     const checks = response.body.checks as ProbeResult[];
-    const names = checks.map(check => check.name).sort();
+    const names = checks.map((check) => check.name).sort();
     expect(names).toEqual(['db', 'outbound', 'queue'].sort());
   });
 
   it('surfaces runner errors without throwing 500', async () => {
-    const spy = jest.spyOn(readinessModule, 'runReadiness').mockRejectedValueOnce(new Error('simulated failure'));
+    const spy = jest
+      .spyOn(readinessModule, 'runReadiness')
+      .mockRejectedValueOnce(new Error('simulated failure'));
     const router = createMetaRouter();
     const app = withUser(router);
 

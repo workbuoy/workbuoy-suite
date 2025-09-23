@@ -1,8 +1,10 @@
 import express from 'express';
-import type { NextFunction, Request, Response } from 'express';
 import request from 'supertest';
+
 import { createMetaRouter } from '../../backend/meta/router';
 import { publicMetaRateLimit } from '../../backend/meta/security';
+
+import type { NextFunction, Request, Response } from 'express';
 
 describe('META security and rate limiting', () => {
   const createApp = (user?: { scopes?: string[] }) => {

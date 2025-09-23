@@ -26,7 +26,8 @@ class MockRegistry {
     if (!metric) {
       return;
     }
-    const name = typeof metric.name === 'string' ? metric.name : `mock_metric_${this.metricsList.length}`;
+    const name =
+      typeof metric.name === 'string' ? metric.name : `mock_metric_${this.metricsList.length}`;
     const type = metric.type ?? 'counter';
     this.metricsList.push({ name, type });
   });

@@ -12,14 +12,12 @@ describe('www entrypoint startup', () => {
 
   it('loads without throwing when listen is defined', async () => {
     const { default: app } = await import('../../src/server');
-    const listen = jest
-      .spyOn(app, 'listen')
-      .mockImplementation((port: number, cb?: () => void) => {
-        if (cb) {
-          cb();
-        }
-        return { close: jest.fn() } as unknown as Server;
-      });
+    const listen = jest.spyOn(app, 'listen').mockImplementation((port: number, cb?: () => void) => {
+      if (cb) {
+        cb();
+      }
+      return { close: jest.fn() } as unknown as Server;
+    });
 
     await import('../../src/bin/www');
 

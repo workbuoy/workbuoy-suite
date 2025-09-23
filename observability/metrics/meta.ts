@@ -48,8 +48,12 @@ const createNoopHistogram = (): HistogramLike => ({
   observe: () => undefined,
 });
 
-type CounterConfiguration = import('prom-client').CounterConfiguration<string> & { labelNames?: readonly string[] };
-type HistogramConfiguration = import('prom-client').HistogramConfiguration<string> & { labelNames?: readonly string[] };
+type CounterConfiguration = import('prom-client').CounterConfiguration<string> & {
+  labelNames?: readonly string[];
+};
+type HistogramConfiguration = import('prom-client').HistogramConfiguration<string> & {
+  labelNames?: readonly string[];
+};
 
 const createCounter = (configuration: CounterConfiguration): CounterLike => {
   if (!promClient) {
@@ -105,7 +109,12 @@ export function recordPolicyDenyMetric(feature = 'meta_policy', reason = 'denied
   policyDeniesTotal.inc({ feature, reason });
 }
 
-export function recordMetaRequestLatency(route: string, method: string, statusCode: number, durationMs: number): void {
+export function recordMetaRequestLatency(
+  route: string,
+  method: string,
+  statusCode: number,
+  durationMs: number,
+): void {
   const duration = Number.isFinite(durationMs) ? Math.max(0, durationMs) : 0;
   metaRequestLatencyMs.observe({ route, method, status: String(statusCode) }, duration);
 }

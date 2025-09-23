@@ -1,7 +1,9 @@
-import request from 'supertest';
 import os from 'os';
 import path from 'path';
+
 import express from 'express';
+import request from 'supertest';
+
 import { metaGenesisRouter } from '../../src/routes/genesis.autonomy';
 
 function buildApp() {

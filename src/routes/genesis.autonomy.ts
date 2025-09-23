@@ -1,6 +1,7 @@
-import { Router, Request, Response } from 'express';
 import { access } from 'fs/promises';
 import path from 'path';
+
+import { Router, Request, Response } from 'express';
 
 type AutonomySuggestion = {
   title: string;
@@ -19,7 +20,11 @@ function awarenessSnapshot() {
       signals: [
         { id: 'memory', status: 'green', detail: 'Conversation memory trimmed to last 200 turns.' },
         { id: 'policies', status: 'green', detail: 'All safety policies loaded and verified.' },
-        { id: 'approvals', status: 'yellow', detail: 'Awaiting human validation for evolution tasks.' },
+        {
+          id: 'approvals',
+          status: 'yellow',
+          detail: 'Awaiting human validation for evolution tasks.',
+        },
       ],
       recommendations: [
         'Maintain manual review cadence for evolution plans.',

@@ -1,10 +1,11 @@
+import { recordPolicyDenyMetric } from '../../observability/metrics/meta';
+
 import type {
   MetaPolicyAutonomyLevel,
   MetaPolicyProfile,
   MetaPolicySnapshotResponse,
   MetaPolicyDenyCounters,
 } from './types';
-import { recordPolicyDenyMetric } from '../../observability/metrics/meta';
 
 const HOUR_IN_MS = 60 * 60 * 1000;
 const DAY_IN_MS = 24 * HOUR_IN_MS;
@@ -87,7 +88,7 @@ export class InMemoryPolicyMetricsStore implements PolicyMetricsStore {
     if (this.events.length === 0) {
       return;
     }
-    this.events = this.events.filter(timestamp => timestamp >= threshold);
+    this.events = this.events.filter((timestamp) => timestamp >= threshold);
   }
 }
 
@@ -199,7 +200,9 @@ export function recordPolicyDeny(at?: Date | number, feature = 'policy', reason 
   }
 }
 
-export async function getPolicySnapshot(now: Date = new Date()): Promise<MetaPolicySnapshotResponse> {
+export async function getPolicySnapshot(
+  now: Date = new Date(),
+): Promise<MetaPolicySnapshotResponse> {
   const snapshot = await Promise.resolve(activeEngine.getSnapshot());
   const deny_counters = normaliseCounters(activeMetrics.getWindowCounts(now));
   return {

@@ -44,7 +44,13 @@ const defaultKey = (req: any) => {
   return (req.ip as string) || req.connection?.remoteAddress || 'global';
 };
 
-const setHeaders = (res: any, limit: number, remaining: number, resetTime: number, options: Options) => {
+const setHeaders = (
+  res: any,
+  limit: number,
+  remaining: number,
+  resetTime: number,
+  options: Options,
+) => {
   if (options.standardHeaders) {
     res.setHeader('RateLimit-Limit', limit);
     res.setHeader('RateLimit-Remaining', Math.max(0, remaining));

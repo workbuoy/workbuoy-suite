@@ -1,7 +1,9 @@
 import express from 'express';
-import type { NextFunction, Request, Response } from 'express';
 import request from 'supertest';
+
 import router from '../../backend/meta/router';
+
+import type { NextFunction, Request, Response } from 'express';
 
 describe('META: /meta/capabilities', () => {
   const ORIGINAL_ENV = process.env;
@@ -101,7 +103,9 @@ describe('META: /meta/capabilities', () => {
       experimental: true,
       gamma: true,
     });
-    expect(Object.values(res.body.feature_flags).every((value: unknown) => typeof value === 'boolean')).toBe(true);
+    expect(
+      Object.values(res.body.feature_flags).every((value: unknown) => typeof value === 'boolean'),
+    ).toBe(true);
     expect(res.body.feature_flags).not.toHaveProperty('secret_api_key');
   });
 

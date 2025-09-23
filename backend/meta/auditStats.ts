@@ -33,7 +33,11 @@ function toIsoString(date: Date): string {
   return new Date(date.getTime()).toISOString();
 }
 
-export async function getAuditStats(repo: AuditRepo, from?: Date, to?: Date): Promise<AuditStatsResponse> {
+export async function getAuditStats(
+  repo: AuditRepo,
+  from?: Date,
+  to?: Date,
+): Promise<AuditStatsResponse> {
   const now = new Date();
   const toTs = normaliseDate(to, now);
   const defaultFrom = new Date(toTs.getTime() - HOUR_IN_MS);
@@ -50,9 +54,9 @@ export async function getAuditStats(repo: AuditRepo, from?: Date, to?: Date): Pr
   const events = await repo.listEvents(fromTs, toTs);
 
   const totals = {
-    intents: events.filter(event => event.type === 'intent').length,
-    actions: events.filter(event => event.type === 'action').length,
-    failures: events.filter(event => event.type === 'failure').length,
+    intents: events.filter((event) => event.type === 'intent').length,
+    actions: events.filter((event) => event.type === 'action').length,
+    failures: events.filter((event) => event.type === 'failure').length,
   };
 
   if (totals.failures > 0) {
