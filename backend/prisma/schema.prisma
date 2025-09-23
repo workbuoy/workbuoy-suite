@@ -8,30 +8,36 @@ datasource db {
 }
 
 model Tenant {
-  id        String  @id @default(cuid())
-  slug      String  @unique
-  name      String
-  users     User[]
-  orgs      Organization[]
-  contacts  Contact[]
-  pipelines Pipeline[]
-  opps      Opportunity[]
-  roles     RoleBinding[]
-  audits    AuditLog[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id                String             @id @default(cuid())
+  slug              String             @unique
+  name              String
+  users             User[]             @relation("TenantUsers")
+  stages            Stage[]            @relation("TenantStages")
+  activities        Activity[]         @relation("TenantActivities")
+  customFieldDefs   CustomFieldDef[]   @relation("TenantCFDefs")
+  customFieldValues CustomFieldValue[] @relation("TenantCFVals")
+  orgs              Organization[]
+  contacts          Contact[]
+  pipelines         Pipeline[]
+  opportunities     Opportunity[]      @relation("TenantOpps")
+  roles             RoleBinding[]
+  audits            AuditLog[]
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
 }
 
 model User {
-  id        String  @id @default(cuid())
-  tenant    Tenant  @relation(fields: [tenantId], references: [id])
-  tenantId  String
-  email     String  @unique
-  displayName String
-  roleBinds RoleBinding[]
-  activities Activity[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id             String         @id @default(cuid())
+  tenantId       String?
+  tenant         Tenant?        @relation("TenantUsers", fields: [tenantId], references: [id])
+  email          String         @unique
+  displayName    String
+  contacts       Contact[]      @relation("UserContacts")
+  opportunities  Opportunity[]  @relation("UserOpps")
+  roleBinds      RoleBinding[]
+  activities     Activity[]
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
 }
 
 model Organization {
@@ -42,7 +48,7 @@ model Organization {
   domain    String?
   contacts  Contact[]
   opps      Opportunity[]
-  custom    CustomFieldValue[]
+  custom    CustomFieldValue[] @relation("OrgCF")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   @@index([tenantId, name])
@@ -54,13 +60,13 @@ model Contact {
   tenantId  String
   organization   Organization? @relation(fields: [organizationId], references: [id])
   organizationId String?
-  owner     User?   @relation(fields: [ownerId], references: [id])
+  owner     User?   @relation("UserContacts", fields: [ownerId], references: [id])
   ownerId   String?
   name      String
   email     String?
   phone     String?
   tags      String[]
-  custom    CustomFieldValue[]
+  custom    CustomFieldValue[] @relation("ContactCF")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   @@index([tenantId, ownerId])
@@ -81,12 +87,13 @@ model Pipeline {
 
 model Stage {
   id        String  @id @default(cuid())
-  tenant    Tenant  @relation(fields: [tenantId], references: [id])
+  tenant    Tenant  @relation("TenantStages", fields: [tenantId], references: [id])
   tenantId  String
   pipeline  Pipeline @relation(fields: [pipelineId], references: [id])
   pipelineId String
   name      String
   order     Int
+  opportunities Opportunity[] @relation("StageOpps")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   @@index([tenantId, pipelineId, order])
@@ -94,23 +101,23 @@ model Stage {
 
 model Opportunity {
   id        String  @id @default(cuid())
-  tenant    Tenant  @relation(fields: [tenantId], references: [id])
+  tenant    Tenant  @relation("TenantOpps", fields: [tenantId], references: [id])
   tenantId  String
   pipeline  Pipeline @relation(fields: [pipelineId], references: [id])
   pipelineId String
-  stage     Stage    @relation(fields: [stageId], references: [id])
+  stage     Stage    @relation("StageOpps", fields: [stageId], references: [id])
   stageId   String
   organization   Organization? @relation(fields: [organizationId], references: [id])
   organizationId String?
-  owner     User?   @relation(fields: [ownerId], references: [id])
+  owner     User?   @relation("UserOpps", fields: [ownerId], references: [id])
   ownerId   String?
   title     String
   valueCents Int?
   currency  String? @default("USD")
   status    String  @default("open") // open|won|lost
   tags      String[]
-  custom    CustomFieldValue[]
-  activities Activity[]
+  custom    CustomFieldValue[] @relation("OppCF")
+  activities Activity[]        @relation("OppActivities")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   @@index([tenantId, pipelineId, stageId, ownerId])
@@ -118,11 +125,11 @@ model Opportunity {
 
 model Activity {
   id        String  @id @default(cuid())
-  tenant    Tenant  @relation(fields: [tenantId], references: [id])
+  tenant    Tenant  @relation("TenantActivities", fields: [tenantId], references: [id])
   tenantId  String
   user      User?   @relation(fields: [userId], references: [id])
   userId    String?
-  opportunity Opportunity? @relation(fields: [opportunityId], references: [id])
+  opportunity Opportunity? @relation("OppActivities", fields: [opportunityId], references: [id])
   opportunityId String?
   subject   String
   note      String?
@@ -131,7 +138,7 @@ model Activity {
 
 model CustomFieldDef {
   id        String  @id @default(cuid())
-  tenant    Tenant  @relation(fields: [tenantId], references: [id])
+  tenant    Tenant  @relation("TenantCFDefs", fields: [tenantId], references: [id])
   tenantId  String
   entity    String  // organization|contact|opportunity
   key       String
@@ -142,19 +149,25 @@ model CustomFieldDef {
 }
 
 model CustomFieldValue {
-  id        String  @id @default(cuid())
-  tenant    Tenant  @relation(fields: [tenantId], references: [id])
-  tenantId  String
-  entity    String  // organization|contact|opportunity
-  entityId  String
-  key       String
-  stringVal String?
-  numberVal Float?
-  boolVal   Boolean?
-  dateVal   DateTime?
-  jsonVal   Json?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id             String          @id @default(cuid())
+  tenantId       String
+  tenant         Tenant          @relation("TenantCFVals", fields: [tenantId], references: [id])
+  entity         String          // organization|contact|opportunity
+  entityId       String
+  key            String
+  stringVal      String?
+  numberVal      Float?
+  boolVal        Boolean?
+  dateVal        DateTime?
+  jsonVal        Json?
+  organizationId String?
+  organization   Organization?   @relation("OrgCF", fields: [organizationId], references: [id])
+  contactId      String?
+  contact        Contact?        @relation("ContactCF", fields: [contactId], references: [id])
+  opportunityId  String?
+  opportunity    Opportunity?    @relation("OppCF", fields: [opportunityId], references: [id])
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
   @@index([tenantId, entity, entityId])
 }
 
