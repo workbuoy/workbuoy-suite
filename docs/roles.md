@@ -15,9 +15,11 @@ Workbuoy persists role definitions, feature metadata, tenant overrides and user 
 
 ## Seeding & Import
 
-1. Ensure Postgres is running and `DATABASE_URL` is exported.
-2. Seed from the repository JSON: `npx ts-node scripts/seed-roles-from-json.ts`
-   - The script loads `roles/roles.json` and `src/roles/seed/features.ts`, upserts into Postgres, and refreshes the registry cache.
+1. Ensure Postgres is running and export:
+   - `FF_PERSISTENCE=true`
+   - `DATABASE_URL=postgresql://<user>:<pass>@<host>:<port>/<db>?schema=public`
+2. Seed from the repository JSON via tsx: `npm run seed:roles`
+   - The script honours optional `ROLES_PATH` / `FEATURES_PATH` overrides, defaults to `core/roles/**`, upserts into Postgres, and refreshes the registry cache.
 3. Admins can re-import via API: `POST /api/admin/roles/import` with `x-role-id: admin`.
 
 When `FF_PERSISTENCE=false`, the registry falls back to in-memory data (`loadRolesFromRepo` + `defaultFeatures`).

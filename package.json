@@ -2,16 +2,14 @@
   "name": "workbuoy-suite",
   "private": true,
   "scripts": {
-    "build": "tsc --noEmit -p tsconfig.proactivity.json",
-    "test": "npm run test --prefix backend",
-    "typecheck": "tsc --noEmit -p tsconfig.meta.json"
-  },
-  "dependencies": {
-    "@prisma/client": "^5.14.0",
-    "js-yaml": "^4.1.0"
+    "seed:roles": "tsx scripts/seed-roles-from-json.ts",
+    "check:roles": "tsx scripts/check-roles-json.ts",
+    "typecheck": "tsc -p tsconfig.meta.json"
   },
   "devDependencies": {
-    "prisma": "^5.14.0",
-    "ts-node": "^10.9.2"
+    "tsx": "^4.19.0",
+    "@types/jest": "^29.5.12",
+    "@types/node": "^20.11.30",
+    "typescript": "^5.4.5"
   }
 }

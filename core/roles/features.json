@@ -1,0 +1,32 @@
+[
+  {
+    "id": "cashflow_forecast",
+    "title": "Cashflow Forecast",
+    "defaultAutonomyCap": 3,
+    "capabilities": ["finance.cashflow.forecast"]
+  },
+  {
+    "id": "lead_qualification",
+    "title": "Lead Qualification",
+    "defaultAutonomyCap": 5,
+    "capabilities": ["crm.lead.qualify", "crm.lead.route", "crm.email.send"]
+  },
+  {
+    "id": "pipeline_forecast",
+    "title": "Pipeline Forecast",
+    "defaultAutonomyCap": 4,
+    "capabilities": ["crm.pipeline.forecast"]
+  },
+  {
+    "id": "customer_health",
+    "title": "Customer Health",
+    "defaultAutonomyCap": 4,
+    "capabilities": ["cs.health.score", "cs.renewal.risk"]
+  },
+  {
+    "id": "contract_compliance",
+    "title": "Contract Compliance",
+    "defaultAutonomyCap": 3,
+    "capabilities": ["ops.contract.monitor"]
+  }
+]

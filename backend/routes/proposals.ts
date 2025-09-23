@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { RoleRegistry } from '../../src/roles/registry';
-import { loadRolesFromRepo, loadFeaturesFromRepo } from '../../src/roles/loader';
+import { loadRoleCatalog } from '../../src/roles/loader';
 import { requiresProMode } from '../../src/core/proactivity/guards';
 import { ProactivityMode } from '../../src/core/proactivity/modes';
 import { resolveProactivityForRequest } from './utils/proactivityContext';
@@ -24,18 +24,29 @@ import { policyCheck } from '../../src/core/policy';
 import { logIntent } from '../../src/core/intentLog';
 
 const router = Router();
-const fallbackRegistry = new RoleRegistry(loadRolesFromRepo(), loadFeaturesFromRepo(), []);
+
+function buildFallbackRegistry(): RoleRegistry {
+  try {
+    const catalog = loadRoleCatalog();
+    return new RoleRegistry(catalog.roles, catalog.features, []);
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : String(err);
+    console.warn('[proposals.router] failed to load role catalog; continuing with defaults', message);
+    return new RoleRegistry([], [], []);
+  }
+}
+
+const fallbackRegistry = buildFallbackRegistry();
 const usePersistence = envBool('FF_PERSISTENCE', false);
 
-async function selectRegistry() {
+async function selectRegistry(): Promise<RoleRegistry> {
   if (usePersistence) {
     return getRoleRegistry();
   }
   return fallbackRegistry;
 }
 
-async function resolveBinding(req: any): Promise<{ tenantId: string; userId: string; role: string; binding: UserRoleBinding }>
-{
+async function resolveBinding(req: any): Promise<{ tenantId: string; userId: string; role: string; binding: UserRoleBinding }>{
   const tenantId = String(req.header('x-tenant') || req.header('x-tenant-id') || 'demo');
   const userId = String(req.header('x-user') || req.header('x-user-id') || 'demo-user');
   const role = String(req.header('x-role') || req.header('x-user-role') || 'sales_rep');
@@ -166,7 +177,9 @@ router.post('/proposals/:id/approve', requiresProMode(ProactivityMode.Kraken), a
     const message = err?.message ?? String(err);
     await markProposalFailed(proposalId, message);
     const failed = await getProposal(proposalId);
-    res.status(500).json({ error: 'proposal_execute_failed', message, proposal: failed ? sanitizeProposal(failed) : undefined });
+    res
+      .status(500)
+      .json({ error: 'proposal_execute_failed', message, proposal: failed ? sanitizeProposal(failed) : undefined });
   }
 });
 

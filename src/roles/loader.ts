@@ -3,108 +3,221 @@ import path from 'node:path';
 import { RoleProfile, FeatureDef } from './types';
 import { defaultFeatures } from './seed/features';
 
-const moduleDir = __dirname;
-const repoRoot = path.resolve(moduleDir, '..', '..');
+interface LoadResult<T> {
+  data: T[];
+  path: string;
+}
 
-function resolveCandidate(filePath?: string | null): string | null {
-  if (!filePath) return null;
-  const attempts: string[] = [];
-  if (path.isAbsolute(filePath)) {
-    attempts.push(filePath);
-  } else {
-    const workspace = process.env.GITHUB_WORKSPACE;
-    const bases = [process.cwd(), repoRoot, moduleDir];
-    if (workspace) bases.push(workspace);
-    for (const base of bases) {
-      attempts.push(path.resolve(base, filePath));
-    }
+class JsonParseError extends Error {
+  constructor(filePath: string, original: unknown) {
+    const detail = original instanceof Error ? original.message : String(original);
+    super(`parse error for ${filePath}: ${detail}`);
+    this.name = 'JsonParseError';
   }
+}
+
+const REPO_ROOT = path.resolve(__dirname, '..', '..');
+const DEFAULT_FEATURE_SOURCE = 'src/roles/seed/features.ts (defaultFeatures export)';
+const FALLBACK_ROLES_PATH = path.resolve(REPO_ROOT, 'scripts', 'fixtures', 'minimal-roles.json');
+const FALLBACK_FEATURES_PATH = path.resolve(REPO_ROOT, 'scripts', 'fixtures', 'minimal-features.json');
+
+function normalizeCandidates(envPath: string | undefined, fallbacks: string[]): string[] {
+  const override = envPath?.trim();
+  if (override) {
+    return [override];
+  }
+
   const seen = new Set<string>();
-  for (const candidate of attempts) {
-    const normalized = path.normalize(candidate);
-    if (seen.has(normalized)) continue;
-    seen.add(normalized);
-    if (fs.existsSync(normalized)) return normalized;
+  const deduped: string[] = [];
+  for (const entry of fallbacks) {
+    const normalized = entry.trim();
+    if (!normalized) continue;
+    const key = path.normalize(normalized);
+    if (seen.has(key)) continue;
+    seen.add(key);
+    deduped.push(normalized);
+  }
+  return deduped;
+}
+
+function expandCandidate(candidate: string): string[] {
+  if (path.isAbsolute(candidate)) {
+    return [candidate];
+  }
+  const absFromRoot = path.resolve(REPO_ROOT, candidate);
+  const absFromCwd = path.resolve(process.cwd(), candidate);
+  if (absFromRoot === absFromCwd) {
+    return [absFromRoot];
+  }
+  return Array.from(new Set([absFromRoot, absFromCwd]));
+}
+
+function loadJson(absPath: string): unknown {
+  const contents = fs.readFileSync(absPath, 'utf8');
+  try {
+    return JSON.parse(contents);
+  } catch (err) {
+    throw new JsonParseError(absPath, err);
+  }
+}
+
+function tryLoadList<T = unknown>(
+  candidateSpecs: string[],
+  key: 'roles' | 'features',
+): LoadResult<T> | null {
+  for (const spec of candidateSpecs) {
+    for (const abs of expandCandidate(spec)) {
+      if (!fs.existsSync(abs)) continue;
+      try {
+        const json = loadJson(abs) as any;
+        if (Array.isArray(json)) {
+          return { data: json as T[], path: abs };
+        }
+        if (Array.isArray(json?.[key])) {
+          return { data: json[key] as T[], path: abs };
+        }
+      } catch (err) {
+        if (err instanceof JsonParseError) {
+          console.error(`[roles.loader] ${err.message}`);
+          throw err;
+        }
+        const reason = err instanceof Error ? err.message : String(err);
+        console.warn(`[roles.loader] Failed to load ${abs}: ${reason}`);
+      }
+    }
   }
   return null;
 }
 
-function parseLooseJson(raw: string) {
-  const trimmed = raw.trim();
-  if (!trimmed) return null;
-  try {
-    return JSON.parse(trimmed);
-  } catch (initialError) {
-    let sanitized = trimmed.replace(/,\s*(\]|\})/g, '$1');
-    const arrays = sanitized.match(/\[[\s\S]*?\]/g);
-    if (arrays && arrays.length > 1) {
-      const merged: unknown[] = [];
-      for (const segment of arrays) {
-        try {
-          const cleaned = segment.replace(/,\s*(\]|\})/g, '$1');
-          const parsed = JSON.parse(cleaned);
-          if (Array.isArray(parsed)) {
-            merged.push(...parsed);
-          } else {
-            merged.push(parsed);
-          }
-        } catch {}
-      }
-      if (merged.length) return merged;
-    }
-    try {
-      return JSON.parse(sanitized);
-    } catch {
-      throw initialError;
-    }
-  }
+function loadFallbackCatalog(): LoadResult<RoleProfile> & { features: FeatureDef[] } {
+  const roles = loadJson(FALLBACK_ROLES_PATH) as RoleProfile[];
+  const features = loadJson(FALLBACK_FEATURES_PATH) as FeatureDef[];
+  console.warn(
+    `[roles.loader] No role catalog found; falling back to minimal fixtures (${FALLBACK_ROLES_PATH})`,
+  );
+  return { data: roles, path: FALLBACK_ROLES_PATH, features };
 }
 
-function readJson(candidate?: string | null) {
-  const resolved = resolveCandidate(candidate);
-  if (!resolved) return null;
+function loadFallbackFeatures(): FeatureDef[] {
+  console.warn(
+    `[roles.loader] No feature catalog found; falling back to minimal fixtures (${FALLBACK_FEATURES_PATH})`,
+  );
+  return loadJson(FALLBACK_FEATURES_PATH) as FeatureDef[];
+}
+
+export interface RoleCatalog {
+  roles: RoleProfile[];
+  features: FeatureDef[];
+  sources: {
+    roles: string;
+    features: string;
+  };
+}
+
+export function loadRoleCatalog(): RoleCatalog {
+  const roleCandidates = normalizeCandidates(process.env.ROLES_PATH, [
+    path.join('core', 'roles', 'roles.json'),
+    path.join('roles', 'roles.json'),
+    path.join('backend', 'roles', 'roles.json'),
+    path.join('data', 'roles.json'),
+  ]);
+  let rolesSource: LoadResult<RoleProfile> | null = null;
+  let rolesParseError: JsonParseError | null = null;
   try {
-    const raw = fs.readFileSync(resolved, 'utf8');
-    return parseLooseJson(raw);
+    rolesSource = tryLoadList<RoleProfile>(roleCandidates, 'roles');
   } catch (err) {
-    console.warn(`[roles.loader] failed to read ${resolved}:`, err);
-    return null;
+    if (err instanceof JsonParseError) {
+      rolesParseError = err;
+    } else {
+      throw err;
+    }
   }
+
+  if (!rolesSource) {
+    if (process.env.NODE_ENV === 'test') {
+      const fallback = loadFallbackCatalog();
+      return {
+        roles: fallback.data,
+        features: fallback.features,
+        sources: {
+          roles: FALLBACK_ROLES_PATH,
+          features: FALLBACK_FEATURES_PATH,
+        },
+      };
+    }
+    if (rolesParseError) {
+      throw rolesParseError;
+    }
+    throw new Error(
+      `[roles.loader] Could not locate roles catalog. Checked: ${roleCandidates.join(', ')}`,
+    );
+  }
+
+  if (process.env.ROLES_PATH && rolesSource.path) {
+    const envAbs = path.resolve(process.env.ROLES_PATH);
+    if (path.resolve(rolesSource.path) === envAbs) {
+      console.log(`[roles.loader] Using ROLES_PATH override: ${rolesSource.path}`);
+    }
+  }
+
+  const featureCandidates = normalizeCandidates(process.env.FEATURES_PATH, [
+    path.join('core', 'roles', 'features.json'),
+    path.join('roles', 'features.json'),
+    path.join('backend', 'roles', 'features.json'),
+    path.join('data', 'features.json'),
+  ]);
+  let featuresSource: LoadResult<FeatureDef> | null = null;
+  let featuresParseError: JsonParseError | null = null;
+  try {
+    featuresSource = tryLoadList<FeatureDef>(featureCandidates, 'features');
+  } catch (err) {
+    if (err instanceof JsonParseError) {
+      featuresParseError = err;
+    } else {
+      throw err;
+    }
+  }
+
+  let features: FeatureDef[];
+  let featurePath: string;
+  if (featuresSource) {
+    features = featuresSource.data;
+    featurePath = featuresSource.path;
+    if (process.env.FEATURES_PATH) {
+      const envAbs = path.resolve(process.env.FEATURES_PATH);
+      if (path.resolve(featurePath) === envAbs) {
+        console.log(`[roles.loader] Using FEATURES_PATH override: ${featurePath}`);
+      }
+    }
+  } else {
+    if (process.env.NODE_ENV === 'test') {
+      features = loadFallbackFeatures();
+      featurePath = FALLBACK_FEATURES_PATH;
+    } else {
+      if (featuresParseError) {
+        throw featuresParseError;
+      }
+      features = defaultFeatures;
+      featurePath = DEFAULT_FEATURE_SOURCE;
+    }
+  }
+
+  return {
+    roles: rolesSource.data,
+    features,
+    sources: {
+      roles: rolesSource.path,
+      features: featurePath,
+    },
+  };
 }
 
 export function loadRolesFromRepo(): RoleProfile[] {
-  const candidates = [
-    process.env.ROLES_PATH,
-    'core/roles/roles.json',
-    'roles/roles.json',
-    'data/roles.json',
-    'src/roles/roles.json',
-    'roles.json'
-  ];
-  for (const candidate of candidates) {
-    const json = readJson(candidate) as any;
-    if (!json) continue;
-    if (Array.isArray(json?.roles)) return json.roles as RoleProfile[];
-    if (Array.isArray(json)) return json as RoleProfile[];
-  }
-  console.warn('[roles.loader] roles.json not found; using empty list');
-  return [];
+  return loadRoleCatalog().roles;
 }
 
 export function loadFeaturesFromRepo(): FeatureDef[] {
-  const candidates = [
-    process.env.FEATURES_PATH,
-    'core/roles/features.json',
-    'roles/features.json',
-    'data/features.json',
-    'src/roles/features.json',
-    'features.json'
-  ];
-  for (const candidate of candidates) {
-    const json = readJson(candidate) as any;
-    if (!json) continue;
-    if (Array.isArray(json?.features)) return json.features as FeatureDef[];
-    if (Array.isArray(json)) return json as FeatureDef[];
-  }
-  return defaultFeatures;
+  return loadRoleCatalog().features;
 }
+
+export { DEFAULT_FEATURE_SOURCE };

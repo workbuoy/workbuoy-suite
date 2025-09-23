@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { rbac } from '../../src/core/security/rbac';
 import { envBool } from '../../src/core/env';
-import { loadFeaturesFromRepo, loadRolesFromRepo } from '../../src/roles/loader';
+import { loadRoleCatalog } from '../../src/roles/loader';
 import { getRoleRegistry, importRolesAndFeatures, listOverridesForTenant, setOverride } from '../../src/roles/service';
 import type { OrgRoleOverride, UserRoleBinding } from '../../src/roles/types';
 
@@ -23,9 +23,8 @@ function ensurePersistence(res: any): boolean {
 router.post('/admin/roles/import', requireAdmin, async (_req, res) => {
   if (!ensurePersistence(res)) return;
   try {
-    const roles = loadRolesFromRepo();
-    const features = loadFeaturesFromRepo();
-    const summary = await importRolesAndFeatures(roles, features);
+    const catalog = loadRoleCatalog();
+    const summary = await importRolesAndFeatures(catalog.roles, catalog.features);
     res.json({ ok: true, imported: summary });
   } catch (err: any) {
     res.status(500).json({ error: 'roles_import_failed', message: err?.message || String(err) });

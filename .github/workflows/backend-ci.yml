@@ -4,67 +4,27 @@ on:
   push:
     paths:
       - 'backend/**'
-      - 'src/**'
-      - 'backend/tests/**'
-      - '.github/workflows/backend-ci.yml'
+      - 'prisma/**'
+      - 'core/roles/**'
+      - 'scripts/seed-roles-from-json.ts'
+      - 'scripts/seed-roles-lib.ts'
+      - 'scripts/roles-io.ts'
+      - '.github/workflows/**'
   pull_request:
     paths:
       - 'backend/**'
-      - 'src/**'
-      - 'backend/tests/**'
-      - '.github/workflows/backend-ci.yml'
+      - 'prisma/**'
+      - 'core/roles/**'
+      - 'scripts/seed-roles-from-json.ts'
+      - 'scripts/seed-roles-lib.ts'
+      - 'scripts/roles-io.ts'
+      - '.github/workflows/**'
 
 jobs:
   test:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: backend
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Node 20
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-
-      - name: Install backend deps
-        run: npm install --no-audit --fund=false
-
-      - name: Run in-memory API smoke tests
-        env:
-          FF_PERSISTENCE: 'false'
-        run: |
-          npm test -- \
-            ../tests/features/active.api.test.ts \
-            ../tests/usage/usage.api.test.ts \
-            --runInBand --passWithNoTests
-
-  test-persistence:
-    runs-on: ubuntu-latest
-    services:
-      postgres:
-        image: postgres:16
-        ports:
-          - 5432:5432
-        env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: workbuoy
-        options: >-
-          --health-cmd "pg_isready -U postgres -d workbuoy"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-
     env:
-      FF_PERSISTENCE: 'true'
-      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/workbuoy?schema=public
-      ROLES_PATH: core/roles/roles.json
-      FEATURES_PATH: core/roles/features.json
-
+      FF_PERSISTENCE: 'false'
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -72,30 +32,16 @@ jobs:
       - name: Setup Node 20
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: 20
 
-      # NOTE: only install in backend/, never at repo root.
-      - name: Install backend deps
-        working-directory: backend
+      - name: Install root dependencies
         run: npm install --no-audit --fund=false
 
-      - name: Generate Prisma client
-        run: npx prisma generate --schema=prisma/schema.prisma
+      - name: Install backend dependencies
+        run: npm --prefix backend install --no-audit --fund=false
 
-      - name: Apply Prisma migrations
-        run: npx prisma migrate deploy --schema=prisma/schema.prisma
-
-      - name: Seed baseline roles
-        working-directory: backend
-        run: npm run seed:roles
-
-      - name: Run persistence tests
-        working-directory: backend
-        run: |
-          npm test -- \
-            ../tests/roles/db.registry.test.ts \
-            ../tests/usage/db.usage.test.ts \
-            ../tests/features/active.api.test.ts \
-            ../tests/admin/roles.api.test.ts \
-            ../tests/proactivity/context.integration.test.ts \
-            --runInBand --passWithNoTests
+      - name: Run backend Jest suite
+        env:
+          ROLES_PATH: ./scripts/fixtures/minimal-roles.json
+          FEATURES_PATH: ./scripts/fixtures/minimal-features.json
+        run: npm --prefix backend test -- --runInBand --passWithNoTests

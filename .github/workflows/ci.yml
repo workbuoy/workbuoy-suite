@@ -1,0 +1,70 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+
+jobs:
+  lint-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install root dependencies
+        run: npm install --no-audit --fund=false
+
+      - name: Install backend dependencies
+        run: npm --prefix backend install --no-audit --fund=false
+
+      - name: Install frontend dependencies
+        run: npm --prefix frontend install --no-audit --fund=false
+
+      - name: Check roles JSON (non-blocking)
+        run: npm run --if-present check:roles
+        continue-on-error: true
+
+      - name: Lint (if present)
+        run: npm run lint --if-present
+
+      - name: Typecheck (meta config)
+        run: npm run typecheck --if-present
+
+      - name: Backend unit tests
+        env:
+          FF_PERSISTENCE: 'false'
+        run: npm --prefix backend test -- --runInBand --passWithNoTests
+
+  coverage:
+    needs: lint-and-test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install root dependencies
+        run: npm install --no-audit --fund=false
+
+      - name: Install backend dependencies
+        run: npm --prefix backend install --no-audit --fund=false
+
+      - name: Backend tests with coverage
+        env:
+          FF_PERSISTENCE: 'false'
+        run: npm --prefix backend test -- --coverage --runInBand --passWithNoTests
+
+      - name: Upload coverage
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-coverage
+          path: |
+            backend/coverage/**
+            coverage/**

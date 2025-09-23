@@ -114,15 +114,14 @@ export function buildProactivityContext(input: ProactivityContextInput): Proacti
 
   if (input.policyCap) {
     const policyKey = modeToKey(input.policyCap);
-    const policyBasis = `cap:policy:${policyKey}`;
     caps.push({
       id: 'policy',
       label: 'policy',
       mode: input.policyCap,
-      basis: [policyBasis],
+      basis: [`cap:policy:${policyKey}`],
       degradeTag: 'policy',
     });
-    basis.add(policyBasis);
+    basis.add(`cap:policy:${policyKey}`);
   }
 
   const resolution = resolveEffectiveMode({

@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { RoleRegistry } from '../../src/roles/registry';
-import { loadRolesFromRepo, loadFeaturesFromRepo } from '../../src/roles/loader';
+import { loadRoleCatalog } from '../../src/roles/loader';
 import type { ProactivityState } from '../../src/core/proactivity/context';
 import { resolveProactivityForRequest } from './utils/proactivityContext';
 import { envBool } from '../../src/core/env';
@@ -10,14 +10,13 @@ import type { UserRoleBinding } from '../../src/roles/types';
 const router: any = Router();
 
 function buildRoleRegistry() {
-  const features = loadFeaturesFromRepo();
   try {
-    const roles = loadRolesFromRepo();
-    return new RoleRegistry(roles, features, []);
+    const catalog = loadRoleCatalog();
+    return new RoleRegistry(catalog.roles, catalog.features, []);
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : String(err);
-    console.warn('[proactivity.router] failed to load roles.json; continuing with defaults', message);
-    return new RoleRegistry([], features, []);
+    console.warn('[proactivity.router] failed to load role catalog; continuing with defaults', message);
+    return new RoleRegistry([], [], []);
   }
 }
 
