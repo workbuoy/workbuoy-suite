@@ -1,5 +1,6 @@
 import type { Request } from 'express';
 import { RoleRegistry } from '../../../src/roles/registry';
+import type { UserRoleBinding } from '../../../src/roles/types';
 import { buildProactivityContext } from '../../../src/core/proactivity/context';
 import { parseProactivityMode } from '../../../src/core/proactivity/modes';
 import { logModusskift } from '../../../src/core/proactivity/telemetry';
@@ -8,6 +9,7 @@ interface ProactivityResolutionOptions {
   requestedOverride?: any;
   logEvent?: boolean;
   logSource?: string;
+  bindingOverride?: UserRoleBinding;
 }
 
 export function resolveProactivityForRequest(rr: RoleRegistry, req: Request, opts: ProactivityResolutionOptions = {}) {
@@ -19,10 +21,13 @@ export function resolveProactivityForRequest(rr: RoleRegistry, req: Request, opt
   const bodyRequested = opts.requestedOverride ?? (req.body as any)?.requestedMode ?? (req.body as any)?.requested ?? (req.body as any)?.mode;
   const featureId = (req.body as any)?.featureId || (req.query as any)?.featureId || undefined;
 
+  const fallbackBinding: UserRoleBinding = { userId, primaryRole: role };
+  const binding = opts.bindingOverride ?? fallbackBinding;
+
   const state = buildProactivityContext({
     tenantId,
     roleRegistry: rr,
-    roleBinding: { userId, primaryRole: role },
+    roleBinding: binding,
     featureId,
     requestedMode: parseProactivityMode(bodyRequested ?? requestedHeader),
     compatMode: compatHeader,
@@ -33,5 +38,5 @@ export function resolveProactivityForRequest(rr: RoleRegistry, req: Request, opt
     logModusskift(state, { tenantId, userId, source: opts.logSource ?? 'api/proactivity' });
   }
 
-  return { tenantId, userId, role, featureId, state };
+  return { tenantId, userId, role: binding.primaryRole, featureId, state, binding };
 }

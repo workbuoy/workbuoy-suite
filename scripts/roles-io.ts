@@ -28,6 +28,10 @@ function strictRolesEnabled(): boolean {
   return (process.env.FF_STRICT_ROLES || '').toLowerCase() === 'true';
 }
 
+function isTestEnv(): boolean {
+  return (process.env.NODE_ENV || '').toLowerCase() === 'test';
+}
+
 function normalizeCandidates(envPath: string | undefined, fallbacks: string[]): string[] {
   const list: string[] = [];
   if (envPath && envPath.trim()) {
@@ -96,12 +100,16 @@ function tryLoadList(candidatePaths: string[], key: 'roles' | 'features'): LoadR
 function fallbackFromParseError(kind: 'roles' | 'features', error: JsonParseError): LoadResult<any> {
   const label = kind === 'roles' ? 'roles' : 'features';
   const fallbackPath = kind === 'roles' ? FALLBACK_ROLES_PATH : FALLBACK_FEATURES_PATH;
-  console.error(`[roles-io] JsonParseError: ${error.message}`);
+  console.error(`[roles.loader] ${error.message}`);
   if (strictRolesEnabled()) {
-    console.error('[roles-io] FF_STRICT_ROLES=true, aborting instead of using fallback dataset.');
+    console.error('[roles.loader] FF_STRICT_ROLES=true, aborting instead of using fallback dataset.');
     throw error;
   }
-  console.warn(`[roles-io] Falling back to minimal ${label} dataset at ${fallbackPath}`);
+  if (!isTestEnv()) {
+    console.error('[roles.loader] Fallback fixtures are only allowed under NODE_ENV=test; aborting.');
+    throw error;
+  }
+  console.warn(`[roles.loader] Falling back to minimal ${label} dataset at ${fallbackPath}`);
   const fallback = loadJSON(fallbackPath) as any[];
   return { data: fallback, path: fallbackPath };
 }

@@ -1,5 +1,7 @@
+import type { Request, Response, NextFunction } from 'express';
 import { Router } from 'express';
 import { RoleRegistry } from '../../src/roles/registry';
+import type { UserRoleBinding } from '../../src/roles/types';
 import { loadRoleCatalog } from '../../src/roles/loader';
 import { requiresProMode } from '../../src/core/proactivity/guards';
 import { ProactivityMode } from '../../src/core/proactivity/modes';
@@ -19,16 +21,45 @@ import { getCapabilityImpl } from '../../src/capabilities/registry';
 import { runCapabilityWithRole } from '../../src/core/capabilityRunnerRole';
 import { policyCheck } from '../../src/core/policy';
 import { logIntent } from '../../src/core/intentLog';
+import { envBool } from '../../src/core/env';
+import { getRoleRegistry, resolveUserBinding } from '../../src/roles/service';
 
 const router = Router();
-let roleRegistry: RoleRegistry;
-try {
-  const catalog = loadRoleCatalog();
-  roleRegistry = new RoleRegistry(catalog.roles, catalog.features, []);
-} catch (err: unknown) {
-  const message = err instanceof Error ? err.message : String(err);
-  console.warn('[proposals.router] failed to load role catalog; continuing with defaults', message);
-  roleRegistry = new RoleRegistry([], [], []);
+const usePersistence = envBool('FF_PERSISTENCE', false);
+
+function buildStaticRegistry(): RoleRegistry {
+  try {
+    const catalog = loadRoleCatalog();
+    return new RoleRegistry(catalog.roles, catalog.features, []);
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : String(err);
+    console.warn('[proposals.router] failed to load role catalog; continuing with defaults', message);
+    return new RoleRegistry([], [], []);
+  }
+}
+
+async function selectRegistry(): Promise<RoleRegistry> {
+  if (usePersistence) {
+    return getRoleRegistry();
+  }
+  return buildStaticRegistry();
+}
+
+function readIdentity(req: Request): { tenantId: string; userId: string; role: string } {
+  const tenantId = String(req.header('x-tenant') || req.header('x-tenant-id') || 'demo');
+  const userId = String(req.header('x-user') || req.header('x-user-id') || 'demo-user');
+  const role = String(req.header('x-role') || req.header('x-user-role') || 'sales_rep');
+  return { tenantId, userId, role };
+}
+
+async function resolveBinding(req: Request): Promise<{ tenantId: string; userId: string; binding: UserRoleBinding }> {
+  const { tenantId, userId, role } = readIdentity(req);
+  const fallback: UserRoleBinding = { userId, primaryRole: role };
+  if (!usePersistence) {
+    return { tenantId, userId, binding: fallback };
+  }
+  const resolved = await resolveUserBinding(tenantId, userId, fallback);
+  return { tenantId, userId, binding: resolved ?? fallback };
 }
 
 function headerIdempotencyKey(req: any): string | undefined {
@@ -42,10 +73,21 @@ function headerIdempotencyKey(req: any): string | undefined {
   return undefined;
 }
 
-router.use((req, _res, next) => {
-  const context = resolveProactivityForRequest(roleRegistry, req as any, { logEvent: false });
-  (req as any).proactivityContext = context;
-  next();
+router.use(async (req: Request, _res: Response, next: NextFunction) => {
+  try {
+    const registry = await selectRegistry();
+    const { binding } = await resolveBinding(req);
+    const context = resolveProactivityForRequest(registry, req as any, {
+      logEvent: false,
+      bindingOverride: binding,
+    });
+    (req as any).roleRegistry = registry;
+    (req as any).roleBinding = binding;
+    (req as any).proactivityContext = context;
+    next();
+  } catch (err) {
+    next(err);
+  }
 });
 
 router.get('/proposals', async (req, res) => {
@@ -114,14 +156,19 @@ router.post('/proposals/:id/approve', requiresProMode(ProactivityMode.Kraken), a
   await markProposalApproved(proposalId, ctx.userId, idempotencyKey);
 
   try {
+    const registry = (req as any).roleRegistry as RoleRegistry | undefined ?? (await selectRegistry());
+    const binding = ((req as any).roleBinding as UserRoleBinding | undefined) ?? {
+      userId: ctx.userId,
+      primaryRole: ctx.role,
+    };
     const result = await runCapabilityWithRole(
-      roleRegistry,
+      registry ?? buildStaticRegistry(),
       proposal.capabilityId,
       proposal.featureId,
       proposal.payload,
       {
         tenantId: ctx.tenantId,
-        roleBinding: { userId: ctx.userId, primaryRole: ctx.role },
+        roleBinding: binding,
         requestedMode: ctx.state.requested,
         compatMode: req.header('x-proactivity-compat'),
         idempotencyKey,
