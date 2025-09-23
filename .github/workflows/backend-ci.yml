@@ -94,7 +94,9 @@ jobs:
         run: npx prisma migrate deploy --schema=prisma/schema.prisma
 
       - name: Seed baseline roles
-        run: node --loader ts-node/esm scripts/seed-roles-from-json.ts
+        run: |
+          npm --prefix backend install --no-audit --fund=false
+          npm --prefix backend exec tsx ../scripts/seed-roles-from-json.ts
 
       - name: Run persistence tests
         working-directory: backend

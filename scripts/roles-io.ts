@@ -53,8 +53,18 @@ function resolveFromCandidates<T = unknown>(
   }
 
   for (const candidate of defaults) {
-    const source = loadJson<T>(candidate);
-    if (source) return source;
+    try {
+      const source = loadJson<T>(candidate);
+      if (source) return source;
+    } catch (error) {
+      if (error instanceof JsonParseError) {
+        const details =
+          error.cause instanceof Error ? error.cause.message : error.cause ? String(error.cause) : error.message;
+        console.warn(`[roles-io] Skipping invalid JSON at ${error.filePath}: ${details}`);
+        continue;
+      }
+      throw error;
+    }
   }
 
   if (isTestEnv()) {
