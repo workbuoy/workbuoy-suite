@@ -47,7 +47,7 @@ Every proactivity decision now evaluates the minimum across four sources before 
 3. **Subscription plan & tenant flags** – plan ceilings (`tenantPlan:<plan>`) and `secureTenant` enforcement (`tenant<=3`).
 4. **Policy guardrails** – optional policy responses that downscope autonomy.
 
-The resolver walks the degrade rail (`tsunami → kraken → …`) until the lowest cap is satisfied. When a downgrade happens we stamp `degraded:<mode>` in the basis so explainability surfaces can render the reason. Kill switches add `kill`, and plan restrictions add `cap:tenantPlan:*` entries.
+The resolver walks the degrade rail (`tsunami → kraken → …`) until the lowest cap is satisfied. When a downgrade happens we stamp `degraded:<mode>` in the basis so explainability surfaces can render the reason. Kill switches add `kill`, and plan restrictions add `tenantPlan:*` entries.
 
 ## Role & Policy Interactions
 
@@ -73,7 +73,7 @@ Basis strings are intentionally terse. Common prefixes:
 - `mode:requested=<n>` / `mode:effective=<n>` → numeric modes after compat mapping and caps
 - `tenantPlan:<plan>` → subscription plan context
 - `tenant<=3` → secure tenant restriction
-- `roleCap:<feature>=<n>` / `policyCap:<source>=<n>` → autonomy caps applied
+- `roleCap:<feature>=<n>` / `cap:policy:<mode>` → autonomy caps applied
 - `degraded:<source>` → which guard forced a downgrade (`subscription`, `role:crm`, `policy`, `kill`, etc.)
 - `guard:min=<n>` → HTTP guard requirement when a request was denied
 

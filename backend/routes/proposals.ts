@@ -4,6 +4,9 @@ import { loadRoleCatalog } from '../../src/roles/loader';
 import { requiresProMode } from '../../src/core/proactivity/guards';
 import { ProactivityMode } from '../../src/core/proactivity/modes';
 import { resolveProactivityForRequest } from './utils/proactivityContext';
+import { envBool } from '../../src/core/env';
+import { getRoleRegistry, resolveUserBinding } from '../../src/roles/service';
+import type { UserRoleBinding } from '../../src/roles/types';
 import {
   listProposals,
   createProposal as recordProposal,
@@ -21,14 +24,37 @@ import { policyCheck } from '../../src/core/policy';
 import { logIntent } from '../../src/core/intentLog';
 
 const router = Router();
-let roleRegistry: RoleRegistry;
-try {
-  const catalog = loadRoleCatalog();
-  roleRegistry = new RoleRegistry(catalog.roles, catalog.features, []);
-} catch (err: unknown) {
-  const message = err instanceof Error ? err.message : String(err);
-  console.warn('[proposals.router] failed to load role catalog; continuing with defaults', message);
-  roleRegistry = new RoleRegistry([], [], []);
+
+function buildFallbackRegistry(): RoleRegistry {
+  try {
+    const catalog = loadRoleCatalog();
+    return new RoleRegistry(catalog.roles, catalog.features, []);
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : String(err);
+    console.warn('[proposals.router] failed to load role catalog; continuing with defaults', message);
+    return new RoleRegistry([], [], []);
+  }
+}
+
+const fallbackRegistry = buildFallbackRegistry();
+const usePersistence = envBool('FF_PERSISTENCE', false);
+
+async function selectRegistry(): Promise<RoleRegistry> {
+  if (usePersistence) {
+    return getRoleRegistry();
+  }
+  return fallbackRegistry;
+}
+
+async function resolveBinding(
+  req: any,
+): Promise<{ tenantId: string; userId: string; role: string; binding: UserRoleBinding }> {
+  const tenantId = String(req.header('x-tenant') || req.header('x-tenant-id') || 'demo');
+  const userId = String(req.header('x-user') || req.header('x-user-id') || 'demo-user');
+  const role = String(req.header('x-role') || req.header('x-user-role') || 'sales_rep');
+  const fallback: UserRoleBinding = { userId, primaryRole: role };
+  const binding = (await resolveUserBinding(tenantId, userId, fallback)) ?? fallback;
+  return { tenantId, userId, role, binding };
 }
 
 function headerIdempotencyKey(req: any): string | undefined {
@@ -42,10 +68,20 @@ function headerIdempotencyKey(req: any): string | undefined {
   return undefined;
 }
 
-router.use((req, _res, next) => {
-  const context = resolveProactivityForRequest(roleRegistry, req as any, { logEvent: false });
-  (req as any).proactivityContext = context;
-  next();
+router.use(async (req, _res, next) => {
+  try {
+    const registry = await selectRegistry();
+    const { binding, tenantId, userId } = await resolveBinding(req);
+    const context = resolveProactivityForRequest(registry, req as any, {
+      logEvent: false,
+      roleBinding: binding,
+    });
+    // berik req for videre håndtering
+    (req as any).proactivityContext = { ...context, tenantId, userId, roleBinding: binding, registry };
+    next();
+  } catch (err) {
+    next(err);
+  }
 });
 
 router.get('/proposals', async (req, res) => {
@@ -115,13 +151,13 @@ router.post('/proposals/:id/approve', requiresProMode(ProactivityMode.Kraken), a
 
   try {
     const result = await runCapabilityWithRole(
-      roleRegistry,
+      ctx.registry,
       proposal.capabilityId,
       proposal.featureId,
       proposal.payload,
       {
         tenantId: ctx.tenantId,
-        roleBinding: { userId: ctx.userId, primaryRole: ctx.role },
+        roleBinding: ctx.roleBinding,
         requestedMode: ctx.state.requested,
         compatMode: req.header('x-proactivity-compat'),
         idempotencyKey,
@@ -144,7 +180,9 @@ router.post('/proposals/:id/approve', requiresProMode(ProactivityMode.Kraken), a
     const message = err?.message ?? String(err);
     await markProposalFailed(proposalId, message);
     const failed = await getProposal(proposalId);
-    res.status(500).json({ error: 'proposal_execute_failed', message, proposal: failed ? sanitizeProposal(failed) : undefined });
+    res
+      .status(500)
+      .json({ error: 'proposal_execute_failed', message, proposal: failed ? sanitizeProposal(failed) : undefined });
   }
 });
 
