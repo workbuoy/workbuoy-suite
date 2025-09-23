@@ -1,8 +1,15 @@
-import express, { type NextFunction, type Request, type Response, type Router as ExpressRouter } from 'express';
+import express, {
+  type NextFunction,
+  type Request,
+  type Response,
+  type Router as ExpressRouter,
+} from 'express';
 import request from 'supertest';
+
 import { createMetaRouter } from '../../backend/meta/router';
-import type { AuditRepo, AuditRepoEvent } from '../../backend/meta/auditStats';
 import { auditFailuresTotal } from '../../observability/metrics/meta';
+
+import type { AuditRepo, AuditRepoEvent } from '../../backend/meta/auditStats';
 
 describe('META: /meta/audit-stats', () => {
   const withUser = (router: ExpressRouter) => {
@@ -33,7 +40,9 @@ describe('META: /meta/audit-stats', () => {
     expect(res.status).toBe(200);
     expect(res.body.totals).toEqual({ intents: 0, actions: 0, failures: 0 });
     expect(res.body.top_errors).toEqual([]);
-    expect(new Date(res.body.window.from).getTime()).toBeLessThanOrEqual(new Date(res.body.window.to).getTime());
+    expect(new Date(res.body.window.from).getTime()).toBeLessThanOrEqual(
+      new Date(res.body.window.to).getTime(),
+    );
     expect(auditFailuresTotal.inc).not.toHaveBeenCalled();
   });
 
@@ -81,12 +90,16 @@ describe('META: /meta/audit-stats', () => {
     const router = createMetaRouter({ auditRepo: repo });
     const app = withUser(router);
 
-    const res = await request(app).get('/api/meta/audit-stats').query({ from: 'invalid', to: 'invalid' });
+    const res = await request(app)
+      .get('/api/meta/audit-stats')
+      .query({ from: 'invalid', to: 'invalid' });
 
     expect(res.status).toBe(200);
     expect(res.body.totals).toEqual({ intents: 0, actions: 0, failures: 0 });
     expect(res.body.top_errors).toEqual([]);
-    expect(new Date(res.body.window.from).getTime()).toBeLessThan(new Date(res.body.window.to).getTime());
+    expect(new Date(res.body.window.from).getTime()).toBeLessThan(
+      new Date(res.body.window.to).getTime(),
+    );
   });
 
   it('swaps invalid ranges where from > to', async () => {
@@ -104,7 +117,9 @@ describe('META: /meta/audit-stats', () => {
 
     expect(res.status).toBe(200);
     expect(res.body.totals).toEqual({ intents: 0, actions: 0, failures: 0 });
-    expect(new Date(res.body.window.from).getTime()).toBeLessThan(new Date(res.body.window.to).getTime());
+    expect(new Date(res.body.window.from).getTime()).toBeLessThan(
+      new Date(res.body.window.to).getTime(),
+    );
   });
 });
 
@@ -112,10 +127,14 @@ function expectIsoClose(actual: Date, expected: Date) {
   const actualTime = actual.getTime();
   const expectedTime = expected.getTime();
   if (Number.isNaN(actualTime) || Number.isNaN(expectedTime)) {
-    throw new Error(`Invalid ISO date comparison: ${actual.toISOString()} vs ${expected.toISOString()}`);
+    throw new Error(
+      `Invalid ISO date comparison: ${actual.toISOString()} vs ${expected.toISOString()}`,
+    );
   }
   const delta = Math.abs(actualTime - expectedTime);
   if (delta > 5) {
-    throw new Error(`Expected ${actual.toISOString()} to be within 5ms of ${expected.toISOString()}, diff=${delta}`);
+    throw new Error(
+      `Expected ${actual.toISOString()} to be within 5ms of ${expected.toISOString()}, diff=${delta}`,
+    );
   }
 }

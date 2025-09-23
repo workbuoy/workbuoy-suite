@@ -1,7 +1,12 @@
-import type { HealthResponse } from './types';
 import { startedAtISO } from './runtimeState';
 
-const GIT_SHA = process.env.GIT_SHA || process.env.VERCEL_GIT_COMMIT_SHA || process.env.HEROKU_SLUG_COMMIT || 'unknown';
+import type { HealthResponse } from './types';
+
+const GIT_SHA =
+  process.env.GIT_SHA ||
+  process.env.VERCEL_GIT_COMMIT_SHA ||
+  process.env.HEROKU_SLUG_COMMIT ||
+  'unknown';
 const BUILD_ID = process.env.BUILD_ID || process.env.VERCEL_BUILD_ID || undefined;
 
 export function getHealth(): HealthResponse {

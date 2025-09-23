@@ -1,22 +1,16 @@
-import { Router } from 'express';
-import type { Request, Response } from 'express';
+import { Router, type Request, type Response } from 'express';
 
-// Existing META helpers
-import { runReadiness } from './readiness';
-// If your project has these, keep them; otherwise lightweight placeholders:
-
-// Health/Version helpers (keep your existing implementations)
-import { getHealth } from './health';
-import { getVersion } from './version';
-
-// New: capabilities + policy
-import { getCapabilities } from './capabilities';
-import { getPolicySnapshot } from './policy';
-import { getAuditStats, type AuditRepo } from './auditStats';
-import { publicMetaRateLimit, requireMetaRead } from './security';
 import { recordMetaRequestLatency, collectMetricsText } from '../../observability/metrics/meta';
 
+import { getAuditStats, type AuditRepo } from './auditStats';
+import { getCapabilities } from './capabilities';
+import { getHealth } from './health';
+import { getPolicySnapshot } from './policy';
 import { createProbe } from './probes';
+import { runReadiness } from './readiness';
+import { publicMetaRateLimit, requireMetaRead } from './security';
+import { getVersion } from './version';
+
 import type { Probe } from './probes';
 
 export interface MetaRouterDeps {
@@ -97,24 +91,39 @@ export function createMetaRouter(deps: MetaRouterDeps = {}) {
     requireMetaRead(),
     instrument('readiness', async (req: Request, res: Response) => {
       try {
-        const includeParam = (req.query.include ? ([] as string[]).concat(req.query.include as any) : []) as string[];
+        const includeParam = (
+          req.query.include ? ([] as string[]).concat(req.query.include as any) : []
+        ) as string[];
         const include = includeParam
-          .flatMap(s => String(s).split(','))
-          .map(s => s.trim())
+          .flatMap((s) => String(s).split(','))
+          .map((s) => s.trim())
           .filter(Boolean);
 
         const defaultProbes: Probe[] = [
-          createProbe('db', { async check() { return { status: 'ok' as const }; } }),
-          createProbe('queue', { async check() { return { status: 'ok' as const }; } }),
-          createProbe('outbound', { async check() { return { status: 'ok' as const }; } }),
+          createProbe('db', {
+            async check() {
+              return { status: 'ok' as const };
+            },
+          }),
+          createProbe('queue', {
+            async check() {
+              return { status: 'ok' as const };
+            },
+          }),
+          createProbe('outbound', {
+            async check() {
+              return { status: 'ok' as const };
+            },
+          }),
         ];
         const probes = deps.probes ?? defaultProbes;
         const result = await runReadiness(probes, include);
         res.status(200).json(result);
       } catch {
-        res
-          .status(200)
-          .json({ status: 'not_ready', checks: [{ name: 'handler', status: 'fail', latency_ms: 0, reason: 'handler-error' }] });
+        res.status(200).json({
+          status: 'not_ready',
+          checks: [{ name: 'handler', status: 'fail', latency_ms: 0, reason: 'handler-error' }],
+        });
       }
     }),
   );

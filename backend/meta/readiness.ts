@@ -1,18 +1,23 @@
-import type { Probe, ProbeResult } from './probes';
 import { recordMetaReadinessCheck } from '../../observability/metrics/meta';
+
+import type { Probe, ProbeResult } from './probes';
 import type { MetaReadinessResponse, MetaReadinessState } from './types';
 
 const deriveState = (results: ProbeResult[]): MetaReadinessState => {
-  if (results.some(result => result.status === 'fail')) {
+  if (results.some((result) => result.status === 'fail')) {
     return 'not_ready';
   }
-  if (results.some(result => result.status === 'warn')) {
+  if (results.some((result) => result.status === 'warn')) {
     return 'degraded';
   }
   return 'ready';
 };
 
-const explode = (value: string): string[] => value.split(',').map(segment => segment.trim()).filter(Boolean);
+const explode = (value: string): string[] =>
+  value
+    .split(',')
+    .map((segment) => segment.trim())
+    .filter(Boolean);
 
 const toArray = (maybe: string | string[] | undefined): string[] | undefined => {
   if (!maybe) {
@@ -29,9 +34,9 @@ const normaliseInclude = (include?: string[]): Set<string> | undefined => {
     return undefined;
   }
   const normalised = include
-    .map(value => value.trim())
-    .filter(value => value.length > 0)
-    .map(value => value.toLowerCase());
+    .map((value) => value.trim())
+    .filter((value) => value.length > 0)
+    .map((value) => value.toLowerCase());
   return normalised.length ? new Set(normalised) : undefined;
 };
 
@@ -63,7 +68,7 @@ export async function runReadiness(
   const includeArray = toArray(include);
   const includeFilter = normaliseInclude(includeArray);
   const selected = includeFilter
-    ? probes.filter(probe => includeFilter.has(probe.name.toLowerCase()))
+    ? probes.filter((probe) => includeFilter.has(probe.name.toLowerCase()))
     : probes;
 
   const results: ProbeResult[] = [];

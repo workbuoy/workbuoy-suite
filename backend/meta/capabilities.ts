@@ -68,7 +68,7 @@ function resolveModes(): MetaCapabilitiesResponse['modes'] {
 }
 
 function resolveConnectorToggle(name: ProviderName, fallback: boolean): boolean {
-  const envKeys = CONNECTOR_ENV_PREFIXES.map(prefix => `${prefix}${name.toUpperCase()}_ENABLED`);
+  const envKeys = CONNECTOR_ENV_PREFIXES.map((prefix) => `${prefix}${name.toUpperCase()}_ENABLED`);
   return parseBoolean(coalesceEnv(envKeys), fallback);
 }
 
@@ -89,7 +89,7 @@ function sanitiseFeatureName(raw: string): string | null {
   if (!trimmed) {
     return null;
   }
-  return trimmed.toLowerCase().replace(/[^a-z0-9_\-]/g, '_');
+  return trimmed.toLowerCase().replace(/[^a-z0-9_-]/g, '_');
 }
 
 function parseAggregatedFeatureFlags(raw: string | undefined): Record<string, boolean> {
@@ -124,7 +124,10 @@ function parseAggregatedFeatureFlags(raw: string | undefined): Record<string, bo
     // Fallback to comma-separated parsing below.
   }
 
-  const segments = raw.split(',').map(segment => segment.trim()).filter(Boolean);
+  const segments = raw
+    .split(',')
+    .map((segment) => segment.trim())
+    .filter(Boolean);
   for (const segment of segments) {
     const [namePart, valuePart] = segment.split('=');
     const name = sanitiseFeatureName(namePart ?? '');

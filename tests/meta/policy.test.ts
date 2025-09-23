@@ -1,14 +1,16 @@
 import express from 'express';
-import type { NextFunction, Request, Response } from 'express';
 import request from 'supertest';
-import router from '../../backend/meta/router';
+
 import {
   configurePolicySnapshot,
   resetPolicySnapshot,
   recordPolicyDeny,
   InMemoryPolicyMetricsStore,
 } from '../../backend/meta/policy';
+import router from '../../backend/meta/router';
 import { policyDeniesTotal } from '../../observability/metrics/meta';
+
+import type { NextFunction, Request, Response } from 'express';
 
 describe('META: /meta/policy', () => {
   const createApp = () => {
@@ -35,7 +37,10 @@ describe('META: /meta/policy', () => {
   it('returns snapshot data from policy engine and metrics store', async () => {
     const metrics = new InMemoryPolicyMetricsStore();
     const engine = {
-      getSnapshot: jest.fn(async () => ({ autonomyLevel: 2 as const, policyProfile: 'secure' as const })),
+      getSnapshot: jest.fn(async () => ({
+        autonomyLevel: 2 as const,
+        policyProfile: 'secure' as const,
+      })),
     };
     configurePolicySnapshot({ engine: engine as any, metrics });
 

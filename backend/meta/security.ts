@@ -1,4 +1,5 @@
 import rateLimit from 'express-rate-limit';
+
 import type { Request, Response, NextFunction } from 'express';
 
 export const publicMetaRateLimit = rateLimit({

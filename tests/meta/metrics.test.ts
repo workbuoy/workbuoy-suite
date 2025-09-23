@@ -1,8 +1,10 @@
 import express from 'express';
-import type { NextFunction, Request, Response } from 'express';
 import request from 'supertest';
+
 import { createMetaRouter } from '../../backend/meta/router';
 import * as metricsModule from '../../observability/metrics/meta';
+
+import type { NextFunction, Request, Response } from 'express';
 
 describe('META: /meta/metrics', () => {
   const createApp = () => {
@@ -31,7 +33,9 @@ describe('META: /meta/metrics', () => {
   });
 
   it('falls back to JSON location when exporter errors', async () => {
-    const spy = jest.spyOn(metricsModule, 'collectMetricsText').mockRejectedValueOnce(new Error('boom'));
+    const spy = jest
+      .spyOn(metricsModule, 'collectMetricsText')
+      .mockRejectedValueOnce(new Error('boom'));
     const app = createApp();
 
     const res = await request(app).get('/api/meta/metrics');
