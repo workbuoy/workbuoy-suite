@@ -1,5 +1,6 @@
 // scripts/seed-roles-lib.ts
 import { resolveFeaturesSource, resolveRolesSource } from './roles-io.ts';
+import type { FeatureDef, RoleProfile } from '../src/roles/types';
 
 export interface SeedSummary {
   ok: true;
@@ -13,16 +14,21 @@ function shouldPersist(): boolean {
   return (process.env.FF_PERSISTENCE || '').toLowerCase() === 'true';
 }
 
-async function loadImporter(): Promise<(roles: any[], features: any[]) => Promise<{ roles: number; features: number }>> {
+type ImportRolesAndFeatures = (
+  roles: RoleProfile[],
+  features: FeatureDef[]
+) => Promise<{ roles: number; features: number }>;
+
+async function loadImporter(): Promise<ImportRolesAndFeatures> {
   const mod = await import('../src/roles/service');
   const fn = mod?.importRolesAndFeatures;
   if (typeof fn !== 'function') {
     throw new Error('importRolesAndFeatures not found in ../src/roles/service');
   }
-  return fn;
+  return fn as ImportRolesAndFeatures;
 }
 
-export async function runSeed(): Promise<SeedSummary> {
+export async function runSeed(importer?: ImportRolesAndFeatures): Promise<SeedSummary> {
   if (!shouldPersist()) {
     return { ok: true, skipped: 'FF_PERSISTENCE=false' };
   }
@@ -33,7 +39,7 @@ export async function runSeed(): Promise<SeedSummary> {
 
   const rolesSource = resolveRolesSource();
   const featuresSource = resolveFeaturesSource();
-  const importRolesAndFeatures = await loadImporter();
+  const importRolesAndFeatures = importer ?? (await loadImporter());
   const summary = await importRolesAndFeatures(rolesSource.data, featuresSource.data);
   console.log(`seeded {roles:${summary.roles}, features:${summary.features}}`);
   return {
@@ -44,12 +50,12 @@ export async function runSeed(): Promise<SeedSummary> {
   };
 }
 
-export async function seedRolesFromJson(): Promise<SeedSummary> {
-  return runSeed();
+export async function seedRolesFromJson(importer?: ImportRolesAndFeatures): Promise<SeedSummary> {
+  return runSeed(importer);
 }
 
-export async function seedRoles(): Promise<SeedSummary> {
-  return runSeed();
+export async function seedRoles(importer?: ImportRolesAndFeatures): Promise<SeedSummary> {
+  return runSeed(importer);
 }
 
 export { resolveRolesSource, resolveFeaturesSource };

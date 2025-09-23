@@ -21,9 +21,6 @@ jobs:
       - name: Install backend dependencies
         run: npm --prefix backend install --no-audit --fund=false
 
-      - name: Install frontend dependencies
-        run: npm --prefix frontend install --no-audit --fund=false
-
       - name: Check roles JSON (non-blocking)
         run: npm run --if-present check:roles
         continue-on-error: true

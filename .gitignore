@@ -1,53 +1,33 @@
-# dependencies
+# deps & logs
 node_modules/
 **/node_modules/
-
-# builds
-dist/
-build/
-out/
-**/dist/
-**/build/
-
-# coverage
-coverage/
-**/coverage/
-
-# data & logs
+*.log
+logs/
+*.tmp
 data/
 intent-log.jsonl
-*.log
-*.tmp
 
-# misc
-.DS_Store
-.env
-.env.local
-.env.*.local
-
-# dependencies
-node_modules/
-**/node_modules/
-
-# builds
+# builds & coverage
 dist/
-build/
-out/
 **/dist/
+build/
 **/build/
-
-# coverage
+.next/
+out/
 coverage/
 **/coverage/
+.nyc_output/
 
-# data & logs
-data/
-intent-log.jsonl
-*.log
-*.tmp
+# caches
+.cache/
+.parcel-cache/
 
-# misc
-.DS_Store
+# env & IDE
 .env
+.env.*
 .env.local
 .env.*.local
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
