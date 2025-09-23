@@ -103,3 +103,7 @@ Icon?
 
 # Misc backups
 *.bak
+
+# Generated telemetry stubs
+meta/*.jsonl
+reports/**/*.json
