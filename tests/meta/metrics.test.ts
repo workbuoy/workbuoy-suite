@@ -1,7 +1,7 @@
 import express from 'express';
 import request from 'supertest';
 
-import { createMetaRouter } from '../../backend/meta/router';
+import { createMetaRouter } from '../../apps/backend/meta/router';
 import * as metricsModule from '../../observability/metrics/meta';
 
 import type { NextFunction, Request, Response } from 'express';

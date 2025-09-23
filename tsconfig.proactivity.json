@@ -15,10 +15,10 @@
     "src/core/subscription/types.ts",
     "src/core/subscription/entitlements.ts",
     "src/core/subscription/state.ts",
-    "backend/routes/proactivity.ts",
-    "backend/routes/admin.subscription.ts",
-    "backend/routes/explainability.ts",
-    "backend/routes/metrics.ts",
-    "backend/routes/dev.runner.ts"
+    "apps/backend/routes/proactivity.ts",
+    "apps/backend/routes/admin.subscription.ts",
+    "apps/backend/routes/explainability.ts",
+    "apps/backend/routes/metrics.ts",
+    "apps/backend/routes/dev.runner.ts"
   ]
 }

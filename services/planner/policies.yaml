@@ -2,5 +2,5 @@ deny:
   - "secrets/**"
   - ".github/workflows/release*.yml"
   - "enterprise/runtime/**"
-  - "backend/**"
+  - "apps/backend/**"
   - "desktop/src/**"

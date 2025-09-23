@@ -1,8 +1,13 @@
 {
-  "name": "workbuoy-suite",
+  "name": "workbuoy-monorepo",
   "private": true,
+  "workspaces": ["apps/*", "packages/*"],
   "scripts": {
-    "seed:roles": "npm --prefix backend run seed:roles",
+    "bootstrap": "npm install --workspaces --include-workspace-root",
+    "build:all": "npm run build -w @workbuoy/backend || true",
+    "test:all": "npm run test -w @workbuoy/backend || true",
+    "typecheck:all": "npm run typecheck -w @workbuoy/backend || true",
+    "seed:roles": "npm run seed:roles -w @workbuoy/backend",
     "check:roles": "tsx scripts/check-roles-json.ts",
     "typecheck": "tsc -p tsconfig.meta.json",
     "lint": "eslint . --ext .ts,.tsx,.js,.cjs --max-warnings=0",

@@ -5,12 +5,12 @@
   },
   "include": [
     "src/routes/genesis.autonomy.ts",
-    "frontend/src/api/introspection.ts",
-    "frontend/src/components/IntrospectionBadge.tsx",
-    "frontend/src/types/static.d.ts",
-    "backend/tests/genesis.autonomy.test.ts",
-    "backend/tests/__mocks__/**/*.ts",
-    "backend/meta/**/*.ts",
+    "apps/frontend/src/api/introspection.ts",
+    "apps/frontend/src/components/IntrospectionBadge.tsx",
+    "apps/frontend/src/types/static.d.ts",
+    "apps/backend/tests/genesis.autonomy.test.ts",
+    "apps/backend/tests/__mocks__/**/*.ts",
+    "apps/backend/meta/**/*.ts",
     "observability/metrics/**/*.ts",
     "tests/meta/**/*.ts"
   ]

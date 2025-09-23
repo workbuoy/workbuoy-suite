@@ -59,14 +59,14 @@ safeMount('/api', './src/routes/manual.complete', 'manualCompleteRouter');
 safeMount('/', './src/routes/genesis.autonomy', 'metaGenesisRouter');
 
 // Backend routers (mounted under /api)
-safeMount('/api', '../backend/routes/usage');
-safeMount('/api', '../backend/routes/features');
-safeMount('/api', '../backend/routes/proactivity');
-safeMount('/api', '../backend/routes/admin.subscription');
-safeMount('/api', '../backend/routes/admin.roles');
-safeMount('/api', '../backend/routes/explainability');
-safeMount('/api', '../backend/routes/proposals');
-safeMount('/api', '../backend/routes/connectors.health');
+safeMount('/api', '../apps/backend/routes/usage');
+safeMount('/api', '../apps/backend/routes/features');
+safeMount('/api', '../apps/backend/routes/proactivity');
+safeMount('/api', '../apps/backend/routes/admin.subscription');
+safeMount('/api', '../apps/backend/routes/admin.roles');
+safeMount('/api', '../apps/backend/routes/explainability');
+safeMount('/api', '../apps/backend/routes/proposals');
+safeMount('/api', '../apps/backend/routes/connectors.health');
 
 app.use('/api', knowledgeRouter);
 app.use('/api/audit', auditRouter());
@@ -75,7 +75,7 @@ app.use('/api/audit', auditRouter());
 if (process.env.NODE_ENV !== 'production') {
   safeMount('/api', './src/routes/debug.dlq', 'debugDlqRouter');
   safeMount('/api', './src/routes/debug.circuit', 'debugCircuitRouter');
-  safeMount('/api', '../backend/routes/dev.runner');
+  safeMount('/api', '../apps/backend/routes/dev.runner');
 }
 
 // Operability surfaces

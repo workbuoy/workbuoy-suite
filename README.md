@@ -28,16 +28,16 @@ Workbuoy stack.
 
 ## Local development
 
-1. Install dependencies:
-   - `npm install --prefix backend`
-   - `npm install --prefix frontend`
-2. Run checks from the repo root:
-   - `npm test` runs the backend Jest suite with mocks for `prom-client` and
-     `jsonwebtoken`.
-   - `npm run typecheck` verifies both backend (`tsc --noEmit`) and frontend
-     TypeScript sources via the shared `tsconfig.json` that includes
-     `backend/src` and `frontend/src`.
-3. Start the UI for manual testing: `npm run dev --prefix frontend`.
+1. Install workspace dependencies with `npm run bootstrap` (installs the
+   backend in `apps/backend` and frontend in `apps/frontend`).
+2. Run backend checks from the repo root:
+   - `npm run test -w @workbuoy/backend -- --runInBand --passWithNoTests` runs
+     the backend Jest suite with mocks for `prom-client` and `jsonwebtoken`.
+   - `npm run typecheck` runs the backend workspace type-check and the shared
+     meta TypeScript config.
+3. Start the UI for manual testing: `npm run dev --prefix apps/frontend`.
+
+See `docs/STRUCTURE.md` for the monorepo layout and workspace quick reference.
 
 The new endpoints are mounted through `src/server.ts`, so running the backend
 server exposes `/genesis/*` and `/genetics/*` alongside existing APIs.

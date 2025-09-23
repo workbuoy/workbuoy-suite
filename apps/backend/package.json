@@ -1,0 +1,33 @@
+{
+  "name": "@workbuoy/backend",
+  "version": "1.0.0-pr-an",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "jest --passWithNoTests --config jest.meta.config.cjs",
+    "typecheck": "tsc --noEmit -p tsconfig.typecheck.json",
+    "start:compliance": "node dist/compliance/server.js",
+    "seed:roles": "tsx ../../scripts/seed-roles-from-json.ts"
+  },
+  "dependencies": {
+    "@turf/boolean-point-in-polygon": "^6.5.0",
+    "express": "^4.19.2",
+    "express-rate-limit": "^6.10.0",
+    "js-yaml": "^4.1.0",
+    "prom-client": "^15.1.0",
+    "uuid": "^9.0.1",
+    "@prisma/client": "6.16.2"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.5",
+    "@types/node": "^20.11.30",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.1.1",
+    "@types/jest": "^29.5.12",
+    "supertest": "^7.0.0",
+    "@types/supertest": "^2.0.16",
+    "prisma": "6.16.2",
+    "tsx": "^4"
+  }
+}

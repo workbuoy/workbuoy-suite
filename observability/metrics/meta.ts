@@ -1,4 +1,4 @@
-import type { ProbeStatus } from '../../backend/meta/probes';
+import type { ProbeStatus } from '../../apps/backend/meta/probes';
 
 interface CounterLike {
   inc(value?: number): void;

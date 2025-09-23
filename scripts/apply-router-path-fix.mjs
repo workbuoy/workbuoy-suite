@@ -2,8 +2,8 @@
 import fs from 'node:fs';
 
 const targets = [
-  'backend/routes/features.ts',
-  'backend/routes/usage.ts'
+  'apps/backend/routes/features.ts',
+  'apps/backend/routes/usage.ts'
 ];
 
 for (const file of targets) {

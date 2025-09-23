@@ -1,11 +1,11 @@
 import request from 'supertest';
 import app from '../../src/server';
 
-jest.mock('../../backend/src/geo/mapbox.js', () => ({
+jest.mock('../../apps/backend/src/geo/mapbox.js', () => ({
   geocodeBatch: jest.fn(async (addresses: string[]) => addresses.map((addr) => ({ lat: 59.91, lng: 10.75, label: addr }))),
 }));
 
-const { geocodeBatch } = jest.requireMock('../../backend/src/geo/mapbox.js');
+const { geocodeBatch } = jest.requireMock('../../apps/backend/src/geo/mapbox.js');
 
 describe('geo routes', () => {
   beforeEach(() => {
