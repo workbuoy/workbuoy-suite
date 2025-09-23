@@ -418,14 +418,14 @@ const pillarDetails = [
 ];
 
 const pillarKeyFiles = {
-  CORE: ['backend/src/app.ts', 'src/routes/genesis.autonomy.ts', 'services/builder/builder.ts'],
+  CORE: ['apps/backend/src/app.ts', 'src/routes/genesis.autonomy.ts', 'services/builder/builder.ts'],
   FLEX: ['connectors/dynamics/connector.js', 'sdk/ts/workbuoy.ts', 'examples/js_quickstart.js'],
-  SECURE: ['backend/meta/router.ts', 'backend/src/meta-evolution/routes/evolution.routes.ts', 'META_ROUTE_RUNBOOK.md'],
-  NAVI: ['frontend/src/components/FlipCard/FlipCard.tsx', 'frontend/src/navi/NaviGrid.tsx', 'frontend/src/components/FlipCard/FlipCard.css'],
-  BUOY_AI: ['src/buoy/agent.ts', 'frontend/src/features/buoy/useBuoy.ts', 'frontend/src/features/buoy/ChatMessage.tsx'],
-  ROLES: ['roles/roles.json', 'src/roles/registry.ts', 'frontend/src/roles/rolePresentation.ts'],
-  PROACTIVITY: ['src/core/proactivity/modes.ts', 'frontend/src/proactivity/useProactivity.ts', 'frontend/src/proactivity/ModeSwitcher.tsx'],
-  META: ['src/routes/genesis.autonomy.ts', 'backend/meta/router.ts', 'tests/meta/meta-rails.test.ts'],
+  SECURE: ['apps/backend/meta/router.ts', 'apps/backend/src/meta-evolution/routes/evolution.routes.ts', 'META_ROUTE_RUNBOOK.md'],
+  NAVI: ['apps/frontend/src/components/FlipCard/FlipCard.tsx', 'apps/frontend/src/navi/NaviGrid.tsx', 'apps/frontend/src/components/FlipCard/FlipCard.css'],
+  BUOY_AI: ['src/buoy/agent.ts', 'apps/frontend/src/features/buoy/useBuoy.ts', 'apps/frontend/src/features/buoy/ChatMessage.tsx'],
+  ROLES: ['roles/roles.json', 'src/roles/registry.ts', 'apps/frontend/src/roles/rolePresentation.ts'],
+  PROACTIVITY: ['src/core/proactivity/modes.ts', 'apps/frontend/src/proactivity/useProactivity.ts', 'apps/frontend/src/proactivity/ModeSwitcher.tsx'],
+  META: ['src/routes/genesis.autonomy.ts', 'apps/backend/meta/router.ts', 'tests/meta/meta-rails.test.ts'],
   INFRA: ['deploy/helm/workbuoy/templates/deployment.yaml', 'observability/metrics/meta.ts', 'grafana/dashboards/proactivity.json'],
   ADOPTION: ['enterprise/onboarding.js', 'crm/pages/api/onboarding/demo.ts', 'samples/contacts.csv']
 };
@@ -465,27 +465,27 @@ function createAuditMarkdown(result) {
   lines.push('## Buoy AI (one assistant)');
   lines.push('');
   lines.push('- `src/buoy/agent.ts` orchestrates the request context and plan/execute pipeline, returning a single assistant response each turn.');
-  lines.push('- `frontend/src/features/buoy/useBuoy.ts` maintains one Buoy AI thread for the chat surface, keeping the assistant singular.');
+  lines.push('- `apps/frontend/src/features/buoy/useBuoy.ts` maintains one Buoy AI thread for the chat surface, keeping the assistant singular.');
   lines.push(`- Analyzer signals: ${singularCount} singular mention${singularCount === 1 ? '' : 's'} recorded, ${pluralCount} plural hit${pluralCount === 1 ? '' : 's'} (must stay at 0).`);
 
   lines.push('');
   lines.push('## Navi Flip-card UX');
   lines.push('');
-  lines.push('- `frontend/src/components/FlipCard/FlipCard.tsx` renders Buoy on the front and Navi on the back with keyboard flips, resize nudges, and connect dialogs.');
-  lines.push('- `frontend/src/components/FlipCard/FlipCard.css` keeps the 3D transform in production while only muting transitions for reduced motion.');
-  lines.push('- `frontend/src/navi/NaviGrid.tsx`, `frontend/src/features/buoy/BuoyChat.tsx`, and `frontend/src/components/FlipCard/FlipCard.test.tsx` ensure Buoy ⇄ Navi wiring stays accurate.');
+  lines.push('- `apps/frontend/src/components/FlipCard/FlipCard.tsx` renders Buoy on the front and Navi on the back with keyboard flips, resize nudges, and connect dialogs.');
+  lines.push('- `apps/frontend/src/components/FlipCard/FlipCard.css` keeps the 3D transform in production while only muting transitions for reduced motion.');
+  lines.push('- `apps/frontend/src/navi/NaviGrid.tsx`, `apps/frontend/src/features/buoy/BuoyChat.tsx`, and `apps/frontend/src/components/FlipCard/FlipCard.test.tsx` ensure Buoy ⇄ Navi wiring stays accurate.');
 
   lines.push('');
   lines.push('## Proactivity UI');
   lines.push('');
-  lines.push('- `frontend/src/proactivity/useProactivity.ts` syncs requested vs. effective modes, degrade rails, and telemetry calls.');
-  lines.push('- `frontend/src/proactivity/ModeSwitcher.tsx` renders the multi-mode selector with pending, approval, and error states.');
-  lines.push('- `frontend/src/proactivity/ApprovalPanel.tsx` surfaces manual approval UI so operators can gate proactivity changes.');
+  lines.push('- `apps/frontend/src/proactivity/useProactivity.ts` syncs requested vs. effective modes, degrade rails, and telemetry calls.');
+  lines.push('- `apps/frontend/src/proactivity/ModeSwitcher.tsx` renders the multi-mode selector with pending, approval, and error states.');
+  lines.push('- `apps/frontend/src/proactivity/ApprovalPanel.tsx` surfaces manual approval UI so operators can gate proactivity changes.');
 
   lines.push('');
   lines.push('## META rails');
   lines.push('');
-  lines.push('- `backend/meta/router.ts` enforces scopes, rate limits, and telemetry on META endpoints.');
+  lines.push('- `apps/backend/meta/router.ts` enforces scopes, rate limits, and telemetry on META endpoints.');
   lines.push('- `src/routes/genesis.autonomy.ts` keeps proposals-only behavior and requires `.evolution/APPROVED` tokens before acknowledging evolution.');
   lines.push('- Guard coverage spans `tests/meta/meta-rails.test.ts` and `ci/policy-meta-rails.sh`, and the analyzer flags any git./fs. usage inside META HTTP handlers.');
 
@@ -493,8 +493,8 @@ function createAuditMarkdown(result) {
   lines.push('## Roles in UI');
   lines.push('');
   lines.push('- `roles/roles.json` seeds tone, priority, and policy chips for each persona.');
-  lines.push('- `frontend/src/roles/rolePresentation.ts` renders those role chips and guidance for UI consumption.');
-  lines.push('- `frontend/src/features/buoy/ChatMessage.tsx` displays assistant vs. user roles alongside rationale drawers.');
+  lines.push('- `apps/frontend/src/roles/rolePresentation.ts` renders those role chips and guidance for UI consumption.');
+  lines.push('- `apps/frontend/src/features/buoy/ChatMessage.tsx` displays assistant vs. user roles alongside rationale drawers.');
 
   lines.push('');
   lines.push('## Infra & observability quick note');

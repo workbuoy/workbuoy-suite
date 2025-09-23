@@ -4,7 +4,7 @@ import path from 'path';
 import express from 'express';
 import request from 'supertest';
 
-import { metaGenesisRouter } from '../../src/routes/genesis.autonomy';
+import { metaGenesisRouter } from '../../../src/routes/genesis.autonomy';
 
 function buildApp() {
   const app = express();

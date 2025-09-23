@@ -1,7 +1,7 @@
 // scripts/apply-features-active-guard.mjs
 import fs from 'node:fs';
 
-const file = 'backend/routes/features.ts';
+const file = 'apps/backend/routes/features.ts';
 if (!fs.existsSync(file)) {
   console.error(`[error] ${file} not found. Run this from repo root.`);
   process.exit(1);
@@ -13,7 +13,7 @@ const src = fs.readFileSync(file, 'utf8');
 const routerDeclRegex = /(const\s+\w+\s*=\s*Router\s*\(\s*\)\s*;?)/;
 const m = src.match(routerDeclRegex);
 if (!m) {
-  console.error('[error] Could not find Router() declaration in backend/routes/features.ts');
+  console.error('[error] Could not find Router() declaration in apps/backend/routes/features.ts');
   process.exit(2);
 }
 
@@ -37,4 +37,4 @@ r.get('/features/active', (req, res, next) => {
 
 const dst = src.slice(0, insertAfter) + guard + src.slice(insertAfter);
 fs.writeFileSync(file, dst, 'utf8');
-console.log('[patched] Inserted in-memory 204 guard into backend/routes/features.ts');
+console.log('[patched] Inserted in-memory 204 guard into apps/backend/routes/features.ts');

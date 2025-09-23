@@ -1,9 +1,9 @@
 import { Router } from 'express';
-import { rbac } from '../../src/core/security/rbac';
-import { envBool } from '../../src/core/env';
-import { loadRoleCatalog } from '../../src/roles/loader';
-import { getRoleRegistry, importRolesAndFeatures, listOverridesForTenant, setOverride } from '../../src/roles/service';
-import type { OrgRoleOverride, UserRoleBinding } from '../../src/roles/types';
+import { rbac } from '../../../src/core/security/rbac';
+import { envBool } from '../../../src/core/env';
+import { loadRoleCatalog } from '../../../src/roles/loader';
+import { getRoleRegistry, importRolesAndFeatures, listOverridesForTenant, setOverride } from '../../../src/roles/service';
+import type { OrgRoleOverride, UserRoleBinding } from '../../../src/roles/types';
 
 const router = Router();
 const requireAdmin = rbac(['admin']);

@@ -1,10 +1,10 @@
 import express from 'express';
 import request from 'supertest';
 
-import * as readinessModule from '../../backend/meta/readiness';
-import { createMetaRouter } from '../../backend/meta/router';
+import * as readinessModule from '../../apps/backend/meta/readiness';
+import { createMetaRouter } from '../../apps/backend/meta/router';
 
-import type { Probe, ProbeResult } from '../../backend/meta/probes';
+import type { Probe, ProbeResult } from '../../apps/backend/meta/probes';
 import type { NextFunction, Request, Response, Router as ExpressRouter } from 'express';
 
 const makeProbe = (result: Omit<ProbeResult, 'latency_ms'> & { latency_ms?: number }): Probe => ({

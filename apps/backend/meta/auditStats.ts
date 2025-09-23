@@ -1,4 +1,4 @@
-import { recordAuditFailures } from '../../observability/metrics/meta';
+import { recordAuditFailures } from '../../../observability/metrics/meta';
 
 export type AuditStatsResponse = {
   window: { from: string; to: string };

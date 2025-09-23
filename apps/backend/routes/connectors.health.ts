@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { getConnectorCircuitState, listConnectorCircuits } from '../../src/connectors/internal/circuitRegistry';
+import { getConnectorCircuitState, listConnectorCircuits } from '../../../src/connectors/internal/circuitRegistry';
 
 const router = Router();
 

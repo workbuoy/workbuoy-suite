@@ -1,4 +1,4 @@
-import bus, { reset } from "../../src/core/events/priorityBus";
+import bus, { reset } from "../../../src/core/events/priorityBus";
 
 describe("priorityBus stats shape", () => {
   beforeEach(() => {

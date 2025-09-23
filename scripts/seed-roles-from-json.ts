@@ -1,6 +1,6 @@
 // scripts/seed-roles-from-json.ts
 import { seedRolesFromJson } from './seed-roles-lib.ts';
-import { importRolesAndFeatures } from '../src/roles/service';
+import { importRolesAndFeatures } from '../apps/backend/src/roles/service';
 
 async function main() {
   try {

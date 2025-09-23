@@ -1,6 +1,6 @@
 import { Router, type Request, type Response } from 'express';
 
-import { recordMetaRequestLatency, collectMetricsText } from '../../observability/metrics/meta';
+import { recordMetaRequestLatency, collectMetricsText } from '../../../observability/metrics/meta';
 
 import { getAuditStats, type AuditRepo } from './auditStats';
 import { getCapabilities } from './capabilities';

@@ -13,20 +13,20 @@
     "noEmit": true,
     "baseUrl": ".",
     "paths": {
-      "@/*": ["frontend/src/*"],
-      "prom-client": ["backend/node_modules/prom-client"]
+      "@/*": ["apps/frontend/src/*"],
+      "prom-client": ["apps/backend/node_modules/prom-client"]
     },
     "types": ["node", "jest", "prisma__client"],
-    "typeRoots": ["./types", "./node_modules/@types", "./backend/node_modules/@types"]
+    "typeRoots": ["./types", "./node_modules/@types", "./apps/backend/node_modules/@types"]
   },
   "include": [
     "src/**/*.ts",
-    "backend/src/**/*.ts",
-    "backend/routes/**/*.ts",
-    "backend/tests/**/*.ts",
-    "frontend/src/**/*.ts",
-    "frontend/src/**/*.tsx",
-    "frontend/src/**/*.d.ts",
+    "apps/backend/src/**/*.ts",
+    "apps/backend/routes/**/*.ts",
+    "apps/backend/tests/**/*.ts",
+    "apps/frontend/src/**/*.ts",
+    "apps/frontend/src/**/*.tsx",
+    "apps/frontend/src/**/*.d.ts",
     "types/**/*.d.ts"
   ],
   "exclude": [

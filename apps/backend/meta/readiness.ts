@@ -1,4 +1,4 @@
-import { recordMetaReadinessCheck } from '../../observability/metrics/meta';
+import { recordMetaReadinessCheck } from '../../../observability/metrics/meta';
 
 import type { Probe, ProbeResult } from './probes';
 import type { MetaReadinessResponse, MetaReadinessState } from './types';

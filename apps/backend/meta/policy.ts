@@ -1,4 +1,4 @@
-import { recordPolicyDenyMetric } from '../../observability/metrics/meta';
+import { recordPolicyDenyMetric } from '../../../observability/metrics/meta';
 
 import type {
   MetaPolicyAutonomyLevel,

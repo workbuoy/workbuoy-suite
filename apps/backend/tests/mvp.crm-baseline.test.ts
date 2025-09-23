@@ -12,7 +12,7 @@ describe('CRM MVP baseline', () => {
     tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'wb-mvp-'));
     process.chdir(tmpDir);
     process.env.PERSIST_MODE = 'file';
-    app = require('../../src/server').default;
+    app = require('../../../src/server').default;
   });
 
   afterAll(() => {

@@ -1,7 +1,7 @@
 import express from 'express';
 import request from 'supertest';
 
-import router from '../../backend/meta/router';
+import router from '../../apps/backend/meta/router';
 
 import type { NextFunction, Request, Response } from 'express';
 

@@ -3,7 +3,7 @@ name: Backend Persistence CI
 on:
   push:
     paths:
-      - 'backend/**'
+      - 'apps/backend/**'
       - 'prisma/**'
       - 'core/roles/**'
       - 'scripts/seed-roles-from-json.ts'
@@ -12,7 +12,7 @@ on:
       - '.github/workflows/**'
   pull_request:
     paths:
-      - 'backend/**'
+      - 'apps/backend/**'
       - 'prisma/**'
       - 'core/roles/**'
       - 'scripts/seed-roles-from-json.ts'
@@ -46,27 +46,27 @@ jobs:
         with:
           node-version: 20
 
-      - name: Install backend dependencies
-        run: npm --prefix backend install --no-audit --fund=false
+      - name: Install workspaces
+        run: npm install --workspaces --include-workspace-root --no-audit --fund=false
 
       - name: Generate Prisma client
         env:
           PRISMA_CLI_QUERY_ENGINE_TYPE: binary
-        run: npx --yes -p prisma@6.16.2 prisma generate --schema=backend/prisma/schema.prisma
+        run: npx --yes -p prisma@6.16.2 prisma generate --schema=apps/backend/prisma/schema.prisma
 
       - name: Apply Prisma migrations
         env:
           PRISMA_CLI_QUERY_ENGINE_TYPE: binary
-        run: npx --yes -p prisma@6.16.2 prisma migrate deploy --schema=backend/prisma/schema.prisma
+        run: npx --yes -p prisma@6.16.2 prisma migrate deploy --schema=apps/backend/prisma/schema.prisma
 
       - name: Seed baseline roles/features
         env:
           FF_PERSISTENCE: true
           DATABASE_URL: ${{ env.DATABASE_URL }}
-        run: npm --prefix backend exec tsx ${{ github.workspace }}/scripts/seed-roles-from-json.ts
+        run: npm run seed:roles -w @workbuoy/backend
 
       - name: Run persistence tests
         env:
           FF_PERSISTENCE: true
           DATABASE_URL: ${{ env.DATABASE_URL }}
-        run: npm --prefix backend test -- --runInBand --passWithNoTests
+        run: npm run test -w @workbuoy/backend -- --runInBand --passWithNoTests

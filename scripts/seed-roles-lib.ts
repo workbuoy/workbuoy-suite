@@ -1,6 +1,6 @@
 // scripts/seed-roles-lib.ts
 import { resolveFeaturesSource, resolveRolesSource } from './roles-io.ts';
-import type { FeatureDef, RoleProfile } from '../src/roles/types';
+import type { FeatureDef, RoleProfile } from '../apps/backend/src/roles/types';
 
 export interface SeedSummary {
   ok: true;
@@ -20,10 +20,10 @@ type ImportRolesAndFeatures = (
 ) => Promise<{ roles: number; features: number }>;
 
 async function loadImporter(): Promise<ImportRolesAndFeatures> {
-  const mod = await import('../src/roles/service');
+  const mod = await import('../apps/backend/src/roles/service');
   const fn = mod?.importRolesAndFeatures;
   if (typeof fn !== 'function') {
-    throw new Error('importRolesAndFeatures not found in ../src/roles/service');
+    throw new Error('importRolesAndFeatures not found in ../apps/backend/src/roles/service');
   }
   return fn as ImportRolesAndFeatures;
 }

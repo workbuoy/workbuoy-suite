@@ -1,9 +1,10 @@
 // scripts/roles-io.ts
 import fs from 'node:fs';
 import path from 'node:path';
-import { defaultFeatures } from '../src/roles/seed/features.ts';
+import { defaultFeatures } from '../apps/backend/src/roles/seed/features.ts';
 
-const DEFAULT_FEATURE_SOURCE = 'src/roles/seed/features.ts (defaultFeatures export)';
+const DEFAULT_FEATURE_SOURCE =
+  'apps/backend/src/roles/seed/features.ts (defaultFeatures export)';
 const FALLBACK_ROLES_PATH = path.resolve(__dirname, 'fixtures', 'minimal-roles.json');
 const FALLBACK_FEATURES_PATH = path.resolve(__dirname, 'fixtures', 'minimal-features.json');
 
@@ -104,7 +105,7 @@ export function resolveRolesSource(): LoadResult<any> {
   const candidates = normalizeCandidates(envOverride, [
     path.join('core', 'roles', 'roles.json'),
     path.join('roles', 'roles.json'),
-    path.join('backend', 'roles', 'roles.json'),
+    path.join('apps', 'backend', 'roles', 'roles.json'),
     path.join('data', 'roles.json'),
   ]);
   try {
@@ -132,7 +133,7 @@ export function resolveFeaturesSource(): LoadResult<any> {
   const candidates = normalizeCandidates(envOverride, [
     path.join('core', 'roles', 'features.json'),
     path.join('roles', 'features.json'),
-    path.join('backend', 'roles', 'features.json'),
+    path.join('apps', 'backend', 'roles', 'features.json'),
     path.join('data', 'features.json'),
   ]);
   try {

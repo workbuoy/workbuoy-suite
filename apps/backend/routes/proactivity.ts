@@ -1,11 +1,11 @@
 import { Router } from 'express';
-import { RoleRegistry } from '../../src/roles/registry';
-import { loadRoleCatalog } from '../../src/roles/loader';
-import type { ProactivityState } from '../../src/core/proactivity/context';
+import { RoleRegistry } from '../../../src/roles/registry';
+import { loadRoleCatalog } from '../../../src/roles/loader';
+import type { ProactivityState } from '../../../src/core/proactivity/context';
 import { resolveProactivityForRequest } from './utils/proactivityContext';
-import { envBool } from '../../src/core/env';
-import { getRoleRegistry, resolveUserBinding } from '../../src/roles/service';
-import type { UserRoleBinding } from '../../src/roles/types';
+import { envBool } from '../../../src/core/env';
+import { getRoleRegistry, resolveUserBinding } from '../../../src/roles/service';
+import type { UserRoleBinding } from '../../../src/roles/types';
 
 const router: any = Router();
 

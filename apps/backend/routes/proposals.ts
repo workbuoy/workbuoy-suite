@@ -1,12 +1,12 @@
 import { Router } from 'express';
-import { RoleRegistry } from '../../src/roles/registry';
-import { loadRoleCatalog } from '../../src/roles/loader';
-import { requiresProMode } from '../../src/core/proactivity/guards';
-import { ProactivityMode } from '../../src/core/proactivity/modes';
+import { RoleRegistry } from '../../../src/roles/registry';
+import { loadRoleCatalog } from '../../../src/roles/loader';
+import { requiresProMode } from '../../../src/core/proactivity/guards';
+import { ProactivityMode } from '../../../src/core/proactivity/modes';
 import { resolveProactivityForRequest } from './utils/proactivityContext';
-import { envBool } from '../../src/core/env';
-import { getRoleRegistry, resolveUserBinding } from '../../src/roles/service';
-import type { UserRoleBinding } from '../../src/roles/types';
+import { envBool } from '../../../src/core/env';
+import { getRoleRegistry, resolveUserBinding } from '../../../src/roles/service';
+import type { UserRoleBinding } from '../../../src/roles/types';
 import {
   listProposals,
   createProposal as recordProposal,
@@ -17,11 +17,11 @@ import {
   markProposalFailed,
   markProposalRejected,
   generateProposalIdempotencyKey,
-} from '../../src/core/proposals/service';
-import { getCapabilityImpl } from '../../src/capabilities/registry';
-import { runCapabilityWithRole } from '../../src/core/capabilityRunnerRole';
-import { policyCheck } from '../../src/core/policy';
-import { logIntent } from '../../src/core/intentLog';
+} from '../../../src/core/proposals/service';
+import { getCapabilityImpl } from '../../../src/capabilities/registry';
+import { runCapabilityWithRole } from '../../../src/core/capabilityRunnerRole';
+import { policyCheck } from '../../../src/core/policy';
+import { logIntent } from '../../../src/core/intentLog';
 
 const router = Router();
 

@@ -5,14 +5,14 @@ services:
     image: node:20
     working_dir: /workspace/workbuoy-suite
     command: >-
-      sh -c "npm install --prefix backend && \
-      NODE_PATH=backend/node_modules \
+      sh -c "npm run bootstrap && \
+      NODE_PATH=apps/backend/node_modules \
       MODE_CORE=true MODE_FLEX=false MODE_SECURE=true \
       META_FEATURE_FLAGS=alpha=true,beta=false \
       PORT=8080 \
-      node -r ts-node/register backend/src/index.ts"
+      node -r ts-node/register apps/backend/src/index.ts"
     environment:
-      NODE_PATH: backend/node_modules
+      NODE_PATH: apps/backend/node_modules
       PORT: 8080
       MODE_CORE: 'true'
       MODE_FLEX: 'false'

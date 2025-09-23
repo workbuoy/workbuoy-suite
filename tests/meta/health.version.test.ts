@@ -1,7 +1,7 @@
 import express from 'express';
 import request from 'supertest';
 
-import router from '../../backend/meta/router';
+import router from '../../apps/backend/meta/router';
 
 describe('META: /meta/health and /meta/version', () => {
   const app = express();

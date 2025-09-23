@@ -6,8 +6,8 @@ import {
   resetPolicySnapshot,
   recordPolicyDeny,
   InMemoryPolicyMetricsStore,
-} from '../../backend/meta/policy';
-import router from '../../backend/meta/router';
+} from '../../apps/backend/meta/policy';
+import router from '../../apps/backend/meta/router';
 import { policyDeniesTotal } from '../../observability/metrics/meta';
 
 import type { NextFunction, Request, Response } from 'express';

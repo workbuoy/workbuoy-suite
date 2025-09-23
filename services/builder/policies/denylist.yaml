@@ -2,5 +2,5 @@
 - ".github/**"
 - "core/roles/roles.json"
 - "enterprise/**"
-- "backend/**"
+- "apps/backend/**"
 - "desktop/**"

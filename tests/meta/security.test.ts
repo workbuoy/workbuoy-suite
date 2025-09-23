@@ -1,8 +1,8 @@
 import express from 'express';
 import request from 'supertest';
 
-import { createMetaRouter } from '../../backend/meta/router';
-import { publicMetaRateLimit } from '../../backend/meta/security';
+import { createMetaRouter } from '../../apps/backend/meta/router';
+import { publicMetaRateLimit } from '../../apps/backend/meta/security';
 
 import type { NextFunction, Request, Response } from 'express';
 

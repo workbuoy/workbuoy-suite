@@ -6,10 +6,10 @@ import express, {
 } from 'express';
 import request from 'supertest';
 
-import { createMetaRouter } from '../../backend/meta/router';
+import { createMetaRouter } from '../../apps/backend/meta/router';
 import { auditFailuresTotal } from '../../observability/metrics/meta';
 
-import type { AuditRepo, AuditRepoEvent } from '../../backend/meta/auditStats';
+import type { AuditRepo, AuditRepoEvent } from '../../apps/backend/meta/auditStats';
 
 describe('META: /meta/audit-stats', () => {
   const withUser = (router: ExpressRouter) => {

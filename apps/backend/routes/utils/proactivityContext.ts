@@ -1,9 +1,9 @@
 import type { Request } from 'express';
-import { RoleRegistry } from '../../../src/roles/registry';
-import { buildProactivityContext } from '../../../src/core/proactivity/context';
-import { parseProactivityMode } from '../../../src/core/proactivity/modes';
-import { logModusskift } from '../../../src/core/proactivity/telemetry';
-import type { UserRoleBinding } from '../../../src/roles/types';
+import { RoleRegistry } from '../../../../src/roles/registry';
+import { buildProactivityContext } from '../../../../src/core/proactivity/context';
+import { parseProactivityMode } from '../../../../src/core/proactivity/modes';
+import { logModusskift } from '../../../../src/core/proactivity/telemetry';
+import type { UserRoleBinding } from '../../../../src/roles/types';
 
 interface ProactivityResolutionOptions {
   requestedOverride?: any;

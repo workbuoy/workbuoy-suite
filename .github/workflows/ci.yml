@@ -15,17 +15,8 @@ jobs:
         with:
           node-version: 20
 
-      - name: Install root dependencies
-        run: npm install --no-audit --fund=false
-
-      - name: Install backend dependencies
-        run: npm --prefix backend install --no-audit --fund=false
-
-      - name: Install frontend dependencies
-        run: |
-          if [ -f frontend/package.json ]; then
-            npm --prefix frontend install --no-audit --fund=false
-          fi
+      - name: Install workspaces
+        run: npm install --workspaces --include-workspace-root --no-audit --fund=false
 
       - name: Check roles JSON (non-blocking)
         run: npm run --if-present check:roles
@@ -44,7 +35,7 @@ jobs:
       - name: Backend unit tests
         env:
           FF_PERSISTENCE: 'false'
-        run: npm --prefix backend test -- --runInBand --passWithNoTests
+        run: npm run test -w @workbuoy/backend -- --runInBand --passWithNoTests
 
   coverage:
     needs: lint-and-test
@@ -56,16 +47,13 @@ jobs:
         with:
           node-version: 20
 
-      - name: Install root dependencies
-        run: npm install --no-audit --fund=false
-
-      - name: Install backend dependencies
-        run: npm --prefix backend install --no-audit --fund=false
+      - name: Install workspaces
+        run: npm install --workspaces --include-workspace-root --no-audit --fund=false
 
       - name: Backend tests with coverage
         env:
           FF_PERSISTENCE: 'false'
-        run: npm --prefix backend test -- --coverage --runInBand --passWithNoTests
+        run: npm run test -w @workbuoy/backend -- --coverage --runInBand --passWithNoTests
 
       - name: Upload coverage
         if: always()
@@ -73,5 +61,5 @@ jobs:
         with:
           name: backend-coverage
           path: |
-            backend/coverage/**
+            apps/backend/coverage/**
             coverage/**

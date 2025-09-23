@@ -1,20 +1,20 @@
 import { Router } from 'express';
-import type { UserRoleBinding } from '../../src/roles/types';
-import { getRoleRegistry, resolveUserBinding } from '../../src/roles/service';
-import { getActiveFeatures } from '../../src/features/activation/featureActivation';
-import { aggregateFeatureUseCount as aggregateInMemory } from '../../src/telemetry/usageSignals';
-import { envBool } from '../../src/core/env';
+import type { UserRoleBinding } from '../../../src/roles/types';
+import { getRoleRegistry, resolveUserBinding } from '../../../src/roles/service';
+import { getActiveFeatures } from '../../../src/features/activation/featureActivation';
+import { aggregateFeatureUseCount as aggregateInMemory } from '../../../src/telemetry/usageSignals';
+import { envBool } from '../../../src/core/env';
 
 const r = Router();
 const usePersistence = envBool('FF_PERSISTENCE', false);
 
-type UsageDbModule = typeof import('../../src/telemetry/usageSignals.db');
+type UsageDbModule = typeof import('../../../src/telemetry/usageSignals.db');
 let dbModule: UsageDbModule | null = null;
 
 function ensureDbModule(): UsageDbModule {
   if (!dbModule) {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
-    dbModule = require('../../src/telemetry/usageSignals.db') as UsageDbModule;
+    dbModule = require('../../../src/telemetry/usageSignals.db') as UsageDbModule;
   }
   return dbModule;
 }

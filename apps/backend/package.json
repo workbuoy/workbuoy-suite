@@ -1,5 +1,5 @@
 {
-  "name": "workbuoy-backend",
+  "name": "@workbuoy/backend",
   "version": "1.0.0-pr-an",
   "private": true,
   "type": "module",
@@ -8,7 +8,7 @@
     "test": "jest --passWithNoTests --config jest.meta.config.cjs",
     "typecheck": "tsc --noEmit -p tsconfig.typecheck.json",
     "start:compliance": "node dist/compliance/server.js",
-    "seed:roles": "tsx ../scripts/seed-roles-from-json.ts"
+    "seed:roles": "tsx ../../scripts/seed-roles-from-json.ts"
   },
   "dependencies": {
     "@turf/boolean-point-in-polygon": "^6.5.0",
