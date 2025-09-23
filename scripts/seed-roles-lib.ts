@@ -33,23 +33,28 @@ export type ImportRolesAndFeatures = (
 
 async function loadImporter(): Promise<ImportRolesAndFeatures> {
   const backendRoot = getBackendRoot();
-  const tsPath = path.join(backendRoot, 'src/roles/service.ts');
-  const jsPath = path.join(backendRoot, 'dist/roles/service.js');
-
-  try {
-    const tsMod = await import(pathToFileURL(tsPath).href);
-    const tsFn = tsMod?.importRolesAndFeatures;
-    if (typeof tsFn === 'function') {
-      return tsFn as ImportRolesAndFeatures;
+  const candidates = [
+    path.join(backendRoot, 'src/roles/service.ts'),
+    path.join(backendRoot, 'src/roles/service.tsx'),
+    path.join(backendRoot, 'src/roles/service.mts'),
+    path.join(backendRoot, 'dist/roles/service.js'),
+    path.join(backendRoot, 'dist/roles/service.mjs'),
+  ];
+  let lastErr: unknown;
+  for (const candidate of candidates) {
+    try {
+      const mod = await import(pathToFileURL(candidate).href);
+      const fn = mod?.importRolesAndFeatures;
+      if (typeof fn === 'function') {
+        return fn as ImportRolesAndFeatures;
+      }
+    } catch (err) {
+      lastErr = err;
     }
-  } catch {}
-
-  const jsMod = await import(pathToFileURL(jsPath).href);
-  const jsFn = jsMod?.importRolesAndFeatures;
-  if (typeof jsFn !== 'function') {
-    throw new Error('importRolesAndFeatures not exported by backend roles service');
   }
-  return jsFn as ImportRolesAndFeatures;
+  throw new Error('importRolesAndFeatures not found in backend roles service', {
+    cause: lastErr as any,
+  });
 }
 
 export async function runSeed(importer?: ImportRolesAndFeatures): Promise<SeedSummary> {
