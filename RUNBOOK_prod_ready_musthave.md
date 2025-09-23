@@ -21,7 +21,7 @@
 ## 5) Desktop
 - Pipeline: `scripts/desktop_pipeline.sh` (probe → build)
 - Sign/Notarize: sanitert `scripts/macos_sign_notarize.sh` (bruk CI secrets)
-- Update-feed: `scripts/gen_latest_json.sh` + `dist/latest.json.template`
+- Update-feed: `scripts/gen_latest_json.sh`
 
 ## 6) Roles Gate
 - Kjør: `scripts/run_roles_gate.sh`
