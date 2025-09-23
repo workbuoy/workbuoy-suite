@@ -2,9 +2,14 @@
   "name": "workbuoy-suite",
   "private": true,
   "scripts": {
-    "seed:roles": "tsx scripts/seed-roles-from-json.ts"
+    "seed:roles": "tsx scripts/seed-roles-from-json.ts",
+    "check:roles": "tsx scripts/check-roles-json.ts",
+    "typecheck": "tsc -p tsconfig.meta.json"
   },
   "devDependencies": {
-    "tsx": "^4.19.0"
+    "tsx": "^4.19.0",
+    "@types/jest": "^29.5.12",
+    "@types/node": "^20.11.30",
+    "typescript": "^5.4.5"
   }
 }
