@@ -46,7 +46,9 @@ async function selectRegistry(): Promise<RoleRegistry> {
   return fallbackRegistry;
 }
 
-async function resolveBinding(req: any): Promise<{ tenantId: string; userId: string; role: string; binding: UserRoleBinding }>{
+async function resolveBinding(
+  req: any,
+): Promise<{ tenantId: string; userId: string; role: string; binding: UserRoleBinding }> {
   const tenantId = String(req.header('x-tenant') || req.header('x-tenant-id') || 'demo');
   const userId = String(req.header('x-user') || req.header('x-user-id') || 'demo-user');
   const role = String(req.header('x-role') || req.header('x-user-role') || 'sales_rep');
@@ -69,12 +71,13 @@ function headerIdempotencyKey(req: any): string | undefined {
 router.use(async (req, _res, next) => {
   try {
     const registry = await selectRegistry();
-    const { binding } = await resolveBinding(req);
+    const { binding, tenantId, userId } = await resolveBinding(req);
     const context = resolveProactivityForRequest(registry, req as any, {
       logEvent: false,
       roleBinding: binding,
     });
-    (req as any).proactivityContext = context;
+    // berik req for videre håndtering
+    (req as any).proactivityContext = { ...context, tenantId, userId, roleBinding: binding, registry };
     next();
   } catch (err) {
     next(err);
