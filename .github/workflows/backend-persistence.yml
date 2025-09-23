@@ -55,13 +55,14 @@ jobs:
         run: npm --prefix backend install --no-audit --fund=false
 
       - name: Generate Prisma client
-        run: npx prisma generate --schema=prisma/schema.prisma
+        run: npx prisma generate --schema=backend/prisma/schema.prisma
 
       - name: Apply Prisma migrations
-        run: npx prisma migrate deploy --schema=prisma/schema.prisma
+        run: npx prisma migrate deploy --schema=backend/prisma/schema.prisma
 
       - name: Seed baseline roles/features
         run: npm run seed:roles
 
       - name: Run persistence tests
-        run: npm --prefix backend exec jest --config jest.meta.config.cjs --runInBand --passWithNoTests
+        working-directory: backend
+        run: npx jest --config jest.meta.config.cjs --runInBand --passWithNoTests

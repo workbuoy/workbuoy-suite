@@ -3,6 +3,7 @@
   "private": true,
   "scripts": {
     "seed:roles": "tsx scripts/seed-roles-from-json.ts",
+    "check:roles": "tsx scripts/check-roles-json.ts",
     "typecheck": "tsc -p tsconfig.meta.json"
   },
   "devDependencies": {

@@ -35,6 +35,7 @@ export async function runSeed(): Promise<SeedSummary> {
   const featuresSource = resolveFeaturesSource();
   const importRolesAndFeatures = await loadImporter();
   const summary = await importRolesAndFeatures(rolesSource.data, featuresSource.data);
+  console.log(`seeded {roles:${summary.roles}, features:${summary.features}}`);
   return {
     ok: true,
     summary,

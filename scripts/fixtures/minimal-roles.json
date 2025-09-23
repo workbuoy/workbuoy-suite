@@ -1,0 +1,34 @@
+[
+  {
+    "role_id": "sales_rep",
+    "canonical_title": "Sales Representative",
+    "domains": ["Sales"],
+    "summary": "Fallback role for pipeline health when canonical catalog is unavailable.",
+    "core_tasks": ["Manage assigned opportunities", "Log interactions in CRM"],
+    "featureCaps": { "lead_qualification": 3 }
+  },
+  {
+    "role_id": "sales_manager",
+    "canonical_title": "Sales Manager",
+    "domains": ["Sales"],
+    "summary": "Oversees the sales pipeline and supports account executives.",
+    "core_tasks": ["Review forecasts", "Coach reps on active deals"],
+    "featureCaps": { "pipeline_forecast": 4 }
+  },
+  {
+    "role_id": "cs_manager",
+    "canonical_title": "Customer Success Manager",
+    "domains": ["Customer Success"],
+    "summary": "Ensures renewals and positive customer health.",
+    "core_tasks": ["Monitor health scores", "Coordinate renewal plans"],
+    "featureCaps": { "customer_health": 4 }
+  },
+  {
+    "role_id": "ops_manager",
+    "canonical_title": "Operations Manager",
+    "domains": ["Operations"],
+    "summary": "Keeps fulfillment and compliance workflows on track.",
+    "core_tasks": ["Track contract obligations", "Support cross-functional escalations"],
+    "featureCaps": { "contract_compliance": 3 }
+  }
+]
