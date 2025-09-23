@@ -1,17 +1,10 @@
-import { PrismaClient } from '@prisma/client';
-import roles from '../roles/roles.json';
+import { seedRolesFromJson } from './seed-roles-lib.ts';
 
-const prisma = new PrismaClient();
-
-async function main() {
-  for (const role of roles) {
-    await prisma.role.upsert({
-      where: { role_id: role.role_id },
-      update: { ...role },
-      create: { ...role },
-    });
-  }
-  console.log("Seeded roles.json");
-}
-
-main().finally(async () => await prisma.$disconnect());
+seedRolesFromJson()
+  .then((result) => {
+    console.log(JSON.stringify(result));
+  })
+  .catch((err) => {
+    console.error('[seed-roles-from-json-v2] failed:', err?.stack || err?.message || String(err));
+    process.exit(1);
+  });

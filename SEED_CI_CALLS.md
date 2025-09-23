@@ -1,22 +1,17 @@
 # Seeding roles/features in CI
 
-## Option A — ESM (recommended)
+## Recommended tsx runner
 ```yaml
 - name: Seed roles/features from JSON
-  run: node --loader ts-node/esm scripts/seed-roles-from-json.ts
+  run: npm run seed:roles
   env:
-    DATABASE_URL: ${{ env.DATABASE_URL }}
     FF_PERSISTENCE: 'true'
+    DATABASE_URL: ${{ env.DATABASE_URL }}
+    ROLES_PATH: core/roles/roles.json # optional override
+    FEATURES_PATH: core/roles/features.json # optional override
 ```
 
-## Option B — CommonJS wrapper
-```yaml
-- name: Seed roles/features from JSON (CJS)
-  run: node scripts/seed-roles-from-json.cjs
-  env:
-    DATABASE_URL: ${{ env.DATABASE_URL }}
-    FF_PERSISTENCE: 'true'
-```
-
-Both paths avoid importing the entrypoint from application code to prevent
-ESM/CommonJS cycles. Shared logic lives in `scripts/seed-roles-lib.ts`.
+The script logs the resolved file paths and upsert summary. It will exit early
+when `FF_PERSISTENCE` is not enabled or throw if `DATABASE_URL` is missing.
+Shared logic lives in `scripts/seed-roles-lib.ts` and the CommonJS wrapper
+(`scripts/seed-roles-from-json.cjs`) delegates to the same runner.
