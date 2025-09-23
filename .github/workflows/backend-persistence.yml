@@ -68,4 +68,5 @@ jobs:
         run: npm run seed:roles
 
       - name: Run persistence tests
-        run: npm --prefix backend exec jest --config jest.meta.config.cjs --runInBand --passWithNoTests
+        working-directory: backend
+        run: npx jest --config jest.meta.config.cjs --runInBand --passWithNoTests
