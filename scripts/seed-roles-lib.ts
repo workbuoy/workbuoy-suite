@@ -5,6 +5,15 @@ import { pathToFileURL } from 'node:url';
 import { resolveFeaturesSource, resolveRolesSource } from './roles-io.ts';
 import type { FeatureDef, RoleProfile } from '../apps/backend/src/roles/types';
 
+function getBackendRoot(): string {
+  const cwd = process.cwd();
+  if (path.basename(cwd) === 'backend' && path.basename(path.dirname(cwd)) === 'apps') {
+    return cwd;
+  }
+  const candidate = path.resolve(cwd, 'apps/backend');
+  return candidate;
+}
+
 export interface SeedSummary {
   ok: true;
   summary?: { roles: number; features: number };
@@ -23,8 +32,9 @@ export type ImportRolesAndFeatures = (
 ) => Promise<{ roles: number; features: number }>;
 
 async function loadImporter(): Promise<ImportRolesAndFeatures> {
-  const tsPath = path.resolve(process.cwd(), 'apps/backend/src/roles/service.ts');
-  const jsPath = path.resolve(process.cwd(), 'apps/backend/dist/roles/service.js');
+  const backendRoot = getBackendRoot();
+  const tsPath = path.join(backendRoot, 'src/roles/service.ts');
+  const jsPath = path.join(backendRoot, 'dist/roles/service.js');
 
   try {
     const tsMod = await import(pathToFileURL(tsPath).href);
