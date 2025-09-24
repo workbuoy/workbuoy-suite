@@ -4,9 +4,9 @@ This branch adds a lightweight meta-control layer that exposes awareness signals
 autonomous development proposals and explicit evolution guardrails across the
 Workbuoy stack.
 
-> **Workspace note:** All active backend and frontend code now lives under
-> `apps/backend` and `apps/frontend`. The legacy `backend/` and `frontend/`
-> directories have been retired.
+## Structure
+
+Active services live under apps/backend and apps/frontend. Legacy roots were retired.
 
 ## Typecheck & tests
 

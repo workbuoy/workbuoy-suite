@@ -43,7 +43,7 @@ jobs:
             ${{ runner.os }}-node-
 
       - name: Install workspaces
-        run: npm ci --workspaces --include-workspace-root --no-audit --fund=false
+        run: npm install --workspaces --include-workspace-root --no-audit --fund=false
 
       - name: Backend typecheck
         run: npm run typecheck -w @workbuoy/backend
