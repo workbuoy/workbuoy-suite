@@ -36,25 +36,46 @@ async function fastSeedPrisma(roles: any[], features: any[]) {
 
   let roleCount = 0;
   for (const r of roles) {
-    // accept either {id,name} or {slug,...}
-    const id = r.id || r.slug || r.name;
+    // accept either {role_id,id,name} or {slug,...}
+    const id = r.role_id || r.id || r.slug || r.name;
     if (!id) continue;
     await prisma.role.upsert({
-      where: { id: String(id) },
-      create: { id: String(id), name: r.name ?? String(id) },
-      update: { name: r.name ?? String(id) },
+      where: { role_id: String(id) },
+      create: {
+        role_id: String(id),
+        title: r.name ?? r.title ?? String(id),
+        // tolerate optional fields from fixtures
+        inherits: Array.isArray(r.inherits) ? r.inherits : undefined,
+        featureCaps: r.featureCaps ?? undefined,
+        scopeHints: r.scopeHints ?? undefined,
+        profile: r.profile ?? undefined,
+      },
+      update: {
+        title: r.name ?? r.title ?? String(id),
+        inherits: Array.isArray(r.inherits) ? r.inherits : undefined,
+        featureCaps: r.featureCaps ?? undefined,
+        scopeHints: r.scopeHints ?? undefined,
+        profile: r.profile ?? undefined,
+      },
     });
     roleCount++;
   }
 
   let featureCount = 0;
   for (const f of features) {
-    const id = f.id || f.key || f.slug || f.name;
+    const id = f.feature_id || f.id || f.key || f.slug || f.name;
     if (!id) continue;
     await prisma.feature.upsert({
-      where: { id: String(id) },
-      create: { id: String(id), name: f.name ?? String(id), description: f.description ?? null },
-      update: { name: f.name ?? String(id), description: f.description ?? null },
+      where: { feature_id: String(id) },
+      create: {
+        feature_id: String(id),
+        name: f.name ?? String(id),
+        description: f.description ?? null,
+      },
+      update: {
+        name: f.name ?? String(id),
+        description: f.description ?? null,
+      },
     });
     featureCount++;
   }

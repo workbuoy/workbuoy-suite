@@ -1,3 +1,8 @@
 {
-  "extends": "./tsconfig.meta.json"
+  "extends": "./tsconfig.meta.json",
+  "compilerOptions": {
+    "moduleResolution": "nodenext",
+    "resolveJsonModule": true,
+    "allowArbitraryExtensions": true
+  }
 }
