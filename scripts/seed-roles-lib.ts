@@ -1,101 +1,107 @@
-// scripts/seed-roles-lib.ts
-import path from 'node:path';
-import { pathToFileURL } from 'node:url';
-
-import { resolveFeaturesSource, resolveRolesSource } from './roles-io.ts';
-import type { FeatureDef, RoleProfile } from '../apps/backend/src/roles/types';
-import { prisma } from '../apps/backend/src/db/prisma';
-
-function getBackendRoot(): string {
-  const cwd = process.cwd();
-  if (path.basename(cwd) === 'backend' && path.basename(path.dirname(cwd)) === 'apps') {
-    return cwd;
-  }
-  const candidate = path.resolve(cwd, 'apps/backend');
-  return candidate;
-}
-
-export interface SeedSummary {
-  ok: true;
-  summary?: { roles: number; features: number };
-  skipped?: string;
-  rolesPath?: string;
-  featuresPath?: string;
-}
+import { prisma } from '../apps/backend/src/core/db/prisma';
+import { resolveRolesSource, resolveFeaturesSource } from './roles-io.ts';
 
 function shouldPersist(): boolean {
   return (process.env.FF_PERSISTENCE || '').toLowerCase() === 'true';
 }
 
-export type ImportRolesAndFeatures = (
-  roles: RoleProfile[],
-  features: FeatureDef[]
-) => Promise<{ roles: number; features: number }>;
-
-async function loadImporter(): Promise<ImportRolesAndFeatures> {
-  const backendRoot = getBackendRoot();
-  const candidates = [
-    path.join(backendRoot, 'src/roles/service.ts'),
-    path.join(backendRoot, 'src/roles/service/index.ts'),
-    path.join(backendRoot, 'src/roles/service/importer.ts'),
-    path.join(backendRoot, 'src/roles/service.mts'),
-    path.join(backendRoot, 'src/roles/service.js'),
-    path.join(backendRoot, 'dist/roles/service.js'),
-    path.join(backendRoot, 'dist/roles/service.mjs'),
-  ];
-  let lastErr: unknown;
-  for (const candidate of candidates) {
-    try {
-      const mod = await import(pathToFileURL(candidate).href);
-      const fn = mod?.importRolesAndFeatures;
-      if (typeof fn === 'function') {
-        return fn as ImportRolesAndFeatures;
-      }
-    } catch (err) {
-      lastErr = err;
-    }
-  }
-  throw new Error('importRolesAndFeatures not found in backend roles service', {
-    cause: lastErr as any,
-  });
+async function loadImporter(): Promise<(r: any[], f: any[]) => Promise<{ roles: number; features: number }>> {
+  const mod = await import('../apps/backend/src/roles/service/index.ts');
+  const fn = (mod as any)?.importRolesAndFeatures;
+  if (typeof fn !== 'function') throw new Error('importRolesAndFeatures not found in backend roles service');
+  return fn;
 }
 
-export async function runSeed(importer?: ImportRolesAndFeatures): Promise<SeedSummary> {
-  if (!shouldPersist()) {
-    return { ok: true, skipped: 'FF_PERSISTENCE=false' };
+async function raceWithTimeout<T>(p: Promise<T>, ms: number, label: string): Promise<T> {
+  let t: any;
+  const timeout = new Promise<never>((_, rej) => {
+    t = setTimeout(() => rej(new Error(`[seed] ${label} timed out after ${ms}ms`)), ms);
+  });
+  try {
+    const res = await Promise.race([p, timeout]);
+    return res as T;
+  } finally {
+    clearTimeout(t);
+  }
+}
+
+/** fallback: minimal upsert using Prisma if service import hangs */
+async function fastSeedPrisma(roles: any[], features: any[]) {
+  console.log('[seed:fallback] using direct Prisma upserts');
+
+  // best effort: shorten long queries
+  try {
+    await prisma.$executeRawUnsafe('SET statement_timeout = 10000');
+  } catch {}
+
+  let roleCount = 0;
+  for (const r of roles) {
+    // accept either {id,name} or {slug,...}
+    const id = r.id || r.slug || r.name;
+    if (!id) continue;
+    await prisma.role.upsert({
+      where: { id: String(id) },
+      create: { id: String(id), name: r.name ?? String(id) },
+      update: { name: r.name ?? String(id) },
+    });
+    roleCount++;
   }
 
+  let featureCount = 0;
+  for (const f of features) {
+    const id = f.id || f.key || f.slug || f.name;
+    if (!id) continue;
+    await prisma.feature.upsert({
+      where: { id: String(id) },
+      create: { id: String(id), name: f.name ?? String(id), description: f.description ?? null },
+      update: { name: f.name ?? String(id), description: f.description ?? null },
+    });
+    featureCount++;
+  }
+
+  return { roles: roleCount, features: featureCount };
+}
+
+export async function seedRolesFromJson() {
+  return runSeed();
+}
+
+export async function runSeed(): Promise<{ ok: true; summary?: any; skipped?: string }> {
+  if (!shouldPersist()) {
+    console.log('[seed] FF_PERSISTENCE=false – skipping');
+    return { ok: true, skipped: 'FF_PERSISTENCE=false' };
+  }
   if (!process.env.DATABASE_URL) {
     throw new Error('DATABASE_URL must be set when FF_PERSISTENCE=true');
   }
 
-  const rolesSource = resolveRolesSource();
-  const featuresSource = resolveFeaturesSource();
-  const importRolesAndFeatures = importer ?? (await loadImporter());
-  console.log('[seed] importing roles/features');
-  const summary = await importRolesAndFeatures(rolesSource.data, featuresSource.data);
+  const rolesSrc = resolveRolesSource();
+  const featsSrc = resolveFeaturesSource();
+
+  const importRolesAndFeatures = await loadImporter();
+
+  console.log('[seed] importing roles/features via service (10s timeout)…');
+
+  let summary: { roles: number; features: number } | undefined;
 
   try {
-    await prisma.$disconnect();
-    console.log('[seed] prisma disconnected');
-  } catch (e) {
-    console.warn('[seed] prisma disconnect failed:', e);
+    // try normal path with timeout
+    summary = await raceWithTimeout(
+      importRolesAndFeatures(rolesSrc.data, featsSrc.data),
+      10_000,
+      'service import',
+    );
+    console.log(`[seed] service import done {roles:${summary.roles}, features:${summary.features}}`);
+  } catch (err) {
+    console.warn('[seed] service import failed or timed out – switching to Prisma fallback:', (err as Error)?.message);
+    summary = await fastSeedPrisma(rolesSrc.data, featsSrc.data);
+    console.log(`[seed] fallback done {roles:${summary.roles}, features:${summary.features}}`);
+  } finally {
+    try {
+      await prisma.$disconnect();
+      console.log('[seed] prisma disconnected');
+    } catch {}
   }
 
-  return {
-    ok: true,
-    summary,
-    rolesPath: rolesSource.path,
-    featuresPath: featuresSource.path,
-  };
+  return { ok: true, summary };
 }
-
-export async function seedRolesFromJson(importer?: ImportRolesAndFeatures): Promise<SeedSummary> {
-  return runSeed(importer);
-}
-
-export async function seedRoles(importer?: ImportRolesAndFeatures): Promise<SeedSummary> {
-  return runSeed(importer);
-}
-
-export { resolveRolesSource, resolveFeaturesSource };
