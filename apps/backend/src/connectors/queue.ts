@@ -1,9 +1,10 @@
-import Redis from 'ioredis';
+import { Redis } from 'ioredis';
+import type { Redis as RedisClient } from 'ioredis';
 import { Job } from './types.js';
 import { wb_connector_retries_total } from '../metrics/metrics.js';
 
 const redisUrl = process.env.REDIS_URL || 'redis://127.0.0.1:6379';
-export const redis = new Redis(redisUrl);
+export const redis: RedisClient = new Redis(redisUrl);
 
 const qKey = 'connectors:jobs';
 const dlqKey = 'connectors:dlq';

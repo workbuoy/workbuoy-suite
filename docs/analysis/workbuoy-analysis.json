@@ -1,0 +1,26 @@
+{
+  "generatedAt": "2025-09-24T06:49:42Z",
+  "workspace": "apps",
+  "entries": [
+    {
+      "path": "apps/backend",
+      "sizeKB": 1028,
+      "notes": "Primary API implementation and services"
+    },
+    {
+      "path": "apps/backend/src",
+      "sizeKB": 588,
+      "notes": "Business logic, resolvers, and handlers"
+    },
+    {
+      "path": "apps/frontend",
+      "sizeKB": 1440,
+      "notes": "Active web client"
+    },
+    {
+      "path": "apps/frontend/src",
+      "sizeKB": 1204,
+      "notes": "UI components and routing"
+    }
+  ]
+}

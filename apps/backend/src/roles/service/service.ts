@@ -1,5 +1,5 @@
-import type { FeatureDef, OrgRoleOverride, RoleProfile, UserRoleBinding } from '../types';
-import { loadServiceModule } from './loader';
+import type { FeatureDef, OrgRoleOverride, RoleProfile, UserRoleBinding } from '../types.js';
+import { loadServiceModule } from './loader.js';
 
 async function callServiceFunction<T>(name: string, args: unknown[]): Promise<T> {
   const mod = await loadServiceModule();

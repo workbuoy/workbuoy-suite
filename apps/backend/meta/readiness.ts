@@ -1,7 +1,7 @@
-import { recordMetaReadinessCheck } from '../../../observability/metrics/meta';
+import { recordMetaReadinessCheck } from './metrics.js';
 
-import type { Probe, ProbeResult } from './probes';
-import type { MetaReadinessResponse, MetaReadinessState } from './types';
+import type { Probe, ProbeResult } from './probes/index.js';
+import type { MetaReadinessResponse, MetaReadinessState } from './types.js';
 
 const deriveState = (results: ProbeResult[]): MetaReadinessState => {
   if (results.some((result) => result.status === 'fail')) {

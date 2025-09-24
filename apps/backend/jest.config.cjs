@@ -1,20 +1,27 @@
+const path = require('path');
+
 /** @type {import('ts-jest').JestConfigWithTsJest} */
 module.exports = {
   preset: 'ts-jest',
+  rootDir: __dirname,
   testEnvironment: 'node',
-  roots: ['<rootDir>/src', '<rootDir>/tests', '<rootDir>/../../tests'],
-  moduleFileExtensions: ['ts', 'js', 'json'],
+  moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json'],
+  moduleDirectories: ['node_modules'],
   transform: {
-    '^.+\\.ts$': ['ts-jest'],
+    '^.+\\.[tj]sx?$': [
+      'ts-jest',
+      {
+        tsconfig: path.join(__dirname, 'tsconfig.jest.json'),
+      },
+    ],
   },
   moduleNameMapper: {
-    // Resolve TS files when imports end with .js (e.g., './rbac/policies.js')
     '^(\\.{1,2}/.*)\\.js$': '$1',
     '^prom-client$': '<rootDir>/tests/__mocks__/prom-client.ts',
     '^express-rate-limit$': '<rootDir>/tests/__mocks__/express-rate-limit.ts',
     '^jsonwebtoken$': '<rootDir>/tests/__mocks__/jsonwebtoken.ts',
-    '^express$': '<rootDir>/node_modules/express',
-    '^supertest$': '<rootDir>/node_modules/supertest',
+    '^@backend/(.*)$': '<rootDir>/src/$1',
+    '^@backend-tests/(.*)$': '<rootDir>/tests/$1',
+    '^@backend-meta/(.*)$': '<rootDir>/meta/$1',
   },
-  // If your package.json has "type": "module", this CJS config still works.
 };

@@ -1,16 +1,18 @@
 import { Router } from 'express';
-import path from 'path';
-import fs from 'fs';
-import { fileURLToPath } from 'url';
-import { dirname } from 'path';
-import * as swaggerDist from 'swagger-ui-dist';
+import express from 'express';
+import path from 'node:path';
+import fs from 'node:fs';
+import { fileURLToPath } from 'node:url';
+import { dirname } from 'node:path';
+import swaggerDist from 'swagger-ui-dist';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 export function swaggerRouter() {
   const r = Router();
-  const swaggerPath = (swaggerDist as any).getAbsoluteFSPath();
+  const dist: { getAbsoluteFSPath?: () => string } = swaggerDist as unknown as { getAbsoluteFSPath?: () => string };
+  const swaggerPath = dist.getAbsoluteFSPath ? dist.getAbsoluteFSPath() : path.join(__dirname, '../../node_modules/swagger-ui-dist');
   const yamlPath = path.resolve(process.cwd(), 'openapi', 'workbuoy.yaml');
 
   r.get('/docs/openapi.yaml', (_req, res) => {
@@ -18,7 +20,7 @@ export function swaggerRouter() {
       const y = fs.readFileSync(yamlPath, 'utf8');
       res.setHeader('Content-Type', 'application/yaml');
       res.send(y);
-    } catch (e:any) {
+    } catch (e) {
       res.status(500).send('OpenAPI file not found: ' + yamlPath);
     }
   });
@@ -52,10 +54,10 @@ export function swaggerRouter() {
     next();
   });
 
-  r.use('/docs', (req, res, next) => {
+  r.use('/docs', (req, _res, next) => {
     (req as any).url = req.originalUrl.replace(/^\/docs/, '');
     next();
-  }, (await import('express')).default.static(swaggerPath));
+  }, express.static(swaggerPath));
 
   return r;
 }

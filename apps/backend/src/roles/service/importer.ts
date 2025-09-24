@@ -1,5 +1,5 @@
-import type { FeatureDef, RoleProfile } from '../types';
-import { loadServiceModule } from './loader';
+import type { FeatureDef, RoleProfile } from '../types.js';
+import { loadServiceModule } from './loader.js';
 
 export type ImportRolesAndFeatures = (
   roles: RoleProfile[],

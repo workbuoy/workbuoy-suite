@@ -1,7 +1,9 @@
 import fetch from 'node-fetch';
-import Redis from 'ioredis';
+import type { Response } from 'node-fetch';
+import { Redis } from 'ioredis';
+import type { Redis as RedisClient } from 'ioredis';
 import { getAccessToken, SfdcAuthConfig } from './auth.js';
-import { mapContact, mapOpportunity } from './mapping.js';
+import { mapContact, mapOpportunity, type SfdcContact, type SfdcOpportunity } from './mapping.js';
 import { Upserter, WorkBuoyCfg } from './upsert.js';
 
 export interface WorkerConfig {
@@ -12,24 +14,32 @@ export interface WorkerConfig {
   workbuoy: WorkBuoyCfg;
 }
 
-async function fetchContacts(accessToken: string, base: string, sinceMs: number) {
+async function parseJsonArray<T>(res: Response): Promise<T[]> {
+  const payload = (await res.json()) as unknown;
+  if (!Array.isArray(payload)) {
+    return [];
+  }
+  return payload as T[];
+}
+
+async function fetchContacts(accessToken: string, base: string, sinceMs: number): Promise<SfdcContact[]> {
   // For tests we allow a simplified provider API: GET /contacts?since=<ms>
   const url = `${base}/contacts?since=${sinceMs}`;
   const res = await fetch(url, { headers: { Authorization: `Bearer ${accessToken}` } });
   if (!res.ok) throw new Error('sfdc contacts fetch failed: '+res.status);
-  return await res.json();
+  return parseJsonArray<SfdcContact>(res);
 }
 
-async function fetchOpportunities(accessToken: string, base: string, sinceMs: number) {
+async function fetchOpportunities(accessToken: string, base: string, sinceMs: number): Promise<SfdcOpportunity[]> {
   const url = `${base}/opportunities?since=${sinceMs}`;
   const res = await fetch(url, { headers: { Authorization: `Bearer ${accessToken}` } });
   if (!res.ok) throw new Error('sfdc opps fetch failed: '+res.status);
-  return await res.json();
+  return parseJsonArray<SfdcOpportunity>(res);
 }
 
 export async function runOnce(cfg: WorkerConfig) {
   const token = await getAccessToken(cfg.auth);
-  const dlq = new Redis(cfg.redisUrl);
+  const dlq: RedisClient = new Redis(cfg.redisUrl);
   const up = new Upserter(cfg.redisUrl, cfg.workbuoy);
   try {
     const contacts = await fetchContacts(token, cfg.sfdcBaseUrl, cfg.sinceMs);

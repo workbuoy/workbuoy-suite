@@ -1,6 +1,6 @@
-import { startedAtISO } from './runtimeState';
+import { startedAtISO } from './runtimeState.js';
 
-import type { HealthResponse } from './types';
+import type { HealthResponse } from './types.js';
 
 const GIT_SHA =
   process.env.GIT_SHA ||

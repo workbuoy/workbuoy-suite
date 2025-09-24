@@ -1,17 +1,17 @@
 import { Router, type Request, type Response } from 'express';
 
-import { recordMetaRequestLatency, collectMetricsText } from '../../../observability/metrics/meta';
+import { recordMetaRequestLatency, collectMetricsText } from './metrics.js';
 
-import { getAuditStats, type AuditRepo } from './auditStats';
-import { getCapabilities } from './capabilities';
-import { getHealth } from './health';
-import { getPolicySnapshot } from './policy';
-import { createProbe } from './probes';
-import { runReadiness } from './readiness';
-import { publicMetaRateLimit, requireMetaRead } from './security';
-import { getVersion } from './version';
+import { getAuditStats, type AuditRepo } from './auditStats.js';
+import { getCapabilities } from './capabilities.js';
+import { getHealth } from './health.js';
+import { getPolicySnapshot } from './policy.js';
+import { createProbe } from './probes/index.js';
+import { runReadiness } from './readiness.js';
+import { publicMetaRateLimit, requireMetaRead } from './security.js';
+import { getVersion } from './version.js';
 
-import type { Probe } from './probes';
+import type { Probe } from './probes/index.js';
 
 export interface MetaRouterDeps {
   probes?: Probe[];

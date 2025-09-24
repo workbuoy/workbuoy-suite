@@ -1,21 +1,20 @@
+const path = require('path');
 const baseConfig = require('./jest.config.cjs');
-
-const {
-  '^express$': _expressIgnored,
-  '^supertest$': _supertestIgnored,
-  ...metaModuleNameMapper
-} = baseConfig.moduleNameMapper ?? {};
-
-const metaSetupFiles = [
-  ...(baseConfig.setupFiles ?? []),
-  '<rootDir>/tests/setup-mime.cjs',
-];
 
 module.exports = {
   ...baseConfig,
-  moduleNameMapper: metaModuleNameMapper,
-  moduleDirectories: ['node_modules', '<rootDir>/../../node_modules'],
-  setupFiles: metaSetupFiles,
+  rootDir: path.resolve(__dirname),
+  moduleDirectories: ['node_modules', '<rootDir>/node_modules', '<rootDir>/../../node_modules'],
+  setupFiles: [...(baseConfig.setupFiles ?? []), '<rootDir>/tests/setup-mime.cjs'],
+  transform: {
+    '^.+\\.[tj]sx?$': [
+      'ts-jest',
+      {
+        tsconfig: path.join(__dirname, 'tsconfig.jest.json'),
+      },
+    ],
+  },
+  testEnvironment: 'node',
   testMatch: [
     '<rootDir>/tests/genesis.autonomy.test.ts',
     '<rootDir>/tests/eventBus.stats.shape.test.ts',
@@ -26,6 +25,6 @@ module.exports = {
     '<rootDir>/../../tests/usage/db.usage.test.ts',
     '<rootDir>/../../tests/features/active.api.test.ts',
     '<rootDir>/../../tests/admin/roles.api.test.ts',
-    '<rootDir>/../../tests/proactivity/context.integration.test.ts'
+    '<rootDir>/../../tests/proactivity/context.integration.test.ts',
   ],
 };
