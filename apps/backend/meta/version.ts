@@ -1,4 +1,4 @@
-import type { VersionResponse } from './types';
+import type { VersionResponse } from './types.js';
 
 const SEMVER = process.env.SEMVER || process.env.npm_package_version || '0.0.0';
 const GIT_SHA =

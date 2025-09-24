@@ -4,6 +4,21 @@ This branch adds a lightweight meta-control layer that exposes awareness signals
 autonomous development proposals and explicit evolution guardrails across the
 Workbuoy stack.
 
+## Structure
+
+Active services live under `apps/backend` and `apps/frontend`.  
+Legacy roots (`backend/` and `frontend/`) have been retired.
+
+## Typecheck & tests
+
+Run the backend checks from the repo root:
+
+```bash
+npm install --workspaces --include-workspace-root
+npm run typecheck -w @workbuoy/backend
+npm run test -w @workbuoy/backend -- --runInBand --passWithNoTests
+```
+
 ## Modules
 
 - **Introspection report** – `GET /genesis/introspection-report` exposes the
@@ -31,10 +46,10 @@ Workbuoy stack.
 1. Install workspace dependencies with `npm run bootstrap` (installs the
    backend in `apps/backend` and frontend in `apps/frontend`).
 2. Run backend checks from the repo root:
+   - `npm run typecheck -w @workbuoy/backend` executes the backend workspace
+     type-check with the meta TypeScript config.
    - `npm run test -w @workbuoy/backend -- --runInBand --passWithNoTests` runs
      the backend Jest suite with mocks for `prom-client` and `jsonwebtoken`.
-   - `npm run typecheck` runs the backend workspace type-check and the shared
-     meta TypeScript config.
 3. Start the UI for manual testing: `npm run dev --prefix apps/frontend`.
 
 See `docs/STRUCTURE.md` for the monorepo layout and workspace quick reference.

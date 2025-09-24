@@ -23,6 +23,21 @@ jobs:
               - 'apps/frontend/**'
               - 'package.json'
 
+  hygiene:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Guard against tracked dependencies
+        run: npm run guard:ban-tracked-deps
+
+      - name: Guard against empty generated logs
+        run: npm run guard:ban-empty-logs
+
   lint-and-test:
     runs-on: ubuntu-latest
     steps:

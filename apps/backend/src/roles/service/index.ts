@@ -1,6 +1,6 @@
-export type { ImportRolesAndFeatures } from './importer';
+export type { ImportRolesAndFeatures } from './importer.js';
+export { importRolesAndFeatures } from './importer.js';
 export {
-  importRolesAndFeatures,
   getRoleRegistry,
   resolveUserBinding,
   setOverride,
@@ -8,5 +8,5 @@ export {
   refreshRoleRegistry,
   listRoles,
   listFeatures,
-  upsertRoleBinding,
-} from '../service';
+  upsertRoleBinding
+} from './service.js';

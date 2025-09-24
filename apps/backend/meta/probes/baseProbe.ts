@@ -1,4 +1,4 @@
-import { Probe, ProbeResult, ProbeStatus } from './types';
+import { Probe, ProbeResult, ProbeStatus } from './types.js';
 
 export interface ProbeCheckResult {
   status: ProbeStatus;

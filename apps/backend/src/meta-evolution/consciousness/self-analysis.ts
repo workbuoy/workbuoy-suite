@@ -1,5 +1,5 @@
-import { promises as fs, existsSync } from 'fs';
-import path from 'path';
+import { promises as fs, existsSync, Dirent } from 'node:fs';
+import path from 'node:path';
 import { AnalysisResult } from '../types.js';
 
 export interface SelfAnalysisOptions {
@@ -59,7 +59,7 @@ export class SelfAnalyzer {
     let linesOfCode = 0;
     let totalComplexity = 0;
 
-    let entries: path.Dirent[] = [];
+    let entries: Dirent[] = [];
     try {
       entries = await fs.readdir(dir, { withFileTypes: true });
     } catch {

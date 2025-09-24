@@ -1,69 +1,94 @@
-import request from 'supertest';
-import fs from 'fs';
-import os from 'os';
-import path from 'path';
+const request = require('supertest');
+
+const { buildApp } = require('@backend/app');
 
 describe('CRM MVP baseline', () => {
-  const originalCwd = process.cwd();
-  let app: any;
-  let tmpDir: string;
+  let app: ReturnType<typeof buildApp>;
 
-  beforeAll(() => {
-    tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'wb-mvp-'));
-    process.chdir(tmpDir);
-    process.env.PERSIST_MODE = 'file';
-    app = require('../../../src/server').default;
+  beforeEach(() => {
+    app = buildApp();
   });
 
-  afterAll(() => {
-    process.chdir(originalCwd);
-    delete process.env.PERSIST_MODE;
-  });
+  it('enforces viewer restrictions and logs admin operations', async () => {
+    const viewerAttempt = await request(app)
+      .post('/api/v1/crm/contacts')
+      .send({ name: 'viewer-demo' });
 
-  it('rejects task writes without autonomy header', async () => {
-    const res = await request(app).post('/api/tasks').send({ title: 'demo' });
-    expect(res.status).toBe(400);
-    expect(res.body).toHaveProperty('error', 'E_POLICY_HEADERS_MISSING');
-  });
+    expect(viewerAttempt.status).toBe(403);
+    expect(viewerAttempt.body).toMatchObject({ error: 'forbidden' });
 
-  it('allows task write with autonomy level 2', async () => {
-    const res = await request(app)
-      .post('/api/tasks')
-      .set('x-autonomy-level', '2')
-      .set('x-role', 'ops')
-      .send({ title: 'demo' });
-    expect(res.status).toBe(201);
-    expect(res.body).toHaveProperty('title', 'demo');
-  });
+    const managerCreate = await request(app)
+      .post('/api/v1/crm/contacts')
+      .set('x-user-role', 'manager')
+      .set('x-user-id', 'manager-1')
+      .send({ name: 'Alice Example', owner_id: 'manager-1', team_id: 'ops' });
 
-  it('exposes bus stats shape', async () => {
-    const res = await request(app).get('/_debug/bus');
-    expect(res.status).toBe(200);
-    expect(res.body).toEqual(expect.objectContaining({
-      summary: expect.objectContaining({
-        high: expect.any(Number),
-        medium: expect.any(Number),
-        low: expect.any(Number),
-        dlq: expect.any(Number)
+    expect(managerCreate.status).toBe(201);
+    expect(managerCreate.body).toEqual(
+      expect.objectContaining({
+        id: expect.any(String),
+        name: 'Alice Example',
+        entity_type: 'contact',
       }),
-      queues: expect.any(Array),
-      dlq: expect.any(Array)
-    }));
+    );
+
+    const auditLog = await request(app).get('/_admin/audit');
+    expect(Array.isArray(auditLog.body)).toBe(true);
+    expect(auditLog.body).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          action: 'create',
+          entity_type: 'contact',
+          actor_id: 'manager-1',
+        }),
+      ]),
+    );
   });
 
-  it('exposes status payload', async () => {
-    const res = await request(app).get('/status');
-    expect(res.status).toBe(200);
-    expect(res.body).toEqual(expect.objectContaining({
-      ok: true,
-      ts: expect.any(String),
-      persistMode: expect.any(String),
-      queues: expect.objectContaining({
-        high: expect.any(Number),
-        medium: expect.any(Number),
-        low: expect.any(Number),
-        dlq: expect.any(Number)
-      })
-    }));
+  it('seeds baseline data and allows team managers to update sensitive records', async () => {
+    const seed = await request(app)
+      .post('/_admin/seed')
+      .send({
+        'contact:seed-1': {
+          id: 'seed-1',
+          entity_type: 'contact',
+          owner_id: 'owner-1',
+          team_id: 'team-a',
+          sensitive: true,
+        },
+      });
+
+    expect(seed.status).toBe(200);
+    expect(seed.body).toMatchObject({ ok: true, n: 1 });
+
+    const viewerGet = await request(app).get('/api/v1/crm/contacts/seed-1');
+    expect(viewerGet.status).toBe(403);
+
+    const managerGet = await request(app)
+      .get('/api/v1/crm/contacts/seed-1')
+      .set('x-user-role', 'manager')
+      .set('x-user-id', 'manager-2')
+      .set('x-user-team', 'team-a');
+
+    expect(managerGet.status).toBe(200);
+    expect(managerGet.body).toMatchObject({ id: 'seed-1', owner_id: 'owner-1' });
+
+    const managerPatch = await request(app)
+      .patch('/api/v1/crm/contacts/seed-1')
+      .set('x-user-role', 'manager')
+      .set('x-user-id', 'manager-2')
+      .set('x-user-team', 'team-a')
+      .send({ title: 'Updated Title' });
+
+    expect(managerPatch.status).toBe(200);
+    expect(managerPatch.body).toMatchObject({ title: 'Updated Title' });
+
+    const auditLog = await request(app).get('/_admin/audit');
+    expect(auditLog.body.length).toBeGreaterThanOrEqual(2);
+    expect(auditLog.body[auditLog.body.length - 1]).toMatchObject({
+      action: 'update',
+      entity_type: 'contact',
+      actor_id: 'manager-2',
+    });
   });
 });

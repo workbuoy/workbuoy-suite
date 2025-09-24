@@ -1,0 +1,8 @@
+{
+  "extends": "./tsconfig.meta.json",
+  "compilerOptions": {
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "esModuleInterop": true
+  }
+}

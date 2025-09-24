@@ -1,25 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import crypto from "crypto";
 
-declare global {
-  namespace Express {
-    interface Request {
-      wb?: {
-        intent?: string;
-        when?: string;
-        autonomy?: number;
-        autonomyLevel?: number;
-        roleId?: string;
-        role?: string;
-        selectedId?: string;
-        selectedType?: string;
-        correlationId: string;
-      };
-      correlationId?: string;
-    }
-  }
-}
-
 function parseAutonomy(value: unknown, fallback?: number): number | undefined {
   if (typeof value === "number" && Number.isFinite(value)) return value;
   if (typeof value === "string" && value.trim().length) {
@@ -31,7 +12,7 @@ function parseAutonomy(value: unknown, fallback?: number): number | undefined {
 
 export function wbContext(req: Request, _res: Response, next: NextFunction) {
   const headers = req.headers;
-  const existing = req.wb || {};
+  const existing: Partial<WbContext> = req.wb ?? {};
 
   const headerCorrelation = (req as any).correlationId as string | undefined;
   const correlationId =
@@ -51,7 +32,7 @@ export function wbContext(req: Request, _res: Response, next: NextFunction) {
     (headers["x-role"] || headers["x-role-id"] || headers["x-wb-role"]) as string | undefined;
   const roleId = roleHeader?.toString().trim() || existing.roleId;
 
-  req.wb = {
+  const ctx: WbContext = {
     ...existing,
     intent: String(headers["x-wb-intent"] || existing.intent || "") || undefined,
     when: String(headers["x-wb-when"] || existing.when || "") || undefined,
@@ -59,11 +40,14 @@ export function wbContext(req: Request, _res: Response, next: NextFunction) {
     autonomyLevel: autonomyLevel ?? existing.autonomyLevel,
     roleId: roleId || existing.roleId,
     role: roleId || existing.role,
-    selectedId: String(headers["x-wb-selected-id"] || existing.selectedId || "") || undefined,
-    selectedType: String(headers["x-wb-selected-type"] || existing.selectedType || "") || undefined,
+    selectedId:
+      String(headers["x-wb-selected-id"] || existing.selectedId || "") || undefined,
+    selectedType:
+      String(headers["x-wb-selected-type"] || existing.selectedType || "") || undefined,
     correlationId
   };
 
-  (req as any).correlationId = correlationId;
+  req.wb = ctx;
+  (req as any).correlationId = ctx.correlationId;
   next();
 }

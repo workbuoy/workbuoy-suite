@@ -1,5 +1,5 @@
 import fetch from 'node-fetch';
-import Redis from 'ioredis';
+import { Redis } from 'ioredis';
 import { dyn_dlq_total, dyn_errors_total, dyn_ingest_total } from './metrics.js';
 
 export interface WorkBuoyCfg {
@@ -8,8 +8,10 @@ export interface WorkBuoyCfg {
   tenantId: string;
 }
 
+type RedisClient = Redis;
+
 export class Upserter {
-  private redis: Redis;
+  private redis: RedisClient;
   private idempTTL = parseInt(process.env.DYN_IDEMP_TTL_SEC || '86400',10);
 
   constructor(redisUrl: string, private wb: WorkBuoyCfg) {
@@ -41,7 +43,7 @@ export class Upserter {
     dyn_ingest_total.labels(kind, 'poll').inc();
   }
 
-  async upsertOrDlq(kind: 'contact'|'opportunity', body: any, dlq: Redis) {
+  async upsertOrDlq(kind: 'contact'|'opportunity', body: any, dlq: RedisClient) {
     const max = parseInt(process.env.DYN_RETRY_MAX || '5', 10);
     let attempt = 0;
     while (attempt < max) {

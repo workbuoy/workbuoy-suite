@@ -83,11 +83,19 @@ export class AwarenessEngine {
 
   async planTranscendence(limitations: Limitation[]): Promise<TranscendencePlan> {
     const focus = limitations.length > 0 ? limitations[0].id : 'stability';
-    const steps = limitations.slice(0, 3).map((limitation, index) => ({
-      id: `step-${index + 1}`,
-      description: `Address ${limitation.id} by ${limitation.recommendedAction.toLowerCase()}.`,
-      impact: limitation.severity === 'high' ? 'high' : 'medium'
-    }));
+    const steps = limitations.slice(0, 3).map((limitation, index) => {
+      const impact: 'low' | 'medium' | 'high' =
+        limitation.severity === 'high'
+          ? 'high'
+          : limitation.severity === 'medium'
+          ? 'medium'
+          : 'low';
+      return {
+        id: `step-${index + 1}`,
+        description: `Address ${limitation.id} by ${limitation.recommendedAction.toLowerCase()}.`,
+        impact
+      };
+    });
 
     if (steps.length === 0) {
       steps.push({

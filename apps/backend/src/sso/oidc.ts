@@ -1,7 +1,8 @@
 import { Router } from 'express';
 import jwt from 'jsonwebtoken';
 import cookie from 'cookie-parser';
-import { Issuer, generators, Client } from 'openid-client';
+import * as oidc from 'openid-client';
+import type { ClientMetadata, Configuration } from 'openid-client';
 import { audit } from '../audit/audit.js';
 
 const SSO_ENABLED = (process.env.SSO_ENABLED || 'true') === 'true';
@@ -10,24 +11,41 @@ const DEV_MOCK = (process.env.OIDC_DEV_MOCK || '1') === '1';
 const JWT_SECRET = process.env.SESSION_SECRET || 'dev-secret';
 const COOKIE_NAME = 'wb_sess';
 
+const issuerUrl = process.env.OIDC_ISSUER_URL || '';
+const clientId = process.env.OIDC_CLIENT_ID || '';
+const clientSecret = process.env.OIDC_CLIENT_SECRET || '';
+const callbackUrl = process.env.OIDC_CALLBACK_URL || 'http://localhost:3000/auth/callback';
+
 type Sess = { sub: string; email?: string; name?: string; roles?: string[]; tenant_id: string };
+type AuthorizationSession = { state: string; codeVerifier: string };
+
+let configuration: Configuration | null = null;
+
+async function getConfiguration(): Promise<Configuration> {
+  if (configuration) return configuration;
+  if (!issuerUrl) {
+    throw new Error('OIDC_ISSUER_URL not configured');
+  }
+  const metadata: Partial<ClientMetadata> = {
+    client_secret: clientSecret || undefined,
+    redirect_uris: [callbackUrl],
+    response_types: ['code'],
+    token_endpoint_auth_method: clientSecret ? 'client_secret_post' : 'none'
+  };
+  configuration = await oidc.discovery(new URL(issuerUrl), clientId, metadata);
+  return configuration;
+}
+
+function buildCallbackUrl(req: any) {
+  const base = `${req.protocol || 'http'}://${req.get?.('host') || 'localhost:3000'}`;
+  return new URL(req.originalUrl || req.url, base);
+}
 
 export function ssoRouter() {
   const r = Router();
   r.use(cookie());
 
-  let client: Client|null = null;
-  let issuerUrl = process.env.OIDC_ISSUER_URL || '';
-  let clientId = process.env.OIDC_CLIENT_ID || '';
-  let clientSecret = process.env.OIDC_CLIENT_SECRET || '';
-  let callbackUrl = process.env.OIDC_CALLBACK_URL || 'http://localhost:3000/auth/callback';
-
-  async function getClient() {
-    if (client) return client;
-    const iss = await Issuer.discover(issuerUrl);
-    client = new iss.Client({ client_id: clientId, client_secret: clientSecret, redirect_uris: [callbackUrl], response_types: ['code'] });
-    return client;
-  }
+  let sessionStore: AuthorizationSession | null = null;
 
   r.get('/auth/login', async (req, res) => {
     const tenant_id = String(req.query.tenant || req.header('x-tenant-id') || 'demo-tenant');
@@ -39,14 +57,20 @@ export function ssoRouter() {
       return res.redirect('/');
     }
     try {
-      const c = await getClient();
-      const state = generators.state();
-      const code_verifier = generators.codeVerifier();
-      const code_challenge = generators.codeChallenge(code_verifier);
-      (req as any).session = { state, code_verifier };
-      const authUrl = c.authorizationUrl({ scope: 'openid email profile', state, code_challenge, code_challenge_method: 'S256' });
-      res.redirect(authUrl);
-    } catch (e:any) {
+      const config = await getConfiguration();
+      const state = oidc.randomState();
+      const codeVerifier = oidc.randomPKCECodeVerifier();
+      const codeChallenge = await oidc.calculatePKCECodeChallenge(codeVerifier);
+      sessionStore = { state, codeVerifier };
+      const authUrl = oidc.buildAuthorizationUrl(config, {
+        redirect_uri: callbackUrl,
+        scope: 'openid email profile',
+        state,
+        code_challenge: codeChallenge,
+        code_challenge_method: 'S256'
+      });
+      res.redirect(authUrl.toString());
+    } catch (e) {
       res.status(500).send(String(e));
     }
   });
@@ -54,17 +78,36 @@ export function ssoRouter() {
   r.get('/auth/callback', async (req, res) => {
     if (DEV_MOCK) return res.redirect('/');
     try {
-      const c = await getClient();
-      const params = c.callbackParams(req);
-      const tokenSet = await c.callback(callbackUrl, params, { state: (req as any).session?.state, code_verifier: (req as any).session?.code_verifier });
-      const id = tokenSet.claims();
+      const config = await getConfiguration();
+      const currentUrl = buildCallbackUrl(req);
+      const checks = sessionStore
+        ? {
+            pkceCodeVerifier: sessionStore.codeVerifier,
+            expectedState: sessionStore.state
+          }
+        : undefined;
+      const tokenSet = await oidc.authorizationCodeGrant(config, currentUrl, checks);
+      const claims = tokenSet.claims?.() ?? {};
       const tenant_id = String(req.header('x-tenant-id') || 'demo-tenant');
-      const roles: string[] = Array.isArray((id as any).roles) ? (id as any).roles : ((id as any)['https://workbuoy/roles'] || []);
-      const tok = jwt.sign({ sub: id.sub, email: id.email, name: id.name, roles, tenant_id }, JWT_SECRET, { expiresIn: '8h' });
+      const roles: string[] = Array.isArray((claims as any).roles)
+        ? ((claims as any).roles as string[])
+        : ((claims as any)['https://workbuoy/roles'] as string[] | undefined) || [];
+      const tok = jwt.sign(
+        {
+          sub: String((claims as any).sub || ''),
+          email: (claims as any).email,
+          name: (claims as any).name,
+          roles,
+          tenant_id
+        },
+        JWT_SECRET,
+        { expiresIn: '8h' }
+      );
       res.cookie(COOKIE_NAME, tok, { httpOnly: true, sameSite: 'lax', secure: false });
-      audit({ type: 'user.login', tenant_id, actor_id: String(id.sub||''), details: { method: 'oidc' } });
+      audit({ type: 'user.login', tenant_id, actor_id: String((claims as any).sub || ''), details: { method: 'oidc' } });
+      sessionStore = null;
       res.redirect('/');
-    } catch (e:any) {
+    } catch (e) {
       res.status(500).send(String(e));
     }
   });

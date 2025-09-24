@@ -25,17 +25,17 @@ jobs:
     runs-on: ubuntu-latest
     services:
       postgres:
-        image: postgres:16
+        image: postgres:15
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
           POSTGRES_DB: wb
         ports: ['5432:5432']
         options: >-
-          --health-cmd "pg_isready -U postgres"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
+          --health-cmd="pg_isready -U postgres"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
     env:
       FF_PERSISTENCE: 'true'
       DATABASE_URL: postgresql://postgres:postgres@localhost:5432/wb?schema=public
@@ -47,6 +47,14 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
+
+      - name: Cache npm
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
 
       - name: Install workspaces
         run: npm install --workspaces --include-workspace-root --no-audit --fund=false
@@ -71,4 +79,4 @@ jobs:
         env:
           FF_PERSISTENCE: true
           DATABASE_URL: ${{ env.DATABASE_URL }}
-        run: npm run test -w @workbuoy/backend -- --runInBand --passWithNoTests
+        run: npm run test -w @workbuoy/backend -- --runInBand --passWithNoTests --detectOpenHandles

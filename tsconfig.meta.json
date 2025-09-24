@@ -11,6 +11,7 @@
     "apps/backend/tests/genesis.autonomy.test.ts",
     "apps/backend/tests/__mocks__/**/*.ts",
     "apps/backend/meta/**/*.ts",
+    "apps/backend/src/types/**/*.d.ts",
     "observability/metrics/**/*.ts",
     "tests/meta/**/*.ts"
   ]
