@@ -1,3 +1,5 @@
+# Archived pending DevOps review. No longer referenced by active pipelines.
+
 version: '3.9'
 
 services:
