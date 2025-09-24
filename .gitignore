@@ -107,4 +107,3 @@ Icon?
 # Generated telemetry stubs
 meta/*.jsonl
 reports/**/*.json
-reports/roles/*.json
