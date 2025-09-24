@@ -6,7 +6,8 @@ Workbuoy stack.
 
 ## Structure
 
-Active services live under apps/backend and apps/frontend. Legacy roots were retired.
+Active services live under `apps/backend` and `apps/frontend`.  
+Legacy roots (`backend/` and `frontend/`) have been retired.
 
 ## Typecheck & tests
 
