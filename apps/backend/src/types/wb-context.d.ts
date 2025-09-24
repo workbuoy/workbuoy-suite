@@ -1,22 +1,14 @@
-declare global {
-  interface WbContext {
-    correlationId: string;
-    autonomyLevel?: number;
-    roleId?: string;
-    role?: string;
-    intent?: string;
-    when?: string;
-    autonomy?: number;
-    selectedId?: string;
-    selectedType?: string;
-  }
+import 'express';
 
-  namespace Express {
-    interface Request {
-      wb?: WbContext;
-      correlationId?: string;
-    }
-  }
+export interface WbContext {
+  correlationId?: string;
+  autonomyLevel?: string;
+  roleId?: string;
+  [key: string]: any;
 }
 
-export {};
+declare module 'express-serve-static-core' {
+  interface Request {
+    wb?: WbContext;
+  }
+}

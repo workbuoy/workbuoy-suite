@@ -4,5 +4,15 @@
     "moduleResolution": "nodenext",
     "resolveJsonModule": true,
     "allowArbitraryExtensions": true
-  }
+  },
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "src/types/**/*.d.ts"
+  ],
+  "exclude": [
+    "dist",
+    "node_modules",
+    "coverage"
+  ]
 }
