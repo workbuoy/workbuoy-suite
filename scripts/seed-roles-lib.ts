@@ -4,6 +4,7 @@ import { pathToFileURL } from 'node:url';
 
 import { resolveFeaturesSource, resolveRolesSource } from './roles-io.ts';
 import type { FeatureDef, RoleProfile } from '../apps/backend/src/roles/types';
+import { prisma } from '../apps/backend/src/db/prisma';
 
 function getBackendRoot(): string {
   const cwd = process.cwd();
@@ -71,8 +72,16 @@ export async function runSeed(importer?: ImportRolesAndFeatures): Promise<SeedSu
   const rolesSource = resolveRolesSource();
   const featuresSource = resolveFeaturesSource();
   const importRolesAndFeatures = importer ?? (await loadImporter());
+  console.log('[seed] importing roles/features');
   const summary = await importRolesAndFeatures(rolesSource.data, featuresSource.data);
-  console.log(`seeded {roles:${summary.roles}, features:${summary.features}}`);
+
+  try {
+    await prisma.$disconnect();
+    console.log('[seed] prisma disconnected');
+  } catch (e) {
+    console.warn('[seed] prisma disconnect failed:', e);
+  }
+
   return {
     ok: true,
     summary,

@@ -70,10 +70,13 @@ jobs:
         run: npx --yes -p prisma@6.16.2 prisma migrate deploy --schema=apps/backend/prisma/schema.prisma
 
       - name: Seed baseline roles/features
+        timeout-minutes: 2
+        run: npm run seed:roles -w @workbuoy/backend
         env:
           FF_PERSISTENCE: true
           DATABASE_URL: ${{ env.DATABASE_URL }}
-        run: npm run seed:roles -w @workbuoy/backend
+          ROLES_PATH: scripts/fixtures/minimal-roles.json
+          FEATURES_PATH: scripts/fixtures/minimal-features.json
 
       - name: Run persistence tests
         env:
