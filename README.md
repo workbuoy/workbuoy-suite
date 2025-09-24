@@ -5,19 +5,17 @@ autonomous development proposals and explicit evolution guardrails across the
 Workbuoy stack.
 
 ## Structure
-
 Active services live under `apps/backend` and `apps/frontend`.  
 Legacy roots (`backend/` and `frontend/`) have been retired.
 
 ## Typecheck & tests
-
 Run the backend checks from the repo root:
 
 ```bash
 npm install --workspaces --include-workspace-root
 npm run typecheck -w @workbuoy/backend
 npm run test -w @workbuoy/backend -- --runInBand --passWithNoTests
-```
+
 
 ## Modules
 
