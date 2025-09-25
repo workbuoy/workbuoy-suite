@@ -20,7 +20,7 @@ jobs:
       contents: read
       security-events: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Set up QEMU (for cross-platform builds, optional)
         uses: docker/setup-qemu-action@v3
@@ -48,7 +48,7 @@ jobs:
 
       # --- Trivy scan (backend) ---
       - name: Trivy Scan (backend) — non-blocking
-        uses: aquasecurity/trivy-action@0.20.0
+        uses: aquasecurity/trivy-action@0.33.1
         with:
           image-ref: workbuoy/backend:pr
           format: 'table'
@@ -60,7 +60,7 @@ jobs:
 
       # --- Trivy scan (frontend) ---
       - name: Trivy Scan (frontend) — non-blocking
-        uses: aquasecurity/trivy-action@0.20.0
+        uses: aquasecurity/trivy-action@0.33.1
         with:
           image-ref: workbuoy/frontend:pr
           format: 'table'
