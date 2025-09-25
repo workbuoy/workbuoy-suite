@@ -17,8 +17,14 @@ export function parseToQuery(input: string): GlobalSearchQuery {
   if (kunde) q.filters['kunde'] = kunde;
 
   // Tidsrom
-  for (const k of Object.keys(periodMap)) {
-    if (lower.includes(k)) { q.filters['tidsrom'] = periodMap[k]; break; }
+  for (const key of Object.keys(periodMap)) {
+    if (lower.includes(key)) {
+      const period = periodMap[key];
+      if (period) {
+        q.filters['tidsrom'] = period;
+        break;
+      }
+    }
   }
 
   // Region

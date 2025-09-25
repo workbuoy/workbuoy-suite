@@ -15,6 +15,7 @@ type ContactMapProps = {
 };
 
 const COLORS = ['#2563eb', '#f97316', '#22c55e', '#a855f7', '#ef4444'];
+const DEFAULT_COLOR = COLORS[0] ?? '#2563eb';
 
 export function ContactMap({ contacts }: ContactMapProps) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -26,7 +27,7 @@ export function ContactMap({ contacts }: ContactMapProps) {
         lat: contact.lat as number,
         lng: contact.lng as number,
         label: contact.name || contact.id,
-        color: COLORS[index % COLORS.length],
+        color: COLORS[index % COLORS.length] ?? DEFAULT_COLOR,
       }));
   }, [contacts]);
 

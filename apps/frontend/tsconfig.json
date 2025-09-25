@@ -1,36 +1,16 @@
 {
-  "extends": "../../tsconfig.json",
+  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "jsx": "react-jsx",
+    "outDir": "dist",
     "module": "ESNext",
     "moduleResolution": "Bundler",
-    "useDefineForClassFields": true,
-    "resolveJsonModule": true,
-    "isolatedModules": true,
+    "jsx": "react-jsx",
     "baseUrl": "./src",
     "paths": {
-      "@/*": [
-        "./*"
-      ]
+      "@/*": ["./*"]
     },
-    "types": [
-      "vitest",
-      "node",
-      "@testing-library/jest-dom"
-    ],
-    "typeRoots": [
-      "../../types",
-      "../../node_modules/@types",
-      "./node_modules/@types",
-      "../../node_modules",
-      "./node_modules"
-    ]
+    "types": ["vitest", "node", "@testing-library/jest-dom"]
   },
-  "include": [
-    "src/**/*"
-  ],
-  "exclude": [
-    "src/**/*.test.ts",
-    "src/**/*.test.tsx"
-  ]
+  "include": ["src", "src/types"],
+  "exclude": ["src/**/*.test.ts", "src/**/*.test.tsx"]
 }

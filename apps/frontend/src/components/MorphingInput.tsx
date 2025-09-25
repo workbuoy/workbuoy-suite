@@ -40,7 +40,7 @@ function tokenize(input: string): Token[] | null {
   const tokens: Token[] = [];
   let idx = 0;
   while (idx < input.length) {
-    const ch = input[idx];
+    const ch = input.charAt(idx);
     if (ch === " ") {
       idx += 1;
       continue;
@@ -48,15 +48,18 @@ function tokenize(input: string): Token[] | null {
     if (/[0-9.]/.test(ch)) {
       let number = ch;
       idx += 1;
-      while (idx < input.length && /[0-9.]/.test(input[idx])) {
-        number += input[idx];
+      while (idx < input.length) {
+        const nextChar = input.charAt(idx);
+        if (!/[0-9.]/.test(nextChar)) break;
+        number += nextChar;
         idx += 1;
       }
       if (number.split(".").length > 2) return null;
       tokens.push({ type: "number", value: number });
       continue;
     }
-    if (operators[ch]) {
+    const operator = operators[ch];
+    if (operator) {
       tokens.push({ type: "operator", value: ch });
       idx += 1;
       continue;
@@ -84,6 +87,7 @@ function evaluateExpression(expression: string): number | null {
       if (!op1) return null;
       while (stack.length) {
         const peek = stack[stack.length - 1];
+        if (!peek) break;
         if (peek.type === "operator") {
           const op2 = operators[peek.value];
           if (
@@ -91,8 +95,11 @@ function evaluateExpression(expression: string): number | null {
             ((op1.assoc === "left" && op1.precedence <= op2.precedence) ||
               (op1.assoc === "right" && op1.precedence < op2.precedence))
           ) {
-            output.push(stack.pop()!);
-            continue;
+            const popped = stack.pop();
+            if (popped) {
+              output.push(popped);
+              continue;
+            }
           }
         }
         break;
@@ -104,7 +111,8 @@ function evaluateExpression(expression: string): number | null {
       } else {
         let found = false;
         while (stack.length) {
-          const popped = stack.pop()!;
+          const popped = stack.pop();
+          if (!popped) break;
           if (popped.type === "paren" && popped.value === "(") {
             found = true;
             break;
@@ -116,7 +124,8 @@ function evaluateExpression(expression: string): number | null {
     }
   }
   while (stack.length) {
-    const popped = stack.pop()!;
+    const popped = stack.pop();
+    if (!popped) break;
     if (popped.type === "paren") return null;
     output.push(popped);
   }
@@ -137,7 +146,9 @@ function evaluateExpression(expression: string): number | null {
     }
   }
   if (evalStack.length !== 1) return null;
-  return Number.parseFloat(evalStack[0].toFixed(4));
+  const result = evalStack[0];
+  if (result === undefined) return null;
+  return Number.parseFloat(result.toFixed(4));
 }
 
 function looksLikeExpression(value: string) {
