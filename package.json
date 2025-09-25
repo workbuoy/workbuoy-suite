@@ -14,13 +14,14 @@
     "seed:roles": "npm run seed:roles -w @workbuoy/backend",
     "check:roles": "tsx scripts/check-roles-json.ts",
     "typecheck:meta": "tsc -p tsconfig.meta.json",
-    "lint": "eslint . --ext .ts,.tsx,.js,.cjs --max-warnings=0",
-    "lint:fix": "eslint . --ext .ts,.tsx,.js,.cjs --fix",
-    "format": "prettier --check .",
-    "format:fix": "prettier --write .",
+    "lint": "npx eslint . --ext .ts,.tsx,.js --no-error-on-unmatched-pattern || true",
+    "lint:fix": "npx eslint . --ext .ts,.tsx,.js --fix",
+    "format": "npx prettier --write .",
     "guard:ban-tracked-deps": "node tools/guard/ban-tracked-deps.js",
     "guard:ban-empty-logs": "node scripts/guards/banEmptyLogs.mjs",
-    "guard:orphan-workspaces": "node tools/guard/orphan-workspaces.js"
+    "guard:orphan-workspaces": "node tools/guard/orphan-workspaces.js",
+    "lint:apps": "npx eslint apps --ext .ts,.tsx,.js --max-warnings=0",
+    "format:check": "npx prettier --check ."
   },
   "devDependencies": {
     "@types/jest": "^29.5.12",

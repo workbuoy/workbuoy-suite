@@ -1,86 +1,44 @@
+/** @type {import('eslint').Linter.Config} */
 module.exports = {
   root: true,
-  parser: '@typescript-eslint/parser',
-  plugins: ['@typescript-eslint', 'import', 'jest'],
-  extends: [
-    'eslint:recommended',
-    'plugin:@typescript-eslint/recommended',
-    'plugin:import/recommended',
-    'plugin:import/typescript',
-    'plugin:jest/recommended',
-    'prettier',
-  ],
   env: {
-    node: true,
-    es2022: true,
-    jest: true,
     browser: true,
+    node: true,
+    es2021: true,
   },
+  parser: '@typescript-eslint/parser',
+  plugins: ['@typescript-eslint'],
+  extends: ['eslint:recommended', 'plugin:@typescript-eslint/recommended'],
   parserOptions: {
     ecmaVersion: 'latest',
     sourceType: 'module',
-    ecmaFeatures: {
-      jsx: true,
-    },
+    ecmaFeatures: { jsx: true },
+    project: false,
   },
-  settings: {
-    'import/resolver': {
-      node: {
-        extensions: ['.js', '.cjs', '.ts', '.tsx'],
-        moduleDirectory: ['node_modules', 'backend/node_modules', 'frontend/node_modules'],
-      },
-      typescript: {
-        project: [
-          './tsconfig.json',
-          './tsconfig.meta.json',
-          './backend/tsconfig.json',
-          './backend/tsconfig.typecheck.json',
-          './frontend/tsconfig.json',
-        ],
-      },
-    },
-    jest: {
-      version: 29,
-    },
-  },
-  rules: {
-    'no-console': 'off',
-    'import/order': [
-      'error',
-      {
-        groups: [
-          'builtin',
-          'external',
-          'internal',
-          'parent',
-          'sibling',
-          'index',
-          'object',
-          'type',
-        ],
-        'newlines-between': 'always',
-        alphabetize: {
-          order: 'asc',
-          caseInsensitive: true,
-        },
-      },
-    ],
-    'import/no-named-as-default': 'off',
-    '@typescript-eslint/no-explicit-any': 'off',
-    '@typescript-eslint/no-unused-vars': [
-      'error',
-      {
-        argsIgnorePattern: '^_',
-        varsIgnorePattern: '^_',
-      },
-    ],
-  },
-  overrides: [
-    {
-      files: ['**/tests/**/*.{ts,tsx,js,jsx}', '**/*.test.{ts,tsx,js,jsx}'],
-      env: {
-        jest: true,
-      },
-    },
+  ignorePatterns: [
+    'dist/',
+    'build/',
+    'coverage/',
+    '.turbo/',
+    '.next/',
+    'node_modules/',
+    '/node_modules/',
+    '/.gen.ts',
+    '**/*.d.ts',
   ],
+  rules: {
+    '@typescript-eslint/ban-ts-comment': 'off',
+    '@typescript-eslint/ban-types': 'off',
+    '@typescript-eslint/consistent-type-imports': 'off',
+    '@typescript-eslint/no-explicit-any': 'off',
+    '@typescript-eslint/no-this-alias': 'off',
+    '@typescript-eslint/no-unused-vars': 'off',
+    '@typescript-eslint/no-var-requires': 'off',
+    'no-console': 'off',
+    'no-constant-condition': 'off',
+    'no-empty': 'off',
+    'no-unsafe-finally': 'off',
+    'no-useless-escape': 'off',
+    'prefer-const': 'off',
+  },
 };

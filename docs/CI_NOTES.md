@@ -21,3 +21,14 @@ git rm -r --cached path/to/offending/node_modules
 echo 'node_modules/' >> .gitignore
 git commit -m "chore(gitignore): ignore node_modules"
 ```
+
+## Linting Policy
+
+- Root ESLint config at `.eslintrc.cjs` is the single source of truth.
+- Blocking: `apps/**` (CI uses `npm run lint:apps` with `--max-warnings=0`).
+- Non-blocking report: entire repo (satellites) via `npm run lint` (CI job continues on error).
+
+## Prettier
+
+- Format files: `npm run format`
+- Check formatting: `npm run format:check`
