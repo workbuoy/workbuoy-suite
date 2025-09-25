@@ -18,8 +18,8 @@ RUN npm ci
 # Now copy the rest of the repo (respects root .dockerignore)
 COPY . .
 
-# Build the backend workspace for container (minimal surface)
-RUN npm run -w @workbuoy/backend build:container
+# Build the backend workspace for container (minimal surface) and verify entrypoint
+RUN npm run -w @workbuoy/backend build:container && npm run -w @workbuoy/backend build:container:verify
 
 # --- runtime ---
 

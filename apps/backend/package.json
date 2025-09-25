@@ -6,6 +6,7 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "build:container": "tsc -p tsconfig.container.json",
+    "build:container:verify": "node -e \"const fs=require('fs');const path=require('path');const resolveDist=()=>{const local=path.join('dist');if(fs.existsSync(local)){return local;}return path.join('apps/backend','dist');};const dist=resolveDist();const entry=path.join(dist,'index.js');const altEntry=path.join(dist,'src/index.js');const ensureFile=(target,source)=>{if(!fs.existsSync(target)&&fs.existsSync(source)){fs.mkdirSync(path.dirname(target),{recursive:true});fs.copyFileSync(source,target);}};ensureFile(entry,altEntry);fs.accessSync(entry);const server=path.join(dist,'server.js');const altServer=path.join(dist,'src/server.js');ensureFile(server,altServer);const serverDts=path.join(dist,'server.d.ts');const altServerDts=path.join(dist,'src/server.d.ts');ensureFile(serverDts,altServerDts);fs.accessSync(server);console.log('[verify] dist/index.js present');\"",
     "test": "jest --passWithNoTests --config jest.meta.config.cjs",
     "typecheck": "tsc --noEmit -p tsconfig.typecheck.json",
     "prisma:generate": "prisma generate",

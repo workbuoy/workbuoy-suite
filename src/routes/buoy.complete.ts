@@ -21,13 +21,18 @@ export function buoyRouter() {
 
       const route = intent ? { capability: intent, payload: params || {} } : routeFromText(String(text ?? ''));
       // Pre-check policy to craft explanations regardless of outcome
-      const policy = await policyCheck(route, { autonomy_level: autonomy as any, tenantId, role });
+      const policy = await policyCheck(route, { autonomy_level: autonomy as any, tenantId, role } as any);
 
       // For MVP: only run capability for safe ones; others just report decision
       let result: any = undefined;
       if (policy.allowed) {
         try {
-          const rc = await runCapability(route.capability, route.payload, { autonomy_level: autonomy as any, tenantId, role }, {});
+          const rc = await runCapability(
+            route.capability,
+            route.payload,
+            { autonomy_level: autonomy as any, tenantId, role },
+            {},
+          );
           result = rc.outcome ?? { ok: true };
         } catch {
           result = { ok: false };

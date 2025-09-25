@@ -8,7 +8,7 @@ function toJson(value: unknown): Prisma.InputJsonValue | undefined {
 }
 
 function mapRowToProfile(row: RoleRow): RoleProfile {
-  const profile = (row.profile as RoleProfile | null) ?? {} as RoleProfile;
+  const profile = (row.profile as unknown as RoleProfile | null) ?? ({} as RoleProfile);
   const featureCaps = (row.featureCaps as Record<string, number> | null) ?? profile.featureCaps;
   const scopeHints = (row.scopeHints as Record<string, any> | null) ?? profile.scopeHints;
   return {
