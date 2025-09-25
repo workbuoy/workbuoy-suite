@@ -1,6 +1,6 @@
 import 'express';
 
-export interface WbContext {
+interface WbContextBase {
   correlationId?: string;
   autonomyLevel?: string | number;
   roleId?: string;
@@ -11,6 +11,12 @@ export interface WbContext {
   selectedId?: string;
   selectedType?: string;
   [key: string]: any;
+}
+
+export interface WbContext extends WbContextBase {}
+
+declare global {
+  interface WbContext extends WbContextBase {}
 }
 
 declare module 'express-serve-static-core' {

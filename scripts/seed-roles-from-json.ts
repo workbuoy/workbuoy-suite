@@ -1,12 +1,5 @@
 import { seedRolesFromJson } from './seed-roles-lib';
 
-const TIMEOUT_MS = 60_000;
-
-const timeout = setTimeout(() => {
-  console.error('[seed] forced exit after timeout');
-  process.exit(2);
-}, TIMEOUT_MS);
-
 async function main() {
   console.log('[seed] starting…');
   const result = await seedRolesFromJson();
@@ -23,12 +16,9 @@ async function main() {
 
 main()
   .then(() => {
-    clearTimeout(timeout);
-    process.exit(0);
+    console.log('[seed] completed successfully');
   })
   .catch((err) => {
-    clearTimeout(timeout);
     console.error('[seed] failed:', err);
     process.exitCode = 1;
-    throw err;
   });
