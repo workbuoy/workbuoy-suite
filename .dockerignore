@@ -1,0 +1,16 @@
+# Root dockerignore to keep context lean
+node_modules/
+**/node_modules/
+dist/
+build/
+coverage/
+.turbo/
+.next/
+.git/
+.gitignore
+.github/
+.vscode/
+.DS_Store
+*.log
+.env
+.env.*

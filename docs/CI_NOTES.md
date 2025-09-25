@@ -32,3 +32,18 @@ git commit -m "chore(gitignore): ignore node_modules"
 
 - Format files: `npm run format`
 - Check formatting: `npm run format:check`
+
+## Containers
+
+We build multi-stage images for backend (Node runtime) and frontend (Nginx runtime).
+
+CI runs a non-blocking Trivy scan for both images and publishes CycloneDX SBOM artifacts.
+
+For local builds:
+
+```bash
+docker build -t workbuoy-backend:dev ./apps/backend
+docker run --rm -p 3000:3000 workbuoy-backend:dev
+docker build -t workbuoy-frontend:dev ./apps/frontend
+docker run --rm -p 8080:80 workbuoy-frontend:dev
+```
