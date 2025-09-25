@@ -1,0 +1,3 @@
+# Patterns allowed to exceed size threshold (justify in PR).
+# Example:
+# docs/diagrams/*.png
