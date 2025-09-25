@@ -6,6 +6,7 @@ node_modules/
 # Builds & caches
 
 dist/
+!packages/backend-auth/dist/
 build/
 coverage/
 .turbo/

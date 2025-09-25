@@ -21,3 +21,6 @@ Active development: apps/backend, apps/frontend
 Shared configs: tsconfig.base.json, .eslintrc.cjs, .spectral.yaml
 
 CI workflows live in .github/workflows/
+
+Backend packages:
+- `@workbuoy/backend-auth` – shared authentication router & middleware consumed by `apps/backend`.
