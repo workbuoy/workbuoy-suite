@@ -1,12 +1,21 @@
 {
-  "extends": "./tsconfig.json",
+  "extends": "./tsconfig.meta.json",
   "compilerOptions": {
-    "noEmit": true,
-    "rootDir": "."
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "target": "ES2022",
+    "lib": ["ES2022"],
+    "resolveJsonModule": true,
+    "allowArbitraryExtensions": true,
+    "types": ["node", "jest"]
   },
   "include": [
-    "src/**/*",
-    "tests/genesis.autonomy.test.ts",
-    "tests/__mocks__/**/*.ts"
+    "src/**/*.ts",
+    "src/types/**/*.d.ts"
+  ],
+  "exclude": [
+    "dist",
+    "coverage",
+    "node_modules"
   ]
 }

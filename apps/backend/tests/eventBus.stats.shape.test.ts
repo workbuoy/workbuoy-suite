@@ -1,4 +1,6 @@
-import bus, { reset } from "../../../src/core/events/priorityBus";
+const busModule = require('@backend/core/events/priorityBus');
+const bus = busModule.default || busModule;
+const { reset } = busModule;
 
 describe("priorityBus stats shape", () => {
   beforeEach(() => {

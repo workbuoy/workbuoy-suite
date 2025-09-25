@@ -21,8 +21,6 @@ export function buildHelmet(): RequestHandler {
     frameguard: { action: 'deny' },
     referrerPolicy: { policy: 'no-referrer' },
     crossOriginOpenerPolicy: { policy: 'same-origin' },
-    crossOriginResourcePolicy: { policy: 'same-origin' },
-    xPoweredBy: false,
-    hidePoweredBy: true
+    crossOriginResourcePolicy: { policy: 'same-origin' }
   });
 }

@@ -1,4 +1,4 @@
-import type { ProbeResult } from './probes';
+import type { ProbeResult } from './probes/index.js';
 
 export type HealthStatus = 'ok' | 'degraded' | 'down';
 

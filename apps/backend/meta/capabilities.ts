@@ -1,5 +1,5 @@
-import type { MetaCapabilitiesResponse, MetaConnectorCapability } from './types';
-import type { ProviderName } from '../src/connectors/types';
+import type { MetaCapabilitiesResponse, MetaConnectorCapability } from './types.js';
+import type { ProviderName } from '../src/connectors/types.js';
 
 const BOOLEAN_TRUE_VALUES = new Set(['1', 'true', 'yes', 'on', 'enabled']);
 const BOOLEAN_FALSE_VALUES = new Set(['0', 'false', 'no', 'off', 'disabled']);
@@ -51,11 +51,12 @@ function coalesceEnv(keys: readonly string[]): string | undefined {
 
 function resolveModes(): MetaCapabilitiesResponse['modes'] {
   const deriveMode = (mode: keyof MetaCapabilitiesResponse['modes']): boolean => {
+    const modeKey = String(mode).toUpperCase();
     const envCandidates = [
-      `META_MODE_${mode.toUpperCase()}`,
-      `META_MODE_${mode.toUpperCase()}_ENABLED`,
-      `WB_MODE_${mode.toUpperCase()}`,
-      `WB_MODE_${mode.toUpperCase()}_ENABLED`,
+      `META_MODE_${modeKey}`,
+      `META_MODE_${modeKey}_ENABLED`,
+      `WB_MODE_${modeKey}`,
+      `WB_MODE_${modeKey}_ENABLED`,
     ] as const;
     return parseBoolean(coalesceEnv(envCandidates), MODE_DEFAULTS[mode]);
   };

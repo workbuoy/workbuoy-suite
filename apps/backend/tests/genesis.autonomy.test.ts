@@ -1,10 +1,10 @@
-import os from 'os';
-import path from 'path';
+const os = require('os');
+const path = require('path');
 
-import express from 'express';
-import request from 'supertest';
+const express = require('express');
+const request = require('supertest');
 
-import { metaGenesisRouter } from '../../../src/routes/genesis.autonomy';
+const { metaGenesisRouter } = require('@backend/routes/genesis.autonomy');
 
 function buildApp() {
   const app = express();

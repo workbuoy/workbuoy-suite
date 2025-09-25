@@ -1,67 +1,34 @@
-// scripts/seed-roles-from-json.ts
-import path from 'node:path';
-import { pathToFileURL } from 'node:url';
+import { seedRolesFromJson } from './seed-roles-lib';
 
-import { seedRolesFromJson } from './seed-roles-lib.ts';
-import type { ImportRolesAndFeatures } from './seed-roles-lib.ts';
+const TIMEOUT_MS = 60_000;
 
-function getBackendRoot(): string {
-  const cwd = process.cwd();
-  if (path.basename(cwd) === 'backend' && path.basename(path.dirname(cwd)) === 'apps') {
-    return cwd;
-  }
-  const candidate = path.resolve(cwd, 'apps/backend');
-  return candidate;
-}
-
-async function loadImporter(): Promise<ImportRolesAndFeatures> {
-  const backendRoot = getBackendRoot();
-  const candidates = [
-    path.join(backendRoot, 'src/roles/service.ts'),
-    path.join(backendRoot, 'src/roles/service/index.ts'),
-    path.join(backendRoot, 'src/roles/service/importer.ts'),
-    path.join(backendRoot, 'src/roles/service.mts'),
-    path.join(backendRoot, 'src/roles/service.js'),
-    path.join(backendRoot, 'dist/roles/service.js'),
-    path.join(backendRoot, 'dist/roles/service.mjs'),
-  ];
-  let lastErr: unknown;
-  for (const candidate of candidates) {
-    try {
-      const mod = await import(pathToFileURL(candidate).href);
-      const fn = mod?.importRolesAndFeatures;
-      if (typeof fn === 'function') {
-        return fn as ImportRolesAndFeatures;
-      }
-    } catch (err) {
-      lastErr = err;
-    }
-  }
-  throw new Error('importRolesAndFeatures not found in backend roles service', {
-    cause: lastErr as any,
-  });
-}
+const timeout = setTimeout(() => {
+  console.error('[seed] forced exit after timeout');
+  process.exit(2);
+}, TIMEOUT_MS);
 
 async function main() {
-  try {
-    const importRolesAndFeatures = await loadImporter();
-    const result = await seedRolesFromJson(importRolesAndFeatures);
-    if (result.summary) {
-      console.log(
-        JSON.stringify({
-          ok: true,
-          summary: result.summary,
-          rolesPath: result.rolesPath,
-          featuresPath: result.featuresPath,
-        })
-      );
-    } else {
-      console.log(JSON.stringify(result));
-    }
-  } catch (err: any) {
-    console.error('[seed-roles-from-json] failed:', err?.stack || err?.message || String(err));
-    process.exit(1);
+  console.log('[seed] starting…');
+  const result = await seedRolesFromJson();
+
+  if (result?.skipped) {
+    console.log(`[seed] skipped: ${result.skipped}`);
+    return { roles: 0, features: 0 };
   }
+
+  const summary = result?.summary ?? { roles: 0, features: 0 };
+  console.log(`seeded roles=${summary.roles}, features=${summary.features}`);
+  return summary;
 }
 
-main();
+main()
+  .then(() => {
+    clearTimeout(timeout);
+    process.exit(0);
+  })
+  .catch((err) => {
+    clearTimeout(timeout);
+    console.error('[seed] failed:', err);
+    process.exitCode = 1;
+    throw err;
+  });

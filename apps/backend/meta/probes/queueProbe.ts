@@ -1,5 +1,5 @@
-import { createProbe, ProbeDependencies } from './baseProbe';
-import { Probe } from './types';
+import { createProbe, ProbeDependencies } from './baseProbe.js';
+import { Probe } from './types.js';
 
 export type QueueProbeDependencies = ProbeDependencies;
 

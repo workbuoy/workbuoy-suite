@@ -1,4 +1,4 @@
-import booleanPointInPolygon from "@turf/boolean-point-in-polygon";
+import booleanPointInPolygon from '@turf/boolean-point-in-polygon';
 import type { Feature, FeatureCollection, MultiPolygon, Polygon } from "geojson";
 
 export type TerritoryShape = Feature<Polygon | MultiPolygon> | FeatureCollection<Polygon | MultiPolygon>;
@@ -21,12 +21,16 @@ function featureToIterable(shape: TerritoryShape): Feature<Polygon | MultiPolygo
 
 export function assignTerritory(point: Coordinate, territories: TerritoryDefinition[]): TerritoryDefinition | null {
   if (!territories || territories.length === 0) return null;
-  const pt = { type: "Point", coordinates: [point.lng, point.lat] as [number, number] };
+  const pt: Feature = {
+    type: 'Feature',
+    geometry: { type: 'Point', coordinates: [point.lng, point.lat] as [number, number] },
+    properties: {}
+  };
   for (const territory of territories) {
     const shapes = featureToIterable(territory.shape);
     for (const feature of shapes) {
       if (!feature?.geometry) continue;
-      if (booleanPointInPolygon(pt, feature.geometry as any)) {
+      if (booleanPointInPolygon(pt, feature.geometry as Polygon | MultiPolygon)) {
         return territory;
       }
     }

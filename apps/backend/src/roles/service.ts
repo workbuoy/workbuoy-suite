@@ -1,1 +1,1 @@
-export * from '../../../../src/roles/service';
+export * from './service/index.js';

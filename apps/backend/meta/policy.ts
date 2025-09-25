@@ -1,11 +1,11 @@
-import { recordPolicyDenyMetric } from '../../../observability/metrics/meta';
+import { recordPolicyDenyMetric } from './metrics.js';
 
 import type {
   MetaPolicyAutonomyLevel,
   MetaPolicyProfile,
   MetaPolicySnapshotResponse,
   MetaPolicyDenyCounters,
-} from './types';
+} from './types.js';
 
 const HOUR_IN_MS = 60 * 60 * 1000;
 const DAY_IN_MS = 24 * HOUR_IN_MS;

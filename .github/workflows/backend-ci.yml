@@ -34,11 +34,22 @@ jobs:
         with:
           node-version: 20
 
+      - name: Cache npm
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
       - name: Install workspaces
         run: npm install --workspaces --include-workspace-root --no-audit --fund=false
+
+      - name: Backend typecheck
+        run: npm run typecheck -w @workbuoy/backend
 
       - name: Run backend Jest suite
         env:
           ROLES_PATH: ./scripts/fixtures/minimal-roles.json
           FEATURES_PATH: ./scripts/fixtures/minimal-features.json
-        run: npm run test -w @workbuoy/backend -- --runInBand --passWithNoTests
+        run: npm run test -w @workbuoy/backend -- --runInBand --passWithNoTests --detectOpenHandles
