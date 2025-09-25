@@ -19,7 +19,7 @@
     "keytar": "^7.9.0"
   },
   "devDependencies": {
-    "typescript": "^5.4.5",
+    "typescript": "^5.9.2",
     "@types/node": "^20.11.30"
   }
 }
