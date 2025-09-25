@@ -1,18 +1,31 @@
 {
-  "extends": "./tsconfig.json",
+  "extends": "./tsconfig.base.json",
   "compilerOptions": {
-    "types": ["jest", "node"]
+    "composite": false,
+    "noEmit": true,
+    "jsx": "react-jsx",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["apps/frontend/src/*"],
+      "@backend/*": ["apps/backend/src/*"],
+      "@backend-tests/*": ["apps/backend/tests/*"],
+      "@backend-meta/*": ["apps/backend/meta/*"]
+    }
   },
   "include": [
-    "src/routes/genesis.autonomy.ts",
-    "apps/frontend/src/api/introspection.ts",
-    "apps/frontend/src/components/IntrospectionBadge.tsx",
-    "apps/frontend/src/types/static.d.ts",
-    "apps/backend/tests/genesis.autonomy.test.ts",
+    "types/**/*.d.ts",
+    "apps/**/src/**/*.d.ts",
     "apps/backend/tests/__mocks__/**/*.ts",
-    "apps/backend/meta/**/*.ts",
-    "apps/backend/src/types/**/*.d.ts",
-    "observability/metrics/**/*.ts",
-    "tests/meta/**/*.ts"
+    "observability/metrics/**/*.ts"
+  ],
+  "exclude": [
+    "**/node_modules",
+    "**/dist",
+    "**/build",
+    ".turbo",
+    "**/*.test.tsx",
+    "**/*.spec.tsx"
   ]
 }

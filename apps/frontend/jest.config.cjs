@@ -18,7 +18,7 @@ if (tsJest) {
   transform['^.+\\.(ts|tsx)$'] = [
     'ts-jest',
     {
-      tsconfig: path.join(__dirname, 'tsconfig.jest.json'),
+      tsconfig: path.join(__dirname, 'tsconfig.json'),
     },
   ];
 } else if (swcJest) {
@@ -27,25 +27,29 @@ if (tsJest) {
   transform['^.+\\.(ts|tsx)$'] = ['babel-jest'];
 }
 
+const setupCandidates = ['@testing-library/jest-dom', '<rootDir>/jest.setup.ts'];
+
 /** @type {import('jest').Config} */
 module.exports = {
-  rootDir: __dirname,
-  testEnvironment: 'node',
-  roots: ['<rootDir>/src'],
+  testEnvironment: 'jsdom',
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json'],
-  moduleDirectories: ['node_modules'],
+  roots: ['<rootDir>/src'],
   transform,
-  setupFilesAfterEnv: ['<rootDir>/tests/setup.ts'].filter((setupPath) =>
-    fs.existsSync(setupPath.replace('<rootDir>', __dirname))
-  ),
+  setupFilesAfterEnv: setupCandidates.filter((candidate) => {
+    if (candidate.startsWith('<rootDir>')) {
+      const resolved = candidate.replace('<rootDir>', __dirname);
+      return fs.existsSync(resolved);
+    }
+    try {
+      require.resolve(candidate);
+      return true;
+    } catch (error) {
+      return false;
+    }
+  }),
   collectCoverageFrom: ['src/**/*.{ts,tsx}', '!src/**/*.d.ts'],
   moduleNameMapper: {
+    '^@/(.*)$': '<rootDir>/src/$1',
     '^(\\.{1,2}/.*)\\.js$': '$1',
-    '^prom-client$': '<rootDir>/tests/__mocks__/prom-client.ts',
-    '^express-rate-limit$': '<rootDir>/tests/__mocks__/express-rate-limit.ts',
-    '^jsonwebtoken$': '<rootDir>/tests/__mocks__/jsonwebtoken.ts',
-    '^@backend/(.*)$': '<rootDir>/src/$1',
-    '^@backend-tests/(.*)$': '<rootDir>/tests/$1',
-    '^@backend-meta/(.*)$': '<rootDir>/meta/$1',
   },
 };
