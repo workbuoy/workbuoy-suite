@@ -9,6 +9,8 @@
 
 ## Typical pipeline
 
+CI performs a full dependency install (`npm ci`) before running jobs so every workspace, including optional ones, is available during validation.
+
 1. Repo guards
 2. Typecheck (`npm run typecheck`)
 3. Unit tests (`npm test`)
