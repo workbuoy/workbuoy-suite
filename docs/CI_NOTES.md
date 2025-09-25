@@ -54,3 +54,16 @@ docker run --rm -p 8080:80 workbuoy-frontend:dev
 - CI renders manifests via `helm template` (using `values.ci.yaml` when present).
 - CI validates YAML against Kubernetes schemas using `kubeconform` (`-strict -summary`).
 - Currently non-blocking (report-only). Flip `continue-on-error` off once charts stabilize.
+
+## OpenAPI Quality Gates
+
+- **Lint:** Run Spectral (`@stoplight/spectral-cli`) against any `openapi.yaml|yml|json` under `apps/**` or `**/openapi/**`.
+- **Diff vs main:** Generate a report with `openapi-diff` to surface potential breaking changes.
+- Both steps are non-blocking right now (report-first). We may flip to blocking once specs stabilize.
+
+### Local usage
+
+```bash
+npm run openapi:lint
+npm run openapi:diff
+```

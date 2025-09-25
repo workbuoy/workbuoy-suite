@@ -1,0 +1,25 @@
+extends:
+  - "spectral:oas"
+rules:
+  workbuoy-operation-operationId:
+    description: "Operations must have non-empty operationId"
+    message: "Operation is missing a non-empty operationId"
+    given: "$.paths[*][*]"
+    severity: error
+    then:
+      field: operationId
+      function: truthy
+  workbuoy-info-contact:
+    description: "Provide a contact for the API"
+    given: "$.info"
+    severity: warn
+    then:
+      field: contact
+      function: truthy
+  workbuoy-schema-description:
+    description: "Schemas should document purpose"
+    given: "$.components.schemas[*]"
+    severity: warn
+    then:
+      field: description
+      function: truthy
