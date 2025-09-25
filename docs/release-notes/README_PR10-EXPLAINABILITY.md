@@ -8,7 +8,7 @@
 - `tests/http/buoy.complete.e2e.test.ts` — supertest røyk.
 
 ## Montering
-Legg til i `src/server.ts` (etter middleware og før error handler):
+Legg til i `apps/backend/src/server.ts` (etter middleware og før error handler):
 ```ts
 import { buoyRouter } from './routes/buoy.complete';
 app.use('/buoy', buoyRouter());

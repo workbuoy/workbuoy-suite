@@ -5,12 +5,13 @@
     "noEmit": false
   },
   "include": [
-    "src/index.ts",
     "src/app.secure.ts",
     "src/security/**/*.ts",
     "src/**/*.d.ts"
   ],
   "exclude": [
+    "src/server.ts",
+    "src/index.ts",
     // Exclude optional/experimental areas that fail strict build but are not required for the runtime image
     "src/crm/",
     "src/connectors/",

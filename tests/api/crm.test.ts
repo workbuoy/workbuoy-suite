@@ -1,5 +1,5 @@
 import request from "supertest";
-import app from "../../src/server";
+import app from "../../apps/backend/src/server";
 
 describe("CRM Contacts API (in-memory)", () => {
   it("GET list 200", async () => {

@@ -1,6 +1,6 @@
 import request from 'supertest';
 process.env.FF_PERSISTENCE = process.env.FF_PERSISTENCE ?? 'false';
-import app from '../../src/server';
+import app from '../../apps/backend/src/server';
 
 describe('Usage router public paths', () => {
   it('POST /api/usage/feature', async () => {

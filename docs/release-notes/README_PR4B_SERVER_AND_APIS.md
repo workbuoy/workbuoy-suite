@@ -1,7 +1,7 @@
 # PR4 (Alt B) — Server bootstrap + CRM/Tasks/Log APIs (in-memory) + Buoy echo + EventBus + Audit
 
 ## Hva som inngår
-- Full server-bootstrap (`src/server.ts`, `src/bin/www.ts`) med riktig middleware-rekkefølge.
+- Full server-bootstrap (`apps/backend/src/server.ts`, `src/bin/www.ts`) med riktig middleware-rekkefølge.
 - **Policy V2** guard som nekter write når `x-autonomy-level < 2` (403 med `explanations[]`).
 - **EventBus** (priority + DLQ minimal) og dev-inspeksjon `/api/_debug/dlq`.
 - **Audit hashchain** (append + verify) koblet på skrive-paths.

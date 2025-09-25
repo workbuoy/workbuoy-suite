@@ -8,7 +8,7 @@
 - `tests/e2e/finance.reminder.test.ts` — supertest-røyk
 
 ## Wiring
-I `src/server.ts`:
+I `apps/backend/src/server.ts`:
 ```ts
 import { financeReminderRouter } from './core/http/routes/finance.reminder';
 import { financeOverdueDevRouter } from './core/http/routes/finance.overdue.dev';

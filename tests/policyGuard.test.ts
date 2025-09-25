@@ -1,5 +1,5 @@
 import request from "supertest";
-import app from "../src/server";
+import app from "../apps/backend/src/server";
 
 describe("policyGuard autonomy 0-2", () => {
   it("denies write at autonomy 0", async () => {

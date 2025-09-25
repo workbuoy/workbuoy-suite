@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { getRecentProactivityEvents } from '../../../src/core/proactivity/telemetry';
+import { getRecentProactivityEvents } from '../../../src/core/proactivity/telemetry.js';
 
 const router: any = Router();
 

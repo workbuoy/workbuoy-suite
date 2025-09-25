@@ -1,8 +1,8 @@
 import { Router } from 'express';
-import { getSubscriptionForTenant, getSubscriptionCap, setSubscriptionForTenant } from '../../../src/core/subscription/state';
-import { isSubscriptionPlan } from '../../../src/core/subscription/entitlements';
-import { parseProactivityMode } from '../../../src/core/proactivity/modes';
-import { rbac } from '../../../src/core/security/rbac';
+import { getSubscriptionForTenant, getSubscriptionCap, setSubscriptionForTenant } from '../../../src/core/subscription/state.js';
+import { isSubscriptionPlan } from '../../../src/core/subscription/entitlements.js';
+import { parseProactivityMode } from '../../../src/core/proactivity/modes.js';
+import { rbac } from '../../../src/core/security/rbac.js';
 
 const router: any = Router();
 const requireAdmin = rbac(['admin']);

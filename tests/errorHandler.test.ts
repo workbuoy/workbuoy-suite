@@ -1,5 +1,5 @@
 import request from "supertest";
-import app from "../src/server";
+import app from "../apps/backend/src/server";
 
 describe("errorHandler + correlationId", () => {
   it("returns correlationId on 404 from delete", async () => {

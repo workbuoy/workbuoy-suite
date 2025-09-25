@@ -1,7 +1,7 @@
 # PR4 — Server bootstrap complete (export app, start in bin/www)
 
 ## What changed
-- `src/server.ts` now **exports `app` only** (no `listen` here) and wires middleware in the correct order:
+- `apps/backend/src/server.ts` now **exports `app` only** (no `listen` here) and wires middleware in the correct order:
   1) `requestContext` → 2) `express.json()` → 3) (route-local) write rate-limit →
   4) feature routers (policy is applied inside routers on write paths) →
   5) Buoy routes → 6) `/healthz`, `/readyz`, `/buildz` → 7) `errorHandler` last.

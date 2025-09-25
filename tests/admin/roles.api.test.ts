@@ -18,7 +18,7 @@ describeIfPersistence('Admin roles API', () => {
     await prisma.userRole.deleteMany();
     await prisma.role.deleteMany();
     await prisma.feature.deleteMany();
-    app = (await import('../../src/server')).default;
+    app = (await import('../../apps/backend/src/server')).default;
   });
 
   afterAll(async () => {

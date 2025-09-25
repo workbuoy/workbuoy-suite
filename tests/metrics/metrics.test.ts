@@ -1,5 +1,5 @@
 import request from 'supertest';
-import app from '../../src/server';
+import app from '../../apps/backend/src/server';
 
 describe('metrics endpoint', () => {
   it('exposes proactivity metrics in Prometheus format', async () => {

@@ -1,6 +1,6 @@
 // tests/e2e/dealflow.test.ts
 import request from 'supertest';
-import app from '../../src/server';
+import app from '../../apps/backend/src/server';
 
 describe('deal → audit flow', () => {
   const headers = { 'x-role':'owner', 'x-autonomy-level':'2' };

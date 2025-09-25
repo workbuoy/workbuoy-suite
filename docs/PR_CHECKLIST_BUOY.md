@@ -2,7 +2,7 @@
 
 - [ ] `src/buoy/*` added: agent, reasoning, actions, memory
 - [ ] POST `/buoy/complete` implemented in `src/core/http/routes/buoy.ts`
-- [ ] Router wired in `src/server.ts` (see PATCHES/WIRE_BUOY_ROUTE.md)
+- [ ] Router wired in `apps/backend/src/server.ts` (see PATCHES/WIRE_BUOY_ROUTE.md)
 - [ ] Uses policy rails: middleware order `requestContext` → `policyGuard` → handler
 - [ ] EventBus publish: `buoy.action.executed` (priority: low)
 - [ ] Audit append on each action

@@ -1,6 +1,6 @@
 // tests/e2e/smoke.test.ts
 import request from 'supertest';
-import app from '../../src/server';
+import app from '../../apps/backend/src/server';
 describe('E2E smoke', () => {
   it('addons returns crm.contacts', async () => {
     const r = await request(app).get('/api/addons');

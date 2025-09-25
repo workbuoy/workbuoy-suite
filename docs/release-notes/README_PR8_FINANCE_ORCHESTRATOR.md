@@ -11,7 +11,7 @@
 - `tests/e2e/finance.orchestrator.test.ts` — røyk mot dev-route
 
 ## Integrasjon
-- Registrér `financeDevRouter()` i `src/server.ts` **kun i dev** (`NODE_ENV !== 'production'`).
+- Registrér `financeDevRouter()` i `apps/backend/src/server.ts` **kun i dev** (`NODE_ENV !== 'production'`).
 - Kall `registerDealToCash(new FinanceOrchestrator(MockFinanceConnector))` ved server-oppstart (bak feature flag `FF_FINANCE_ORCH`).
 
 ## Forventet atferd

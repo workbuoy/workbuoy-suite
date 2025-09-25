@@ -1,6 +1,6 @@
 // tests/debug.dlq.test.ts
 import request from 'supertest';
-import app from '../src/server';
+import app from '../apps/backend/src/server';
 describe('_debug dlq', () => {
   it('returns json', async () => {
     const r = await request(app).get('/_debug/dlq');

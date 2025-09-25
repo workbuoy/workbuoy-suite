@@ -1,6 +1,6 @@
 import express from 'express';
 import request from 'supertest';
-import app from '../../src/server';
+import app from '../../apps/backend/src/server';
 
 describe('bootstrap smoke', () => {
   it('healthz', async () => {

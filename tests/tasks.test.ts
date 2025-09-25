@@ -1,5 +1,5 @@
 import request from "supertest";
-import app from "../src/server";
+import app from "../apps/backend/src/server";
 
 describe("Tasks API (MVP)", () => {
   it("creates a task at autonomy 2", async () => {

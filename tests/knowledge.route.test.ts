@@ -1,6 +1,6 @@
 // tests/knowledge.route.test.ts
 import request from 'supertest';
-import app from '../src/server';
+import app from '../apps/backend/src/server';
 
 describe('knowledge search', ()=>{
   it('returns results array', async ()=>{

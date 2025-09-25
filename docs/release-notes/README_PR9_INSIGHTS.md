@@ -6,7 +6,7 @@
 - `tests/e2e/insights.route.test.ts` — supertest-røyk (kort)
 
 ## Wiring
-Registrér router i `src/server.ts`:
+Registrér router i `apps/backend/src/server.ts`:
 ```ts
 import { insightsRouter } from './core/http/routes/insights';
 app.use(insightsRouter());

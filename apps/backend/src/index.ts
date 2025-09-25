@@ -1,3 +1,6 @@
-import app from './app.secure.js';
-const port = process.env.PORT || 3000;
-app.listen(port, () => console.log(`[workbuoy] secure app listening on :${port}`));
+import app from './server.js';
+
+const port = Number(process.env.PORT || 3000);
+app.listen(port, () => {
+  console.log(`[workbuoy] backend listening on :${port}`);
+});

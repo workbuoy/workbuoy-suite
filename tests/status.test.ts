@@ -1,6 +1,6 @@
 // tests/status.test.ts
 import request from 'supertest';
-import app from '../src/server';
+import app from '../apps/backend/src/server';
 describe('status', ()=>{
   it('returns mode and ts', async ()=>{
     const r = await request(app).get('/status');
