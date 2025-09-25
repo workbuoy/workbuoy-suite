@@ -1,32 +1,26 @@
-node_modules
-dist
-build
-.next
-coverage
-.nyc_output
-scripts/fixtures/**
-**/*
-!backend/
-!backend/meta/
-!backend/meta/**
-!backend/tests/
-!backend/tests/__mocks__/
-!backend/tests/__mocks__/**
-!backend/tests/genesis.autonomy.test.ts
-!frontend/
-!frontend/src/
-!frontend/src/api/
-!frontend/src/api/introspection.ts
-!frontend/src/components/
-!frontend/src/components/IntrospectionBadge.tsx
-!frontend/src/types/
-!frontend/src/types/static.d.ts
-!observability/
-!observability/metrics/
-!observability/metrics/**
-!src/
-!src/routes/
-!src/routes/genesis.autonomy.ts
-!tests/
-!tests/meta/
-!tests/meta/**
+# Builds & caches
+
+dist/
+build/
+coverage/
+.turbo/
+.next/
+
+# Deps
+
+node_modules/
+**/node_modules/
+
+# Generated / vendors
+
+**/.gen.ts
+**/*.d.ts
+vendor/
+
+# Misc
+
+*.min.js
+
+# Temporary exclusions until migrated to .tsx or fixed parsing
+apps/frontend/src/components/FlipCard/FlipCard.test.tsx
+apps/frontend/src/proactivity/useProactivity.test.ts
