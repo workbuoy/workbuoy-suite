@@ -1,0 +1,16 @@
+name: repo-guards
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  ban-tracked-deps:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Enforce no tracked node_modules
+        run: |
+          npm run guard:ban-tracked-deps
+          # (Optional) room for other guards later, e.g., empty telemetry logs, disallow large binaries, etc.
