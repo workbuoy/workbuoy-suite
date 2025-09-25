@@ -3,24 +3,17 @@ Repository Structure
 
 ```
 .
-├─ apps/
-│  ├─ backend/      # API & services
-│  └─ frontend/     # Web app
-├─ types/           # shared ambient types
-├─ tools/           # guards, scripts
-├─ deploy/
-│  ├─ helm/         # charts
-│  └─ k8s/          # rendered/static manifests
-├─ docs/            # guides, ADRs, policies, release notes
-├─ .github/         # workflows, CODEOWNERS, dependabot
-└─ package.json     # workspace root
+├─ apps/        # first-party product surfaces
+├─ connectors/  # integrations and sync agents
+├─ crm/         # CRM-specific services and assets
+├─ desktop/     # desktop runtime and packaging
+├─ docs/        # guides, ADRs, and reference material
+├─ enterprise/  # enterprise-only extensions
+├─ packages/    # shared libraries consumed across workspaces
+├─ sdk/         # SDKs and developer tooling
+└─ telemetry/   # metrics pipelines and dashboards
 ```
 
-Active development: apps/backend, apps/frontend
+Legacy or experimental workspaces that previously lived at the repository root have been moved to `docs/archive/` to keep the active layout easy to scan. See [docs/ARCHIVE.md](ARCHIVE.md) for details and guidance on retrieving historical context.
 
-Shared configs: tsconfig.base.json, .eslintrc.cjs, .spectral.yaml
-
-CI workflows live in .github/workflows/
-
-Backend packages:
-- `@workbuoy/backend-auth` – shared authentication router & middleware consumed by `apps/backend`.
+Shared configuration continues to live alongside the workspaces (for example `tsconfig.base.json`, `.eslintrc.cjs`, and `.spectral.yaml`). CI workflows remain under `.github/workflows/` and operate unchanged by this reorganization.
