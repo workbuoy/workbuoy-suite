@@ -3,7 +3,16 @@
   "private": true,
   "workspaces": [
     "apps/*",
-    "packages/*"
+    "packages/*",
+    "enterprise/",
+    "crm/",
+    "connectors/*",
+    "desktop/",
+    "desktop/ui",
+    "sdk/*",
+    "docs/",
+    "examples/js",
+    "telemetry/"
   ],
   "scripts": {
     "bootstrap": "npm install --workspaces --include-workspace-root",
