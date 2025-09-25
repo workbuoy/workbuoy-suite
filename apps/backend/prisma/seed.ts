@@ -19,6 +19,7 @@ type FeatureInput = {
   title?: string;
   name?: string;
   description?: string;
+  capabilities?: unknown;
   [key: string]: unknown;
 };
 
@@ -78,6 +79,22 @@ function toStringOrUndefined(value: unknown): string | undefined {
   }
   const normalized = String(value).trim();
   return normalized.length ? normalized : undefined;
+}
+
+function toStringArray(value: unknown): string[] {
+  if (Array.isArray(value)) {
+    return value.map((item) => String(item));
+  }
+  if (value === undefined || value === null) {
+    return [];
+  }
+  if (typeof value === 'string') {
+    return value
+      .split(',')
+      .map((part) => part.trim())
+      .filter((part) => part.length > 0);
+  }
+  return [];
 }
 
 async function upsertRoles(roles: RoleInput[], dryRun: boolean): Promise<number> {
@@ -144,6 +161,16 @@ async function upsertFeatures(features: FeatureInput[], dryRun: boolean): Promis
 
     const title = toStringOrUndefined(feature.title ?? feature.name) ?? featureId;
     const description = toStringOrUndefined(feature.description);
+    const rawCapabilities = feature.capabilities;
+    const capabilities = toStringArray(rawCapabilities);
+
+    if (rawCapabilities === undefined || rawCapabilities === null) {
+      console.warn(`[seed] feature ${featureId}: missing 'capabilities' → defaulting to []`);
+    } else if (!Array.isArray(rawCapabilities) && typeof rawCapabilities !== 'string') {
+      console.warn(
+        `[seed] feature ${featureId}: invalid 'capabilities' type (${typeof rawCapabilities}) → defaulting to []`,
+      );
+    }
 
     if (!dryRun) {
       await prisma.feature.upsert({
@@ -152,10 +179,12 @@ async function upsertFeatures(features: FeatureInput[], dryRun: boolean): Promis
           id: featureId,
           title,
           description: description ?? undefined,
+          capabilities,
         },
         update: {
           title,
           description: description ?? undefined,
+          capabilities,
         },
       });
     }
