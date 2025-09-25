@@ -7,9 +7,11 @@
     "build": "tsc -p tsconfig.json",
     "test": "jest --passWithNoTests --config jest.meta.config.cjs",
     "typecheck": "tsc --noEmit -p tsconfig.typecheck.json",
-    "prisma:generate": "prisma generate --schema prisma/schema.prisma",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate:deploy": "prisma migrate deploy",
     "start:compliance": "node dist/compliance/server.js",
-    "seed:roles": "tsx ../../scripts/seed-roles-from-json.ts"
+    "seed:roles": "node --import tsx prisma/seed.ts",
+    "seed:dry-run": "npm run seed:roles -- --dry-run"
   },
   "dependencies": {
     "@turf/boolean-point-in-polygon": "^6.5.0",

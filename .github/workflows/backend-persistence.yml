@@ -6,8 +6,7 @@ on:
       - 'apps/backend/**'
       - 'prisma/**'
       - 'core/roles/**'
-      - 'scripts/seed-roles-from-json.ts'
-      - 'scripts/seed-roles-lib.ts'
+      - 'apps/backend/prisma/seed.ts'
       - 'scripts/roles-io.ts'
       - '.github/workflows/**'
   pull_request:
@@ -15,8 +14,7 @@ on:
       - 'apps/backend/**'
       - 'prisma/**'
       - 'core/roles/**'
-      - 'scripts/seed-roles-from-json.ts'
-      - 'scripts/seed-roles-lib.ts'
+      - 'apps/backend/prisma/seed.ts'
       - 'scripts/roles-io.ts'
       - '.github/workflows/**'
 
@@ -62,12 +60,12 @@ jobs:
       - name: Generate Prisma client
         env:
           PRISMA_CLI_QUERY_ENGINE_TYPE: binary
-        run: npx --yes -p prisma@6.16.2 prisma generate --schema=apps/backend/prisma/schema.prisma
+        run: npm run prisma:generate -w @workbuoy/backend
 
-      - name: Apply Prisma migrations
+      - name: Prisma migrate deploy
         env:
           PRISMA_CLI_QUERY_ENGINE_TYPE: binary
-        run: npx --yes -p prisma@6.16.2 prisma migrate deploy --schema=apps/backend/prisma/schema.prisma
+        run: npm run prisma:migrate:deploy -w @workbuoy/backend
 
       - name: Seed baseline roles/features
         timeout-minutes: 10
