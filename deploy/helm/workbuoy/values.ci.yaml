@@ -1,0 +1,12 @@
+# Minimal values for CI rendering; adjust as your chart requires.
+replicaCount: 1
+image:
+  repository: workbuoy/backend
+  tag: "ci"
+  pullPolicy: IfNotPresent
+service:
+  type: ClusterIP
+  port: 3000
+resources: {}
+ingress:
+  enabled: false

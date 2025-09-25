@@ -1,0 +1,60 @@
+name: helm
+
+on:
+  pull_request:
+    paths:
+      - "deploy/helm/**"
+      - "deploy/k8s/**"
+      - ".github/workflows/helm.yml"
+  push:
+    branches: [main]
+    paths:
+      - "deploy/helm/**"
+      - "deploy/k8s/**"
+      - ".github/workflows/helm.yml"
+
+jobs:
+  lint-and-validate:
+    runs-on: ubuntu-latest
+    continue-on-error: true # report-only for now
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: v3.15.2
+
+      - name: Helm version
+        run: helm version
+
+      - name: Helm lint (workbuoy chart)
+        if: hashFiles('deploy/helm/workbuoy/Chart.yaml') != ''
+        run: |
+          helm lint deploy/helm/workbuoy
+
+      - name: Render manifests (helm template)
+        if: hashFiles('deploy/helm/workbuoy/Chart.yaml') != ''
+        run: |
+          if [ -f deploy/helm/workbuoy/values.ci.yaml ]; then
+            helm template workbuoy deploy/helm/workbuoy -f deploy/helm/workbuoy/values.ci.yaml > rendered.yaml
+          else
+            helm template workbuoy deploy/helm/workbuoy > rendered.yaml
+          fi
+          echo "Rendered to rendered.yaml"
+
+      - name: Install kubeconform
+        run: |
+          curl -sSL -o kubeconform.tar.gz https://github.com/yannh/kubeconform/releases/download/v0.6.7/kubeconform-linux-amd64.tar.gz
+          tar -xzf kubeconform.tar.gz kubeconform
+          sudo mv kubeconform /usr/local/bin/kubeconform
+          kubeconform -v
+
+      - name: Validate manifests with kubeconform (strict)
+        if: hashFiles('deploy/helm/workbuoy/Chart.yaml') != ''
+        run: |
+          if [ -f rendered.yaml ]; then
+            kubeconform -strict -summary -output tap rendered.yaml || true
+          else
+            echo "No rendered.yaml to validate"
+          fi
