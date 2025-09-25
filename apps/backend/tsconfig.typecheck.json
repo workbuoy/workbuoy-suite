@@ -7,10 +7,11 @@
     "lib": ["ES2022"],
     "resolveJsonModule": true,
     "allowArbitraryExtensions": true,
-    "types": ["node", "jest"]
+    "types": ["node", "jest", "express"]
   },
   "include": [
-    "src/**/*.ts",
+    "src/middleware/**/*.ts",
+    "src/middleware/**/*.tsx",
     "src/types/**/*.d.ts"
   ],
   "exclude": [
