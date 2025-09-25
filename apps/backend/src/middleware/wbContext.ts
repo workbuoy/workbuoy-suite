@@ -38,7 +38,7 @@ function parseAutonomy(value: unknown, fallback?: string | number): number | und
 export function wbContext(req: Request, _res: Response, next: NextFunction): void {
   const headers = req.headers;
   const correlatedReq = req as RequestWithCorrelation;
-  const existing: WbContext = req.wb ?? {};
+  const existing = (req.wb ?? {}) as WbContext;
 
   const headerCorrelation = correlatedReq.correlationId;
   const correlationId =
@@ -63,12 +63,20 @@ export function wbContext(req: Request, _res: Response, next: NextFunction): voi
   const selectedIdHeader = headers['x-wb-selected-id'];
   const selectedTypeHeader = headers['x-wb-selected-type'];
 
+  const autonomyLevelInput = autonomyLevel ?? existing.autonomyLevel;
+  const normalizedAutonomyLevel =
+    autonomyLevelInput === undefined
+      ? existing.autonomyLevel
+      : typeof autonomyLevelInput === 'number'
+        ? String(autonomyLevelInput)
+        : autonomyLevelInput;
+
   const ctx: WbContext = {
     ...existing,
     intent: intentHeader !== undefined ? toOptionalString(intentHeader) : existing.intent,
     when: whenHeader !== undefined ? toOptionalString(whenHeader) ?? existing.when : existing.when,
     autonomy: autonomyLevel ?? existing.autonomy,
-    autonomyLevel: autonomyLevel ?? existing.autonomyLevel,
+    autonomyLevel: normalizedAutonomyLevel,
     roleId,
     role: roleId ?? existing.role,
     selectedId:
@@ -82,7 +90,7 @@ export function wbContext(req: Request, _res: Response, next: NextFunction): voi
     correlationId,
   };
 
-  req.wb = ctx;
+  req.wb = ctx as WbContext;
   correlatedReq.correlationId = correlationId;
   next();
 }

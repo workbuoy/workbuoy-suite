@@ -2,9 +2,8 @@ import 'express';
 
 export interface WbContext {
   correlationId?: string;
-  autonomyLevel?: string | number;
+  autonomyLevel?: string;
   roleId?: string;
-  role?: string;
   intent?: string;
   when?: string | number | Date;
   autonomy?: string | number;
