@@ -7,5 +7,15 @@ export async function apiWhy(path: string, method: string = "GET", body?: any, h
   let data: any = {};
   try { data = await res.json(); } catch {}
   const explanations = data?.explanations || [];
-  return { status: res.status, data, explanations, correlationId: corr, headers: Object.fromEntries(res.headers.entries()) };
+  const headerEntries: Record<string, string> = {};
+  res.headers.forEach((value, key) => {
+    headerEntries[key] = value;
+  });
+  return {
+    status: res.status,
+    data,
+    explanations,
+    correlationId: corr,
+    headers: headerEntries,
+  };
 }

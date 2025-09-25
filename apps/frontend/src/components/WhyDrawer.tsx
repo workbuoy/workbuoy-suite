@@ -11,12 +11,14 @@ type WhyDrawerProps = {
 
 export const WhyDrawer: React.FC<WhyDrawerProps> = ({ explanations }) => {
   if (!explanations || explanations.length === 0) return null;
-  const explanation = explanations[0];
+  const [explanation] = explanations;
+  if (!explanation) return null;
   const titleId = React.useId();
   const descriptionId = React.useId();
   const listId = React.useId();
 
-  const confidence = typeof explanation.confidence === "number" ? Math.round(explanation.confidence * 100) : null;
+  const confidence =
+    typeof explanation.confidence === "number" ? Math.round(explanation.confidence * 100) : null;
 
   return (
     <aside

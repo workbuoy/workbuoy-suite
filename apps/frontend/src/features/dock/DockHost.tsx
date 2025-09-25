@@ -74,7 +74,8 @@ export default function DockHost({
     if (!node) return;
     const focusable = getFocusableElements(node);
     if (focusable.length === 0) return;
-    focusable[0].focus();
+    const first = focusable[0];
+    first?.focus();
   }, []);
 
   const focusLastElement = useCallback(() => {
@@ -82,7 +83,8 @@ export default function DockHost({
     if (!node) return;
     const focusable = getFocusableElements(node);
     if (focusable.length === 0) return;
-    focusable[focusable.length - 1].focus();
+    const last = focusable[focusable.length - 1];
+    last?.focus();
   }, []);
 
   useEffect(() => {
@@ -118,6 +120,7 @@ export default function DockHost({
       if (focusable.length === 0) return;
       const first = focusable[0];
       const last = focusable[focusable.length - 1];
+      if (!first || !last) return;
       if (event.shiftKey) {
         if (document.activeElement === first) {
           event.preventDefault();
@@ -144,7 +147,8 @@ export default function DockHost({
 
   const cycleSize = useCallback(() => {
     const index = HOST_SIZE_ORDER.indexOf(cardSize);
-    const next = HOST_SIZE_ORDER[(index + 1) % HOST_SIZE_ORDER.length];
+    const next = HOST_SIZE_ORDER[(index + 1) % HOST_SIZE_ORDER.length] ?? HOST_SIZE_ORDER[0];
+    if (!next) return;
     setCardSize(next);
     onResize?.(next);
   }, [cardSize, onResize]);

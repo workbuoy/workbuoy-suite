@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import type { Response as ExpressResponse } from 'express';
 import client from 'prom-client';
 
 const register = new client.Registry();
@@ -76,7 +77,7 @@ export const rbac_policy_change_total = new client.Counter({
 });
 
 export const metricsRouter = Router();
-metricsRouter.get('/', async (_req, res) => {
-  res.set('Content-Type', register.contentType);
+metricsRouter.get('/', async (_req, res: ExpressResponse) => {
+  res.setHeader('Content-Type', register.contentType);
   res.end(await register.metrics());
 });

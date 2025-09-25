@@ -8,7 +8,8 @@ export function latency() {
       const end = process.hrtime.bigint();
       const diffMs = Number(end - start) / 1_000_000;
       const route = (req.route && req.route.path) || req.path || 'unknown';
-      crm_api_latency_ms.labels(req.method, route, String(res.statusCode)).observe(diffMs);
+      const method = req.method ?? 'UNKNOWN';
+      crm_api_latency_ms.labels(method, route, String(res.statusCode)).observe(diffMs);
     });
     next();
   };

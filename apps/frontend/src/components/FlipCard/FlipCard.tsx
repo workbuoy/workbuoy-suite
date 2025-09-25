@@ -167,7 +167,9 @@ function FlipCard({
         sizeOrder.length - 1,
       );
       const next = sizeOrder[nextIndex];
-      if (next !== cardSize) emitResize(next);
+      if (next && next !== cardSize) {
+        emitResize(next);
+      }
     },
     [cardSize, emitResize, sizeOrder],
   );
@@ -233,6 +235,7 @@ function FlipCard({
         sizeOrder.length - 1,
       );
       const nextSize = sizeOrder[nextIndex];
+      if (!nextSize) return;
       dragRef.current = {
         pointerId: drag.pointerId,
         startX: event.clientX,
