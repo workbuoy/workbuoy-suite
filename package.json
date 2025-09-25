@@ -36,7 +36,7 @@
     "openapi:diff": "bash -lc 'SPECS=$(git ls-files | grep -E \"(^|/)(openapi\\\\.(ya?ml|json)|openapi/.+\\\\.(ya?ml|json))$\" || true); if [ -z \"$SPECS\" ]; then echo \"No OpenAPI specs found\"; exit 0; fi; git fetch origin main:refs/remotes/origin/main >/dev/null 2>&1 || true; echo \"$SPECS\" | while read -r spec; do echo \"=== Diff: $spec ===\"; if git show origin/main:\"$spec\" >/dev/null 2>&1; then TMP=$(mktemp); git show origin/main:\"$spec\" > \"$TMP\"; npx openapi-diff@3.0.1 --fail-on-changed false --fail-on-incompatible false -f text \"$TMP\" \"$spec\" || true; rm -f \"$TMP\"; else echo \"[new] $spec\"; fi; echo; done'"
   },
   "devDependencies": {
-    "@types/jest": "^29.5.12",
+    "@types/jest": "^30.0.0",
     "@types/node": "^20.11.30",
     "@typescript-eslint/eslint-plugin": "^7.18.0",
     "@typescript-eslint/parser": "^7.18.0",
