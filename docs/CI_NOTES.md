@@ -47,3 +47,10 @@ docker run --rm -p 3000:3000 workbuoy-backend:dev
 docker build -t workbuoy-frontend:dev ./apps/frontend
 docker run --rm -p 8080:80 workbuoy-frontend:dev
 ```
+
+## Helm & Kubernetes Validation
+
+- CI runs Helm lint for `deploy/helm/workbuoy`.
+- CI renders manifests via `helm template` (using `values.ci.yaml` when present).
+- CI validates YAML against Kubernetes schemas using `kubeconform` (`-strict -summary`).
+- Currently non-blocking (report-only). Flip `continue-on-error` off once charts stabilize.
