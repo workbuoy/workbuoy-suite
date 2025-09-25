@@ -9,8 +9,8 @@ export interface SeedSummary {
   featuresPath?: string;
 }
 
-const roleKey = (r: any) => r?.role_id ?? r?.id ?? r?.slug ?? r?.name ?? r?.title;
-const featureKey = (f: any) => f?.id ?? f?.feature_id ?? f?.key ?? f?.slug ?? f?.name ?? f?.title;
+const roleKey = (r: any) => r?.id ?? r?.slug ?? r?.name ?? r?.role_id ?? r?.title;
+const featureKey = (f: any) => f?.feature_id ?? f?.id ?? f?.key ?? f?.slug ?? f?.name ?? f?.title;
 
 function shouldPersist(): boolean {
   return (process.env.FF_PERSISTENCE || '').toLowerCase() === 'true';
@@ -67,7 +67,7 @@ const defined = <T extends Record<string, unknown>>(value: T): T => {
 };
 
 function buildRolePayload(role: any, roleId: string) {
-  const title = toStringOrUndefined(role?.title ?? role?.name) ?? roleId;
+  const title = toStringOrUndefined(role?.name ?? role?.title) ?? roleId;
   const inherits = asStringArray(role?.inherits);
   const featureCaps = role?.featureCaps ?? role?.capabilities ?? undefined;
   const scopeHints = role?.scopeHints ?? undefined;
@@ -93,7 +93,7 @@ function buildRolePayload(role: any, roleId: string) {
 }
 
 function buildFeaturePayload(feature: any, featureId: string) {
-  const title = toStringOrUndefined(feature?.title ?? feature?.name) ?? featureId;
+  const title = toStringOrUndefined(feature?.name ?? feature?.title) ?? featureId;
   const description = feature?.description ?? null;
   const defaultAutonomyCap = toNumberOrUndefined(feature?.defaultAutonomyCap);
   const capabilities = asStringArray(feature?.capabilities) ?? [];

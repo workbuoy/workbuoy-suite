@@ -70,7 +70,7 @@ jobs:
         run: npx --yes -p prisma@6.16.2 prisma migrate deploy --schema=apps/backend/prisma/schema.prisma
 
       - name: Seed baseline roles/features
-        timeout-minutes: 2
+        timeout-minutes: 10
         run: npm run seed:roles -w @workbuoy/backend
         env:
           FF_PERSISTENCE: true
