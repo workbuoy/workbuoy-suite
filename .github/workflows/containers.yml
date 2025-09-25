@@ -32,8 +32,8 @@ jobs:
       - name: Build backend image
         uses: docker/build-push-action@v6
         with:
-          context: ./apps/backend
-          file: ./apps/backend/Dockerfile
+          context: .
+          file: apps/backend/Dockerfile
           tags: workbuoy/backend:pr
           load: true
 
@@ -41,8 +41,8 @@ jobs:
       - name: Build frontend image
         uses: docker/build-push-action@v6
         with:
-          context: ./apps/frontend
-          file: ./apps/frontend/Dockerfile
+          context: .
+          file: apps/frontend/Dockerfile
           tags: workbuoy/frontend:pr
           load: true
 
