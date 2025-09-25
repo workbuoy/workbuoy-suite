@@ -1,0 +1,88 @@
+name: containers
+
+on:
+  pull_request:
+    paths:
+      - "apps/backend/**"
+      - "apps/frontend/**"
+      - ".github/workflows/containers.yml"
+  push:
+    branches: [main]
+    paths:
+      - "apps/backend/**"
+      - "apps/frontend/**"
+      - ".github/workflows/containers.yml"
+
+jobs:
+  build-and-scan:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up QEMU (for cross-platform builds, optional)
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # --- Build backend image ---
+      - name: Build backend image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./apps/backend
+          file: ./apps/backend/Dockerfile
+          tags: workbuoy/backend:pr
+          load: true
+
+      # --- Build frontend image ---
+      - name: Build frontend image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./apps/frontend
+          file: ./apps/frontend/Dockerfile
+          tags: workbuoy/frontend:pr
+          load: true
+
+      # --- Trivy scan (backend) ---
+      - name: Trivy Scan (backend) — non-blocking
+        uses: aquasecurity/trivy-action@0.20.0
+        with:
+          image-ref: workbuoy/backend:pr
+          format: 'table'
+          vuln-type: 'os,library'
+          scanners: 'vuln,secret,misconfig'
+          severity: 'CRITICAL,HIGH,MEDIUM,LOW'
+          exit-code: '0'
+          ignore-unfixed: true
+
+      # --- Trivy scan (frontend) ---
+      - name: Trivy Scan (frontend) — non-blocking
+        uses: aquasecurity/trivy-action@0.20.0
+        with:
+          image-ref: workbuoy/frontend:pr
+          format: 'table'
+          vuln-type: 'os,library'
+          scanners: 'vuln,secret,misconfig'
+          severity: 'CRITICAL,HIGH,MEDIUM,LOW'
+          exit-code: '0'
+          ignore-unfixed: true
+
+      # --- Generate CycloneDX SBOMs via Trivy (backend + frontend) ---
+      - name: SBOM (CycloneDX) for backend
+        run: |
+          trivy image --format cyclonedx --output backend.sbom.json workbuoy/backend:pr || true
+      - name: SBOM (CycloneDX) for frontend
+        run: |
+          trivy image --format cyclonedx --output frontend.sbom.json workbuoy/frontend:pr || true
+
+      - name: Upload SBOM artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: container-sboms
+          path: |
+            backend.sbom.json
+            frontend.sbom.json
+          if-no-files-found: warn
