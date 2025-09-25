@@ -1,5 +1,7 @@
 import express from 'express';
 import { randomUUID } from 'crypto';
+import { readFileSync } from 'node:fs';
+import { createRequire } from 'node:module';
 import { canAccess, EntityType, RecordMeta } from './rbac/policies.js';
 import { clearAudit, getAudit, pushAudit } from './rbac/audit.js';
 import { createEvolutionRouter } from './meta-evolution/routes/evolution.routes.js';
@@ -8,6 +10,29 @@ export function buildApp() {
   const app = express();
   app.use(express.json());
   app.use('/api/meta-evolution', createEvolutionRouter());
+
+  const requireFromHere = createRequire(import.meta.url);
+  const rolesDataPath = requireFromHere.resolve('@workbuoy/roles-data/roles.json');
+  let cachedRoles: unknown[] | null = null;
+
+  function loadCanonicalRoles(): unknown[] {
+    if (cachedRoles) {
+      return cachedRoles;
+    }
+    const raw = readFileSync(rolesDataPath, 'utf8');
+    const parsed = JSON.parse(raw);
+    cachedRoles = Array.isArray(parsed) ? parsed : [];
+    return cachedRoles;
+  }
+
+  app.get('/public/data/roles.json', (_req, res) => {
+    try {
+      res.json(loadCanonicalRoles());
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      res.status(500).json({ error: 'roles_dataset_unavailable', message });
+    }
+  });
 
   // simple in-memory store
   const store: Record<string, RecordMeta & any> = {};

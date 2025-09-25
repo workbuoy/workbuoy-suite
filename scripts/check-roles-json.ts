@@ -1,8 +1,9 @@
 import fs from 'node:fs';
-import path from 'node:path';
+import { createRequire } from 'node:module';
 
 function main(): void {
-  const target = path.resolve(process.cwd(), 'core/roles/roles.json');
+  const requireFromHere = createRequire(import.meta.url);
+  const target = requireFromHere.resolve('@workbuoy/roles-data/roles.json');
 
   try {
     const raw = fs.readFileSync(target, 'utf8');

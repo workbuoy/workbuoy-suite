@@ -31,3 +31,4 @@ logs/
 
 *.tmp
 *.swp
+packages/roles-data/roles.normalized.json

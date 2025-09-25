@@ -1,9 +1,11 @@
 // Core roles loader with tolerant parsing (trailing commas / multiple arrays)
 const fs = require('fs');
-const path = require('path');
+const { createRequire } = require('module');
+
+const requireFromHere = createRequire(__filename);
 
 function loadRoles() {
-  const p = path.join(__dirname, 'roles.json');
+  const p = requireFromHere.resolve('@workbuoy/roles-data/roles.json');
   try {
     // First try strict JSON
     return JSON.parse(fs.readFileSync(p, 'utf8'));

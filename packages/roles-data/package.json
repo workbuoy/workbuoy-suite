@@ -1,0 +1,19 @@
+{
+  "name": "@workbuoy/roles-data",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "files": [
+    "roles.json",
+    "features.json",
+    "README.md"
+  ],
+  "exports": {
+    "./roles.json": "./roles.json",
+    "./features.json": "./features.json",
+    "./package.json": "./package.json"
+  },
+  "scripts": {
+    "validate": "tsx scripts/validate.ts"
+  }
+}

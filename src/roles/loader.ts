@@ -1,4 +1,5 @@
 import fs from 'node:fs';
+import { createRequire } from 'node:module';
 import path from 'node:path';
 import { RoleProfile, FeatureDef } from './types';
 import { defaultFeatures } from './seed/features';
@@ -16,10 +17,11 @@ class JsonParseError extends Error {
   }
 }
 
+const requireFromHere = createRequire(import.meta.url);
 const REPO_ROOT = path.resolve(__dirname, '..', '..');
-const DEFAULT_FEATURE_SOURCE = 'src/roles/seed/features.ts (defaultFeatures export)';
-const FALLBACK_ROLES_PATH = path.resolve(REPO_ROOT, 'scripts', 'fixtures', 'minimal-roles.json');
-const FALLBACK_FEATURES_PATH = path.resolve(REPO_ROOT, 'scripts', 'fixtures', 'minimal-features.json');
+const DEFAULT_FEATURE_SOURCE = '@workbuoy/roles-data/features.json';
+const FALLBACK_ROLES_PATH = requireFromHere.resolve('@workbuoy/roles-data/roles.json');
+const FALLBACK_FEATURES_PATH = requireFromHere.resolve('@workbuoy/roles-data/features.json');
 
 function normalizeCandidates(envPath: string | undefined, fallbacks: string[]): string[] {
   const override = envPath?.trim();
@@ -93,14 +95,14 @@ function loadFallbackCatalog(): LoadResult<RoleProfile> & { features: FeatureDef
   const roles = loadJson(FALLBACK_ROLES_PATH) as RoleProfile[];
   const features = loadJson(FALLBACK_FEATURES_PATH) as FeatureDef[];
   console.warn(
-    `[roles.loader] No role catalog found; falling back to minimal fixtures (${FALLBACK_ROLES_PATH})`,
+    `[roles.loader] No role catalog found; falling back to canonical dataset (${FALLBACK_ROLES_PATH})`,
   );
   return { data: roles, path: FALLBACK_ROLES_PATH, features };
 }
 
 function loadFallbackFeatures(): FeatureDef[] {
   console.warn(
-    `[roles.loader] No feature catalog found; falling back to minimal fixtures (${FALLBACK_FEATURES_PATH})`,
+    `[roles.loader] No feature catalog found; falling back to canonical dataset (${FALLBACK_FEATURES_PATH})`,
   );
   return loadJson(FALLBACK_FEATURES_PATH) as FeatureDef[];
 }
@@ -116,10 +118,8 @@ export interface RoleCatalog {
 
 export function loadRoleCatalog(): RoleCatalog {
   const roleCandidates = normalizeCandidates(process.env.ROLES_PATH, [
-    path.join('core', 'roles', 'roles.json'),
-    path.join('roles', 'roles.json'),
-    path.join('backend', 'roles', 'roles.json'),
-    path.join('data', 'roles.json'),
+    FALLBACK_ROLES_PATH,
+    path.join('packages', 'roles-data', 'roles.json'),
   ]);
   let rolesSource: LoadResult<RoleProfile> | null = null;
   let rolesParseError: JsonParseError | null = null;
@@ -161,10 +161,8 @@ export function loadRoleCatalog(): RoleCatalog {
   }
 
   const featureCandidates = normalizeCandidates(process.env.FEATURES_PATH, [
-    path.join('core', 'roles', 'features.json'),
-    path.join('roles', 'features.json'),
-    path.join('backend', 'roles', 'features.json'),
-    path.join('data', 'features.json'),
+    FALLBACK_FEATURES_PATH,
+    path.join('packages', 'roles-data', 'features.json'),
   ]);
   let featuresSource: LoadResult<FeatureDef> | null = null;
   let featuresParseError: JsonParseError | null = null;

@@ -1,5 +1,6 @@
 // scripts/roles-io.ts
 import fs from 'node:fs';
+import { createRequire } from 'node:module';
 import path from 'node:path';
 
 import { embeddedMinimalFeatures, embeddedMinimalRoles } from './fixtures/embedded.ts';
@@ -31,7 +32,16 @@ function findRepoRoot(): string {
 }
 
 const repoRoot = findRepoRoot();
-const backendRoot = path.join(repoRoot, 'apps/backend');
+const requireFromHere = createRequire(import.meta.url);
+
+function resolveDataPackage(kind: DataKey): string | null {
+  const suffix = kind === 'roles' ? 'roles.json' : 'features.json';
+  try {
+    return requireFromHere.resolve(`@workbuoy/roles-data/${suffix}`);
+  } catch {
+    return null;
+  }
+}
 
 function resolveCandidate(candidate: string | null | undefined): string | null {
   if (!candidate) return null;
@@ -94,13 +104,12 @@ function resolveSource(kind: DataKey): LoadResult<any> {
   const envVar = kind === 'roles' ? process.env.ROLES_PATH : process.env.FEATURES_PATH;
   const envCandidate = resolveCandidate(envVar ?? undefined);
 
+  const packageCandidate = resolveDataPackage(kind);
+  const fileName = kind === 'roles' ? 'roles.json' : 'features.json';
   const candidates = dedupeCandidates([
     envCandidate,
-    path.join(repoRoot, 'core/roles', kind === 'roles' ? 'roles.json' : 'features.json'),
-    path.join(backendRoot, 'core/roles', kind === 'roles' ? 'roles.json' : 'features.json'),
-    path.join(repoRoot, 'core', kind === 'roles' ? 'roles.json' : 'features.json'),
-    path.join(backendRoot, 'core', kind === 'roles' ? 'roles.json' : 'features.json'),
-    path.join(repoRoot, 'scripts/fixtures', kind === 'roles' ? 'minimal-roles.json' : 'minimal-features.json'),
+    packageCandidate,
+    path.join(repoRoot, 'packages/roles-data', fileName),
   ]);
 
   for (const candidate of candidates) {
