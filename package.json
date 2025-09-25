@@ -4,14 +4,8 @@
   "workspaces": [
     "apps/*",
     "packages/*",
-    {
-      "location": "enterprise/",
-      "optional": true
-    },
-    {
-      "location": "crm/",
-      "optional": true
-    },
+    "enterprise/",
+    "crm/",
     "connectors/*",
     "desktop/",
     "desktop/ui",
@@ -24,7 +18,7 @@
     "clean": "git clean -fdx",
     "guard:ban-large-files": "node tools/guard/ban-large-files.js",
     "bootstrap": "npm install --workspaces --include-workspace-root",
-    "bootstrap:light": "npm ci --workspaces --include-workspace-root --ignore-workspace-root-check --omit=optional",
+    "bootstrap:light": "npm ci --workspaces --include-workspace-root --omit=optional",
     "build": "npm run build -w @workbuoy/backend && npm run build -w @workbuoy/frontend",
     "typecheck": "npm run typecheck -w @workbuoy/backend && npm run typecheck -w @workbuoy/frontend",
     "test": "npm run -w apps/backend test && npm run -w apps/frontend test",
