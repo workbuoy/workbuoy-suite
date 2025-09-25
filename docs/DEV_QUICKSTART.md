@@ -1,12 +1,25 @@
 Developer Quickstart
 ====================
 
-1. Clean install
+1. Install dependencies
    ```
    npm run clean
-   npm ci
    ```
-   > Uses `git clean -fdx` to reset the working tree; this removes untracked files and directories.
+   Choose an install mode:
+
+   - **Full install (default / CI)**
+     ```
+     npm ci
+     ```
+     Installs every workspace, including the heavy `enterprise/` and `crm/` apps. This is the mode used by CI and should be used when you need all applications locally.
+
+   - **Light install (skip heavy apps)**
+     ```
+     npm run bootstrap:light
+     ```
+     Runs `npm ci` with `--omit=optional` to skip optional workspaces. Use this for a faster local setup when you do not need the enterprise or CRM apps.
+
+   > `npm run clean` uses `git clean -fdx` to reset the working tree; this removes untracked files and directories.
 
 2. Verify
    ```
