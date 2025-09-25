@@ -1,56 +1,57 @@
-# Workbuoy Meta Safeguards
+Workbuoy Suite
+===============
 
-This branch adds a lightweight meta-control layer that exposes awareness signals,
-autonomous development proposals and explicit evolution guardrails across the
-Workbuoy stack.
+Monorepo for the Workbuoy platform.
 
-## Structure
-Active services live under `apps/backend` and `apps/frontend`.  
-Legacy roots (`backend/` and `frontend/`) have been retired.
+What’s here
+-----------
 
-## Typecheck & tests
-Run the backend checks from the repo root:
+- apps/backend — API & services
+- apps/frontend — Web app
+- types/ — shared ambient types
+- tools/ — repo guards, scripts
+- deploy/ — Helm charts & k8s manifests
+- docs/ — guides, ADRs, policies
 
-```bash
-npm install --workspaces --include-workspace-root
-npm run typecheck -w @workbuoy/backend
-npm run test -w @workbuoy/backend -- --runInBand --passWithNoTests
+Quick start
+-----------
 
+```
+git clean -fdx         # clean workspace (removes old node_modules, builds)
+npm ci                 # install for the workspace
+npm run typecheck      # types across apps
+npm test               # tests across apps
+# (optional) generate prisma client + seed baseline roles/features
+npm run prisma:generate -w @workbuoy/backend
+npm run prisma:migrate:deploy -w @workbuoy/backend
+npm run seed:dry-run   -w @workbuoy/backend  # CI-safe
+# run apps
+npm run -w @workbuoy/backend start  # adjust if start script exists
+npm run -w @workbuoy/frontend dev   # dev server
+```
 
-## Modules
+CI at a glance
+--------------
 
-- **Introspection report** – `GET /genesis/introspection-report` exposes the
-  latest awareness score together with a structured introspection report. The
-  frontend now renders the score through the new `IntrospectionBadge` component
-  in the flip-card header.
-- **Autonomous development proposals** – `POST /genesis/autonomous-develop`
-  only returns planning suggestions (`mode: "proposal"`). It never writes to the
-  repository and provides context-aware checklists for operators.
-- **Evolution gatekeeper** – `POST /genetics/implement-evolution` enforces
-  manual approval via the `.evolution/APPROVED` token and responds with a manual
-  checklist instead of merging.
+- repo-guards: bans tracked node_modules, reports orphan workspaces
+- ci: typecheck, tests, seed dry-run
+- lint: ESLint blocking on apps/**, non-blocking for satellites
+- containers: multi-stage images + Trivy (non-blocking) + SBOM
+- helm: Helm lint + kubeconform (non-blocking)
+- openapi: Spectral lint + diff to main (non-blocking)
 
-## Safety rails
+Docs
+----
 
-- `.evolution/APPROVED` must exist for any evolution request to be accepted.
-  Without the token the endpoint returns `403 approval_required`.
-- Even with approval the evolution endpoint simply acknowledges the request and
-  describes the manual merge steps; no git actions are triggered from HTTP.
-- The autonomous develop endpoint emits suggestions only and references the
-  awareness snapshot so operators can review the context before acting.
+- [Structure](docs/STRUCTURE.md)
+- [Developer Quickstart](docs/DEV_QUICKSTART.md)
+- [Asset Policy](docs/ASSET_POLICY.md)
+- [ADR Template](docs/adr/README.md)
+- [CI Notes](docs/CI_NOTES.md)
+- [Governance](docs/GOVERNANCE.md)
 
-## Local development
+Governance
+----------
 
-1. Install workspace dependencies with `npm run bootstrap` (installs the
-   backend in `apps/backend` and frontend in `apps/frontend`).
-2. Run backend checks from the repo root:
-   - `npm run typecheck -w @workbuoy/backend` executes the backend workspace
-     type-check with the meta TypeScript config.
-   - `npm run test -w @workbuoy/backend -- --runInBand --passWithNoTests` runs
-     the backend Jest suite with mocks for `prom-client` and `jsonwebtoken`.
-3. Start the UI for manual testing: `npm run dev --prefix apps/frontend`.
-
-See `docs/STRUCTURE.md` for the monorepo layout and workspace quick reference.
-
-The new endpoints are mounted through `src/server.ts`, so running the backend
-server exposes `/genesis/*` and `/genetics/*` alongside existing APIs.
+- CODEOWNERS routes reviews to the right teams.
+- Dependabot updates npm workspaces & Actions weekly (grouped).

@@ -83,3 +83,9 @@ Dependabot:
 - Groups common deps (types, testing, linting, build-tools) to reduce PR noise.
 - Caps concurrent PRs to keep review load manageable.
 - Labels: dependencies, plus ecosystem tags (npm, actions).
+
+## Docs housekeeping
+
+Legacy references updated to `apps/backend` and `apps/frontend`.
+
+See also: [Asset Policy](ASSET_POLICY.md), [ADR Guide](adr/README.md).
