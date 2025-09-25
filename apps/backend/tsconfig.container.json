@@ -1,0 +1,27 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "dist",
+    "noEmit": false
+  },
+  "include": [
+    "src/index.ts",
+    "src/app.secure.ts",
+    "src/security/**/*.ts",
+    "src/**/*.d.ts"
+  ],
+  "exclude": [
+    // Exclude optional/experimental areas that fail strict build but are not required for the runtime image
+    "src/crm/",
+    "src/connectors/",
+    "src/meta-evolution/",
+    "src/metrics/",
+    "src/docs/",
+    "src/swagger.ts",
+    "src/identity/",
+    "src/scim/",
+    // generic excludes
+    "**/*.test.ts",
+    "**/*.spec.ts"
+  ]
+}

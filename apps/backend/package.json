@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "build": "tsc -p tsconfig.json",
+    "build:container": "tsc -p tsconfig.container.json",
     "test": "jest --passWithNoTests --config jest.meta.config.cjs",
     "typecheck": "tsc --noEmit -p tsconfig.typecheck.json",
     "prisma:generate": "prisma generate",
