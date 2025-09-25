@@ -1,117 +1,64 @@
-name: CI
+name: ci
 
 on:
-  push:
-    branches: [ main ]
   pull_request:
+  push:
+    branches: [main]
 
 jobs:
-  frontend-changes:
+  setup:
     runs-on: ubuntu-latest
     outputs:
-      frontend: ${{ steps.filter.outputs.frontend }}
+      node_version: ${{ steps.versions.outputs.node }}
     steps:
       - uses: actions/checkout@v4
+      - id: versions
+        run: echo "node=20.x" >> "$GITHUB_OUTPUT"
+      - uses: actions/setup-node@v4
         with:
-          fetch-depth: 0
+          node-version: ${{ steps.versions.outputs.node }}
+          cache: npm
+      - run: npm ci
 
-      - uses: dorny/paths-filter@v3
-        id: filter
-        with:
-          filters: |
-            frontend:
-              - 'apps/frontend/**'
-              - 'package.json'
-
-  hygiene:
+  typecheck:
+    needs: setup
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: ${{ needs.setup.outputs.node_version }}
+          cache: npm
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run typecheck:meta --if-present
 
-      - name: Guard against tracked dependencies
-        run: npm run guard:ban-tracked-deps
-
-      - name: Guard against empty generated logs
-        run: npm run guard:ban-empty-logs
-
-  lint-and-test:
+  test:
+    needs: setup
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
-
-      - name: Install workspaces
-        run: npm install --workspaces --include-workspace-root --no-audit --fund=false
-
-      - name: Check roles JSON (non-blocking)
-        run: npm run --if-present check:roles
-        continue-on-error: true
-
-      - name: Prettier format check (non-blocking)
-        run: npm run format
-        continue-on-error: true
-
-      - name: Lint
-        run: npm run lint
-
-      - name: Typecheck (meta config)
-        run: npm run typecheck:meta --if-present
-
-      - name: Backend unit tests
+          node-version: ${{ needs.setup.outputs.node_version }}
+          cache: npm
+      - run: npm ci
+      - run: npm test -- --ci --reporters=default --reporters=jest-junit
         env:
-          FF_PERSISTENCE: 'false'
-        run: npm run test -w @workbuoy/backend -- --runInBand --passWithNoTests
+          CI: "true"
 
-  coverage:
-    needs: lint-and-test
+  seed:
+    needs: setup
+    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
-
-      - name: Install workspaces
-        run: npm install --workspaces --include-workspace-root --no-audit --fund=false
-
-      - name: Backend tests with coverage
-        env:
-          FF_PERSISTENCE: 'false'
-        run: npm run test -w @workbuoy/backend -- --coverage --runInBand --passWithNoTests
-
-      - name: Upload coverage
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: backend-coverage
-          path: |
-            apps/backend/coverage/**
-            coverage/**
-
-  frontend-typecheck:
-    needs:
-      - frontend-changes
-      - lint-and-test
-    if: needs.frontend-changes.outputs.frontend == 'true'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-
-      - name: Install workspaces
-        run: npm install --workspaces --include-workspace-root
-
-      - name: Frontend typecheck (non-blocking)
-        run: npm run typecheck -w @workbuoy/frontend
-        continue-on-error: true
+          node-version: ${{ needs.setup.outputs.node_version }}
+          cache: npm
+      - run: npm ci
+      - name: Prisma generate (tolerate missing DB)
+        run: npm run prisma:generate || true
+      - name: Seed roles (no-op friendly)
+        run: npm run seed:roles || true

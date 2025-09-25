@@ -1,11 +1,4 @@
-import { seedRolesFromJson } from './seed-roles-lib';
-
-const TIMEOUT_MS = 60_000;
-
-const timeout = setTimeout(() => {
-  console.error('[seed] forced exit after timeout');
-  process.exit(2);
-}, TIMEOUT_MS);
+import { seedRolesFromJson } from './seed-roles-lib.js';
 
 async function main() {
   console.log('[seed] starting…');
@@ -13,22 +6,19 @@ async function main() {
 
   if (result?.skipped) {
     console.log(`[seed] skipped: ${result.skipped}`);
-    return { roles: 0, features: 0 };
+  } else {
+    const summary = result?.summary ?? { roles: 0, features: 0 };
+    console.log(`[seed] completed roles=${summary.roles}, features=${summary.features}`);
   }
 
-  const summary = result?.summary ?? { roles: 0, features: 0 };
-  console.log(`seeded roles=${summary.roles}, features=${summary.features}`);
-  return summary;
+  console.log('[seed] completed successfully');
 }
 
 main()
   .then(() => {
-    clearTimeout(timeout);
     process.exit(0);
   })
   .catch((err) => {
-    clearTimeout(timeout);
     console.error('[seed] failed:', err);
-    process.exitCode = 1;
-    throw err;
+    process.exit(1);
   });

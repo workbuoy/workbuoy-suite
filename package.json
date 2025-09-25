@@ -6,13 +6,13 @@
   ],
   "scripts": {
     "bootstrap": "npm install --workspaces --include-workspace-root",
-    "build:all": "npm run build -w @workbuoy/backend || true",
-    "test:all": "npm run test -w @workbuoy/backend || true",
-    "typecheck:all": "npm run typecheck -w @workbuoy/backend || true",
+    "build": "npm run build -w @workbuoy/backend && npm run build -w @workbuoy/frontend",
+    "typecheck": "npm run typecheck -w @workbuoy/backend && npm run typecheck -w @workbuoy/frontend",
+    "test": "npm run test -w @workbuoy/backend && npm run test -w @workbuoy/frontend",
+    "prisma:generate": "npm run prisma:generate -w @workbuoy/backend",
     "seed:roles": "npm run seed:roles -w @workbuoy/backend",
     "check:roles": "tsx scripts/check-roles-json.ts",
     "typecheck:meta": "tsc -p tsconfig.meta.json",
-    "typecheck": "npm run typecheck -w @workbuoy/backend && npm run typecheck -w @workbuoy/frontend",
     "lint": "eslint . --ext .ts,.tsx,.js,.cjs --max-warnings=0",
     "lint:fix": "eslint . --ext .ts,.tsx,.js,.cjs --fix",
     "format": "prettier --check .",
@@ -33,5 +33,8 @@
     "prettier": "^3.3.3",
     "tsx": "^4.19.0",
     "typescript": "^5.4.5"
+  },
+  "engines": {
+    "node": ">=20"
   }
 }

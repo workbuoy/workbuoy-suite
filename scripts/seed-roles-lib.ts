@@ -1,5 +1,5 @@
-import { prisma } from '../apps/backend/src/core/db/prisma';
-import { resolveRolesSource, resolveFeaturesSource } from './roles-io.ts';
+import { PrismaClient } from '@prisma/client';
+import { resolveRolesSource, resolveFeaturesSource } from './roles-io.js';
 
 export interface SeedSummary {
   ok: true;
@@ -17,7 +17,7 @@ function shouldPersist(): boolean {
 }
 
 async function loadImporter(): Promise<(r: any[], f: any[]) => Promise<{ roles: number; features: number }>> {
-  const mod = await import('../apps/backend/src/roles/service/index.ts');
+  const mod = await import('../apps/backend/src/roles/service/index.js');
   const fn = (mod as any)?.importRolesAndFeatures;
   if (typeof fn !== 'function') throw new Error('importRolesAndFeatures not found in backend roles service');
   return fn;
@@ -122,45 +122,56 @@ function buildFeaturePayload(feature: any, featureId: string) {
 async function fastSeedPrisma(roles: any[], features: any[]) {
   console.log('[seed:fallback] using direct Prisma upserts');
 
+  const prisma = new PrismaClient();
+
   try {
-    await prisma.$executeRawUnsafe('SET statement_timeout = 10000');
-  } catch {}
+    try {
+      await prisma.$executeRawUnsafe('SET statement_timeout = 10000');
+    } catch {}
 
-  let roleCount = 0;
-  const processedRoles = new Set<string>();
-  for (const role of roles) {
-    const key = roleKey(role);
-    if (!key) continue;
-    const roleId = String(key);
-    if (processedRoles.has(roleId)) continue;
-    processedRoles.add(roleId);
-    const payload = buildRolePayload(role, roleId);
-    await prisma.role.upsert({
-      where: { role_id: roleId },
-      create: payload.create,
-      update: payload.update,
-    });
-    roleCount += 1;
+    let roleCount = 0;
+    const processedRoles = new Set<string>();
+    for (const role of roles) {
+      const key = roleKey(role);
+      if (!key) continue;
+      const roleId = String(key);
+      if (processedRoles.has(roleId)) continue;
+      processedRoles.add(roleId);
+      const payload = buildRolePayload(role, roleId);
+      await prisma.role.upsert({
+        where: { role_id: roleId },
+        create: payload.create,
+        update: payload.update,
+      });
+      roleCount += 1;
+    }
+
+    let featureCount = 0;
+    const processedFeatures = new Set<string>();
+    for (const feature of features) {
+      const key = featureKey(feature);
+      if (!key) continue;
+      const featureId = String(key);
+      if (processedFeatures.has(featureId)) continue;
+      processedFeatures.add(featureId);
+      const payload = buildFeaturePayload(feature, featureId);
+      await prisma.feature.upsert({
+        where: { id: featureId },
+        create: payload.create,
+        update: payload.update,
+      });
+      featureCount += 1;
+    }
+
+    return { roles: roleCount, features: featureCount };
+  } finally {
+    try {
+      await prisma.$disconnect();
+    } catch (disconnectError) {
+      console.warn('[seed] prisma disconnect failed:', (disconnectError as Error)?.message ?? disconnectError);
+    }
+    console.log('[seed] prisma disconnected');
   }
-
-  let featureCount = 0;
-  const processedFeatures = new Set<string>();
-  for (const feature of features) {
-    const key = featureKey(feature);
-    if (!key) continue;
-    const featureId = String(key);
-    if (processedFeatures.has(featureId)) continue;
-    processedFeatures.add(featureId);
-    const payload = buildFeaturePayload(feature, featureId);
-    await prisma.feature.upsert({
-      where: { id: featureId },
-      create: payload.create,
-      update: payload.update,
-    });
-    featureCount += 1;
-  }
-
-  return { roles: roleCount, features: featureCount };
 }
 
 export async function seedRolesFromJson(): Promise<SeedSummary> {
@@ -199,13 +210,7 @@ export async function runSeed(): Promise<SeedSummary> {
     );
     summary = await fastSeedPrisma(rolesSrc.data, featsSrc.data);
     console.log(`[seed] fallback done {roles:${summary.roles}, features:${summary.features}}`);
-  } finally {
-    try {
-      await prisma.$disconnect();
-      console.log('[seed] prisma disconnected');
-    } catch {}
   }
-
   return {
     ok: true,
     summary,
