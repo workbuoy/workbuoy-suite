@@ -1,0 +1,54 @@
+version: 2
+updates:
+  # 1) npm workspaces (root + apps + future packages)
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "07:00"
+      timezone: "Europe/Oslo"
+    open-pull-requests-limit: 5
+    labels: ["dependencies", "npm", "automated"]
+    # Group related updates to reduce noise
+    groups:
+      types:
+        patterns:
+          - "@types/"
+      testing:
+        patterns:
+          - "jest"
+          - "@jest/"
+          - "vitest"
+          - "@testing-library/"
+      linting:
+        patterns:
+          - "eslint"
+          - "@typescript-eslint/"
+          - "prettier"
+      build-tools:
+        patterns:
+          - "ts-node*"
+          - "tsx"
+          - "typescript"
+          - "rollup*"
+          - "vite*"
+          - "webpack*"
+    # Let Dependabot discover workspaces automatically
+    allow:
+      - dependency-type: "all"
+
+  # 2) GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "07:30"
+      timezone: "Europe/Oslo"
+    labels: ["dependencies", "actions", "automated"]
+    open-pull-requests-limit: 3
+    groups:
+      gh-actions:
+        patterns:
+          - "*"

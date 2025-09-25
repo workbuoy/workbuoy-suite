@@ -1,4 +1,27 @@
-# Require review from core team; ai-proposal PRs labeled must be reviewed
-*       @workbuoy-core
-docs/*  @workbuoy-core @workbuoy-docs
-tests/* @workbuoy-core @workbuoy-qe
+CODEOWNERS
+Replace @org/* placeholders with real GH teams or usernames when available.
+Core applications
+
+/apps/backend/ @org/backend-team @repo-maintainers
+/apps/frontend/ @org/frontend-team @repo-maintainers
+
+Shared types & tooling
+
+/types/ @org/platform-team @repo-maintainers
+/tools/ @org/platform-team @repo-maintainers
+
+CI & workflows
+
+/.github/workflows/ @org/platform-team @repo-maintainers
+
+Infra: Helm & Kubernetes
+
+/deploy/helm/ @org/platform-team @org/devops-team @repo-maintainers
+/deploy/k8s/ @org/platform-team @org/devops-team @repo-maintainers
+
+Documentation
+
+/docs/ @org/docs-team @repo-maintainers
+
+Catch-all (optional): uncomment to require maintainer review by default
+# * @repo-maintainers

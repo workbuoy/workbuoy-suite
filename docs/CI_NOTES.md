@@ -67,3 +67,19 @@ docker run --rm -p 8080:80 workbuoy-frontend:dev
 npm run openapi:lint
 npm run openapi:diff
 ```
+
+Governance & Automated Updates
+
+CODEOWNERS routes reviews automatically:
+
+- apps/backend/** → backend owners
+- apps/frontend/** → frontend owners
+- deploy/** → platform/devops owners
+- types/**, tools/**, .github/workflows/** → platform owners
+
+Dependabot:
+
+- Runs weekly for npm (root + workspaces) and GitHub Actions.
+- Groups common deps (types, testing, linting, build-tools) to reduce PR noise.
+- Caps concurrent PRs to keep review load manageable.
+- Labels: dependencies, plus ecosystem tags (npm, actions).
