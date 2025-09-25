@@ -11,9 +11,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Enforce no tracked node_modules
-        run: |
-          npm run guard:ban-tracked-deps
-          # (Optional) room for other guards later, e.g., empty telemetry logs, disallow large binaries, etc.
+        run: npm run guard:ban-tracked-deps
+      - name: Enforce large file policy (>5MB)
+        run: GUARD_MAX_FILE_BYTES=$((5 * 1024 * 1024)) npm run guard:ban-large-files
   orphan-workspaces:
     runs-on: ubuntu-latest
     needs: ban-tracked-deps

@@ -23,3 +23,9 @@ Checklist
 - [ ] Is this file required at runtime or for docs?
 - [ ] Can it be generated or fetched?
 - [ ] If unavoidable, documented in the PR and added to an allowlist.
+
+CI Guard
+--------
+
+A CI guard fails builds when tracked files exceed 5 MB (see `tools/guard/ban-large-files.js`).
+Add intentional exceptions to `tools/guard/large-files.allowlist` with a short justification in the PR.
