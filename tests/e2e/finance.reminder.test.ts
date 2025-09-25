@@ -1,6 +1,6 @@
 
 import request from 'supertest';
-import app from '../../src/server';
+import app from '../../apps/backend/src/server';
 
 describe('Finance Reminder suggest', () => {
   it('POST /api/finance/reminder/suggest returns draftEmail', async () => {

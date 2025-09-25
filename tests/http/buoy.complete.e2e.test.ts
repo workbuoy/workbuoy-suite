@@ -1,5 +1,5 @@
 import request from 'supertest';
-import app from '../../src/server';
+import app from '../../apps/backend/src/server';
 
 // Mock runCapability to avoid executing real actions
 jest.mock('../../src/core/capabilityRunner', () => ({

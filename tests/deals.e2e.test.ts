@@ -1,6 +1,6 @@
 // tests/deals.e2e.test.ts
 import request from 'supertest';
-import app from '../src/server';
+import app from '../apps/backend/src/server';
 
 describe('deals', () => {
   const headers = { 'x-autonomy-level': '2', 'x-role': 'ops' };

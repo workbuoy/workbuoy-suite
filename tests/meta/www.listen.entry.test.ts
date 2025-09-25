@@ -11,7 +11,7 @@ describe('www entrypoint startup', () => {
   });
 
   it('loads without throwing when listen is defined', async () => {
-    const { default: app } = await import('../../src/server');
+    const { default: app } = await import('../../apps/backend/src/server');
     const listen = jest.spyOn(app, 'listen').mockImplementation((port: number, cb?: () => void) => {
       if (cb) {
         cb();

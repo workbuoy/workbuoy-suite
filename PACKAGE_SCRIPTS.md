@@ -2,7 +2,7 @@ Suggested package.json fields:
 {
   "type": "module",
   "scripts": {
-    "dev": "ts-node-dev src/server.ts",
+    "dev": "ts-node-dev apps/backend/src/server.ts",
     "build": "tsc -p .",
     "test": "jest --runInBand",
     "lint": "eslint .",

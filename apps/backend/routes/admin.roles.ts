@@ -1,9 +1,9 @@
 import { Router } from 'express';
-import { rbac } from '../../../src/core/security/rbac';
-import { envBool } from '../../../src/core/env';
-import { loadRoleCatalog } from '../../../src/roles/loader';
-import { getRoleRegistry, importRolesAndFeatures, listOverridesForTenant, setOverride } from '../../../src/roles/service';
-import type { OrgRoleOverride, UserRoleBinding } from '../../../src/roles/types';
+import { rbac } from '../../../src/core/security/rbac.js';
+import { envBool } from '../../../src/core/env.js';
+import { loadRoleCatalog } from '../../../src/roles/loader.js';
+import { getRoleRegistry, importRolesAndFeatures, listOverridesForTenant, setOverride } from '../../../src/roles/service.js';
+import type { OrgRoleOverride, UserRoleBinding } from '../../../src/roles/types.js';
 
 const router = Router();
 const requireAdmin = rbac(['admin']);
@@ -39,7 +39,7 @@ async function summarizeRole(tenantId: string, roleId: string) {
     return null;
   }
   return {
-    rolesResolved: ctx.roles.map(r => ({ role_id: r.role_id, title: r.canonical_title })),
+    rolesResolved: ctx.roles.map((role: any) => ({ role_id: role.role_id, title: role.canonical_title })),
     featureCaps: ctx.featureCaps,
     features: ctx.features,
   };
@@ -84,7 +84,7 @@ router.get('/admin/roles/:roleId', requireAdmin, async (req, res) => {
       return res.status(404).json({ error: 'role_not_found', message: `role ${roleId} not registered` });
     }
     const overrides = await listOverridesForTenant(tenantId);
-    const override = overrides.find(o => o.role_id === roleId) ?? null;
+    const override = overrides.find((o: any) => o.role_id === roleId) ?? null;
     res.json({ tenantId, roleId, override, effective: summary });
   } catch (err: any) {
     res.status(500).json({ error: 'role_inspect_failed', message: err?.message || String(err) });

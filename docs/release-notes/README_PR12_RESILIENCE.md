@@ -20,7 +20,7 @@ const finance = new FinanceOrchestrator(makeResilientFinance(MockFinanceConnecto
 // ... pass `finance` til flows (deal-to-cash, overdue-to-reminder) i stedet for å instansiere på nytt i ruter
 ```
 
-2) Registrér manual-complete route i `src/server.ts`:
+2) Registrér manual-complete route i `apps/backend/src/server.ts`:
 ```ts
 import { manualCompleteRouter } from './core/http/routes/manual.complete';
 app.use(manualCompleteRouter());

@@ -1,5 +1,5 @@
 import request from "supertest";
-import app from "../../src/server";
+import app from "../../apps/backend/src/server";
 
 describe("POST /buoy/complete", () => {
   it("returns 200 for echo intent", async () => {

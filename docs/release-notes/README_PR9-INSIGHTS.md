@@ -3,10 +3,10 @@
 ## Innhold
 - `src/insights/engine.ts` — deterministiske regler som produserer innsiktskort (ikke-enforcing).
 - `src/routes/insights.ts` — `GET /api/insights` som returnerer `{ items: InsightCard[] }` fra mock CRM/finans.
-- `tests/insights/insights.e2e.test.ts` — enkel smoke-test (krever at `src/server.ts` `app.use('/api/insights', insightsRouter())` er satt opp).
+- `tests/insights/insights.e2e.test.ts` — enkel smoke-test (krever at `apps/backend/src/server.ts` `app.use('/api/insights', insightsRouter())` er satt opp).
 
 ## Montering i server
-Legg til følgende i `src/server.ts` (etter øvrige router-registreringer):
+Legg til følgende i `apps/backend/src/server.ts` (etter øvrige router-registreringer):
 
 ```ts
 import { insightsRouter } from './routes/insights';

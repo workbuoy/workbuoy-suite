@@ -1,5 +1,5 @@
 import request from 'supertest';
-import app from '../../src/server';
+import app from '../../apps/backend/src/server';
 import { resetSubscriptionState, setSubscriptionForTenant } from '../../src/core/subscription/state';
 import { resetProposalsRepository } from '../../src/core/proposals/repository';
 import { registerCapability } from '../../src/capabilities/registry';

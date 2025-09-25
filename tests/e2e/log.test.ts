@@ -1,5 +1,5 @@
 import request from 'supertest';
-import app from '../../src/server';
+import app from '../../apps/backend/src/server';
 
 describe('Logs & audit', () => {
   it('append log requires autonomy >=2 and audit verify is ok', async ()=>{

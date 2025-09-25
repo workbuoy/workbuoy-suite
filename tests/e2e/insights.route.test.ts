@@ -1,5 +1,5 @@
 import request from 'supertest';
-import app from '../../src/server'; // assumes server exports app (PR4b)
+import app from '../../apps/backend/src/server'; // assumes server exports app (PR4b)
 
 describe('GET /api/insights', () => {
   it('returns at least one credit_review_recommended card for mock data', async () => {

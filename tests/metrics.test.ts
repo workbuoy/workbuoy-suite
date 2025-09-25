@@ -1,6 +1,6 @@
 // tests/metrics.test.ts
 import request from 'supertest';
-import app from '../src/server';
+import app from '../apps/backend/src/server';
 describe('metrics', ()=>{
   it('returns prometheus text', async ()=>{
     const r = await request(app).get('/metrics');

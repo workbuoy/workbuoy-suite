@@ -4,7 +4,7 @@ import { prisma } from '../../src/core/db/prisma';
 import { importRolesAndFeatures, setOverride } from '../../src/roles/service';
 import { loadRolesFromRepo, loadFeaturesFromRepo } from '../../src/roles/loader';
 import { recordFeatureUsage } from '../../src/telemetry/usageSignals.db';
-import appDefault from '../../src/server';
+import appDefault from '../../apps/backend/src/server';
 
 const describeIfPersistence =
   process.env.FF_PERSISTENCE === 'true' ? describe : describe.skip;
@@ -49,7 +49,7 @@ describeIfPersistence('GET /api/features/active [persistent]', () => {
       featureId: 'cashflow_forecast',
       action: 'complete',
     });
-    app = (await import('../../src/server')).default;
+    app = (await import('../../apps/backend/src/server')).default;
   });
 
   afterAll(async () => {

@@ -1,5 +1,5 @@
 import request from "supertest";
-import app from "../../src/server";
+import app from "../../apps/backend/src/server";
 
 describe("Log API (in-memory)", () => {
   it("append and list and verify", async () => {

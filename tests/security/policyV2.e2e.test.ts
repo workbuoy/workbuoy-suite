@@ -4,7 +4,7 @@
  *  - GET  /api/tasks should remain 200
  */
 import request from 'supertest';
-import app from '../../src/server'; // assumes server exports Express app
+import app from '../../apps/backend/src/server'; // assumes server exports Express app
 
 describe('Policy V2 enforcement', () => {
   it('denies write at autonomy=1 with explanations', async () => {

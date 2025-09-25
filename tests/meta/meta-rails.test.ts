@@ -1,6 +1,6 @@
 import request from 'supertest';
 
-import app from '../../src/server';
+import app from '../../apps/backend/src/server';
 
 describe('META rails guard', () => {
   it('rejects evolution without approval token', async () => {

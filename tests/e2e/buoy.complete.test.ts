@@ -1,6 +1,6 @@
 
 import request from 'supertest';
-import app from '../../src/server';
+import app from '../../apps/backend/src/server';
 
 describe('POST /buoy/complete', () => {
   it('NL route to prepareDraft returns ROI impact in explanations', async () => {

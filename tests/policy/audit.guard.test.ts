@@ -1,5 +1,5 @@
 import request from 'supertest';
-import app from '../../src/server';
+import app from '../../apps/backend/src/server';
 
 describe('policy guard on /api/audit', () => {
   it('rejects missing autonomy headers', async () => {

@@ -1,5 +1,5 @@
 import request from 'supertest';
-import app from '../../src/server';
+import app from '../../apps/backend/src/server';
 import { resetProactivityTelemetry } from '../../src/core/proactivity/telemetry';
 
 describe('GET /api/explain/last', () => {

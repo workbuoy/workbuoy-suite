@@ -1,5 +1,5 @@
 import request from 'supertest';
-import app from '../../src/server';
+import app from '../../apps/backend/src/server';
 
 jest.mock('../../apps/backend/src/geo/mapbox.js', () => ({
   geocodeBatch: jest.fn(async (addresses: string[]) => addresses.map((addr) => ({ lat: 59.91, lng: 10.75, label: addr }))),

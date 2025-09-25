@@ -1,9 +1,9 @@
 import { Router } from 'express';
-import { runCapabilityWithRole } from '../../../src/core/capabilityRunnerRole';
-import { testCaps } from '../../../src/capabilities/testCaps';
-import { parseProactivityMode } from '../../../src/core/proactivity/modes';
-import { getRoleRegistry, resolveUserBinding } from '../../../src/roles/service';
-import type { UserRoleBinding } from '../../../src/roles/types';
+import { runCapabilityWithRole } from '../../../src/core/capabilityRunnerRole.js';
+import { testCaps } from '../../../src/capabilities/testCaps.js';
+import { parseProactivityMode } from '../../../src/core/proactivity/modes.js';
+import { getRoleRegistry, resolveUserBinding } from '../../../src/roles/service.js';
+import type { UserRoleBinding } from '../../../src/roles/types.js';
 
 const router: any = Router();
 

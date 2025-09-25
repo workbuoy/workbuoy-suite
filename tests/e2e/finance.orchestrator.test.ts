@@ -1,5 +1,5 @@
 import request from 'supertest';
-import app from '../../src/server'; // assumes PR4b exports app
+import app from '../../apps/backend/src/server'; // assumes PR4b exports app
 
 describe('Finance Orchestrator dev routes', () => {
   it('POST /api/_dev/finance/prepareDraft returns previewUrl in simulate mode', async () => {

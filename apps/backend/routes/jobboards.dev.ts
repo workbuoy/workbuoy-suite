@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import fs from 'node:fs';
 import path from 'node:path';
-import { extractFeatureCandidates } from '../../../src/ingest/jobboards/pipeline';
+import { extractFeatureCandidates } from '../../../src/ingest/jobboards/pipeline.js';
 
 const r = Router();
 r.get('/dev/jobboards/proposals', (_req,res)=>{

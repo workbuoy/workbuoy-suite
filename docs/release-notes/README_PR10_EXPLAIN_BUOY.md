@@ -12,7 +12,7 @@
 - `tests/e2e/buoy.complete.test.ts` — NL-happy-path + 403-path
 
 ## Wiring
-I `src/server.ts`:
+I `apps/backend/src/server.ts`:
 ```ts
 import { buoyRouter } from './core/http/routes/buoy.complete';
 app.use(buoyRouter());
