@@ -58,7 +58,5 @@ jobs:
           node-version: ${{ needs.setup.outputs.node_version }}
           cache: npm
       - run: npm ci
-      - name: Prisma generate (tolerate missing DB)
-        run: npm run prisma:generate || true
-      - name: Seed roles (no-op friendly)
-        run: npm run seed:roles || true
+      - name: Seed dry run (no DB writes)
+        run: npm run seed:dry-run -w @workbuoy/backend || true
