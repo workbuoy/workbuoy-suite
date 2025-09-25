@@ -19,5 +19,16 @@ jobs:
     needs: ban-tracked-deps
     steps:
       - uses: actions/checkout@v5
-      - name: Report orphan workspaces (non-blocking)
-        run: npm run guard:orphan-workspaces
+      - name: Enforce orphan workspaces guard
+        shell: bash
+        run: |
+          set -euo pipefail
+          report="$(mktemp)"
+          node tools/guard/orphan-workspaces.js | tee "$report"
+
+          if grep -q 'Orphan workspaces (not covered by root workspaces):' "$report"; then
+            echo "::error::Orphan workspaces detected. Please add them to workspaces or archive them."
+            exit 1
+          fi
+
+          rm -f "$report"

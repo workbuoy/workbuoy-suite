@@ -3,9 +3,10 @@ Developer Quickstart
 
 1. Clean install
    ```
-   git clean -fdx
+   npm run clean
    npm ci
    ```
+   > Uses `git clean -fdx` to reset the working tree; this removes untracked files and directories.
 
 2. Verify
    ```
