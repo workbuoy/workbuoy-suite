@@ -423,7 +423,7 @@ const pillarKeyFiles = {
   SECURE: ['apps/backend/meta/router.ts', 'apps/backend/src/meta-evolution/routes/evolution.routes.ts', 'META_ROUTE_RUNBOOK.md'],
   NAVI: ['apps/frontend/src/components/FlipCard/FlipCard.tsx', 'apps/frontend/src/navi/NaviGrid.tsx', 'apps/frontend/src/components/FlipCard/FlipCard.css'],
   BUOY_AI: ['src/buoy/agent.ts', 'apps/frontend/src/features/buoy/useBuoy.ts', 'apps/frontend/src/features/buoy/ChatMessage.tsx'],
-  ROLES: ['roles/roles.json', 'src/roles/registry.ts', 'apps/frontend/src/roles/rolePresentation.ts'],
+  ROLES: ['packages/roles-data/roles.json', 'src/roles/registry.ts', 'apps/frontend/src/roles/rolePresentation.ts'],
   PROACTIVITY: ['src/core/proactivity/modes.ts', 'apps/frontend/src/proactivity/useProactivity.ts', 'apps/frontend/src/proactivity/ModeSwitcher.tsx'],
   META: ['src/routes/genesis.autonomy.ts', 'apps/backend/meta/router.ts', 'tests/meta/meta-rails.test.ts'],
   INFRA: ['deploy/helm/workbuoy/templates/deployment.yaml', 'observability/metrics/meta.ts', 'grafana/dashboards/proactivity.json'],
@@ -492,7 +492,7 @@ function createAuditMarkdown(result) {
   lines.push('');
   lines.push('## Roles in UI');
   lines.push('');
-  lines.push('- `roles/roles.json` seeds tone, priority, and policy chips for each persona.');
+  lines.push('- `packages/roles-data/roles.json` seeds tone, priority, and policy chips for each persona.');
   lines.push('- `apps/frontend/src/roles/rolePresentation.ts` renders those role chips and guidance for UI consumption.');
   lines.push('- `apps/frontend/src/features/buoy/ChatMessage.tsx` displays assistant vs. user roles alongside rationale drawers.');
 

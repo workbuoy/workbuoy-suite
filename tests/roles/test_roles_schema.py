@@ -1,6 +1,6 @@
 import json, os, re
 
-ROLES_PATH = os.path.join(os.path.dirname(__file__), "..", "..", "core", "roles", "roles.json")
+ROLES_PATH = os.path.join(os.path.dirname(__file__), "..", "..", "packages", "roles-data", "roles.json")
 
 def tolerant_load_roles(path):
     txt = open(path, "r", encoding="utf-8", errors="ignore").read()

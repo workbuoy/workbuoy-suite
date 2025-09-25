@@ -9,7 +9,7 @@
 | Secure | ✅ Present | Security modules and policy guards keep governance and approvals in place. Key files: `backend/meta/router.ts`, `backend/src/meta-evolution/routes/evolution.routes.ts`, `META_ROUTE_RUNBOOK.md`. |
 | Navi | ✅ Present | Flip-card UI and Navi modules expose the workspace navigation surfaces. Key files: `frontend/src/components/FlipCard/FlipCard.tsx`, `frontend/src/navi/NaviGrid.tsx`, `frontend/src/components/FlipCard/FlipCard.css`. |
 | Buoy AI | ✅ Present | Single-assistant orchestration and chat UX live in buoy source modules. Key files: `src/buoy/agent.ts`, `frontend/src/features/buoy/useBuoy.ts`, `frontend/src/features/buoy/ChatMessage.tsx`. |
-| Roles | ✅ Present | Role registries and UI presenters surface tone, priority, and policy chips. Key files: `roles/roles.json`, `src/roles/registry.ts`, `frontend/src/roles/rolePresentation.ts`. |
+| Roles | ✅ Present | Role registries and UI presenters surface tone, priority, and policy chips. Key files: `packages/roles-data/roles.json`, `src/roles/registry.ts`, `frontend/src/roles/rolePresentation.ts`. |
 | Proactivity | ✅ Present | Mode definitions and UI keep proactivity controls available. Key files: `src/core/proactivity/modes.ts`, `frontend/src/proactivity/useProactivity.ts`, `frontend/src/proactivity/ModeSwitcher.tsx`. |
 | META | ✅ Present | META routers, genesis flows, and guard specs stay enforced. Key files: `src/routes/genesis.autonomy.ts`, `backend/meta/router.ts`, `tests/meta/meta-rails.test.ts`. |
 | Infra | ✅ Present | Deploy and observability assets remain packaged with the suite. Key files: `deploy/helm/workbuoy/templates/deployment.yaml`, `observability/metrics/meta.ts`, `grafana/dashboards/proactivity.json`. |
@@ -41,7 +41,7 @@
 
 ## Roles in UI
 
-- `roles/roles.json` seeds tone, priority, and policy chips for each persona.
+- `packages/roles-data/roles.json` seeds tone, priority, and policy chips for each persona.
 - `frontend/src/roles/rolePresentation.ts` renders those role chips and guidance for UI consumption.
 - `frontend/src/features/buoy/ChatMessage.tsx` displays assistant vs. user roles alongside rationale drawers.
 

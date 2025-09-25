@@ -6,8 +6,8 @@
   run: npm run seed:roles -w @workbuoy/backend
   env:
     DATABASE_URL: ${{ env.DATABASE_URL }}
-    ROLES_PATH: core/roles/roles.json # optional override
-    FEATURES_PATH: core/roles/features.json # optional override
+    ROLES_PATH: packages/roles-data/roles.json # optional override
+    FEATURES_PATH: packages/roles-data/features.json # optional override
 ```
 
 The unified entrypoint lives in `apps/backend/prisma/seed.ts`. Use

@@ -1,4 +1,5 @@
 import { existsSync, readFileSync } from 'node:fs';
+import { createRequire } from 'node:module';
 import path from 'node:path';
 import process from 'node:process';
 import { fileURLToPath } from 'node:url';
@@ -35,8 +36,9 @@ const prismaDir = path.dirname(fileURLToPath(import.meta.url));
 const workspaceRoot = path.resolve(prismaDir, '..');
 const repoRoot = path.resolve(workspaceRoot, '..', '..');
 
-const DEFAULT_ROLES_PATH = path.join('scripts', 'fixtures', 'minimal-roles.json');
-const DEFAULT_FEATURES_PATH = path.join('scripts', 'fixtures', 'minimal-features.json');
+const requireFromHere = createRequire(import.meta.url);
+const DEFAULT_ROLES_PATH = requireFromHere.resolve('@workbuoy/roles-data/roles.json');
+const DEFAULT_FEATURES_PATH = requireFromHere.resolve('@workbuoy/roles-data/features.json');
 
 function envOrDefault(name: string, fallback: string): string {
   const value = process.env[name];
