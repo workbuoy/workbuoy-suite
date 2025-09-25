@@ -1,7 +1,9 @@
 import express, { Router } from 'express';
 import app from './app.secure.js';
+import { createAuthModule } from '@workbuoy/backend-auth';
 import { swaggerRouter as buildSwaggerRouter } from './docs/swagger.js';
 import { rbacRouter } from './rbac/routes.js';
+import { audit } from './audit/audit.js';
 
 import { correlationHeader } from '../../../src/middleware/correlationHeader.js';
 import { wbContext } from '../../../src/middleware/wbContext.js';
@@ -53,6 +55,9 @@ app.use(requestLogger());
 
 app.set('eventBus', bus);
 
+const { router: authRouter } = createAuthModule({ audit });
+
+app.use('/', authRouter);
 app.use('/', buildSwaggerRouter());
 
 app.use('/api/crm', crmRouter());

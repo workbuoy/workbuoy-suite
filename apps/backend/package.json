@@ -17,6 +17,7 @@
     "seed:dry-run": "npm run seed:roles -- --dry-run"
   },
   "dependencies": {
+    "@workbuoy/backend-auth": "file:../../packages/backend-auth",
     "@workbuoy/roles-data": "file:../../packages/roles-data",
     "@turf/boolean-point-in-polygon": "^6.5.0",
     "busboy": "^1.6.0",
