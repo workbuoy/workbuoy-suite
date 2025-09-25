@@ -4,6 +4,9 @@
 FROM node:20-alpine AS builder
 WORKDIR /repo
 COPY package*.json ./
+RUN mkdir -p apps/backend apps/frontend
+COPY apps/backend/package*.json apps/backend/
+COPY apps/frontend/package*.json apps/frontend/
 RUN npm ci
 COPY . .
 

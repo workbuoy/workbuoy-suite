@@ -4,11 +4,18 @@
 FROM node:20-alpine AS builder
 WORKDIR /repo
 
-# Copy root manifests first for caching
+# Copy root manifest(s) and workspace package.json files for proper workspaces install
 COPY package*.json ./
+
+# Pre-create workspace dirs and copy their package manifests to enable npm workspaces resolution
+RUN mkdir -p apps/backend apps/frontend
+COPY apps/backend/package*.json apps/backend/
+COPY apps/frontend/package*.json apps/frontend/
+
+# Install with the root lockfile and workspace manifests present
 RUN npm ci
 
-# Copy the rest of the repo (respects root .dockerignore)
+# Now copy the rest of the repo (respects root .dockerignore)
 COPY . .
 
 # Build the backend workspace (outputs to apps/backend/dist)
