@@ -21,7 +21,9 @@
     "guard:ban-empty-logs": "node scripts/guards/banEmptyLogs.mjs",
     "guard:orphan-workspaces": "node tools/guard/orphan-workspaces.js",
     "lint:apps": "npx eslint apps --ext .ts,.tsx,.js --max-warnings=0",
-    "format:check": "npx prettier --check ."
+    "format:check": "npx prettier --check .",
+    "openapi:lint": "bash -lc 'SPECS=$(git ls-files | grep -E \"(^|/)(openapi\\\\.(ya?ml|json)|openapi/.+\\\\.(ya?ml|json))$\" || true); if [ -z \"$SPECS\" ]; then echo \"No OpenAPI specs found\"; exit 0; fi; echo \"$SPECS\" | while read -r spec; do echo \"=== Lint: $spec ===\"; npx @stoplight/spectral-cli@6 lint \"$spec\" -r .spectral.yaml || true; done'",
+    "openapi:diff": "bash -lc 'SPECS=$(git ls-files | grep -E \"(^|/)(openapi\\\\.(ya?ml|json)|openapi/.+\\\\.(ya?ml|json))$\" || true); if [ -z \"$SPECS\" ]; then echo \"No OpenAPI specs found\"; exit 0; fi; git fetch origin main:refs/remotes/origin/main >/dev/null 2>&1 || true; echo \"$SPECS\" | while read -r spec; do echo \"=== Diff: $spec ===\"; if git show origin/main:\"$spec\" >/dev/null 2>&1; then TMP=$(mktemp); git show origin/main:\"$spec\" > \"$TMP\"; npx openapi-diff@3.0.1 --fail-on-changed false --fail-on-incompatible false -f text \"$TMP\" \"$spec\" || true; rm -f \"$TMP\"; else echo \"[new] $spec\"; fi; echo; done'"
   },
   "devDependencies": {
     "@types/jest": "^29.5.12",

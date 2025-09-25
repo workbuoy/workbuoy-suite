@@ -1,0 +1,107 @@
+name: openapi
+
+on:
+  pull_request:
+    paths:
+      - '**/openapi.yaml'
+      - '**/openapi.yml'
+      - '**/openapi.json'
+      - '**/openapi/**/*.yaml'
+      - '**/openapi/**/*.yml'
+      - '**/openapi/**/*.json'
+      - '.spectral.yaml'
+      - '.github/workflows/openapi.yml'
+  push:
+    branches:
+      - main
+    paths:
+      - '**/openapi.yaml'
+      - '**/openapi.yml'
+      - '**/openapi.json'
+      - '**/openapi/**/*.yaml'
+      - '**/openapi/**/*.yml'
+      - '**/openapi/**/*.json'
+      - '.spectral.yaml'
+      - '.github/workflows/openapi.yml'
+
+jobs:
+  lint-and-diff:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+
+      - name: Find OpenAPI specs
+        id: find_specs
+        run: |
+          SPECS=$(git ls-files | grep -E '(^|/)(openapi\.(ya?ml|json)|openapi/.+\.(ya?ml|json))$' || true)
+          echo "specs<<EOF" >> "$GITHUB_OUTPUT"
+          echo "$SPECS" >> "$GITHUB_OUTPUT"
+          echo "EOF" >> "$GITHUB_OUTPUT"
+          if [ -n "$SPECS" ]; then
+            echo "Found specs:"
+            echo "$SPECS"
+          else
+            echo "No OpenAPI specs found"
+          fi
+
+      - name: Persist spec list
+        if: steps.find_specs.outputs.specs != ''
+        run: |
+          printf '%s\n' "$SPEC_LIST" > specs.txt
+        env:
+          SPEC_LIST: ${{ steps.find_specs.outputs.specs }}
+
+      - name: Run Spectral on each spec
+        if: steps.find_specs.outputs.specs != ''
+        run: |
+          while IFS= read -r spec; do
+            [ -z "$spec" ] && continue
+            echo "=== Lint: $spec ==="
+            npx --yes @stoplight/spectral-cli@6 lint "$spec" -r .spectral.yaml || true
+          done < specs.txt
+
+      - name: Prepare diff against main
+        if: steps.find_specs.outputs.specs != ''
+        run: |
+          git fetch origin main:refs/remotes/origin/main
+          : > diff.md
+          while IFS= read -r spec; do
+            [ -z "$spec" ] && continue
+            echo "## $spec" >> diff.md
+            if git show origin/main:"$spec" >/dev/null 2>&1; then
+              TMP=$(mktemp)
+              git show origin/main:"$spec" > "$TMP"
+              npx --yes openapi-diff@3.0.1 \
+                --fail-on-changed false \
+                --fail-on-incompatible false \
+                -f markdown \
+                "$TMP" "$spec" >> diff.md || true
+              rm -f "$TMP"
+            else
+              echo "_No baseline on main (new spec)_" >> diff.md
+            fi
+            echo "" >> diff.md
+          done < specs.txt
+
+      - name: Upload diff report
+        if: steps.find_specs.outputs.specs != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: openapi-diff-report
+          path: diff.md
+          if-no-files-found: warn
+
+      - name: Print diff summary
+        if: steps.find_specs.outputs.specs != ''
+        run: |
+          echo "---- OpenAPI Diff (vs main) ----"
+          sed -n '1,200p' diff.md || true
+          echo "--------------------------------"
