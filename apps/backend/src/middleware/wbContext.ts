@@ -1,6 +1,6 @@
 import crypto from 'node:crypto';
 import type { NextFunction, Request, Response } from 'express';
-import type { WbContext } from '../types/wb-context';
+import type { WbContext } from '../types/wb-context.js';
 
 type RequestWithCorrelation = Request & { correlationId?: string };
 
