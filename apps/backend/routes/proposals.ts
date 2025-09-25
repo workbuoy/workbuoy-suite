@@ -165,7 +165,9 @@ router.post('/proposals/:id/approve', requiresProMode(ProactivityMode.Kraken), a
       },
       capability,
       policyCheck,
-      logIntent,
+      async (event) => {
+        await logIntent(event);
+      },
     );
 
     await markProposalExecuted(proposalId, result.outcome);

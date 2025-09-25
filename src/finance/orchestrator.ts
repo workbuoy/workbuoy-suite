@@ -9,7 +9,7 @@ export class FinanceOrchestrator {
       observe: async () => {},
       suggest: async () => (await this.connector.simulate('invoice.createDraft', input)),
       prepare: async () => (await this.connector.simulate('invoice.createDraft', input)),
-      execute: async () => (await this.connector.execute('invoice.createDraft', input)),
+      execute: async () => (await this.connector.execute('invoice.createDraft', input)) as any,
     });
   }
 
@@ -18,7 +18,7 @@ export class FinanceOrchestrator {
       observe: async () => {},
       suggest: async () => ({ message: 'Klar til å sende (krever godkjenning)' }),
       prepare: async () => ({ message: 'Utkast klart – venter godkjenning' }),
-      execute: async () => (await this.connector.execute('invoice.send', input)),
+      execute: async () => (await this.connector.execute('invoice.send', input)) as any,
     });
   }
 

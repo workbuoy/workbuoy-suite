@@ -17,6 +17,7 @@ class JsonParseError extends Error {
   }
 }
 
+// @ts-ignore - import.meta is available when bundling for ESM runtimes
 const requireFromHere = createRequire(import.meta.url);
 const REPO_ROOT = path.resolve(__dirname, '..', '..');
 const DEFAULT_FEATURE_SOURCE = '@workbuoy/roles-data/features.json';

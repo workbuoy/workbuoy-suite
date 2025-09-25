@@ -18,8 +18,10 @@ RUN npm ci
 # Now copy the rest of the repo (respects root .dockerignore)
 COPY . .
 
-# Build the backend workspace for container (minimal surface)
-RUN npm run -w @workbuoy/backend build:container
+# Generate Prisma client for typechecking and build backend (container surface)
+RUN npx prisma generate --schema=apps/backend/prisma/schema.prisma \
+  && npm run -w @workbuoy/backend build:container \
+  && npm run -w @workbuoy/backend build:container:verify
 
 # --- runtime ---
 
@@ -27,13 +29,17 @@ FROM node:20-alpine AS runtime
 ENV NODE_ENV=production
 WORKDIR /app
 
-# Install ONLY backend production deps.
-# We cannot rely on a per-workspace lockfile inside the app folder,
-# so use npm install (not ci) against the workspace package.json.
+# 1) Copy manifest and Prisma schema so postinstall/generate can find it
 COPY apps/backend/package*.json ./
+COPY apps/backend/prisma ./prisma
+
+# 2) Production install; @prisma/client postinstall will attempt generate
 RUN npm install --omit=dev --no-audit --no-fund
 
-# Copy compiled output from builder
+# 3) Explicit generate in case postinstall was skipped
+RUN npx prisma generate --schema=prisma/schema.prisma
+
+# 4) Copy compiled artifacts from builder
 COPY --from=builder /repo/apps/backend/dist ./dist
 USER node
 EXPOSE 3000

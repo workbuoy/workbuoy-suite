@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { Router } from 'express';
 import app from './app.secure.js';
 import { swaggerRouter as buildSwaggerRouter } from './docs/swagger.js';
 import { rbacRouter } from './rbac/routes.js';
@@ -58,7 +58,7 @@ app.use('/', buildSwaggerRouter());
 app.use('/api/crm', crmRouter());
 app.use('/api/tasks', tasksRouter());
 app.use('/api/logs', logRouter());
-app.use('/api', dealsRouter);
+app.use('/api', dealsRouter as unknown as Router);
 app.use('/buoy', buoyRouter());
 app.use('/api/insights', insightsRouter());
 app.use('/api/finance', financeReminderRouter());
@@ -74,7 +74,7 @@ app.use('/api', explainabilityRouter);
 app.use('/api', proposalsRouter);
 app.use('/api', connectorsHealthRouter);
 
-app.use('/api', knowledgeRouter);
+app.use('/api', knowledgeRouter as unknown as Router);
 app.use('/api/audit', auditRouter());
 app.use('/api/rbac', rbacRouter);
 

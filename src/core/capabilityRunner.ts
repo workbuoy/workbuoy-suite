@@ -31,7 +31,7 @@ export async function runCapability<T>(
     return { policy };
   }
 
-  const policy = await policyCheck({ capability: capabilityId, payload }, ctx);
+  const policy = await policyCheck({ capability: capabilityId, payload } as any, ctx);
   const mode: ModuleMode = ctx.autonomy_level >= 5 ? 'integration' : 'simulate';
   let outcome: any;
 

@@ -5,7 +5,9 @@
   "type": "module",
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "build:container": "tsc -p tsconfig.container.json",
+    "build:prisma": "prisma generate --schema=prisma/schema.prisma",
+    "build:container": "npm run build:prisma && tsc -p tsconfig.container.json && node -e \"const fs=require('fs');const path=require('path');const source=path.join('dist','apps','backend','src','index.js');const target=path.join('dist','index.js');if(!fs.existsSync(source)){throw new Error('missing '+source);}fs.mkdirSync(path.dirname(target),{recursive:true});fs.copyFileSync(source,target);\"",
+    "build:container:verify": "node -e \"require('fs').accessSync('dist/index.js'); console.log('[verify] dist/index.js present')\"",
     "test": "jest --passWithNoTests --config jest.meta.config.cjs",
     "typecheck": "tsc --noEmit -p tsconfig.typecheck.json",
     "prisma:generate": "prisma generate",

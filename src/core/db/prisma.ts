@@ -41,7 +41,7 @@ function createNoopClient(): PrismaClient {
       };
     },
   };
-  return new Proxy({}, handler) as PrismaClient;
+  return new Proxy({}, handler) as unknown as PrismaClient;
 }
 
 const noopClient = createNoopClient();

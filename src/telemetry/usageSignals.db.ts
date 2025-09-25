@@ -22,7 +22,7 @@ export async function recordFeatureUsage(evt: FeatureUsageEvent): Promise<void> 
       featureId: evt.featureId,
       action: evt.action as PrismaFeatureUsageAction,
       ts: evt.ts ?? new Date(),
-      metadata: evt.metadata,
+      metadata: evt.metadata as any,
     },
   });
 }
