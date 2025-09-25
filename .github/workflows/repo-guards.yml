@@ -9,7 +9,7 @@ jobs:
   ban-tracked-deps:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Enforce no tracked node_modules
         run: npm run guard:ban-tracked-deps
       - name: Enforce large file policy (>5MB)
@@ -18,6 +18,6 @@ jobs:
     runs-on: ubuntu-latest
     needs: ban-tracked-deps
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Report orphan workspaces (non-blocking)
         run: npm run guard:orphan-workspaces
