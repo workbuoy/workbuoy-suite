@@ -1,41 +1,23 @@
 # CI Notes
 
-This repository has three relevant backend/OpenAPI workflows. Run the same commands locally to debug failing checks.
+- Primary apps live under `apps/backend` and `apps/frontend`.
 
-## Backend smoke tests (in-memory)
-- Workflow: `.github/workflows/backend-ci.yml`
-- Command:
-  ```bash
-  cd backend
-  FF_PERSISTENCE=false npm test -- \
-    tests/features/active.api.test.ts \
-    tests/usage/usage.api.test.ts \
-    --runInBand --passWithNoTests
-  ```
-- Jest config: `backend/jest.meta.config.cjs` (loads policy/meta/usage tests and skips DB suites when `FF_PERSISTENCE=false`).
-- Tip: keep `FF_PERSISTENCE=false` so the in-memory fallback is used. Gate any DB-only tests or modules behind a `FF_PERSISTENCE==='true'` check.
+## Guards
 
-## Type checking
-- Workflow runs `npm run typecheck --if-present` from repo root.
-- Local command:
-  ```bash
-  npm run typecheck
-  ```
-- Config: `tsconfig.meta.json` extends the shared TypeScript config.
+- `repo-guards` workflow enforces no tracked `node_modules`.
+- Run locally with `npm run guard:ban-tracked-deps` if you suspect large working copies.
 
-## OpenAPI lint (Redocly)
-- Workflow: `.github/workflows/openapi-lint.yml`
-- Command (latest Redocly CLI):
-  ```bash
-  npx @redocly/cli lint openapi/**/*.yaml
-  ```
-  (The CI job iterates each file under `openapi/` individually.)
-- Ensure every documented operation has an `operationId`, valid responses, and no broken `$ref` paths.
+## Typical pipeline
 
-## Running persistence-backed tests
-- To execute the Postgres-backed suites locally, start Postgres and set the flag before invoking Jest:
-  ```bash
-  cd backend
-  FF_PERSISTENCE=true npm test
-  ```
-- The Prisma client is loaded lazily; modules only touch the database when the feature flag is `true` at runtime.
+1. Repo guards
+2. Typecheck (`npm run typecheck`)
+3. Unit tests (`npm test`)
+4. (Optional) Seed verification (`npm run seed:roles || true`)
+
+If CI reports tracked `node_modules`, remove files from Git history and re-commit:
+
+```bash
+git rm -r --cached path/to/offending/node_modules
+echo 'node_modules/' >> .gitignore
+git commit -m "chore(gitignore): ignore node_modules"
+```

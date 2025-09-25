@@ -17,7 +17,7 @@
     "lint:fix": "eslint . --ext .ts,.tsx,.js,.cjs --fix",
     "format": "prettier --check .",
     "format:fix": "prettier --write .",
-    "guard:ban-tracked-deps": "node scripts/guards/banTrackedDeps.mjs",
+    "guard:ban-tracked-deps": "node tools/guard/ban-tracked-deps.js",
     "guard:ban-empty-logs": "node scripts/guards/banEmptyLogs.mjs"
   },
   "devDependencies": {
