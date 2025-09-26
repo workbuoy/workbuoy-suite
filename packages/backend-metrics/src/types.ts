@@ -1,11 +1,12 @@
-export type AnyRegistry = any;
+// Permissive cross-version types. Keep very tolerant to prom-client changes.
+export type AnyRegistry = unknown;
 
-// Tolerant versjon av prom-client collectDefaultMetrics options
-export type CollectDefaultsOptions = {
-  register?: any;
+export interface CollectDefaultsOptions {
+  register?: AnyRegistry;
   prefix?: string;
   labels?: Record<string, string>;
   gcDurationBuckets?: number[];
-  eventLoopMonitoringPrecision?: number;
-  timeout?: number;
-} & Record<string, any>;
+  interval?: number;
+  // allow future/unknown keys without breaking
+  [k: string]: unknown;
+}

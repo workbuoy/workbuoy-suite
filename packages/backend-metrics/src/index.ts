@@ -1,4 +1,4 @@
-// NodeNext barrel – IMPORTANT: use .js extensions
+// NodeNext barrel – keep .js extensions on relative exports.
 export { createCounter, createHistogram } from './helpers.js';
 export { createMetricsRouter } from './router.js';
 export { withMetrics } from './middleware.js';
@@ -8,8 +8,7 @@ export {
   ensureDefaultMetrics,
   mergeRegistries,
   getMetricsText,
-  getOpenMetricsText
+  getOpenMetricsText,
 } from './registry.js';
 
-// Re-export types consumed by the backend
 export type { AnyRegistry, CollectDefaultsOptions } from './types.js';
