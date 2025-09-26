@@ -7,6 +7,8 @@ import {
   Registry,
 } from "prom-client";
 
+type AnyRegistry = any;
+
 const defaultRegistry = new Registry();
 const registriesWithDefaults = new WeakSet<Registry>();
 
@@ -27,6 +29,11 @@ export function ensureDefaultMetrics(
   // Avoid depending on the exact prom-client signature shape across versions.
   collectDefaultMetrics({ register: registry, ...config });
   registriesWithDefaults.add(registry);
+}
+
+export function setupDefaultMetrics(opts?: CollectDefaultsOptions): ReturnType<typeof collectDefaultMetrics> {
+  // Avoid depending on exact prom-client signature shapes across versions.
+  return collectDefaultMetrics(opts as any);
 }
 
 type CounterInit<T extends string> = CounterConfiguration<T> & {
@@ -60,27 +67,27 @@ export function createHistogram<T extends string>(config: HistogramInit<T>): His
   return new Histogram<T>({ ...rest, registers: resolveRegisters(registry, registers) });
 }
 
-function coerceRegistries(registries?: Registry[]): Registry[] {
+function coerceRegistries(registries?: AnyRegistry[]): AnyRegistry[] {
   if (Array.isArray(registries) && registries.length > 0) {
     return registries;
   }
-  return [defaultRegistry];
+  return [defaultRegistry as AnyRegistry];
 }
 
-function mergeRegistries(registries?: Registry[]): Registry {
+export function mergeRegistries(registries?: AnyRegistry[]): AnyRegistry {
   const regs = coerceRegistries(registries);
   // prom-client v15 tightened the Registry.merge signature; cast to keep compatibility
   // with prior releases while still merging the provided registries.
-  const merger = Registry as unknown as { merge(rs?: Registry[]): Registry };
+  const merger = Registry as unknown as { merge(rs?: AnyRegistry[]): AnyRegistry };
   return merger.merge(regs);
 }
 
-export function getMetricsText(registries?: Registry[]): Promise<string> {
+export function getMetricsText(registries?: AnyRegistry[]): Promise<string> {
   const merged = mergeRegistries(registries);
   return merged.metrics();
 }
 
-export function getOpenMetricsText(registries?: Registry[]): Promise<string> {
+export function getOpenMetricsText(registries?: AnyRegistry[]): Promise<string> {
   const merged = mergeRegistries(registries);
   // Some prom-client versions do not accept options for metrics(); rely on the default
   // content type to keep the helper broadly compatible.

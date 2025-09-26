@@ -1,16 +1,5 @@
-export {
-  getRegistry,
-  ensureDefaultMetrics,
-  createCounter,
-  createHistogram,
-  getMetricsText,
-  getOpenMetricsText,
-  type CollectDefaultsOptions,
-} from "./registry.js";
-export {
-  withMetrics,
-  createRequestMetricsMiddleware,
-  type WithMetricsOptions,
-  type WithMetricsResult,
-} from "./middleware.js";
-export { metricsRouter, createMetricsRouter, type MetricsRouterOptions } from "./router.js";
+export * from "./helpers.js";
+export * from "./registry.js";
+export * from "./middleware.js";
+export * from "./router.js";
+export * from "./types.js";
