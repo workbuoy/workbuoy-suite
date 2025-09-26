@@ -77,7 +77,12 @@ if (metricsEnabled) {
   const registry = getRegistry();
   const collectEventBusMetrics = createEventBusMetricsCollector(registry);
   withMetrics(app, { registry });
-  app.use(metricsRoute, createMetricsRouter({ registry, beforeCollect: collectEventBusMetrics }));
+  const metricsRouter = createMetricsRouter({
+    path: metricsRoute,
+    registry,
+    beforeCollect: collectEventBusMetrics,
+  });
+  app.use(metricsRouter);
 } else {
   app.use(timingMiddleware);
   app.get(metricsRoute, metricsHandler);

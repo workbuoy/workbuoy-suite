@@ -6,7 +6,9 @@
     "resolvePackageJsonExports": true,
     "baseUrl": "../..",
     "paths": {
-      "@workbuoy/backend-metrics": ["packages/backend-metrics/src/index.ts"]
+      "@workbuoy/backend-metrics": ["packages/backend-metrics/src/index.ts"],
+      "@workbuoy/backend-telemetry": ["packages/backend-telemetry/src/index.ts"],
+      "@workbuoy/backend-rbac": ["packages/backend-rbac/src/index.ts"]
     },
     "skipLibCheck": true
   }
