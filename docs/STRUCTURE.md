@@ -22,3 +22,4 @@ Shared configuration continues to live alongside the workspaces (for example `ts
 
 - `@workbuoy/backend-auth` — Express router and middleware for session handling and SSO integrations.
 - `@workbuoy/backend-telemetry` — Express router and storage adapters for feature usage telemetry (in-memory + Prisma-backed).
+- `@workbuoy/backend-rbac` — Shared RBAC policy engine, middleware, and admin router used by backend services.

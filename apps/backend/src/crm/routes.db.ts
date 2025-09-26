@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { repo } from './repo.js';
-import { requireRole } from '../middleware/rbac.js';
+import { requireRole } from '@workbuoy/backend-rbac';
 
 export const crmDbRouter = Router();
 

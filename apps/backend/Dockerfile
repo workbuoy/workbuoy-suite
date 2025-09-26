@@ -8,10 +8,11 @@ WORKDIR /repo
 COPY package*.json ./
 
 # Pre-create workspace dirs and copy their package manifests to enable npm workspaces resolution
-RUN mkdir -p apps/backend apps/frontend packages/backend-telemetry
+RUN mkdir -p apps/backend apps/frontend packages/backend-telemetry packages/backend-rbac
 COPY apps/backend/package*.json apps/backend/
 COPY apps/frontend/package*.json apps/frontend/
 COPY packages/backend-telemetry/package*.json packages/backend-telemetry/
+COPY packages/backend-rbac/package*.json packages/backend-rbac/
 
 # Install with the root lockfile and workspace manifests present
 RUN npm ci
@@ -22,6 +23,7 @@ COPY . .
 # Generate Prisma client for typechecking and build backend (container surface)
 RUN npx prisma generate --schema=apps/backend/prisma/schema.prisma \
   && npm run -w @workbuoy/backend-telemetry build \
+  && npm run -w @workbuoy/backend-rbac build \
   && npm run -w @workbuoy/backend build:container \
   && npm run -w @workbuoy/backend build:container:verify
 

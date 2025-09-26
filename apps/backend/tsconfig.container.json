@@ -24,6 +24,7 @@
     "src/swagger.ts",
     "src/identity/",
     "src/scim/",
+    "src/rbac/",
     // generic excludes
     "**/*.test.ts",
     "**/*.spec.ts"
