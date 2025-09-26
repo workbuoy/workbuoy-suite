@@ -1,18 +1,12 @@
-export type FeatureUsageAction = 'open' | 'complete' | 'dismiss' | (string & {});
-
-export interface FeatureUsageEvent {
+export type TelemetryEvent = {
   userId: string;
-  tenantId?: string;
+  tenantId: string;
   featureId: string;
-  action: FeatureUsageAction;
-  ts?: Date;
+  action: string; // package accepts string; adapter maps to Prisma enum
+  ts: Date;
   metadata?: Record<string, unknown>;
-}
+};
 
-export interface TelemetryStore {
-  recordFeatureUsage(event: FeatureUsageEvent): Promise<void> | void;
-  aggregateFeatureUseCount(
-    userId: string,
-    tenantId?: string,
-  ): Promise<Record<string, number>> | Record<string, number>;
+export interface TelemetryStorage {
+  record(ev: TelemetryEvent): Promise<void>;
 }

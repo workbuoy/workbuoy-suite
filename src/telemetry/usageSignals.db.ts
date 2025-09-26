@@ -1,27 +1,31 @@
-import { createPrismaTelemetryStore } from '@workbuoy/backend-telemetry';
-import type { FeatureUsageEvent as TelemetryEvent } from '@workbuoy/backend-telemetry';
+import { createPrismaTelemetryStorage } from '@workbuoy/backend-telemetry';
+import type { TelemetryEvent } from '@workbuoy/backend-telemetry';
 import { prisma } from '../core/db/prisma';
 
-const store = createPrismaTelemetryStore(prisma);
+const store = createPrismaTelemetryStorage(prisma);
 
 /**
- * @deprecated Use createPrismaTelemetryStore from @workbuoy/backend-telemetry instead.
+ * @deprecated Use createPrismaTelemetryStorage from @workbuoy/backend-telemetry instead.
  */
 export type FeatureUsageEvent = TelemetryEvent;
 
 /**
- * @deprecated Use createPrismaTelemetryStore(prisma).recordFeatureUsage instead.
+ * @deprecated Use createPrismaTelemetryStorage(prisma).record instead.
  */
 export async function recordFeatureUsage(event: FeatureUsageEvent): Promise<void> {
-  await store.recordFeatureUsage(event);
+  await store.record(event);
 }
 
 /**
- * @deprecated Use createPrismaTelemetryStore(prisma).aggregateFeatureUseCount instead.
+ * @deprecated Use createPrismaTelemetryStorage(prisma).aggregateFeatureUseCount instead.
  */
 export async function aggregateFeatureUseCount(
   userId: string,
   tenantId?: string,
 ): Promise<Record<string, number>> {
-  return store.aggregateFeatureUseCount(userId, tenantId);
+  const aggregate = (store as any).aggregateFeatureUseCount;
+  if (typeof aggregate === 'function') {
+    return aggregate.call(store, userId, tenantId);
+  }
+  return {};
 }

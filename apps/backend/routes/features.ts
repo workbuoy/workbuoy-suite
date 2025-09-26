@@ -25,7 +25,10 @@ router.get('/features/active', async (req, res) => {
     const binding = (await resolveUserBinding(tenantId, userId, fallback)) ?? fallback;
 
     const usageStore = getTelemetryStore();
-    const usage = await usageStore.aggregateFeatureUseCount(userId, tenantId);
+    const aggregate = (usageStore as any).aggregateFeatureUseCount;
+    const usage = typeof aggregate === 'function'
+      ? await aggregate.call(usageStore, userId, tenantId)
+      : {};
 
     const orgContext = {
       industry: req.header('x-industry') ?? undefined,

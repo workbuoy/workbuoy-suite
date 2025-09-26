@@ -1,5 +1,5 @@
-import { createInMemoryTelemetryStore } from '@workbuoy/backend-telemetry';
-import type { FeatureUsageEvent } from '@workbuoy/backend-telemetry';
+import { createInMemoryTelemetryStorage } from '@workbuoy/backend-telemetry';
+import type { TelemetryEvent } from '@workbuoy/backend-telemetry';
 
 /**
  * @deprecated Use @workbuoy/backend-telemetry instead.
@@ -12,31 +12,35 @@ export interface FeatureUsage {
   action: 'open' | 'complete' | 'dismiss';
 }
 
-const store = createInMemoryTelemetryStore();
+const store = createInMemoryTelemetryStorage();
 
-function toFeatureUsageEvent(event: FeatureUsage): FeatureUsageEvent {
+function toFeatureUsageEvent(event: FeatureUsage): TelemetryEvent {
   return {
     userId: event.userId,
-    tenantId: event.tenantId,
+    tenantId: event.tenantId ?? 'DEV',
     featureId: event.featureId,
     action: event.action,
-    ts: event.ts ? new Date(event.ts) : undefined,
+    ts: event.ts ? new Date(event.ts) : new Date(),
   };
 }
 
 /**
- * @deprecated Use createInMemoryTelemetryStore().recordFeatureUsage instead.
+ * @deprecated Use createInMemoryTelemetryStorage().record instead.
  */
 export function recordFeatureUsage(event: FeatureUsage): void {
-  store.recordFeatureUsage(toFeatureUsageEvent(event));
+  void store.record(toFeatureUsageEvent(event));
 }
 
 /**
- * @deprecated Use createInMemoryTelemetryStore().aggregateFeatureUseCount instead.
+ * @deprecated Use createInMemoryTelemetryStorage().aggregateFeatureUseCount instead.
  */
 export function aggregateFeatureUseCount(
   userId: string,
   tenantId?: string,
 ): Record<string, number> {
-  return store.aggregateFeatureUseCount(userId, tenantId);
+  const aggregate = (store as any).aggregateFeatureUseCount;
+  if (typeof aggregate === 'function') {
+    return aggregate.call(store, userId, tenantId);
+  }
+  return {};
 }

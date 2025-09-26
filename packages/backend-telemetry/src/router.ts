@@ -1,19 +1,19 @@
 import type { Request, Response } from 'express';
 import { Router } from 'express';
-import { createInMemoryTelemetryStore } from './stores/inMemory.js';
-import type { FeatureUsageEvent, TelemetryStore } from './types.js';
+import { createInMemoryTelemetryStorage } from './stores/inMemory.js';
+import type { TelemetryEvent, TelemetryStorage } from './types.js';
 
 export interface TelemetryRouterOptions {
   usePersistence?: boolean;
-  fallbackStore?: TelemetryStore;
-  getPersistentStore?: () => TelemetryStore | Promise<TelemetryStore>;
+  fallbackStore?: TelemetryStorage;
+  getPersistentStore?: () => TelemetryStorage | Promise<TelemetryStorage>;
   defaultTenantId?: string;
   resolveTenantId?: (req: Request, fallbackTenantId: string) => string;
   now?: () => Date;
 }
 
 interface StoreCache {
-  persistent: TelemetryStore | null;
+  persistent: TelemetryStorage | null;
 }
 
 function resolveTenantIdFromRequest(req: Request, fallbackTenantId: string): string {
@@ -32,7 +32,7 @@ function resolveTenantIdFromRequest(req: Request, fallbackTenantId: string): str
   return fallbackTenantId;
 }
 
-function ensureStore(cache: StoreCache, options: TelemetryRouterOptions, fallback: TelemetryStore) {
+function ensureStore(cache: StoreCache, options: TelemetryRouterOptions, fallback: TelemetryStorage) {
   return async () => {
     if (!options.usePersistence || !options.getPersistentStore) {
       return fallback;
@@ -50,8 +50,8 @@ function buildUsageEvent(
   req: Request,
   tenantId: string,
   now: () => Date,
-): FeatureUsageEvent | null {
-  const { userId, featureId, action, metadata } = (req.body ?? {}) as Partial<FeatureUsageEvent>;
+): TelemetryEvent | null {
+  const { userId, featureId, action, metadata } = (req.body ?? {}) as Partial<TelemetryEvent>;
   if (typeof userId !== 'string' || typeof featureId !== 'string' || typeof action !== 'string') {
     return null;
   }
@@ -59,15 +59,27 @@ function buildUsageEvent(
     userId,
     tenantId,
     featureId,
-    action: action as FeatureUsageEvent['action'],
+    action,
     ts: now(),
     metadata: metadata && typeof metadata === 'object' ? metadata : undefined,
   };
 }
 
+function aggregateIfSupported(
+  store: TelemetryStorage,
+  userId: string,
+  tenantId: string,
+): Promise<Record<string, number>> | Record<string, number> {
+  const aggregator = (store as any).aggregateFeatureUseCount;
+  if (typeof aggregator === 'function') {
+    return aggregator.call(store, userId, tenantId);
+  }
+  return {};
+}
+
 export function createTelemetryRouter(options: TelemetryRouterOptions = {}) {
   const router = Router();
-  const fallbackStore = options.fallbackStore ?? createInMemoryTelemetryStore();
+  const fallbackStore = options.fallbackStore ?? createInMemoryTelemetryStorage();
   const cache: StoreCache = { persistent: null };
   const getStore = ensureStore(cache, options, fallbackStore);
   const fallbackTenantId = options.defaultTenantId ?? 'DEV';
@@ -85,7 +97,7 @@ export function createTelemetryRouter(options: TelemetryRouterOptions = {}) {
       }
 
       const store = await getStore();
-      await store.recordFeatureUsage(event);
+      await store.record(event);
       res.json({ ok: true });
     } catch (error) {
       res.status(500).json({
@@ -104,7 +116,7 @@ export function createTelemetryRouter(options: TelemetryRouterOptions = {}) {
         return;
       }
       const store = await getStore();
-      const usage = await store.aggregateFeatureUseCount(userId, tenantId);
+      const usage = await aggregateIfSupported(store, userId, tenantId);
       res.json(usage);
     } catch (error) {
       res.status(500).json({

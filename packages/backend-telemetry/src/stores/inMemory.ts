@@ -1,24 +1,24 @@
-import type { FeatureUsageEvent, TelemetryStore } from '../types.js';
+import type { TelemetryEvent, TelemetryStorage } from '../types.js';
 
-interface InMemoryUsageRecord extends FeatureUsageEvent {
-  ts: Date;
-}
+interface InMemoryUsageRecord extends TelemetryEvent {}
 
-function normalizeEvent(event: FeatureUsageEvent): InMemoryUsageRecord {
+function normalizeEvent(event: TelemetryEvent): InMemoryUsageRecord {
   return {
     ...event,
-    ts: event.ts ? new Date(event.ts) : new Date(),
+    ts: new Date(event.ts),
   };
 }
 
-export function createInMemoryTelemetryStore(): TelemetryStore {
+export function createInMemoryTelemetryStorage(): TelemetryStorage {
   const records: InMemoryUsageRecord[] = [];
 
-  return {
-    recordFeatureUsage(event) {
+  const storage: TelemetryStorage & {
+    aggregateFeatureUseCount: (userId: string, tenantId?: string) => Promise<Record<string, number>>;
+  } = {
+    async record(event) {
       records.push(normalizeEvent(event));
     },
-    aggregateFeatureUseCount(userId, tenantId) {
+    async aggregateFeatureUseCount(userId: string, tenantId?: string) {
       return records
         .filter((record) => {
           if (record.userId !== userId) {
@@ -35,4 +35,6 @@ export function createInMemoryTelemetryStore(): TelemetryStore {
         }, {});
     },
   };
+
+  return storage;
 }
