@@ -1,6 +1,6 @@
-import type { PriorityBus } from '../../../src/core/eventBusV2.js';
+import type { EventBus } from '../core/eventBusV2';
 import { createCounter } from '@workbuoy/backend-metrics';
-import bus from '../../../src/core/eventBusV2.js';
+import { eventBus } from '../core/eventBusV2';
 
 interface EventBusLike {
   on<T = any>(type: string, handler: (payload: T) => void | Promise<void>): void;
@@ -41,7 +41,7 @@ const featureUsageCounter = createCounter({
 
 const startedBuses = new WeakSet<object>();
 
-export function startMetricsBridge(eventBus: EventBusLike = bus as PriorityBus): void {
+export function startMetricsBridge(eventBus: EventBusLike = eventBus as EventBus): void {
   if (!eventBus || startedBuses.has(eventBus as object)) {
     return;
   }

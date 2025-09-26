@@ -4,6 +4,8 @@
     "outDir": "dist",
     "baseUrl": ".",
     "paths": {
+      "@workbuoy/backend-metrics": ["../../packages/backend-metrics/src"],
+      "@workbuoy/backend-metrics/*": ["../../packages/backend-metrics/src/*"],
       "@workbuoy/backend-rbac": ["../../packages/backend-rbac/src/index.ts"],
       "@workbuoy/backend-telemetry": ["../../packages/backend-telemetry/src/index.ts"]
     },
