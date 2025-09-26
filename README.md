@@ -54,6 +54,7 @@ Docs
 - [ADR Template](docs/adr/README.md)
 - [CI Notes](docs/CI_NOTES.md)
 - [Governance](docs/GOVERNANCE.md)
+- [Workbuoy Architecture (Core/Flex/Secure + Navi/Buoy AI/Roles/Proactivity)](docs/architecture/workbuoy-architecture.md)
 
 Governance
 ----------
