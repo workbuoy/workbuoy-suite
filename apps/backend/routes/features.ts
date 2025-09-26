@@ -2,25 +2,19 @@ import { Router } from 'express';
 import type { UserRoleBinding } from '../../../src/roles/types.js';
 import { getRoleRegistry, resolveUserBinding } from '../../../src/roles/service.js';
 import { getActiveFeatures } from '../../../src/features/activation/featureActivation.js';
-import { aggregateFeatureUseCount as aggregateInMemory } from '../../../src/telemetry/usageSignals.js';
 import { envBool } from '../../../src/core/env.js';
+import { getTelemetryFallbackStore, ensureTelemetryPersistentStore } from '../src/telemetryContext.js';
 
-const r = Router();
+const router = Router();
 const usePersistence = envBool('FF_PERSISTENCE', false);
+const fallbackStore = getTelemetryFallbackStore();
 
-type UsageDbModule = typeof import('../../../src/telemetry/usageSignals.db.js');
-let dbModule: UsageDbModule | null = null;
-
-function ensureDbModule(): UsageDbModule {
-  if (!dbModule) {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    dbModule = require('../../../src/telemetry/usageSignals.db.js') as UsageDbModule;
-  }
-  return dbModule;
+function getTelemetryStore() {
+  return usePersistence ? ensureTelemetryPersistentStore() : fallbackStore;
 }
 
 // NB: Router mountes under /api i server.ts, så path her skal ikke ha /api-prefiks.
-r.get('/features/active', async (req, res) => {
+router.get('/features/active', async (req, res) => {
   const tenantId = String(req.header('x-tenant') ?? 'DEV');
   const userId = String(req.header('x-user') ?? 'dev-user');
   const role = String(req.header('x-role') ?? 'sales_rep');
@@ -28,12 +22,13 @@ r.get('/features/active', async (req, res) => {
   try {
     const registry = await getRoleRegistry();
     const fallback: UserRoleBinding = { userId, primaryRole: role };
-    const binding =
-      (await resolveUserBinding(tenantId, userId, fallback)) ?? fallback;
+    const binding = (await resolveUserBinding(tenantId, userId, fallback)) ?? fallback;
 
-    const usage = usePersistence
-      ? await ensureDbModule().aggregateFeatureUseCount(userId, tenantId)
-      : aggregateInMemory(userId, tenantId);
+    const usageStore = getTelemetryStore();
+    const aggregate = (usageStore as any).aggregateFeatureUseCount;
+    const usage = typeof aggregate === 'function'
+      ? await aggregate.call(usageStore, userId, tenantId)
+      : {};
 
     const orgContext = {
       industry: req.header('x-industry') ?? undefined,
@@ -57,4 +52,4 @@ r.get('/features/active', async (req, res) => {
   }
 });
 
-export default r;
+export default router;

@@ -1,45 +1,31 @@
+import { createPrismaTelemetryStorage } from '@workbuoy/backend-telemetry';
+import type { TelemetryEvent } from '@workbuoy/backend-telemetry';
 import { prisma } from '../core/db/prisma';
 
-type PrismaFeatureUsageAction = import('@prisma/client').FeatureUsageAction;
-type FeatureUsageEventAction = PrismaFeatureUsageAction extends string
-  ? PrismaFeatureUsageAction | 'open' | 'complete' | 'dismiss'
-  : 'open' | 'complete' | 'dismiss';
+const store = createPrismaTelemetryStorage(prisma);
 
-export interface FeatureUsageEvent {
-  userId: string;
-  tenantId: string;
-  featureId: string;
-  action: FeatureUsageEventAction;
-  ts?: Date;
-  metadata?: Record<string, unknown>;
+/**
+ * @deprecated Use createPrismaTelemetryStorage from @workbuoy/backend-telemetry instead.
+ */
+export type FeatureUsageEvent = TelemetryEvent;
+
+/**
+ * @deprecated Use createPrismaTelemetryStorage(prisma).record instead.
+ */
+export async function recordFeatureUsage(event: FeatureUsageEvent): Promise<void> {
+  await store.record(event);
 }
 
-export async function recordFeatureUsage(evt: FeatureUsageEvent): Promise<void> {
-  await prisma.featureUsage.create({
-    data: {
-      userId: evt.userId,
-      tenantId: evt.tenantId,
-      featureId: evt.featureId,
-      action: evt.action as PrismaFeatureUsageAction,
-      ts: evt.ts ?? new Date(),
-      metadata: evt.metadata as any,
-    },
-  });
-}
-
-export async function aggregateFeatureUseCount(userId: string, tenantId?: string): Promise<Record<string, number>> {
-  const rows = await prisma.featureUsage.groupBy({
-    by: ['featureId'],
-    where: {
-      userId,
-      ...(tenantId ? { tenantId } : {}),
-    },
-    _count: {
-      _all: true,
-    },
-  });
-  return rows.reduce<Record<string, number>>((acc, row) => {
-    acc[row.featureId] = row._count._all;
-    return acc;
-  }, {});
+/**
+ * @deprecated Use createPrismaTelemetryStorage(prisma).aggregateFeatureUseCount instead.
+ */
+export async function aggregateFeatureUseCount(
+  userId: string,
+  tenantId?: string,
+): Promise<Record<string, number>> {
+  const aggregate = (store as any).aggregateFeatureUseCount;
+  if (typeof aggregate === 'function') {
+    return aggregate.call(store, userId, tenantId);
+  }
+  return {};
 }

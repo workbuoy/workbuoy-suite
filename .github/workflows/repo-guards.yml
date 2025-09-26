@@ -32,3 +32,20 @@ jobs:
           fi
 
           rm -f "$report"
+  size-report:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    needs: ban-tracked-deps
+    steps:
+      - uses: actions/checkout@v5
+      - name: Generate repository size report
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run size:report | tee size-report.txt
+      - name: Upload size report artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: repo-size-report
+          path: size-report.txt
+          if-no-files-found: warn

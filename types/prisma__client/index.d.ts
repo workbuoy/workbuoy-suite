@@ -1,5 +1,15 @@
 declare module '@prisma/client' {
-  export type FeatureUsageAction = 'open' | 'complete' | 'dismiss';
+  export type FeatureUsageAction =
+    | 'VIEW'
+    | 'CLICK'
+    | 'START'
+    | 'FINISH'
+    | 'ERROR'
+    | 'OTHER'
+    | 'UNKNOWN'
+    | (string & {});
+
+  export const FeatureUsageAction: Record<string, FeatureUsageAction>;
 
   export type Feature = Record<string, any>;
   export type Role = Record<string, any>;

@@ -1,6 +1,15 @@
-import { recordFeatureUsage } from '../../src/telemetry/usageSignals.db.v2';
+import { prisma } from '../../src/core/db/prisma';
+import { createPrismaTelemetryStorage } from '@workbuoy/backend-telemetry';
+
+const store = createPrismaTelemetryStorage(prisma);
 
 test.skip('record and aggregate usage (DB)', async () => {
-  await recordFeatureUsage({ userId: 'u1', featureId: 'f1', action: 'open' });
+  await store.record({
+    userId: 'u1',
+    tenantId: 'DEV',
+    featureId: 'f1',
+    action: 'open',
+    ts: new Date(),
+  });
   // aggregate assertions here
 });
