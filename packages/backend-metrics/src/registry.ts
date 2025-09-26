@@ -1,7 +1,9 @@
-import { collectDefaultMetrics, Registry, type DefaultMetricsCollectorConfiguration } from "prom-client";
+import { collectDefaultMetrics, Registry } from "prom-client";
 
 const defaultRegistry = new Registry();
 const registriesWithDefaults = new WeakSet<Registry>();
+
+export type CollectDefaultsOptions = Parameters<typeof collectDefaultMetrics>[0];
 
 export function getRegistry(): Registry {
   return defaultRegistry;
@@ -9,7 +11,7 @@ export function getRegistry(): Registry {
 
 export function ensureDefaultMetrics(
   registry: Registry = defaultRegistry,
-  config?: DefaultMetricsCollectorConfiguration,
+  config?: CollectDefaultsOptions,
 ): void {
   if (registriesWithDefaults.has(registry)) {
     return;

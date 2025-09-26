@@ -1,4 +1,4 @@
-export { getRegistry, ensureDefaultMetrics } from "./registry.js";
+export { getRegistry, ensureDefaultMetrics, type CollectDefaultsOptions } from "./registry.js";
 export {
   withMetrics,
   createRequestMetricsMiddleware,

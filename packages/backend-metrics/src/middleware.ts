@@ -1,6 +1,6 @@
 import type { Application, NextFunction, Request, Response } from "express";
-import { Counter, Histogram, type Registry, type DefaultMetricsCollectorConfiguration } from "prom-client";
-import { ensureDefaultMetrics, getRegistry } from "./registry.js";
+import { Counter, Histogram, type Registry } from "prom-client";
+import { ensureDefaultMetrics, getRegistry, type CollectDefaultsOptions } from "./registry.js";
 
 const requestLabelNames = ["method", "path", "status_code"] as const;
 type HttpLabel = (typeof requestLabelNames)[number];
@@ -62,7 +62,7 @@ function resolvePathLabel(req: Request): string {
 export interface WithMetricsOptions {
   registry?: Registry;
   enableDefaultMetrics?: boolean;
-  defaultMetrics?: DefaultMetricsCollectorConfiguration;
+  defaultMetrics?: CollectDefaultsOptions;
 }
 
 export interface WithMetricsResult {
