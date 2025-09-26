@@ -1,6 +1,7 @@
 import { Counter, Histogram } from 'prom-client';
 import { ensureDefaultMetrics, getRegistry } from './registry.js';
-import type { AnyRegistry } from './types.js';
+
+type AnyRegistry = unknown;
 
 type BaseOptions = {
   name: string;
@@ -12,7 +13,7 @@ type BaseOptions = {
 
 export function createCounter(opts: BaseOptions) {
   const reg = getRegistry(opts.register);
-  ensureDefaultMetrics({ register: reg });
+  ensureDefaultMetrics(reg);
   return new (Counter as any)({
     name: opts.name,
     help: opts.help,
@@ -23,7 +24,7 @@ export function createCounter(opts: BaseOptions) {
 
 export function createHistogram(opts: BaseOptions & { buckets?: number[] }) {
   const reg = getRegistry(opts.register);
-  ensureDefaultMetrics({ register: reg });
+  ensureDefaultMetrics(reg);
   return new (Histogram as any)({
     name: opts.name,
     help: opts.help,

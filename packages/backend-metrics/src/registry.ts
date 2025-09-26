@@ -1,7 +1,8 @@
 import { collectDefaultMetrics, Registry, register as globalRegister } from 'prom-client';
-import type { AnyRegistry, CollectDefaultsOptions } from './types.js';
 
-// Tolerant "any" for registry shape across prom-client versions.
+type AnyRegistry = unknown;
+type CollectDefaultsOptions = Record<string, unknown>;
+
 type PRegistry = Registry & { contentType?: string };
 
 let _singleton: PRegistry | undefined;
@@ -29,7 +30,6 @@ export function setupDefaultMetrics(arg?: CollectDefaultsOptions | AnyRegistry):
   collectDefaultMetrics({ ...(options as any), register: reg } as any);
 }
 
-// Back-compat name used in earlier attempts and in backend wiring.
 export const ensureDefaultMetrics: {
   (): void;
   (opts: CollectDefaultsOptions): void;
@@ -38,10 +38,8 @@ export const ensureDefaultMetrics: {
 
 export function mergeRegistries(registries?: AnyRegistry[]): PRegistry {
   const regs = (registries?.length ? registries : [getRegistry()]) as PRegistry[];
-  // prom-client v15 has Registry.merge; older/newer may differ — fall back to concat.
   const maybeMerge = (Registry as any).merge ?? (globalRegister as any)?.merge;
   if (typeof maybeMerge === 'function') return maybeMerge(regs);
-  // Fallback: make a throwaway registry that concatenates on collect
   const target = new (Registry as any)() as PRegistry;
   (target as any).metrics = async () => (await Promise.all(regs.map((r) => (r as any).metrics?.() ?? ''))).join('');
   (target as any).getSingleMetricAsString = async (name: string) =>
@@ -55,6 +53,5 @@ export async function getMetricsText(reg?: AnyRegistry): Promise<string> {
 }
 
 export async function getOpenMetricsText(reg?: AnyRegistry): Promise<string> {
-  // Same as above; prom-client switches content-type by negotiation; we only expose text here.
   return getMetricsText(reg);
 }
