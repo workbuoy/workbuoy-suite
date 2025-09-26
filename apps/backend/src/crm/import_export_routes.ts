@@ -11,8 +11,12 @@ const memByTenant = new Map<string, Store>();
 const dlq: any[] = []; // {id, entity, error, record, tenant_id, ts}
 
 function storeFor(tenant: string): Store {
-  if (!memByTenant.has(tenant)) memByTenant.set(tenant, { contacts: [], opportunities: [] });
-  return memByTenant.get(tenant)!;
+  let store = memByTenant.get(tenant);
+  if (!store) {
+    store = { contacts: [], opportunities: [] };
+    memByTenant.set(tenant, store);
+  }
+  return store;
 }
 
 function parseCSV(buf: Buffer) {

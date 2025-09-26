@@ -26,6 +26,9 @@ export interface ProactivityResolution {
 }
 
 function clampToRail(mode: ProactivityMode, rail: ProactivityMode[]): ProactivityMode {
+  if (!rail.length) {
+    throw new Error('Invariant: degrade rail must contain at least one mode.');
+  }
   if (rail.includes(mode)) return mode;
   // fall back to numeric comparison when mode not explicitly in rail
   const sorted = [...rail].sort((a, b) => b - a);
@@ -48,11 +51,18 @@ function degradeDown(current: ProactivityMode, limit: ProactivityMode, rail: Pro
       return candidate;
     }
   }
-  return order[order.length - 1];
+  const fallback = order[order.length - 1];
+  if (fallback === undefined) {
+    throw new Error('Invariant: degrade rail exhausted without fallback.');
+  }
+  return fallback;
 }
 
 export function resolveEffectiveMode(input: ResolveEffectiveModeInput): ProactivityResolution {
   const rail = input.degradeRail?.length ? input.degradeRail : DEFAULT_DEGRADE_RAIL;
+  if (!rail.length) {
+    throw new Error('Invariant: resolveEffectiveMode requires non-empty degrade rail.');
+  }
   const caps = (input.caps ?? []).map(cap => ({
     ...cap,
     mode: clampToRail(cap.mode, rail),
@@ -101,7 +111,15 @@ export function degradeOnError(
     return fallback;
   }
   if (idx < rail.length - 1) {
-    return rail[idx + 1];
+    const next = rail[idx + 1];
+    if (next === undefined) {
+      throw new Error('Invariant: degrade rail missing next mode.');
+    }
+    return next;
   }
-  return rail[rail.length - 1];
+  const final = rail[rail.length - 1];
+  if (final === undefined) {
+    throw new Error('Invariant: degrade rail has no terminal mode.');
+  }
+  return final;
 }

@@ -83,7 +83,11 @@ export class EvolutionSimulator {
 
     const generation = this.currentGeneration;
     const crossovers = survivors.slice(0, Math.max(1, Math.floor(survivors.length / 2))).map((variant, index) => {
-      const partner = survivors[survivors.length - 1 - index];
+      const partnerIndex = survivors.length - 1 - index;
+      const partner = survivors[partnerIndex];
+      if (!partner) {
+        throw new Error('Invariant: missing partner variant for crossover.');
+      }
       return this.genome.combine(variant, partner, generation);
     });
 
@@ -172,6 +176,9 @@ export class EvolutionSimulator {
     for (let index = 0; index < pairs; index += 1) {
       const a = variants[index];
       const b = variants[variants.length - 1 - index];
+      if (!a || !b) {
+        throw new Error('Invariant: insufficient variants for crossover generation.');
+      }
       crossovers.push(this.genome.combine(a, b, generation));
     }
 

@@ -40,6 +40,9 @@ export class CodeGenome {
 
   express(goal: ImprovementGoal, index: number): CodeVariant {
     const gene = this.baseGenes[index % this.baseGenes.length];
+    if (!gene) {
+      throw new Error('Invariant: base gene unavailable for expression.');
+    }
     const emphasis = Math.min(1, gene.influence + goal.desiredValue / 100);
 
     return {

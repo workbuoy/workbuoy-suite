@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { repo } from './repo.js';
 import { requireRole } from '@workbuoy/backend-rbac';
+import { requireString } from '../utils/require.js';
 
 export const crmDbRouter = Router();
 
@@ -25,7 +26,8 @@ crmDbRouter.post('/contacts', requireRole('contributor'), async (req, res, next)
 crmDbRouter.patch('/contacts/:id', requireRole('contributor'), async (req, res, next) => {
   try {
     const ctx = { tenant_id: (req as any).tenant_id || 'demo-tenant', user_id: (req as any).actor_user_id, roles: (req as any).roles };
-    const c = await repo.updateContact(ctx, req.params.id, req.body);
+    const id = requireString(req.params.id, 'req.params.id');
+    const c = await repo.updateContact(ctx, id, req.body);
     res.json(c);
   } catch (e) { next(e); }
 });
@@ -67,7 +69,8 @@ crmDbRouter.post('/opportunities', requireRole('contributor'), async (req, res, 
 crmDbRouter.patch('/opportunities/:id', requireRole('contributor'), async (req, res, next) => {
   try {
     const ctx = { tenant_id: (req as any).tenant_id || 'demo-tenant', user_id: (req as any).actor_user_id, roles: (req as any).roles };
-    const o = await repo.patchOpportunity(ctx, req.params.id, req.body);
+    const id = requireString(req.params.id, 'req.params.id');
+    const o = await repo.patchOpportunity(ctx, id, req.body);
     res.json(o);
   } catch (e) { next(e); }
 });

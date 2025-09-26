@@ -5,6 +5,7 @@ import { createRequire } from 'node:module';
 import { canAccess, EntityType, RecordMeta } from './rbac/policies.js';
 import { clearAudit, getAudit, pushAudit } from './rbac/audit.js';
 import { createEvolutionRouter } from './meta-evolution/routes/evolution.routes.js';
+import { requireString } from './utils/require.js';
 
 export function buildApp() {
   const app = express();
@@ -59,19 +60,22 @@ export function buildApp() {
 
   // CRUD
   app.get('/api/v1/crm/:type(contacts|opportunities)/:id', (req,res)=>{
-    const type = req.params.type === 'contacts' ? 'contact' : 'opportunity';
-    const key = `${type}:${req.params.id}`;
+    const typeParam = requireString(req.params.type, 'req.params.type');
+    const type = typeParam === 'contacts' ? 'contact' : 'opportunity';
+    const id = requireString(req.params.id, 'req.params.id');
+    const key = `${type}:${id}`;
     const rec = store[key];
     const a = actor(req);
     const decision = canAccess(a, rec, { action:'read' });
-    aud('read', a.user_id, a.role, type, req.params.id, decision.allow, decision.reason);
+    aud('read', a.user_id, a.role, type, id, decision.allow, decision.reason);
     if (!decision.allow) return res.status(403).json({ error:'forbidden' });
     if (!rec) return res.status(404).json({ error:'not_found' });
     res.json(rec);
   });
 
   app.post('/api/v1/crm/:type(contacts|opportunities)', (req,res)=>{
-    const type = req.params.type === 'contacts' ? 'contact' : 'opportunity';
+    const typeParam = requireString(req.params.type, 'req.params.type');
+    const type = typeParam === 'contacts' ? 'contact' : 'opportunity';
     const id = randomUUID();
     const a = actor(req);
     const changes = { ...req.body, owner_id: req.body.owner_id || a.user_id } as any;
@@ -84,30 +88,34 @@ export function buildApp() {
   });
 
   app.patch('/api/v1/crm/:type(contacts|opportunities)/:id', (req,res)=>{
-    const type = req.params.type === 'contacts' ? 'contact' : 'opportunity';
-    const key = `${type}:${req.params.id}`;
+    const typeParam = requireString(req.params.type, 'req.params.type');
+    const type = typeParam === 'contacts' ? 'contact' : 'opportunity';
+    const id = requireString(req.params.id, 'req.params.id');
+    const key = `${type}:${id}`;
     const rec = store[key];
     if (!rec) return res.status(404).json({ error:'not_found' });
     const a = actor(req);
     const decision = canAccess(a, rec, { action:'update', changes: req.body });
     const before = { ...rec };
-    if (!decision.allow) { aud('update', a.user_id, a.role, type, req.params.id, false, decision.reason, before, undefined); return res.status(403).json({ error:'forbidden', reason: decision.reason }); }
+    if (!decision.allow) { aud('update', a.user_id, a.role, type, id, false, decision.reason, before, undefined); return res.status(403).json({ error:'forbidden', reason: decision.reason }); }
     Object.assign(rec, req.body);
     store[key] = rec;
-    aud('update', a.user_id, a.role, type, req.params.id, true, undefined, before, rec);
+    aud('update', a.user_id, a.role, type, id, true, undefined, before, rec);
     res.json(rec);
   });
 
   app.delete('/api/v1/crm/:type(contacts|opportunities)/:id', (req,res)=>{
-    const type = req.params.type === 'contacts' ? 'contact' : 'opportunity';
-    const key = `${type}:${req.params.id}`;
+    const typeParam = requireString(req.params.type, 'req.params.type');
+    const type = typeParam === 'contacts' ? 'contact' : 'opportunity';
+    const id = requireString(req.params.id, 'req.params.id');
+    const key = `${type}:${id}`;
     const rec = store[key];
     if (!rec) return res.status(404).json({ error:'not_found' });
     const a = actor(req);
     const decision = canAccess(a, rec, { action:'delete' });
-    if (!decision.allow) { aud('delete', a.user_id, a.role, type, req.params.id, false, decision.reason, rec, undefined); return res.status(403).json({ error:'forbidden', reason: decision.reason }); }
+    if (!decision.allow) { aud('delete', a.user_id, a.role, type, id, false, decision.reason, rec, undefined); return res.status(403).json({ error:'forbidden', reason: decision.reason }); }
     delete store[key];
-    aud('delete', a.user_id, a.role, type, req.params.id, true, undefined, rec, undefined);
+    aud('delete', a.user_id, a.role, type, id, true, undefined, rec, undefined);
     res.status(204).end();
   });
 
