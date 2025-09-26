@@ -12,5 +12,5 @@
     },
     "skipLibCheck": true
   },
-  "include": ["src", "src/types", "src/**/*.d.ts"]
+  "include": ["src", "src/types", "src/**/*.d.ts", "src/types/**/*.d.ts"]
 }

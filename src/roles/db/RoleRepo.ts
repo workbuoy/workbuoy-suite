@@ -1,3 +1,4 @@
+import { Prisma } from '@prisma/client';
 import { prisma } from '../../core/db/prisma';
 import type { RoleProfile } from '../types';
 
@@ -56,7 +57,7 @@ export class RoleRepo {
         scopeHints: role.scopeHints === undefined ? undefined : toJsonInput(role.scopeHints),
         profile: toJsonInput(role),
       },
-    });
+    } as any);
     return mapRowToProfile(updated);
   }
 

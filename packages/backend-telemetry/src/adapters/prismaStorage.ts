@@ -1,12 +1,12 @@
+import { Prisma } from '@prisma/client';
 import type { TelemetryEvent, TelemetryStorage } from '../types.js';
-import type { PrismaClient } from '@prisma/client';
 
 type FeatureUsageAction = 'INVOKE' | 'STREAM' | 'CACHE_HIT' | 'CACHE_MISS';
 
 const toJsonInput = (v: unknown): any => v as any;
 
 // Keep this minimal: only require the model we use.
-type PrismaClientLike = Pick<PrismaClient, 'featureUsage'>;
+type PrismaClientLike = Pick<Prisma.PrismaClient, 'featureUsage'>;
 
 const toAction = (s: string): FeatureUsageAction => {
   const k = s?.toLowerCase?.() ?? '';
@@ -29,7 +29,6 @@ export function createPrismaTelemetryStorage(client: PrismaClientLike): Telemetr
           featureId: ev.featureId,
           action: toAction(ev.action) as any,
           ts: new Date(),
-          // Ensure metadata matches Prisma JSON type
           metadata: toJsonInput(ev.metadata),
         },
       });
@@ -44,10 +43,10 @@ export function createPrismaTelemetryStorage(client: PrismaClientLike): Telemetr
         _count: { _all: true },
       });
 
-      return rows.reduce<Record<string, number>>((acc: Record<string, number>, row: (typeof rows)[number]) => {
+      return rows.reduce((acc: any, row: any) => {
         acc[row.featureId] = row._count._all;
         return acc;
-      }, {});
+      }, {} as Record<string, number>);
     },
   };
 

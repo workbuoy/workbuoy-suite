@@ -24,7 +24,8 @@
     "src/security/**/*.ts",
     "src/middleware/**/*.ts",
     "src/observability/**/*.ts",
-    "src/**/*.d.ts"
+    "src/**/*.d.ts",
+    "src/types/**/*.d.ts"
   ],
   "exclude": [
     // Exclude optional/experimental areas not required for the runtime image

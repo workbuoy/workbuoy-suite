@@ -1,3 +1,4 @@
+import { Prisma } from '@prisma/client';
 import { prisma } from '../../core/db/prisma';
 import type { UserRoleBinding } from '../types';
 
