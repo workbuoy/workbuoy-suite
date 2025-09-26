@@ -9,58 +9,46 @@ export function createMetricsRouter(
   appOrOptions?: ExpressLikeApp | MetricsRouterOptions,
   maybeOptions?: MetricsRouterOptions
 ): RouterLike {
-  const isAppLike = (value: unknown): value is ExpressLikeApp =>
-    !!value && typeof value === 'object' && typeof (value as any).use === 'function';
+  const isAppLike = (value: any): value is ExpressLikeApp =>
+    !!value && typeof value === 'object' && (typeof value.use === 'function' || typeof value.get === 'function');
 
   const app: ExpressLikeApp | undefined = isAppLike(appOrOptions) ? (appOrOptions as ExpressLikeApp) : undefined;
   const options: MetricsRouterOptions = (app ? maybeOptions : (appOrOptions as MetricsRouterOptions)) ?? {};
 
   const { path = '/metrics', registry = getRegistry(), beforeCollect } = options;
-  const resolvedRegistry = registry ?? getRegistry();
 
-  ensureDefaultMetrics(resolvedRegistry);
+  ensureDefaultMetrics(registry);
 
-  const handler = async (req: any, res: any = {}): Promise<string> => {
+  const handler = async (req: any, res: any = {}) => {
     await beforeCollect?.();
+    const accept = String(req?.headers?.accept || '');
+    const wantsOpen = accept.includes('application/openmetrics-text');
 
-    const accept = String(req?.headers?.accept ?? '');
-    const wantsOpenMetrics = accept.includes('application/openmetrics-text');
-    const body = wantsOpenMetrics
-      ? await getOpenMetricsText(resolvedRegistry)
-      : await getMetricsText(resolvedRegistry);
-
-    const contentType = wantsOpenMetrics
-      ? 'application/openmetrics-text; version=1.0.0; charset=utf-8'
-      : 'text/plain; version=0.0.4; charset=utf-8';
-
-    if (typeof res.setHeader === 'function') {
-      res.setHeader('Content-Type', contentType);
-    }
+    const body = wantsOpen ? await getOpenMetricsText(registry) : await getMetricsText(registry);
+    res.setHeader?.(
+      'Content-Type',
+      wantsOpen
+        ? 'application/openmetrics-text; version=1.0.0; charset=utf-8'
+        : 'text/plain; version=0.0.4; charset=utf-8'
+    );
     if ('statusCode' in res) {
       res.statusCode = 200;
     }
-    if (typeof res.end === 'function') {
-      res.end(body);
-    }
-
-    return body;
+    res.end?.(body);
   };
 
   if (app) {
     app.get?.(path, handler);
-    return app;
+    return app as unknown as RouterLike;
   }
 
   const router: RouterLike = {
-    path,
     _routes: [{ method: 'GET', path, handler }],
-    get(routePath: string, routeHandler: any) {
-      const routes = (this as any)._routes as any[];
-      routes.push({ method: 'GET', path: routePath, handler: routeHandler });
+    get(p: string, h: any) {
+      this._routes.push({ method: 'GET', path: p, handler: h });
       return this;
     },
     handle: handler,
-  } as RouterLike;
-
+  };
   return router;
 }
