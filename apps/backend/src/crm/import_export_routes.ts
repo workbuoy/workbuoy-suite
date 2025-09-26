@@ -24,7 +24,8 @@ function parseCSV(buf: Buffer) {
   const text = buf.toString('utf8').replace('\r\n','\n');
   const lines = text.split(/\n/).filter(l => l.trim().length>0);
   if (lines.length<1) return [];
-  const header = lines[0].split(',').map(s => s.trim());
+  const headerLine = assertDefined(lines[0], 'csv header');
+  const header = headerLine.split(',').map(s => s.trim());
   return lines.slice(1).map(line => {
     const cols = line.split(',');
     const obj:any = {};
@@ -62,7 +63,7 @@ importExportRouter.post('/import', upload.single('file'), async (req, res, next)
     if (idem && (global as any).__idem.has(idem)) return res.json({ entity, imported: 0, failed: 0, dry_run: dry, idempotent: true });
     if (idem) (global as any).__idem.add(idem);
 
-    const storage = req.app?.locals?.storage;
+    const { storage } = req.app.locals;
     if (!storage) {
       return res.status(500).send('Storage not configured');
     }

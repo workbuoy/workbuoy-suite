@@ -3,7 +3,7 @@ import { buildExplanation } from '../core/explain';
 import { runCapability } from '../core/capabilityRunner';
 import { policyCheck } from '../core/policy';
 import { routeFromText } from '../router/nl';
-import { requireHeader } from '../utils/require';
+import { requireHeader, assertDefined } from '../utils/require';
 
 /**
  * POST /buoy/complete
@@ -22,10 +22,11 @@ export function buoyRouter() {
       const ctxCid = wbContext?.correlationId;
       const headerCandidate = req.headers['x-correlation-id'] as string | undefined;
       const headerCid = headerCandidate ? requireHeader(req.headers as Record<string, unknown>, 'x-correlation-id') : undefined;
-      const correlationId = (ctxCid && String(ctxCid)) || headerCid || '';
-      if (!correlationId) {
+      const correlationSource = ctxCid ?? headerCid;
+      if (!correlationSource) {
         return res.status(400).send('Missing correlation id');
       }
+      const correlationId = String(correlationSource);
 
       const route = intent ? { capability: intent, payload: params || {} } : routeFromText(String(text ?? ''));
       // Pre-check policy to craft explanations regardless of outcome
@@ -57,7 +58,8 @@ export function buoyRouter() {
         })
       ];
 
-      res.json({ result, explanations, correlationId, confidence: explanations[0].confidence ?? 0.6 });
+      const primaryExplanation = assertDefined(explanations[0], 'explanations[0]');
+      res.json({ result, explanations, correlationId, confidence: primaryExplanation.confidence ?? 0.6 });
     } catch (e) { next(e); }
   });
   return r;

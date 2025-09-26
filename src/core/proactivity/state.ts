@@ -1,4 +1,5 @@
 import { DEFAULT_DEGRADE_RAIL, ProactivityMode } from './modes';
+import { assertDefined } from '../../utils/require';
 
 export interface ProactivityCap {
   id: string;
@@ -33,9 +34,10 @@ function clampToRail(mode: ProactivityMode, rail: ProactivityMode[]): Proactivit
   // fall back to numeric comparison when mode not explicitly in rail
   const sorted = [...rail].sort((a, b) => b - a);
   for (const candidate of sorted) {
-    if (candidate <= mode) return candidate;
+    if (candidate !== undefined && candidate <= mode) return candidate;
   }
-  return sorted[sorted.length - 1];
+  const fallback = assertDefined(sorted[sorted.length - 1], 'degrade rail fallback');
+  return fallback;
 }
 
 function degradeDown(current: ProactivityMode, limit: ProactivityMode, rail: ProactivityMode[]): ProactivityMode {
@@ -47,14 +49,11 @@ function degradeDown(current: ProactivityMode, limit: ProactivityMode, rail: Pro
   }
   for (let i = idx; i < order.length; i += 1) {
     const candidate = order[i];
-    if (candidate <= limit) {
+    if (candidate !== undefined && candidate <= limit) {
       return candidate;
     }
   }
-  const fallback = order[order.length - 1];
-  if (fallback === undefined) {
-    throw new Error('Invariant: degrade rail exhausted without fallback.');
-  }
+  const fallback = assertDefined(order[order.length - 1], 'degrade rail exhausted without fallback');
   return fallback;
 }
 

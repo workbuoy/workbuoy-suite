@@ -6,7 +6,7 @@ import { requireRole } from '@workbuoy/backend-rbac';
 import { requireString } from '../utils/require.js';
 
 function requirePrisma(req: Request): PrismaClient {
-  const prisma = req.app?.locals?.prisma as PrismaClient | undefined;
+  const prisma = req.app.locals?.prisma as PrismaClient | undefined;
   if (!prisma) {
     throw new Error('Prisma client not initialized on app.locals.prisma');
   }

@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { randomUUID, createHash } from 'crypto';
 import { selectRepo } from '../core/persist/select';
 import { policyGuardWrite } from '../core/policy/guard';
+import { assertDefined } from '../utils/require';
 
 export type AuditRow = {
   id: string;
@@ -36,7 +37,8 @@ async function ensureHydrated() {
   const rows = await repo.all();
   rows.sort((a, b) => a.ts.localeCompare(b.ts));
   auditLog.splice(0, auditLog.length, ...rows);
-  lastHash = rows.length ? rows[rows.length - 1].hash : 'GENESIS';
+  const latest = rows.length ? assertDefined(rows[rows.length - 1], 'audit rows latest') : undefined;
+  lastHash = latest ? latest.hash : 'GENESIS';
   hydrated = true;
 }
 
@@ -44,7 +46,8 @@ export async function appendAudit(entry: Omit<AuditRow, 'id' | 'ts' | 'prevHash'
   await ensureHydrated();
   const ts = new Date().toISOString();
   const payloadHash = computePayloadHash(entry);
-  const prevHash = auditLog.length ? auditLog[auditLog.length - 1].hash : lastHash;
+  const prev = auditLog.length ? assertDefined(auditLog[auditLog.length - 1], 'audit log tail') : undefined;
+  const prevHash = prev ? prev.hash : lastHash;
   const hash = createHash('sha256').update(`${ts}|${prevHash}|${payloadHash}`).digest('hex');
   const stored: AuditRow = {
     id: randomUUID(),
