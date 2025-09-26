@@ -3,7 +3,12 @@
   "compilerOptions": {
     "outDir": "dist",
     "noEmit": false,
-    "strict": false
+    "strict": false,
+    "baseUrl": ".",
+    "paths": {
+      "@workbuoy/backend-rbac": ["../../packages/backend-rbac/src/index.ts"]
+    },
+    "rootDirs": [".", "../../packages/backend-rbac/src"]
   },
   "include": [
     "src/index.ts",

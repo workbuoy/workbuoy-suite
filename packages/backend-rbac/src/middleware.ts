@@ -4,6 +4,7 @@ import { getAudit, getCounters, isEnforced, storeProxy } from './config.js';
 import type {
   Action,
   ResourceKind,
+  ResourceDescriptor,
   ResourceResolver,
   Role,
 } from './types.js';
@@ -39,7 +40,7 @@ export function createPolicyEnforcer(
       typeof resolveResource === 'function'
         ? await resolveResource(req)
         : resolveResource;
-    const resource = resourceInput ?? {};
+    const resource = (resourceInput ?? {}) as ResourceDescriptor;
 
     const decision = await decide(storeProxy, subject, action, {
       kind: resourceKind,

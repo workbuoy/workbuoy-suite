@@ -1,7 +1,12 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "dist"
+    "outDir": "dist",
+    "baseUrl": ".",
+    "paths": {
+      "@workbuoy/backend-rbac": ["../../packages/backend-rbac/src/index.ts"]
+    },
+    "rootDirs": [".", "../../packages/backend-rbac/src"]
   },
   "include": ["src", "src/types"]
 }

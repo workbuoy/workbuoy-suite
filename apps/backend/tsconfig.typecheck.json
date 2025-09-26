@@ -7,7 +7,12 @@
     "lib": ["ES2022"],
     "resolveJsonModule": true,
     "allowArbitraryExtensions": true,
-    "types": ["node", "jest", "express"]
+    "types": ["node", "jest", "express"],
+    "baseUrl": ".",
+    "paths": {
+      "@workbuoy/backend-rbac": ["../../packages/backend-rbac/src/index.ts"]
+    },
+    "rootDir": "../.."
   },
   "include": [
     "src/middleware/**/*.ts",

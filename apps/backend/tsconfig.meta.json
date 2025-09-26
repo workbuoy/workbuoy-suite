@@ -13,7 +13,7 @@
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "baseUrl": ".",
-    "rootDirs": ["./", "../../tests"],
+    "rootDirs": ["./", "../../tests", "../../packages/backend-rbac/src"],
     "paths": {
       "@backend/*": ["src/*"],
       "@backend-tests/*": ["tests/*"],
