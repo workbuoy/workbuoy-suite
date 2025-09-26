@@ -8,7 +8,7 @@ import { createMetricsRouter, withMetrics } from "../src/index.js";
 test("/metrics endpoint exposes Prometheus output", async () => {
   const registry = new Registry();
   const app = express();
-  withMetrics(app, { registry, enableDefaultMetrics: false });
+  app.use(withMetrics(registry));
 
   app.get("/hello", (_req, res) => {
     res.json({ ok: true });

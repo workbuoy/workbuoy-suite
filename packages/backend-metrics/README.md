@@ -15,16 +15,14 @@ Lightweight Prometheus helpers for Workbuoy backend services.
 import express from "express";
 import {
   withMetrics,
-  metricsRouter,
+  createMetricsRouter,
   createCounter,
   createHistogram,
 } from "@workbuoy/backend-metrics";
 
 const app = express();
 
-withMetrics(app, {
-  enableDefaultMetrics: true,
-});
+app.use(withMetrics());
 
 const featureUsageTotal = createCounter({
   name: "feature_usage_total",
@@ -41,16 +39,16 @@ const proposalLatencySeconds = createHistogram({
 featureUsageTotal.inc({ feature: "insights", action: "viewed" });
 proposalLatencySeconds.observe(0.42);
 
-app.use("/metrics", metricsRouter);
+app.use("/metrics", createMetricsRouter());
 ```
 
-Call `withMetrics` before other middleware so the instrumentation observes all requests. Pass a custom `registry` if you need to share metrics between packages.
+Call `withMetrics` before other middleware so the instrumentation observes all requests. Pass a custom `registry` if you need to
+share metrics between packages or want to reuse an existing `prom-client.Registry` instance.
 
-### Options
+### Router options
 
-- `enableDefaultMetrics` (default: `true`) — collect Prometheus default metrics for the chosen registry.
-- `defaultMetrics` — forwarded to `prom-client.collectDefaultMetrics` for advanced tuning (e.g. `prefix`).
-- `registry` — share an existing `prom-client.Registry` instance across packages.
+`createMetricsRouter` accepts an optional `{ path, registry, beforeCollect }` object. Provide a custom `registry` to share metrics,
+and `beforeCollect` if you need to execute async hooks prior to snapshotting values.
 
 ### Testing
 

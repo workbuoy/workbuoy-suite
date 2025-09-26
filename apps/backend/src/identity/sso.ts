@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
-import { createRemoteJWKSet, jwtVerify } from 'jose';
+import { createRemoteJWKSet, importSPKI, jwtVerify } from 'jose';
 import { requireEnv, requireHeader } from '../utils/require.js';
 
 const enabled = String(process.env.SSO_ENABLED ?? 'true').toLowerCase() === 'true';
@@ -32,8 +32,10 @@ export async function ssoOptional(req: Request, _res: Response, next: NextFuncti
 
   try {
     if (!jwks) {
-      const publicKey = requireEnv('SSO_JWT_PUBLIC_KEY');
-      const { payload } = await jwtVerify(token, publicKey, {
+      const publicKeyPem = requireEnv('SSO_JWT_PUBLIC_KEY');
+      const key = await importSPKI(publicKeyPem, 'RS256');
+      const { payload } = await jwtVerify(token, key, {
+        algorithms: ['RS256'],
         issuer: process.env.OIDC_ISSUER,
         audience: process.env.OIDC_AUDIENCE,
       });
@@ -46,6 +48,7 @@ export async function ssoOptional(req: Request, _res: Response, next: NextFuncti
     }
 
     const { payload } = await jwtVerify(token, jwks, {
+      algorithms: ['RS256'],
       issuer: process.env.OIDC_ISSUER,
       audience: process.env.OIDC_AUDIENCE,
     });

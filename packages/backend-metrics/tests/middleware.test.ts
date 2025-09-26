@@ -8,7 +8,7 @@ import { withMetrics } from "../src/index.js";
 test("records request counts and latency", async () => {
   const registry = new Registry();
   const app = express();
-  withMetrics(app, { registry, enableDefaultMetrics: false });
+  app.use(withMetrics(registry));
 
   app.get("/ping", (_req, res) => {
     res.status(204).end();

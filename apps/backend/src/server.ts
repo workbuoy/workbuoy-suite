@@ -76,7 +76,7 @@ const metricsRoute = normalizeMetricsRoute(process.env.METRICS_ROUTE);
 if (metricsEnabled) {
   const registry = getRegistry();
   const collectEventBusMetrics = createEventBusMetricsCollector(registry);
-  withMetrics(app, { registry });
+  app.use(withMetrics(registry));
   const metricsRouter = createMetricsRouter({
     path: metricsRoute,
     registry,

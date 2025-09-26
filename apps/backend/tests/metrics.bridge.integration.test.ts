@@ -31,7 +31,7 @@ describe('metricsBridge integration', () => {
   test('events surface in /metrics output', async () => {
     const registry = getRegistry();
     const app = express();
-    withMetrics(app, { registry, enableDefaultMetrics: false });
+    app.use(withMetrics(registry));
     app.use('/metrics', createMetricsRouter({ registry }));
 
     const bus = createStubBus();

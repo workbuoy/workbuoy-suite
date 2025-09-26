@@ -17,7 +17,11 @@ export function buoyRouter() {
       const autonomy = Number(req.headers['x-autonomy-level'] ?? 2);
       const role = String(req.headers['x-role-id'] ?? 'user');
       const tenantId = String(req.headers['x-tenant-id'] ?? 'T1');
-      const correlationId = (req.wb && req.wb.correlationId) || req.headers['x-correlation-id'] || '';
+      const wbContext = req.wb as { correlationId?: string } | undefined;
+      const correlationId =
+        typeof wbContext?.correlationId === 'string'
+          ? wbContext.correlationId
+          : (req.headers['x-correlation-id'] as string | undefined) || '';
 
       const route = intent ? { capability: intent, payload: params || {} } : routeFromText(String(text ?? ''));
       // Pre-check policy to craft explanations regardless of outcome
