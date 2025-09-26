@@ -37,6 +37,11 @@ Developer Quickstart
    RBAC middleware and the admin router now live in the reusable `@workbuoy/backend-rbac` package. Import guards such as
    `requireRole` or the `RbacRouter` directly from the package instead of `apps/backend/src/rbac/*`.
 
+   To exercise the metrics bridge locally, export `METRICS_ENABLED=true` before starting the backend. This bootstraps the
+   `/metrics` router via `@workbuoy/backend-metrics` and attaches the event-bus consumer defined in
+   `apps/backend/src/observability/metricsBridge.ts`. You can then curl `/metrics`, emit `rbac:denied` or
+   `telemetry:feature_used` events via the debug bus helpers, and observe the labeled counters increment.
+
 4. Lint & format
    ```
    npm run lint:apps

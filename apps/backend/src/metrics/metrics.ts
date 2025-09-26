@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import type { Response as ExpressResponse } from 'express';
 import client from 'prom-client';
+import { rbacDeniedCounter } from '../observability/metricsBridge.js';
 
 const register = new client.Registry();
 client.collectDefaultMetrics({ register });
@@ -64,11 +65,12 @@ export const crm_pipeline_transitions_total = new client.Counter({
   registers: [register],
 });
 
-export const rbac_denied_total = new client.Counter({
-  name: 'rbac_denied_total',
-  help: 'Denied RBAC checks',
-  registers: [register],
-});
+export const rbac_denied_total = {
+  inc(value?: number) {
+    const amount = typeof value === 'number' ? value : 1;
+    rbacDeniedCounter.inc({ role: 'unknown', resource: 'unknown' }, amount);
+  },
+};
 
 export const rbac_policy_change_total = new client.Counter({
   name: 'rbac_policy_change_total',

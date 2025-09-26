@@ -21,6 +21,6 @@ Shared configuration continues to live alongside the workspaces (for example `ts
 ### Shared backend packages
 
 - `@workbuoy/backend-auth` — Express router and middleware for session handling and SSO integrations.
-- `@workbuoy/backend-metrics` — Prometheus registry helpers, request middleware, and `/metrics` router.
+- `@workbuoy/backend-metrics` — Prometheus registry helpers, request middleware, `/metrics` router, and helpers for wiring domain consumers into shared counters/histograms.
 - `@workbuoy/backend-telemetry` — Express router and storage adapters for feature usage telemetry (in-memory + Prisma-backed).
 - `@workbuoy/backend-rbac` — Shared RBAC policy engine, middleware, and admin router used by backend services.
