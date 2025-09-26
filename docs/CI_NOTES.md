@@ -7,6 +7,12 @@
 - `repo-guards` workflow enforces no tracked `node_modules`.
 - Run locally with `npm run guard:ban-tracked-deps` if you suspect large working copies.
 
+### Size report
+
+- `npm run size:report` captures working tree size (GiB), counts `node_modules` folders, and total file count after `npm ci`.
+- Thresholds are enforced as warnings via `tools/size-thresholds.ts` (defaults: `SIZE_MAX_GB=2.6`, `NODE_MODULES_MAX=220`, `FILES_MAX=150000`).
+- GitHub Actions posts a non-blocking PR comment summarizing the metrics and diffs versus the previous run. Override thresholds by setting the corresponding env vars on the workflow/job.
+
 ## Typical pipeline
 
 CI performs a full dependency install (`npm ci`) before running jobs so every workspace, including optional ones, is available during validation.

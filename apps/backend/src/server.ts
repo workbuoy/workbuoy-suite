@@ -9,7 +9,25 @@ import { rbac_denied_total, rbac_policy_change_total } from './metrics/metrics.j
 import { correlationHeader } from '../../../src/middleware/correlationHeader.js';
 import { wbContext } from '../../../src/middleware/wbContext.js';
 import { requestLogger } from '../../../src/core/logging/logger.js';
-import { timingMiddleware, metricsHandler } from '../../../src/core/observability/metrics.js';
+import {
+  timingMiddleware,
+  metricsHandler,
+  createEventBusMetricsCollector,
+} from '../../../src/core/observability/metrics.js';
+import { createMetricsRouter, getRegistry, withMetrics } from '@workbuoy/backend-metrics';
+
+function normalizeMetricsRoute(value?: string | null): string {
+  if (!value) {
+    return '/metrics';
+  }
+
+  const trimmed = value.trim();
+  if (!trimmed) {
+    return '/metrics';
+  }
+
+  return trimmed.startsWith('/') ? trimmed : `/${trimmed}`;
+}
 import { errorHandler } from '../../../src/core/http/middleware/errorHandler.js';
 import { debugBusHandler } from '../../../src/routes/_debug.bus.js';
 import knowledgeRouter from '../../../src/routes/knowledge.router.js';
@@ -51,7 +69,20 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use(correlationHeader);
 app.use(wbContext);
-app.use(timingMiddleware);
+
+const metricsEnabled = String(process.env.METRICS_ENABLED ?? 'false').toLowerCase() === 'true';
+const metricsRoute = normalizeMetricsRoute(process.env.METRICS_ROUTE);
+
+if (metricsEnabled) {
+  const registry = getRegistry();
+  const collectEventBusMetrics = createEventBusMetricsCollector(registry);
+  withMetrics(app, { registry });
+  app.use(metricsRoute, createMetricsRouter({ registry, beforeCollect: collectEventBusMetrics }));
+} else {
+  app.use(timingMiddleware);
+  app.get(metricsRoute, metricsHandler);
+}
+
 app.use(requestLogger());
 
 app.set('eventBus', bus);
@@ -97,8 +128,6 @@ if (process.env.NODE_ENV !== 'production') {
   app.use('/api', debugCircuitRouter());
   app.use('/api', devRunnerRouter);
 }
-
-app.get('/metrics', metricsHandler);
 
 app.get('/status', async (_req, res) => {
   try {

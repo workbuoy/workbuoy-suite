@@ -38,14 +38,141 @@ jobs:
     needs: ban-tracked-deps
     steps:
       - uses: actions/checkout@v5
+      - name: Install dependencies
+        run: npm ci
       - name: Generate repository size report
-        shell: bash
-        run: |
-          set -euo pipefail
-          npm run size:report | tee size-report.txt
+        run: npm run size:report
+      - name: Evaluate size thresholds
+        run: node --import tsx tools/size-thresholds.ts size-report.json
       - name: Upload size report artifact
         uses: actions/upload-artifact@v4
         with:
           name: repo-size-report
-          path: size-report.txt
+          path: size-report.json
           if-no-files-found: warn
+      - name: Comment PR with size report
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        env:
+          SIZE_MAX_GB: ${{ env.SIZE_MAX_GB }}
+          NODE_MODULES_MAX: ${{ env.NODE_MODULES_MAX }}
+          FILES_MAX: ${{ env.FILES_MAX }}
+        with:
+          script: |
+            const fs = require('node:fs');
+
+            const tag = '<!-- size-report -->';
+            const dataTagStart = '<!-- size-report:data ';
+            const dataTagEnd = ' -->';
+
+            const report = JSON.parse(fs.readFileSync('size-report.json', 'utf8'));
+
+            const thresholds = {
+              sizeMax: Number(process.env.SIZE_MAX_GB ?? 2.6),
+              nodeModules: Number(process.env.NODE_MODULES_MAX ?? 220),
+              files: Number(process.env.FILES_MAX ?? 150000),
+            };
+
+            const metrics = {
+              repoSizeGiB: report.metrics.workingTreeBytes / 1024 ** 3,
+              nodeModules: report.metrics.nodeModulesCount,
+              files: report.metrics.filesCount,
+            };
+
+            const formatValue = (value, unit) => {
+              if (unit === 'GiB') {
+                return `${value.toFixed(2)} ${unit}`;
+              }
+              return value.toLocaleString('en-US');
+            };
+
+            const results = [
+              {
+                key: 'repoSizeGiB',
+                label: 'Repo size',
+                value: metrics.repoSizeGiB,
+                threshold: thresholds.sizeMax,
+                unit: 'GiB',
+              },
+              {
+                key: 'nodeModules',
+                label: 'node_modules directories',
+                value: metrics.nodeModules,
+                threshold: thresholds.nodeModules,
+                unit: '',
+              },
+              {
+                key: 'files',
+                label: 'Files',
+                value: metrics.files,
+                threshold: thresholds.files,
+                unit: '',
+              },
+            ];
+
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+
+            const existing = comments.find((comment) => comment.body && comment.body.includes(tag));
+
+            let baseline = {};
+            if (existing) {
+              const match = existing.body.match(/<!-- size-report:data (?<json>{.+}) -->/);
+              if (match?.groups?.json) {
+                try {
+                  baseline = JSON.parse(match.groups.json);
+                } catch (error) {
+                  core.warning(`Failed to parse size-report baseline: ${error.message}`);
+                }
+              }
+            }
+
+            const formatDiff = (key, unit) => {
+              const previous = baseline[key];
+              if (typeof previous !== 'number') {
+                return 'n/a';
+              }
+              const diff = results.find((item) => item.key === key).value - previous;
+              if (unit === 'GiB') {
+                return `${diff > 0 ? '+' : ''}${diff.toFixed(2)} ${unit}`;
+              }
+              const rounded = Math.round(diff);
+              if (rounded === 0) {
+                return '0';
+              }
+              return `${diff > 0 ? '+' : ''}${rounded.toLocaleString('en-US')}`;
+            };
+
+            const rowStatus = (value, threshold) => {
+              return value > threshold ? '⚠️ Breach' : '✅ OK';
+            };
+
+            const tableRows = results
+              .map((result) => {
+                const thresholdValue = result.unit === 'GiB'
+                  ? `${result.threshold.toFixed(2)} ${result.unit}`
+                  : result.threshold.toLocaleString('en-US');
+                return `| ${result.label} | ${formatValue(result.value, result.unit)} | ${thresholdValue} | ${formatDiff(result.key, result.unit)} | ${rowStatus(result.value, result.threshold)} |`;
+              })
+              .join('\n');
+
+            const body = `${tag}\n### Repository size report\n\n| Metric | Value | Threshold | Δ vs prev | Status |\n| --- | --- | --- | --- | --- |\n${tableRows}\n\nThreshold overrides: \`SIZE_MAX_GB\`, \`NODE_MODULES_MAX\`, \`FILES_MAX\`.\n\n${dataTagStart}${JSON.stringify(metrics)}${dataTagEnd}`;
+
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existing.id,
+                body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body,
+              });
+            }
