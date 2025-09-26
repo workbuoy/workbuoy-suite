@@ -8,7 +8,7 @@ export function mergeRegistries(registries?: AnyRegistry[]): AnyRegistry {
   const regs = (registries ?? []) as AnyRegistry[];
   const R: any = Registry as any;
   if (typeof R.merge === 'function') return R.merge(regs);
-  // Fallback: gi en ny registry for å unngå typesprik. Downstream kaller metrics() selv.
+  // Fallback: tom registry (downstream kaller metrics() eller bruker egen join)
   return new (Registry as any)();
 }
 

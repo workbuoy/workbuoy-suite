@@ -1,3 +1,4 @@
+export type AnyRegistry = any;
 export type CollectDefaultsOptions = {
   register?: any;
   prefix?: string;
@@ -6,4 +7,3 @@ export type CollectDefaultsOptions = {
   eventLoopMonitoringPrecision?: number;
   timeout?: number;
 } & Record<string, any>;
-export type AnyRegistry = any;

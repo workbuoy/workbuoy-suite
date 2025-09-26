@@ -1,25 +1,29 @@
 import { Counter, Histogram, Registry } from 'prom-client';
 import { ensureDefaultMetrics, getRegistry } from './registry.js';
 
-type BaseCfg = {
+export type CounterConfig = {
   name: string;
   help: string;
   labelNames?: string[];
-  registers?: Registry[]; // tolerer forskjeller i prom-client-typinger
+  registers?: Registry[];
 };
 
-export function createCounter(cfg: BaseCfg) {
+export type HistogramConfig = CounterConfig & {
+  buckets?: number[];
+};
+
+export function createCounter(cfg: CounterConfig) {
   const reg = (cfg.registers?.[0] as any) ?? getRegistry();
   ensureDefaultMetrics({ register: reg as any });
   return new Counter({
     name: cfg.name,
     help: cfg.help,
     labelNames: cfg.labelNames ?? [],
-    registers: (cfg.registers ?? [reg]) as any,
+    registers: (cfg.registers ?? [reg]) as any
   } as any);
 }
 
-export function createHistogram(cfg: BaseCfg & { buckets?: number[] }) {
+export function createHistogram(cfg: HistogramConfig) {
   const reg = (cfg.registers?.[0] as any) ?? getRegistry();
   ensureDefaultMetrics({ register: reg as any });
   return new Histogram({
@@ -27,6 +31,6 @@ export function createHistogram(cfg: BaseCfg & { buckets?: number[] }) {
     help: cfg.help,
     labelNames: cfg.labelNames ?? [],
     buckets: cfg.buckets,
-    registers: (cfg.registers ?? [reg]) as any,
+    registers: (cfg.registers ?? [reg]) as any
   } as any);
 }
