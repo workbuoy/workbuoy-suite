@@ -1,6 +1,6 @@
 import { Router, type Request, type Response, type NextFunction } from 'express';
-import { requirePrisma, requireUser } from '../require';
-import { assertDefined } from '../utils/assert';
+import { requirePrisma, requireUser } from '../require.js';
+import { assertDefined } from '../utils/assert.js';
 
 const router = Router();
 

@@ -2,17 +2,15 @@ import { Prisma } from '@prisma/client';
 import { prisma } from '../../core/db/prisma';
 import type { FeatureDef } from '../types';
 
+const toJsonInput = (v: unknown): Prisma.InputJsonValue | Prisma.NullableJsonNullValueInput =>
+  v === null ? Prisma.JsonNull : (v as Prisma.InputJsonValue);
+
 interface FeatureRow {
   id: string;
   title: string;
   description: string | null;
   defaultAutonomyCap: number | null;
   capabilities: FeatureDef['capabilities'];
-}
-
-function toJson(value: unknown): Prisma.JsonValue | undefined {
-  if (value === undefined) return undefined;
-  return value as Prisma.JsonValue;
 }
 
 function mapRowToFeature(row: FeatureRow): FeatureDef {
@@ -40,14 +38,14 @@ export class FeatureRepo {
         description: feature.description,
         defaultAutonomyCap: feature.defaultAutonomyCap ?? 3,
         capabilities: feature.capabilities,
-        metadata: toJson({ ...feature }),
+        metadata: toJsonInput({ ...feature }),
       },
       update: {
         title: feature.title,
         description: feature.description,
         defaultAutonomyCap: feature.defaultAutonomyCap ?? 3,
         capabilities: feature.capabilities,
-        metadata: toJson({ ...feature }),
+        metadata: toJsonInput({ ...feature }),
       },
     });
     return mapRowToFeature(row);
@@ -64,14 +62,14 @@ export class FeatureRepo {
           description: feature.description,
           defaultAutonomyCap: feature.defaultAutonomyCap ?? 3,
           capabilities: feature.capabilities,
-          metadata: toJson({ ...feature }),
+          metadata: toJsonInput({ ...feature }),
         },
         update: {
           title: feature.title,
           description: feature.description,
           defaultAutonomyCap: feature.defaultAutonomyCap ?? 3,
           capabilities: feature.capabilities,
-          metadata: toJson({ ...feature }),
+          metadata: toJsonInput({ ...feature }),
         },
       })
     ));

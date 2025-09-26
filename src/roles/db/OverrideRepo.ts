@@ -2,16 +2,14 @@ import { Prisma } from '@prisma/client';
 import { prisma } from '../../core/db/prisma';
 import type { OrgRoleOverride } from '../types';
 
+const toJsonInput = (v: unknown): Prisma.InputJsonValue | Prisma.NullableJsonNullValueInput =>
+  v === null ? Prisma.JsonNull : (v as Prisma.InputJsonValue);
+
 interface OverrideRow {
   tenant_id: string;
   role_id: string;
-  featureCaps: Prisma.JsonValue | null;
+  featureCaps: unknown;
   disabledFeatures: string[] | null;
-}
-
-function toJson(value: unknown): Prisma.JsonValue | undefined {
-  if (value === undefined) return undefined;
-  return value as Prisma.JsonValue;
 }
 
 function mapRow(row: OverrideRow): OrgRoleOverride {
@@ -45,11 +43,13 @@ export class OverrideRepo {
       create: {
         tenant_id: tenantId,
         role_id: roleId,
-        featureCaps: toJson(override.featureCaps),
+        featureCaps:
+          override.featureCaps === undefined ? undefined : toJsonInput(override.featureCaps),
         disabledFeatures: override.disabledFeatures ?? [],
       },
       update: {
-        featureCaps: toJson(override.featureCaps),
+        featureCaps:
+          override.featureCaps === undefined ? undefined : toJsonInput(override.featureCaps),
         disabledFeatures: override.disabledFeatures ?? [],
       },
     });
