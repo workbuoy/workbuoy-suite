@@ -1,8 +1,5 @@
 import { ensureDefaultMetrics, getMetricsText, getOpenMetricsText, getRegistry } from './registry.js';
-import type { MetricsRouterOptions } from './types.js';
-
-type ExpressLikeApp = any;
-type RouterLike = any;
+import type { ExpressLikeApp, MetricsRouterOptions, RouterLike } from './types.js';
 
 export function createMetricsRouter(options?: MetricsRouterOptions): RouterLike;
 export function createMetricsRouter(app: ExpressLikeApp, options?: MetricsRouterOptions): RouterLike;
@@ -53,15 +50,16 @@ export function createMetricsRouter(
     return app;
   }
 
-  const router: any = {
+  const router: RouterLike = {
     path,
     _routes: [{ method: 'GET', path, handler }],
     get(routePath: string, routeHandler: any) {
-      this._routes.push({ method: 'GET', path: routePath, handler: routeHandler });
+      const routes = (this as any)._routes as any[];
+      routes.push({ method: 'GET', path: routePath, handler: routeHandler });
       return this;
     },
     handle: handler,
-  };
+  } as RouterLike;
 
-  return router as RouterLike;
+  return router;
 }
