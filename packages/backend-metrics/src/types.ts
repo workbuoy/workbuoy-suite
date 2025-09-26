@@ -23,8 +23,3 @@ export interface ExpressLikeApp {
   use?: (...args: any[]) => any;
   get?: (...args: any[]) => any;
 }
-
-export type CreateMetricsRouter = {
-  (options?: MetricsRouterOptions): any;
-  (app: ExpressLikeApp, options?: MetricsRouterOptions): any;
-};
