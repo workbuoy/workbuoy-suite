@@ -18,6 +18,7 @@
   },
   "dependencies": {
     "@workbuoy/backend-auth": "file:../../packages/backend-auth",
+    "@workbuoy/backend-metrics": "^0.1.0",
     "@workbuoy/backend-rbac": "^0.1.0",
     "@workbuoy/roles-data": "file:../../packages/roles-data",
     "@turf/boolean-point-in-polygon": "^6.5.0",

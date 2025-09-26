@@ -8,11 +8,12 @@ WORKDIR /repo
 COPY package*.json ./
 
 # Pre-create workspace dirs and copy their package manifests to enable npm workspaces resolution
-RUN mkdir -p apps/backend apps/frontend packages/backend-telemetry packages/backend-rbac
+RUN mkdir -p apps/backend apps/frontend packages/backend-telemetry packages/backend-rbac packages/backend-metrics
 COPY apps/backend/package*.json apps/backend/
 COPY apps/frontend/package*.json apps/frontend/
 COPY packages/backend-telemetry/package*.json packages/backend-telemetry/
 COPY packages/backend-rbac/package*.json packages/backend-rbac/
+COPY packages/backend-metrics/package*.json packages/backend-metrics/
 
 # Install with the root lockfile and workspace manifests present
 RUN npm ci
@@ -22,6 +23,7 @@ COPY . .
 
 # Generate Prisma client for typechecking and build backend (container surface)
 RUN npx prisma generate --schema=apps/backend/prisma/schema.prisma \
+  && npm run -w @workbuoy/backend-metrics build \
   && npm run -w @workbuoy/backend-telemetry build \
   && npm run -w @workbuoy/backend-rbac build \
   && npm run -w @workbuoy/backend build:container \
@@ -37,10 +39,11 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 
 # Needed workspace manifests for prod resolution
-RUN mkdir -p apps/backend packages/backend-telemetry packages/backend-rbac
+RUN mkdir -p apps/backend packages/backend-telemetry packages/backend-rbac packages/backend-metrics
 COPY apps/backend/package*.json ./apps/backend/
 COPY packages/backend-telemetry/package*.json ./packages/backend-telemetry/
 COPY packages/backend-rbac/package*.json ./packages/backend-rbac/
+COPY packages/backend-metrics/package*.json ./packages/backend-metrics/
 
 # Production install using the lockfile
 RUN npm ci --omit=dev --no-audit --fund=false

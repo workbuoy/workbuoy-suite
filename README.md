@@ -30,6 +30,11 @@ npm run -w @workbuoy/backend start  # adjust if start script exists
 npm run -w @workbuoy/frontend dev   # dev server
 ```
 
+### Backend metrics
+
+- Set `METRICS_ENABLED=true` to enable Prometheus HTTP metrics in `apps/backend`.
+- Override the endpoint path with `METRICS_ROUTE` (default `/metrics`).
+
 CI at a glance
 --------------
 
