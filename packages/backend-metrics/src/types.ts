@@ -1,4 +1,6 @@
 export type AnyRegistry = any;
+
+// Tolerant versjon av prom-client collectDefaultMetrics options
 export type CollectDefaultsOptions = {
   register?: any;
   prefix?: string;

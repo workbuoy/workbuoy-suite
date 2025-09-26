@@ -1,23 +1,26 @@
 import { Registry, collectDefaultMetrics } from 'prom-client';
-import type { CollectDefaultsOptions } from './types.js';
+import type { CollectDefaultsOptions, AnyRegistry } from './types.js';
 
-// Tverr-versjonsvennlig aliaser
-export type AnyRegistry = any;
+let _registry: AnyRegistry | undefined;
 
-export function mergeRegistries(registries?: AnyRegistry[]): AnyRegistry {
-  const regs = (registries ?? []) as AnyRegistry[];
-  const R: any = Registry as any;
-  if (typeof R.merge === 'function') return R.merge(regs);
-  // Fallback: tom registry (downstream kaller metrics() eller bruker egen join)
-  return new (Registry as any)();
+export function getRegistry(): AnyRegistry {
+  if (_registry) return _registry;
+  _registry = new (Registry as any)();
+  return _registry;
 }
 
 export function setupDefaultMetrics(opts?: CollectDefaultsOptions) {
   return collectDefaultMetrics(opts as any);
 }
-
-// Back-compat alias (tidligere importnavn i andre moduler)
+// kompat-aliase som backend kan bruke
 export const ensureDefaultMetrics = setupDefaultMetrics;
+
+export function mergeRegistries(registries?: AnyRegistry[]): AnyRegistry {
+  const regs = (registries ?? []) as AnyRegistry[];
+  const R: any = Registry as any;
+  if (typeof R.merge === 'function') return R.merge(regs);
+  return new (Registry as any)(); // defensiv fallback
+}
 
 export async function getMetricsText(registries?: AnyRegistry[]) {
   return (mergeRegistries(registries) as any).metrics();
@@ -25,11 +28,4 @@ export async function getMetricsText(registries?: AnyRegistry[]) {
 
 export async function getOpenMetricsText(registries?: AnyRegistry[]) {
   return (mergeRegistries(registries) as any).metrics();
-}
-
-let _registry: AnyRegistry | undefined;
-export function getRegistry() {
-  if (_registry) return _registry;
-  _registry = new (Registry as any)();
-  return _registry;
 }
