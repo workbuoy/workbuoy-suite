@@ -19,14 +19,10 @@ export function buoyRouter() {
       const role = String(req.headers['x-role-id'] ?? 'user');
       const tenantId = String(req.headers['x-tenant-id'] ?? 'T1');
       const wbContext = req.wb as { correlationId?: string } | undefined;
-      const ctxCid = typeof wbContext?.correlationId === 'string' ? wbContext.correlationId.trim() : '';
-      let headerCid: string | undefined;
-      try {
-        headerCid = requireHeader(req.headers as Record<string, unknown>, 'x-correlation-id').trim();
-      } catch {
-        headerCid = undefined;
-      }
-      const correlationId = ctxCid || headerCid || '';
+      const ctxCid = wbContext?.correlationId;
+      const headerCandidate = req.headers['x-correlation-id'] as string | undefined;
+      const headerCid = headerCandidate ? requireHeader(req.headers as Record<string, unknown>, 'x-correlation-id') : undefined;
+      const correlationId = (ctxCid && String(ctxCid)) || headerCid || '';
       if (!correlationId) {
         return res.status(400).send('Missing correlation id');
       }

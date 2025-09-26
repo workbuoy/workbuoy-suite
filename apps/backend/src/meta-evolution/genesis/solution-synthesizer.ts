@@ -1,4 +1,5 @@
 import { FeatureApproach, FeatureSpecification, LatentNeed } from '../types.js';
+import { assertDefined } from '../../utils/require.js';
 
 export interface SolutionFeasibility {
   approachId: string;
@@ -45,7 +46,8 @@ export class SolutionSynthesizer {
       throw new Error('No approaches available for selection.');
     }
     if (feasibility.length === 0) {
-      return approaches[0];
+      const primaryApproach = assertDefined(approaches[0], 'approaches[0]');
+      return primaryApproach;
     }
 
     const scored = approaches.map((approach) => {
@@ -54,7 +56,8 @@ export class SolutionSynthesizer {
     });
 
     scored.sort((a, b) => b.score - a.score);
-    return scored[0].approach;
+    const top = assertDefined(scored[0], 'scored[0]');
+    return top.approach;
   }
 
   generateSpecification(approach: FeatureApproach, need: LatentNeed): FeatureSpecification {

@@ -11,5 +11,6 @@
       "@workbuoy/backend-rbac": ["packages/backend-rbac/src/index.ts"]
     },
     "skipLibCheck": true
-  }
+  },
+  "include": ["src", "src/types", "src/**/*.d.ts"]
 }

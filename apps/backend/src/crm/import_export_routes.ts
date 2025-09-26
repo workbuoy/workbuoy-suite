@@ -63,17 +63,25 @@ importExportRouter.post('/import', upload.single('file'), async (req, res, next)
     if (idem) (global as any).__idem.add(idem);
 
     const storage = req.app?.locals?.storage;
-    if (!storage) return res.status(500).send('Storage not configured');
+    if (!storage) {
+      return res.status(500).send('Storage not configured');
+    }
 
-    if (!req.user) return res.status(401).send('Unauthorized');
+    const user = req.user;
+    if (!user) {
+      return res.status(401).send('Unauthorized');
+    }
 
     const file = req.file;
     const st = storeFor(tenant);
     let records: any[] = [];
 
-    if (!file) return res.status(400).json({ error: 'file required (CSV or JSON)' });
+    if (!file) {
+      return res.status(400).json({ error: 'file required (CSV or JSON)' });
+    }
 
-    assertDefined(storage.bucket, 'storage.bucket');
+    const bucket = assertDefined(storage.bucket, 'storage.bucket');
+    void bucket;
     if ((file.mimetype || '').includes('json') || file.originalname.endsWith('.json')) {
       const parsed = JSON.parse(file.buffer.toString('utf8'));
       records = Array.isArray(parsed) ? parsed : (parsed.items || []);
@@ -91,7 +99,7 @@ importExportRouter.post('/import', upload.single('file'), async (req, res, next)
       if (err) {
         failed++; wb_import_fail_total.inc();
         const id = `dlq-${Date.now()}-${i}`;
-        dlq.push({ id, entity, error: err, record: rec, tenant_id: tenant, ts: Date.now(), source: 'import' });
+        dlq.push({ id, entity, error: err, record: rec, tenant_id: tenant, ts: Date.now(), source: 'import', user_id: user.id });
         failures.push(id);
         continue;
       }

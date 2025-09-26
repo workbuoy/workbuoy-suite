@@ -9,6 +9,7 @@ import {
   Capability,
   AnalysisResult
 } from '../types.js';
+import { assertDefined } from '../../utils/require.js';
 import { SelfAnalyzer, SelfAnalysisOptions } from './self-analysis.js';
 import { CapabilityMapper } from './capability-mapper.js';
 
@@ -82,7 +83,11 @@ export class AwarenessEngine {
   }
 
   async planTranscendence(limitations: Limitation[]): Promise<TranscendencePlan> {
-    const focus = limitations.length > 0 ? limitations[0].id : 'stability';
+    const primaryLimitation = limitations[0];
+    if (!primaryLimitation) {
+      throw new Error('Invariant: limitation missing');
+    }
+    const focus = assertDefined(primaryLimitation, 'primaryLimitation').id;
     const steps = limitations.slice(0, 3).map((limitation, index) => {
       const impact: 'low' | 'medium' | 'high' =
         limitation.severity === 'high'

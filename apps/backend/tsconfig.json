@@ -15,5 +15,5 @@
       "../../packages/backend-telemetry/src"
     ]
   },
-  "include": ["src", "src/types"]
+  "include": ["src", "src/types", "src/**/*.d.ts"]
 }
