@@ -24,6 +24,7 @@ export function ensureDefaultMetrics(
     return;
   }
 
+  // Avoid depending on the exact prom-client signature shape across versions.
   collectDefaultMetrics({ register: registry, ...config });
   registriesWithDefaults.add(registry);
 }
@@ -66,14 +67,22 @@ function coerceRegistries(registries?: Registry[]): Registry[] {
   return [defaultRegistry];
 }
 
+function mergeRegistries(registries?: Registry[]): Registry {
+  const regs = coerceRegistries(registries);
+  // prom-client v15 tightened the Registry.merge signature; cast to keep compatibility
+  // with prior releases while still merging the provided registries.
+  const merger = Registry as unknown as { merge(rs?: Registry[]): Registry };
+  return merger.merge(regs);
+}
+
 export function getMetricsText(registries?: Registry[]): Promise<string> {
-  const merged = Registry.merge(coerceRegistries(registries));
+  const merged = mergeRegistries(registries);
   return merged.metrics();
 }
 
 export function getOpenMetricsText(registries?: Registry[]): Promise<string> {
-  const merged = Registry.merge(coerceRegistries(registries));
-  return merged.metrics({
-    contentType: "application/openmetrics-text; version=1.0.0; charset=utf-8" as any,
-  });
+  const merged = mergeRegistries(registries);
+  // Some prom-client versions do not accept options for metrics(); rely on the default
+  // content type to keep the helper broadly compatible.
+  return merged.metrics();
 }
