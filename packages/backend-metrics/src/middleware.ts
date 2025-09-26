@@ -98,7 +98,10 @@ export function withMetrics(app: Application, options: WithMetricsOptions = {}):
   const enableDefaults = options.enableDefaultMetrics ?? true;
 
   if (enableDefaults) {
-    ensureDefaultMetrics(registry, options.defaultMetrics);
+    ensureDefaultMetrics({
+      register: registry as any,
+      ...(options.defaultMetrics ?? {}),
+    });
   }
 
   const middleware = createRequestMetricsMiddleware(registry);

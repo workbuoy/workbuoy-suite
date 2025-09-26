@@ -1,32 +1,27 @@
 import { Registry, collectDefaultMetrics } from 'prom-client';
-import type { CollectDefaultsOptions as PromCollectDefaultsOptions } from 'prom-client';
+import type { CollectDefaultsOptions } from './types.js';
 
-export type CollectDefaultsOptions = PromCollectDefaultsOptions;
-
-// Cross-version friendly alias
+// Avoid literal content-type generics across prom-client versions
 export type AnyRegistry = any;
 
-/**
- * Merge registries without binding to literal content-type generics.
- * Accept/return `AnyRegistry` to avoid TS2345 across prom-client versions.
- */
 export function mergeRegistries(registries?: AnyRegistry[]): AnyRegistry {
   const regs = (registries ?? []) as AnyRegistry[];
   const R: any = Registry as any;
   if (typeof R.merge === 'function') return R.merge(regs);
 
-  // Fallback: concatenate text output if merge() is not present
-  const out = new (Registry as any)();
-  // No reliable way to clone metric instances across versions here,
-  // but downstream text exporters call metrics()/content-type on `out`,
-  // so we keep API shape consistent.
-  return out;
+  // Fallback: provide a fresh registry (downstream text exporters will call metrics() on it);
+  // older prom-client versions can lack merge(). We keep the API shape stable.
+  return new (Registry as any)();
 }
 
 export function setupDefaultMetrics(opts?: CollectDefaultsOptions) {
   return collectDefaultMetrics(opts as any);
 }
 
+// Back-compat alias for previous imports
+export const ensureDefaultMetrics = setupDefaultMetrics;
+
+// Text helpers
 export function getMetricsText(registries?: AnyRegistry[]) {
   return (mergeRegistries(registries) as any).metrics();
 }
@@ -35,10 +30,12 @@ export function getOpenMetricsText(registries?: AnyRegistry[]) {
   return (mergeRegistries(registries) as any).metrics();
 }
 
-// Keep existing getRegistry export if present; otherwise provide a simple singleton.
+// Lazy singleton accessor (used by router/middleware)
 let _registry: AnyRegistry | undefined;
 export function getRegistry() {
   if (_registry) return _registry;
   _registry = new (Registry as any)();
   return _registry;
 }
+
+export type { CollectDefaultsOptions } from './types.js';
