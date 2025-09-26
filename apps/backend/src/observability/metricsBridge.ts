@@ -1,6 +1,6 @@
-import type { EventBus } from '../core/eventBusV2';
+import type { EventBus } from '../core/eventBusV2.js';
 import { createCounter } from '@workbuoy/backend-metrics';
-import { eventBus } from '../core/eventBusV2';
+import { eventBus as defaultBus } from '../core/eventBusV2.js';
 
 interface EventBusLike {
   on<T = any>(type: string, handler: (payload: T) => void | Promise<void>): void;
@@ -41,24 +41,24 @@ const featureUsageCounter = createCounter({
 
 const startedBuses = new WeakSet<object>();
 
-export function startMetricsBridge(eventBus: EventBusLike = eventBus as EventBus): void {
-  if (!eventBus || startedBuses.has(eventBus as object)) {
+export function startMetricsBridge(bus: EventBusLike = defaultBus as EventBus): void {
+  if (!bus || startedBuses.has(bus as object)) {
     return;
   }
 
-  eventBus.on('rbac:denied', async (payload: RbacDeniedPayload = {}) => {
+  bus.on('rbac:denied', async (payload: RbacDeniedPayload = {}) => {
     const role = normalizeLabel(payload.role, 'unknown');
     const resource = normalizeLabel(payload.resource, 'unknown');
     rbacDeniedCounter.inc({ role, resource });
   });
 
-  eventBus.on('telemetry:feature_used', async (payload: FeatureUsedPayload = {}) => {
+  bus.on('telemetry:feature_used', async (payload: FeatureUsedPayload = {}) => {
     const feature = normalizeLabel(payload.feature, 'unknown');
     const action = normalizeLabel(payload.action, 'unknown');
     featureUsageCounter.inc({ feature, action });
   });
 
-  startedBuses.add(eventBus as object);
+  startedBuses.add(bus as object);
 }
 
 export function resetMetricsBridgeMetrics(): void {

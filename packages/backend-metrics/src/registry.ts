@@ -58,3 +58,22 @@ export function createHistogram<T extends string>(config: HistogramInit<T>): His
   const { registry, registers, ...rest } = config;
   return new Histogram<T>({ ...rest, registers: resolveRegisters(registry, registers) });
 }
+
+function coerceRegistries(registries?: Registry[]): Registry[] {
+  if (Array.isArray(registries) && registries.length > 0) {
+    return registries;
+  }
+  return [defaultRegistry];
+}
+
+export function getMetricsText(registries?: Registry[]): Promise<string> {
+  const merged = Registry.merge(coerceRegistries(registries));
+  return merged.metrics();
+}
+
+export function getOpenMetricsText(registries?: Registry[]): Promise<string> {
+  const merged = Registry.merge(coerceRegistries(registries));
+  return merged.metrics({
+    contentType: "application/openmetrics-text; version=1.0.0; charset=utf-8" as any,
+  });
+}

@@ -3,7 +3,7 @@ import {
   resetMetricsBridgeMetrics,
   rbacDeniedCounter,
   featureUsageCounter,
-} from '../src/observability/metricsBridge';
+} from '../src/observability/metricsBridge.js';
 
 describe('metricsBridge', () => {
   function createStubBus() {

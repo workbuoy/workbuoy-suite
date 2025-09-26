@@ -3,6 +3,8 @@ export {
   ensureDefaultMetrics,
   createCounter,
   createHistogram,
+  getMetricsText,
+  getOpenMetricsText,
   type CollectDefaultsOptions,
 } from "./registry.js";
 export {

@@ -4,7 +4,7 @@ import { createMetricsRouter, getRegistry, withMetrics } from '@workbuoy/backend
 import {
   startMetricsBridge,
   resetMetricsBridgeMetrics,
-} from '../src/observability/metricsBridge';
+} from '../src/observability/metricsBridge.js';
 
 describe('metricsBridge integration', () => {
   function createStubBus() {
