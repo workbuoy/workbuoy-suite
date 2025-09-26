@@ -5,6 +5,8 @@
     "noEmit": false,
     "strict": false,
     "baseUrl": ".",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
     "paths": {
       "@workbuoy/backend-metrics": ["../../packages/backend-metrics/src"],
       "@workbuoy/backend-metrics/": ["../../packages/backend-metrics/src/"],

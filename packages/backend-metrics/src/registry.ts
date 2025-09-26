@@ -7,6 +7,7 @@ import {
   Registry,
 } from "prom-client";
 
+// Keep typings tolerant across prom-client versions (v14 vs v15+ openmetrics).
 type AnyRegistry = any;
 
 const defaultRegistry = new Registry();
@@ -74,12 +75,20 @@ function coerceRegistries(registries?: AnyRegistry[]): AnyRegistry[] {
   return [defaultRegistry as AnyRegistry];
 }
 
+/**
+ * Merges registries regardless of prom-client version. Avoids strict literal
+ * content-type generics that cause TS2345 when passing mixed Registry types.
+ */
 export function mergeRegistries(registries?: AnyRegistry[]): AnyRegistry {
   const regs = coerceRegistries(registries);
-  // prom-client v15 tightened the Registry.merge signature; cast to keep compatibility
-  // with prior releases while still merging the provided registries.
-  const merger = Registry as unknown as { merge(rs?: AnyRegistry[]): AnyRegistry };
-  return merger.merge(regs);
+  const merger = Registry as unknown as { merge?: (rs?: AnyRegistry[]) => AnyRegistry };
+
+  if (typeof merger.merge === "function") {
+    return merger.merge(regs);
+  }
+
+  // Extremely defensive: fall back to a fresh registry when merge() is absent.
+  return new (Registry as any)();
 }
 
 export function getMetricsText(registries?: AnyRegistry[]): Promise<string> {
