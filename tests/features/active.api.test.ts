@@ -3,7 +3,7 @@ import type { Application } from 'express';
 import { prisma } from '../../src/core/db/prisma';
 import { importRolesAndFeatures, setOverride } from '../../src/roles/service';
 import { loadRolesFromRepo, loadFeaturesFromRepo } from '../../src/roles/loader';
-import { recordFeatureUsage } from '../../src/telemetry/usageSignals.db';
+import { createPrismaTelemetryStore } from '@workbuoy/backend-telemetry';
 import appDefault from '../../apps/backend/src/server';
 
 const describeIfPersistence =
@@ -14,6 +14,7 @@ const roleId = 'sales-manager-account-executive';
 const userId = 'user-active';
 
 let app: Application;
+const telemetryStore = createPrismaTelemetryStore(prisma);
 
 /**
  * Full test med Postgres persistens
@@ -31,19 +32,19 @@ describeIfPersistence('GET /api/features/active [persistent]', () => {
     await setOverride(tenantId, roleId, {
       featureCaps: { cashflow_forecast: 5, lead_qualification: 3 },
     });
-    await recordFeatureUsage({
+    await telemetryStore.recordFeatureUsage({
       userId,
       tenantId,
       featureId: 'lead_qualification',
       action: 'open',
     });
-    await recordFeatureUsage({
+    await telemetryStore.recordFeatureUsage({
       userId,
       tenantId,
       featureId: 'lead_qualification',
       action: 'open',
     });
-    await recordFeatureUsage({
+    await telemetryStore.recordFeatureUsage({
       userId,
       tenantId,
       featureId: 'cashflow_forecast',

@@ -32,5 +32,5 @@ score = autonomyCap + log(usage + 1) * 1.2 + industryBoost
 ## Admin & Debugging
 
 - Clear usage during tests with `DELETE FROM "FeatureUsage";`
-- The DB-backed implementation lives in `src/telemetry/usageSignals.db.ts`.
-- In-memory fallback remains in `src/telemetry/usageSignals.ts` for `FF_PERSISTENCE=false` runs.
+- The shared router and stores live in `packages/backend-telemetry`.
+- Legacy shims remain in `src/telemetry/*` and are marked `@deprecated`.
