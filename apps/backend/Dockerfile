@@ -33,17 +33,25 @@ FROM node:20-alpine AS runtime
 ENV NODE_ENV=production
 WORKDIR /app
 
-# 1) Copy manifest and Prisma schema so postinstall/generate can find it
-COPY apps/backend/package*.json ./
+# Root manifests so npm workspaces are understood in runtime image
+COPY package.json package-lock.json ./
+
+# Needed workspace manifests for prod resolution
+RUN mkdir -p apps/backend packages/backend-telemetry packages/backend-rbac
+COPY apps/backend/package*.json ./apps/backend/
+COPY packages/backend-telemetry/package*.json ./packages/backend-telemetry/
+COPY packages/backend-rbac/package*.json ./packages/backend-rbac/
+
+# Production install with workspaces awareness
+RUN npm ci --omit=dev --workspaces --include-workspace-root --no-audit --fund=false
+
+# Prisma schema for generate step
 COPY apps/backend/prisma ./prisma
 
-# 2) Production install; @prisma/client postinstall will attempt generate
-RUN npm install --omit=dev --no-audit --no-fund
-
-# 3) Explicit generate in case postinstall was skipped
+# Explicit generate in case postinstall was skipped
 RUN npx prisma generate --schema=prisma/schema.prisma
 
-# 4) Copy compiled artifacts from builder
+# Copy compiled artifacts from builder
 COPY --from=builder /repo/apps/backend/dist ./dist
 USER node
 EXPOSE 3000
