@@ -11,4 +11,4 @@ export {
   getOpenMetricsText,
 } from './registry.js';
 
-export type { AnyRegistry, CollectDefaultsOptions } from './types.js';
+export type { AnyRegistry, CollectDefaultsOptions, BeforeCollect, MetricsRouterOptions } from './types.js';
