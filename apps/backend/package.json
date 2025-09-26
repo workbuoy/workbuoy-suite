@@ -18,6 +18,7 @@
   },
   "dependencies": {
     "@workbuoy/backend-auth": "file:../../packages/backend-auth",
+    "@workbuoy/backend-rbac": "^0.1.0",
     "@workbuoy/roles-data": "file:../../packages/roles-data",
     "@turf/boolean-point-in-polygon": "^6.5.0",
     "busboy": "^1.6.0",
@@ -44,7 +45,7 @@
     "@prisma/client": "6.16.2",
     "yaml": "^2.4.2",
     "zod": "^3.23.8",
-    "@workbuoy/backend-telemetry": "file:../../packages/backend-telemetry"
+    "@workbuoy/backend-telemetry": "^0.1.0"
   },
   "devDependencies": {
     "typescript": "^5.9.2",

@@ -13,11 +13,18 @@
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "baseUrl": ".",
-    "rootDirs": ["./", "../../tests"],
+    "rootDirs": [
+      "./",
+      "../../tests",
+      "../../packages/backend-rbac/src",
+      "../../packages/backend-telemetry/src"
+    ],
     "paths": {
       "@backend/*": ["src/*"],
       "@backend-tests/*": ["tests/*"],
-      "@backend-meta/*": ["meta/*"]
+      "@backend-meta/*": ["meta/*"],
+      "@workbuoy/backend-rbac": ["../../packages/backend-rbac/src/index.ts"],
+      "@workbuoy/backend-telemetry": ["../../packages/backend-telemetry/src/index.ts"]
     }
   },
   "include": [

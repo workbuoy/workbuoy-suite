@@ -34,6 +34,9 @@ Developer Quickstart
    npm run -w @workbuoy/frontend dev
    ```
 
+   RBAC middleware and the admin router now live in the reusable `@workbuoy/backend-rbac` package. Import guards such as
+   `requireRole` or the `RbacRouter` directly from the package instead of `apps/backend/src/rbac/*`.
+
 4. Lint & format
    ```
    npm run lint:apps

@@ -1,4 +1,4 @@
-import { upsertBinding, resolveRoles } from '../src/rbac/binding';
+import { upsertBinding, resolveRoles } from '@workbuoy/backend-rbac';
 
 test('binding resolves roles', () => {
   upsertBinding({ tenant_id: 't1', group: 'grp-admins', role: 'admin' });

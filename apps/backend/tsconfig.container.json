@@ -3,7 +3,17 @@
   "compilerOptions": {
     "outDir": "dist",
     "noEmit": false,
-    "strict": false
+    "strict": false,
+    "baseUrl": ".",
+    "paths": {
+      "@workbuoy/backend-rbac": ["../../packages/backend-rbac/src/index.ts"],
+      "@workbuoy/backend-telemetry": ["../../packages/backend-telemetry/src/index.ts"]
+    },
+    "rootDirs": [
+      ".",
+      "../../packages/backend-rbac/src",
+      "../../packages/backend-telemetry/src"
+    ]
   },
   "include": [
     "src/index.ts",
@@ -24,6 +34,7 @@
     "src/swagger.ts",
     "src/identity/",
     "src/scim/",
+    "src/rbac/",
     // generic excludes
     "**/*.test.ts",
     "**/*.spec.ts"

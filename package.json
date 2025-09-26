@@ -4,15 +4,14 @@
   "workspaces": [
     "apps/*",
     "packages/*",
-    "enterprise/",
-    "crm/",
-    "connectors/*",
-    "desktop/",
-    "desktop/ui",
+    "enterprise",
+    "crm",
+    "connectors",
+    "desktop",
     "sdk/*",
-    "docs/",
-    "examples/js",
-    "telemetry/"
+    "docs",
+    "telemetry",
+    "examples/*"
   ],
   "scripts": {
     "clean": "git clean -fdx",

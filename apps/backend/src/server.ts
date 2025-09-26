@@ -2,8 +2,9 @@ import express, { Router } from 'express';
 import app from './app.secure.js';
 import { createAuthModule } from '@workbuoy/backend-auth';
 import { swaggerRouter as buildSwaggerRouter } from './docs/swagger.js';
-import { rbacRouter } from './rbac/routes.js';
+import { configureRbac, RbacRouter } from '@workbuoy/backend-rbac';
 import { audit } from './audit/audit.js';
+import { rbac_denied_total, rbac_policy_change_total } from './metrics/metrics.js';
 
 import { correlationHeader } from '../../../src/middleware/correlationHeader.js';
 import { wbContext } from '../../../src/middleware/wbContext.js';
@@ -55,6 +56,14 @@ app.use(requestLogger());
 
 app.set('eventBus', bus);
 
+configureRbac({
+  audit,
+  counters: {
+    denied: rbac_denied_total,
+    policyChange: rbac_policy_change_total,
+  },
+});
+
 const { router: authRouter } = createAuthModule({ audit });
 
 app.use('/', authRouter);
@@ -81,7 +90,7 @@ app.use('/api', connectorsHealthRouter);
 
 app.use('/api', knowledgeRouter as unknown as Router);
 app.use('/api/audit', auditRouter());
-app.use('/api/rbac', rbacRouter);
+app.use('/api/rbac', RbacRouter);
 
 if (process.env.NODE_ENV !== 'production') {
   app.use('/api', debugDlqRouter());
