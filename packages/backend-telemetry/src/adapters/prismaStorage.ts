@@ -1,11 +1,9 @@
 import type { TelemetryEvent, TelemetryStorage } from '../types.js';
-import { Prisma } from '@prisma/client';
 import type { PrismaClient } from '@prisma/client';
 
 type FeatureUsageAction = 'INVOKE' | 'STREAM' | 'CACHE_HIT' | 'CACHE_MISS';
 
-const toJsonInput = (v: unknown): Prisma.InputJsonValue | Prisma.NullableJsonNullValueInput =>
-  v === null ? Prisma.JsonNull : (v as Prisma.InputJsonValue);
+const toJsonInput = (v: unknown): any => v as any;
 
 // Keep this minimal: only require the model we use.
 type PrismaClientLike = Pick<PrismaClient, 'featureUsage'>;
@@ -29,7 +27,7 @@ export function createPrismaTelemetryStorage(client: PrismaClientLike): Telemetr
           userId: ev.userId,
           tenantId: ev.tenantId,
           featureId: ev.featureId,
-          action: toAction(ev.action),
+          action: toAction(ev.action) as any,
           ts: new Date(),
           // Ensure metadata matches Prisma JSON type
           metadata: toJsonInput(ev.metadata),

@@ -1,9 +1,7 @@
-import { Prisma } from '@prisma/client';
 import { prisma } from '../../core/db/prisma';
 import type { FeatureDef } from '../types';
 
-const toJsonInput = (v: unknown): Prisma.InputJsonValue | Prisma.NullableJsonNullValueInput =>
-  v === null ? Prisma.JsonNull : (v as Prisma.InputJsonValue);
+const toJsonInput = (v: unknown): any => v as any;
 
 interface FeatureRow {
   id: string;

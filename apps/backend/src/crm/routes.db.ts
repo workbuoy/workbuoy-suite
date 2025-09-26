@@ -7,13 +7,13 @@ const router = Router();
 function requireDealId(req: Request): string {
   const id = (req.params as { dealId?: string }).dealId;
   assertDefined(id, 'dealId required');
-  return id;
+  return id as string;
 }
 
 function requireCorrelationId(req: Request): string {
   const cid = req.headers['x-correlation-id'] as string | undefined;
   assertDefined(cid, 'x-correlation-id required');
-  return cid;
+  return cid as string;
 }
 
 router.get('/crm/db/deals/:dealId', async (req: Request, res: Response, next: NextFunction) => {
@@ -21,7 +21,6 @@ router.get('/crm/db/deals/:dealId', async (req: Request, res: Response, next: Ne
     const prisma = requirePrisma(req.app);
     const user = requireUser(req);
     const dealId = requireDealId(req);
-
     const deal = await prisma.deal.findUnique({ where: { id: dealId } });
     res.json({ deal, actor: user.id });
   } catch (err) {
