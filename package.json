@@ -8,7 +8,7 @@
     "crm",
     "connectors",
     "desktop",
-    "sdks",
+    "sdk/*",
     "docs",
     "telemetry",
     "examples/*"

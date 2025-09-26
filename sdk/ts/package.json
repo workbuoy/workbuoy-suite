@@ -1,6 +1,7 @@
 {
   "name": "@workbuoy/sdk",
   "version": "0.0.0",
+  "private": true,
   "description": "TypeScript SDK for WorkBuoy (generated from OpenAPI)",
   "types": "index.d.ts",
   "license": "MIT",
