@@ -5,20 +5,15 @@
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
     "strict": true,
+    "isolatedModules": true,
     "declaration": true,
     "declarationMap": false,
     "sourceMap": false,
-    "rootDir": "src",
-    "outDir": "dist",
-    "isolatedModules": true,
     "esModuleInterop": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "rootDir": "src",
+    "outDir": "dist"
   },
-  "include": [
-    "src/**/*.ts"
-  ],
-  "exclude": [
-    "**/*.test.ts",
-    "**/__tests__/**"
-  ]
+  "include": ["src/**/*.ts"],
+  "exclude": ["**/*.test.ts", "**/__tests__/**"]
 }
