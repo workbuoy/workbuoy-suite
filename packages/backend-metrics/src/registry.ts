@@ -12,13 +12,29 @@ export function getRegistry(reg?: AnyRegistry): PRegistry {
   return _singleton;
 }
 
-export function setupDefaultMetrics(opts?: CollectDefaultsOptions): void {
-  const reg = getRegistry(opts?.register);
-  collectDefaultMetrics({ ...(opts as any), register: reg } as any);
+const isRegistryLike = (value: unknown): value is AnyRegistry =>
+  !!value && typeof value === 'object' && typeof (value as any).metrics === 'function';
+
+const isCollectDefaultsOptions = (value: unknown): value is CollectDefaultsOptions =>
+  !!value && typeof value === 'object' && !isRegistryLike(value);
+
+export function setupDefaultMetrics(): void;
+export function setupDefaultMetrics(opts: CollectDefaultsOptions): void;
+export function setupDefaultMetrics(register: AnyRegistry): void;
+export function setupDefaultMetrics(arg?: CollectDefaultsOptions | AnyRegistry): void {
+  const options: CollectDefaultsOptions | undefined =
+    arg === undefined ? undefined : isCollectDefaultsOptions(arg) ? arg : { register: arg };
+
+  const reg = getRegistry(options?.register ?? (isRegistryLike(arg) ? arg : undefined));
+  collectDefaultMetrics({ ...(options as any), register: reg } as any);
 }
 
 // Back-compat name used in earlier attempts and in backend wiring.
-export const ensureDefaultMetrics = setupDefaultMetrics;
+export const ensureDefaultMetrics: {
+  (): void;
+  (opts: CollectDefaultsOptions): void;
+  (register: AnyRegistry): void;
+} = setupDefaultMetrics as any;
 
 export function mergeRegistries(registries?: AnyRegistry[]): PRegistry {
   const regs = (registries?.length ? registries : [getRegistry()]) as PRegistry[];

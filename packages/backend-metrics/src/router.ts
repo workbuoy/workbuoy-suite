@@ -1,5 +1,7 @@
 import { ensureDefaultMetrics, getMetricsText, getOpenMetricsText, getRegistry } from './registry.js';
-import type { ExpressLikeApp, MetricsRouterOptions, RouterLike } from './types.js';
+import type { ExpressLikeApp, MetricsRouterOptions } from './types.js';
+
+type RouterLike = any;
 
 export function createMetricsRouter(options?: MetricsRouterOptions): RouterLike;
 export function createMetricsRouter(app: ExpressLikeApp, options?: MetricsRouterOptions): RouterLike;
@@ -13,11 +15,10 @@ export function createMetricsRouter(
   const app: ExpressLikeApp | undefined = isAppLike(appOrOptions) ? (appOrOptions as ExpressLikeApp) : undefined;
   const options: MetricsRouterOptions = (app ? maybeOptions : (appOrOptions as MetricsRouterOptions)) ?? {};
 
-  const registry = getRegistry(options.registry);
-  ensureDefaultMetrics({ register: registry });
+  const { path = '/metrics', registry = getRegistry(), beforeCollect } = options;
+  const resolvedRegistry = registry ?? getRegistry();
 
-  const path = options.path ?? '/metrics';
-  const beforeCollect = options.beforeCollect;
+  ensureDefaultMetrics(resolvedRegistry);
 
   const handler = async (req: any, res: any = {}): Promise<string> => {
     await beforeCollect?.();
@@ -25,8 +26,8 @@ export function createMetricsRouter(
     const accept = String(req?.headers?.accept ?? '');
     const wantsOpenMetrics = accept.includes('application/openmetrics-text');
     const body = wantsOpenMetrics
-      ? await getOpenMetricsText(registry)
-      : await getMetricsText(registry);
+      ? await getOpenMetricsText(resolvedRegistry)
+      : await getMetricsText(resolvedRegistry);
 
     const contentType = wantsOpenMetrics
       ? 'application/openmetrics-text; version=1.0.0; charset=utf-8'

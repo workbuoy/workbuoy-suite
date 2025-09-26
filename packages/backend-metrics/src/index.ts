@@ -17,6 +17,5 @@ export type {
   BeforeCollect,
   MetricsRouterOptions,
   ExpressLikeApp,
-  RouterLike,
   CreateMetricsRouter,
 } from './types.js';
