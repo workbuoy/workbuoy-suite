@@ -2,19 +2,16 @@
   "name": "workbuoy-monorepo",
   "private": true,
   "workspaces": [
-    "apps/",
     "apps/*",
-    "packages/",
     "packages/*",
     "enterprise",
     "crm",
     "connectors",
-    "connectors/*",
     "desktop",
-    "sdk",
-    "sdk/*",
+    "sdks",
     "docs",
-    "telemetry"
+    "telemetry",
+    "examples/*"
   ],
   "scripts": {
     "clean": "git clean -fdx",

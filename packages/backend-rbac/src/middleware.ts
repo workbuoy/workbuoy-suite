@@ -33,7 +33,13 @@ export function createPolicyEnforcer(
     const tenant_id = String((req as any).tenant_id ?? req.header('x-tenant-id') ?? 'demo-tenant');
     const user_id = ((req as any).actor_user_id ?? req.header('x-user-id') ?? null) as string | null;
     const groups = normalizeList((req as any).groups ?? req.header('x-groups'));
-    const roles = normalizeList((req as any).roles ?? req.header('x-roles')) as Role[];
+    let roles = normalizeList((req as any).roles ?? req.header('x-roles')) as Role[];
+    if (!roles.length) {
+      const legacy = req.header?.('x-user-role');
+      if (legacy) {
+        roles = normalizeList(legacy) as Role[];
+      }
+    }
 
     const subject = { tenant_id, user_id, groups, roles };
     const resourceInput =
@@ -77,7 +83,13 @@ export function requireRole(min: Extract<Role, 'viewer' | 'contributor' | 'manag
     if (!isEnforced()) {
       return next();
     }
-    const roles = normalizeList((req as any).roles ?? req.header('x-roles')) as Role[];
+    let roles = normalizeList((req as any).roles ?? req.header('x-roles')) as Role[];
+    if (!roles.length) {
+      const legacy = req.header?.('x-user-role');
+      if (legacy) {
+        roles = normalizeList(legacy) as Role[];
+      }
+    }
     if (roles.length === 0) {
       roles.push('viewer');
     }
