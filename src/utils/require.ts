@@ -1,13 +1,8 @@
-export function requireString(value: string | undefined, name: string): string {
+export function requireString(value: unknown, name: string): string {
   if (typeof value !== 'string' || value.length === 0) {
     throw new Error(`Missing or empty required string: ${name}`);
   }
   return value;
-}
-
-export function requireEnv(name: string): string {
-  const v = process.env[name];
-  return requireString(v, `process.env.${name}`);
 }
 
 export function requireHeader(headers: Record<string, unknown>, key: string): string {
@@ -15,9 +10,14 @@ export function requireHeader(headers: Record<string, unknown>, key: string): st
   return requireString(v, `header ${key}`);
 }
 
-export function assertDefined<T>(val: T | null | undefined, name: string): T {
-  if (val === undefined || val === null) {
+export function requireEnv(name: string): string {
+  const value = process.env[name];
+  return requireString(value, `process.env.${name}`);
+}
+
+export function assertDefined<T>(value: T | null | undefined, name: string): T {
+  if (value === undefined || value === null) {
     throw new Error(`${name} is undefined`);
   }
-  return val;
+  return value;
 }

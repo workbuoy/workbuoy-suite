@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import multer from 'multer';
+import { assertDefined } from '../utils/require.js';
 import { wb_import_total, wb_import_fail_total, wb_export_total } from '../metrics/metrics.js';
 
 export const importExportRouter = Router();
@@ -61,11 +62,18 @@ importExportRouter.post('/import', upload.single('file'), async (req, res, next)
     if (idem && (global as any).__idem.has(idem)) return res.json({ entity, imported: 0, failed: 0, dry_run: dry, idempotent: true });
     if (idem) (global as any).__idem.add(idem);
 
+    const storage = req.app?.locals?.storage;
+    if (!storage) return res.status(500).send('Storage not configured');
+
+    if (!req.user) return res.status(401).send('Unauthorized');
+
     const file = req.file;
     const st = storeFor(tenant);
     let records: any[] = [];
 
     if (!file) return res.status(400).json({ error: 'file required (CSV or JSON)' });
+
+    assertDefined(storage.bucket, 'storage.bucket');
     if ((file.mimetype || '').includes('json') || file.originalname.endsWith('.json')) {
       const parsed = JSON.parse(file.buffer.toString('utf8'));
       records = Array.isArray(parsed) ? parsed : (parsed.items || []);

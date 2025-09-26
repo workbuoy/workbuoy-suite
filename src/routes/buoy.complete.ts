@@ -3,6 +3,7 @@ import { buildExplanation } from '../core/explain';
 import { runCapability } from '../core/capabilityRunner';
 import { policyCheck } from '../core/policy';
 import { routeFromText } from '../router/nl';
+import { requireHeader } from '../utils/require';
 
 /**
  * POST /buoy/complete
@@ -18,10 +19,17 @@ export function buoyRouter() {
       const role = String(req.headers['x-role-id'] ?? 'user');
       const tenantId = String(req.headers['x-tenant-id'] ?? 'T1');
       const wbContext = req.wb as { correlationId?: string } | undefined;
-      const correlationId =
-        typeof wbContext?.correlationId === 'string'
-          ? wbContext.correlationId
-          : (req.headers['x-correlation-id'] as string | undefined) || '';
+      const ctxCid = typeof wbContext?.correlationId === 'string' ? wbContext.correlationId.trim() : '';
+      let headerCid: string | undefined;
+      try {
+        headerCid = requireHeader(req.headers as Record<string, unknown>, 'x-correlation-id').trim();
+      } catch {
+        headerCid = undefined;
+      }
+      const correlationId = ctxCid || headerCid || '';
+      if (!correlationId) {
+        return res.status(400).send('Missing correlation id');
+      }
 
       const route = intent ? { capability: intent, payload: params || {} } : routeFromText(String(text ?? ''));
       // Pre-check policy to craft explanations regardless of outcome
