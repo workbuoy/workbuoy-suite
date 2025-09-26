@@ -6,9 +6,14 @@
     "strict": false,
     "baseUrl": ".",
     "paths": {
-      "@workbuoy/backend-rbac": ["../../packages/backend-rbac/src/index.ts"]
+      "@workbuoy/backend-rbac": ["../../packages/backend-rbac/src/index.ts"],
+      "@workbuoy/backend-telemetry": ["../../packages/backend-telemetry/src/index.ts"]
     },
-    "rootDirs": [".", "../../packages/backend-rbac/src"]
+    "rootDirs": [
+      ".",
+      "../../packages/backend-rbac/src",
+      "../../packages/backend-telemetry/src"
+    ]
   },
   "include": [
     "src/index.ts",

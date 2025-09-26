@@ -10,7 +10,8 @@
     "types": ["node", "jest", "express"],
     "baseUrl": ".",
     "paths": {
-      "@workbuoy/backend-rbac": ["../../packages/backend-rbac/src/index.ts"]
+      "@workbuoy/backend-rbac": ["../../packages/backend-rbac/src/index.ts"],
+      "@workbuoy/backend-telemetry": ["../../packages/backend-telemetry/src/index.ts"]
     },
     "rootDir": "../.."
   },

@@ -33,7 +33,7 @@ FROM node:20-alpine AS runtime
 ENV NODE_ENV=production
 WORKDIR /app
 
-# Root manifests so npm workspaces are understood in runtime image
+# Root manifests so npm understands dependency graph in runtime image
 COPY package.json package-lock.json ./
 
 # Needed workspace manifests for prod resolution
@@ -42,8 +42,8 @@ COPY apps/backend/package*.json ./apps/backend/
 COPY packages/backend-telemetry/package*.json ./packages/backend-telemetry/
 COPY packages/backend-rbac/package*.json ./packages/backend-rbac/
 
-# Production install with workspaces awareness
-RUN npm ci --omit=dev --workspaces --include-workspace-root --no-audit --fund=false
+# Production install using the lockfile
+RUN npm ci --omit=dev --no-audit --fund=false
 
 # Prisma schema for generate step
 COPY apps/backend/prisma ./prisma
@@ -53,6 +53,8 @@ RUN npx prisma generate --schema=prisma/schema.prisma
 
 # Copy compiled artifacts from builder
 COPY --from=builder /repo/apps/backend/dist ./dist
+COPY --from=builder /repo/node_modules/@prisma ./node_modules/@prisma
+COPY --from=builder /repo/node_modules/@workbuoy ./node_modules/@workbuoy
 USER node
 EXPOSE 3000
 CMD ["node", "dist/index.js"]
