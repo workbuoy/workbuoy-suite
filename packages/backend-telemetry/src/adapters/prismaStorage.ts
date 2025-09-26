@@ -1,5 +1,7 @@
 import type { TelemetryEvent, TelemetryStorage } from '../types.js';
-import { Prisma, PrismaClient, FeatureUsageAction } from '@prisma/client';
+import { Prisma, PrismaClient } from '@prisma/client';
+
+type FeatureUsageAction = 'open' | 'complete' | 'dismiss';
 
 // Keep this minimal: only require the model we use.
 type PrismaClientLike = Pick<PrismaClient, 'featureUsage'>;
@@ -25,7 +27,7 @@ export function createPrismaTelemetryStorage(client: PrismaClientLike): Telemetr
           action: toAction(ev.action),
           ts: new Date(),
           // Ensure metadata matches Prisma JSON type
-          metadata: ev.metadata as Prisma.InputJsonValue,
+          metadata: ev.metadata as Prisma.JsonValue,
         },
       });
     },
@@ -39,7 +41,7 @@ export function createPrismaTelemetryStorage(client: PrismaClientLike): Telemetr
         _count: { _all: true },
       });
 
-      return rows.reduce<Record<string, number>>((acc, row) => {
+      return rows.reduce<Record<string, number>>((acc: Record<string, number>, row: (typeof rows)[number]) => {
         acc[row.featureId] = row._count._all;
         return acc;
       }, {});

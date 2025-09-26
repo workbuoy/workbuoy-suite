@@ -1,10 +1,19 @@
-import type { Prisma, Role as RoleRow } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 import { prisma } from '../../core/db/prisma';
 import type { RoleProfile } from '../types';
 
-function toJson(value: unknown): Prisma.InputJsonValue | undefined {
+interface RoleRow {
+  role_id: string;
+  title: string;
+  inherits: string[] | null;
+  featureCaps: Prisma.JsonValue | null;
+  scopeHints: Prisma.JsonValue | null;
+  profile: Prisma.JsonValue | null;
+}
+
+function toJson(value: unknown): Prisma.JsonValue | undefined {
   if (value === undefined) return undefined;
-  return value as Prisma.InputJsonValue;
+  return value as Prisma.JsonValue;
 }
 
 function mapRowToProfile(row: RoleRow): RoleProfile {
@@ -33,7 +42,7 @@ export class RoleRepo {
   }
 
   async upsert(role: RoleProfile): Promise<RoleProfile> {
-    const data: Prisma.RoleUpsertArgs['create'] = {
+    const data = {
       role_id: role.role_id,
       title: role.canonical_title ?? role.role_id,
       inherits: role.inherits ?? [],

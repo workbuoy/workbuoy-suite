@@ -1,10 +1,18 @@
-import type { Feature as FeatureRow, Prisma } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 import { prisma } from '../../core/db/prisma';
 import type { FeatureDef } from '../types';
 
-function toJson(value: unknown): Prisma.InputJsonValue | undefined {
+interface FeatureRow {
+  id: string;
+  title: string;
+  description: string | null;
+  defaultAutonomyCap: number | null;
+  capabilities: FeatureDef['capabilities'];
+}
+
+function toJson(value: unknown): Prisma.JsonValue | undefined {
   if (value === undefined) return undefined;
-  return value as Prisma.InputJsonValue;
+  return value as Prisma.JsonValue;
 }
 
 function mapRowToFeature(row: FeatureRow): FeatureDef {

@@ -1,6 +1,12 @@
-import type { UserRole as UserRoleRow } from '@prisma/client';
 import { prisma } from '../../core/db/prisma';
 import type { UserRoleBinding } from '../types';
+
+interface UserRoleRow {
+  user_id: string;
+  tenant_id: string;
+  primaryRole: string;
+  secondaryRoles: string[] | null;
+}
 
 function mapRow(row: UserRoleRow): UserRoleBinding {
   return {

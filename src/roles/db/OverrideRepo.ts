@@ -1,10 +1,17 @@
-import type { OrgRoleOverride as OverrideRow, Prisma } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 import { prisma } from '../../core/db/prisma';
 import type { OrgRoleOverride } from '../types';
 
-function toJson(value: unknown): Prisma.InputJsonValue | undefined {
+interface OverrideRow {
+  tenant_id: string;
+  role_id: string;
+  featureCaps: Prisma.JsonValue | null;
+  disabledFeatures: string[] | null;
+}
+
+function toJson(value: unknown): Prisma.JsonValue | undefined {
   if (value === undefined) return undefined;
-  return value as Prisma.InputJsonValue;
+  return value as Prisma.JsonValue;
 }
 
 function mapRow(row: OverrideRow): OrgRoleOverride {
