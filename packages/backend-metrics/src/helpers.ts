@@ -1,6 +1,4 @@
 export {
-  createCounter,
-  createHistogram,
   ensureDefaultMetrics,
   setupDefaultMetrics,
   getRegistry,
@@ -9,3 +7,5 @@ export {
   mergeRegistries,
   type CollectDefaultsOptions,
 } from "./registry.js";
+
+export { createCounter, createHistogram } from "./helpers/metrics.js";

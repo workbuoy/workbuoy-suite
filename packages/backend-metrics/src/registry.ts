@@ -1,14 +1,7 @@
-import {
-  collectDefaultMetrics,
-  Counter,
-  type CounterConfiguration,
-  Histogram,
-  type HistogramConfiguration,
-  Registry,
-} from "prom-client";
+import { collectDefaultMetrics, Registry } from "prom-client";
 
 // Keep typings tolerant across prom-client versions (v14 vs v15+ openmetrics).
-type AnyRegistry = any;
+export type AnyRegistry = any;
 
 const defaultRegistry = new Registry();
 const registriesWithDefaults = new WeakSet<Registry>();
@@ -37,37 +30,6 @@ export function setupDefaultMetrics(opts?: CollectDefaultsOptions): ReturnType<t
   return collectDefaultMetrics(opts as any);
 }
 
-type CounterInit<T extends string> = CounterConfiguration<T> & {
-  registry?: Registry;
-};
-
-type HistogramInit<T extends string> = HistogramConfiguration<T> & {
-  registry?: Registry;
-};
-
-function resolveRegisters(
-  registry: Registry | undefined,
-  registers: Registry[] | undefined,
-): Registry[] {
-  if (Array.isArray(registers) && registers.length > 0) {
-    return registers;
-  }
-  if (registry) {
-    return [registry];
-  }
-  return [defaultRegistry];
-}
-
-export function createCounter<T extends string>(config: CounterInit<T>): Counter<T> {
-  const { registry, registers, ...rest } = config;
-  return new Counter<T>({ ...rest, registers: resolveRegisters(registry, registers) });
-}
-
-export function createHistogram<T extends string>(config: HistogramInit<T>): Histogram<T> {
-  const { registry, registers, ...rest } = config;
-  return new Histogram<T>({ ...rest, registers: resolveRegisters(registry, registers) });
-}
-
 function coerceRegistries(registries?: AnyRegistry[]): AnyRegistry[] {
   if (Array.isArray(registries) && registries.length > 0) {
     return registries;
@@ -87,8 +49,33 @@ export function mergeRegistries(registries?: AnyRegistry[]): AnyRegistry {
     return merger.merge(regs);
   }
 
-  // Extremely defensive: fall back to a fresh registry when merge() is absent.
-  return new (Registry as any)();
+  // Fallback: emulate a merged registry by delegating to the individual registries.
+  const safeRegs = regs.filter(Boolean);
+
+  return {
+    async metrics() {
+      const parts = await Promise.all(
+        safeRegs.map((registry) => {
+          try {
+            return typeof registry.metrics === "function" ? registry.metrics() : "";
+          } catch {
+            return "";
+          }
+        }),
+      );
+
+      return parts.filter((part): part is string => Boolean(part)).join("\n");
+    },
+    getMetricsAsJSON() {
+      return safeRegs.flatMap((registry) => {
+        try {
+          return typeof registry.getMetricsAsJSON === "function" ? registry.getMetricsAsJSON() : [];
+        } catch {
+          return [];
+        }
+      });
+    },
+  } as AnyRegistry;
 }
 
 export function getMetricsText(registries?: AnyRegistry[]): Promise<string> {
