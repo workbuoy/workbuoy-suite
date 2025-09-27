@@ -14,7 +14,8 @@
     "prisma:migrate:deploy": "prisma migrate deploy",
     "start:compliance": "node dist/compliance/server.js",
     "seed:roles": "node --import tsx prisma/seed.ts",
-    "seed:dry-run": "npm run seed:roles -- --dry-run"
+    "seed:dry-run": "npm run seed:roles -- --dry-run",
+    "lint": "node ../../node_modules/eslint/bin/eslint.js --ignore-path ../../.eslintignore --ext .ts,.tsx,.js --max-warnings=0 --no-error-on-unmatched-pattern ."
   },
   "dependencies": {
     "@workbuoy/backend-auth": "file:../../packages/backend-auth",

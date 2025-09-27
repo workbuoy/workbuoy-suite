@@ -1,7 +1,6 @@
 import { prisma } from '../../core/db/prisma';
+import { toPrismaJson } from '../../lib/prismaJson.js';
 import type { FeatureDef } from '../types';
-
-const toPrismaJson = (value: unknown): any => (value === null ? (null as any) : (value as any));
 
 type FeatureRow = {
   id: string;

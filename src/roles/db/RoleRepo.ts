@@ -1,7 +1,6 @@
 import { prisma } from '../../core/db/prisma';
+import { toPrismaJson } from '../../lib/prismaJson.js';
 import type { RoleProfile } from '../types';
-
-const toPrismaJson = (value: unknown): any => (value === null ? (null as any) : (value as any));
 
 type RoleRow = {
   role_id: string;
