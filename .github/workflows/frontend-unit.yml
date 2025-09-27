@@ -37,6 +37,11 @@ jobs:
           path: frontend/node_modules/.cache/swc
           key: ${{ runner.os }}-swc-${{ hashFiles('frontend/package-lock.json') }}
 
+      - name: Sanitize npm proxy config (legacy http-proxy)
+        shell: bash
+        working-directory: ..
+        run: scripts/ci/sanitize-npm-proxy.sh
+
       - name: Install dependencies
         run: |
           if [ -f package-lock.json ]; then

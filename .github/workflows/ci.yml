@@ -24,6 +24,9 @@ jobs:
         with:
           path: node_modules/.cache/swc
           key: ${{ runner.os }}-swc-${{ hashFiles('package-lock.json') }}
+      - name: Sanitize npm proxy config (legacy http-proxy)
+        shell: bash
+        run: scripts/ci/sanitize-npm-proxy.sh
       - run: npm ci
 
   typecheck:
@@ -41,6 +44,9 @@ jobs:
         with:
           path: node_modules/.cache/swc
           key: ${{ runner.os }}-swc-${{ hashFiles('package-lock.json') }}
+      - name: Sanitize npm proxy config (legacy http-proxy)
+        shell: bash
+        run: scripts/ci/sanitize-npm-proxy.sh
       - run: npm ci
       - run: npm run typecheck
       - run: npm run typecheck:meta --if-present
@@ -60,6 +66,9 @@ jobs:
         with:
           path: node_modules/.cache/swc
           key: ${{ runner.os }}-swc-${{ hashFiles('package-lock.json') }}
+      - name: Sanitize npm proxy config (legacy http-proxy)
+        shell: bash
+        run: scripts/ci/sanitize-npm-proxy.sh
       - run: npm ci
       - run: npm test -- --ci --reporters=default --reporters=jest-junit
         env:
@@ -81,6 +90,9 @@ jobs:
         with:
           path: node_modules/.cache/swc
           key: ${{ runner.os }}-swc-${{ hashFiles('package-lock.json') }}
+      - name: Sanitize npm proxy config (legacy http-proxy)
+        shell: bash
+        run: scripts/ci/sanitize-npm-proxy.sh
       - run: npm ci
       - name: Seed dry run (no DB writes)
         run: npm run seed:dry-run -w @workbuoy/backend || true
