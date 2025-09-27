@@ -15,8 +15,9 @@ import {
 } from '../../../src/core/observability/metrics.js';
 import { withMetrics } from '@workbuoy/backend-metrics';
 import { createMetricsRouter } from './metrics/router.js';
-import { getRegistry, metricsEnabled as metricsFeatureEnabled } from './metrics/registry.js';
+import { getRegistry } from './metrics/registry.js';
 import { initializeMetricsBridge } from './metrics/bridge.js';
+import { isMetricsEnabled } from './observability/metricsConfig.js';
 
 function normalizeMetricsRoute(value?: string | null): string {
   if (!value) {
@@ -72,10 +73,9 @@ app.use(express.urlencoded({ extended: true }));
 app.use(correlationHeader);
 app.use(wbContext);
 
-const metricsEnabled = metricsFeatureEnabled;
 const metricsRoute = normalizeMetricsRoute(process.env.METRICS_ROUTE);
 
-if (metricsEnabled) {
+if (isMetricsEnabled()) {
   const registry = getRegistry();
   const collectEventBusMetrics = createEventBusMetricsCollector(registry);
   initializeMetricsBridge();
