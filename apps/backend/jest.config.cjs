@@ -1,31 +1,4 @@
-const path = require('node:path');
 const fs = require('node:fs');
-
-const tryResolve = (moduleName) => {
-  try {
-    return require.resolve(moduleName);
-  } catch (error) {
-    return null;
-  }
-};
-
-const tsJest = tryResolve('ts-jest');
-const swcJest = tryResolve('@swc/jest');
-const babelJest = tryResolve('babel-jest');
-
-const transform = {};
-if (tsJest) {
-  transform['^.+\\.(ts|tsx)$'] = [
-    'ts-jest',
-    {
-      tsconfig: path.join(__dirname, 'tsconfig.jest.json'),
-    },
-  ];
-} else if (swcJest) {
-  transform['^.+\\.(ts|tsx)$'] = ['@swc/jest'];
-} else if (babelJest) {
-  transform['^.+\\.(ts|tsx)$'] = ['babel-jest'];
-}
 
 /** @type {import('jest').Config} */
 module.exports = {
@@ -34,7 +7,10 @@ module.exports = {
   roots: ['<rootDir>/src'],
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json'],
   moduleDirectories: ['node_modules'],
-  transform,
+  transform: {
+    '^.+\\.(t|j)sx?$': ['@swc/jest'],
+  },
+  extensionsToTreatAsEsm: ['.ts', '.tsx'],
   setupFilesAfterEnv: ['<rootDir>/tests/setup.ts'].filter((setupPath) =>
     fs.existsSync(setupPath.replace('<rootDir>', __dirname))
   ),

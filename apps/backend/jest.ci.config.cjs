@@ -1,11 +1,11 @@
 /** Clean smoke Jest config for CI */
 module.exports = {
-  preset: 'ts-jest',
   testEnvironment: 'node',
   roots: ['<rootDir>/tests/smoke'],
-  moduleFileExtensions: ['ts', 'js', 'json'],
+  moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json'],
   transform: {
-    '^.+\\.ts$': ['ts-jest', { isolatedModules: true }],
+    '^.+\\.(t|j)sx?$': ['@swc/jest'],
   },
+  extensionsToTreatAsEsm: ['.ts', '.tsx'],
   passWithNoTests: true,
 };
