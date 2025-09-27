@@ -1,19 +1,12 @@
+import type { Prisma, UserRole as UserRoleModel } from '@prisma/client';
 import { prisma } from '../../core/db/prisma';
-import { toPrismaJson } from '../../lib/prismaJson.js';
 import type { UserRoleBinding } from '../types';
 
-type UserRoleRow = {
-  user_id: string;
-  tenant_id: string;
-  primaryRole: string | null;
-  secondaryRoles: unknown;
-};
-
-function mapRow(row: UserRoleRow): UserRoleBinding {
+function mapRow(row: UserRoleModel): UserRoleBinding {
   return {
     userId: row.user_id,
     primaryRole: row.primaryRole as UserRoleBinding['primaryRole'],
-    secondaryRoles: (row.secondaryRoles as UserRoleBinding['secondaryRoles']) ?? [],
+    secondaryRoles: row.secondaryRoles as UserRoleBinding['secondaryRoles'],
   };
 }
 
@@ -31,20 +24,21 @@ export class UserRoleRepo {
   }
 
   async set(tenantId: string, binding: UserRoleBinding): Promise<UserRoleBinding> {
-    const row = await prisma.userRole.upsert({
+    const args: Prisma.UserRoleUpsertArgs = {
       where: { user_id: binding.userId },
       create: {
         user_id: binding.userId,
         tenant_id: tenantId,
         primaryRole: binding.primaryRole,
-        secondaryRoles: toPrismaJson(binding.secondaryRoles ?? []),
+        secondaryRoles: binding.secondaryRoles ?? [],
       },
       update: {
         tenant_id: tenantId,
         primaryRole: binding.primaryRole,
-        secondaryRoles: toPrismaJson(binding.secondaryRoles ?? []),
+        secondaryRoles: binding.secondaryRoles ?? [],
       },
-    });
+    };
+    const row = await prisma.userRole.upsert(args);
     return mapRow(row);
   }
 }
