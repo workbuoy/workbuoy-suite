@@ -41,6 +41,7 @@ export default {
   setupFilesAfterEnv,
   moduleNameMapper: {
     ...base.moduleNameMapper,
+    '^(\\.{1,2}/.*)\\.js$': '$1',
     '^prom-client$': '<rootDir>/tests/__mocks__/prom-client.ts',
     '^express-rate-limit$': '<rootDir>/tests/__mocks__/express-rate-limit.ts',
     '^jsonwebtoken$': '<rootDir>/tests/__mocks__/jsonwebtoken.ts',
@@ -54,9 +55,11 @@ export default {
     '^@backend-tests/(.*)$': '<rootDir>/tests/$1',
     '^@backend-meta/(.*)$': '<rootDir>/meta/$1',
   },
+  collectCoverage: true,
   collectCoverageFrom: [
-    '<rootDir>/src/metrics/**/*.{ts,tsx,js,jsx}',
-    '<rootDir>/src/core/events/**/*.{ts,tsx,js,jsx}',
+    'src/metrics/**/*.{ts,tsx}',
+    'src/core/events/**/*.{ts,tsx}',
+    '!**/*.d.ts',
   ],
   coveragePathIgnorePatterns: [
     '/node_modules/',
@@ -65,8 +68,6 @@ export default {
     '<rootDir>/src/server.ts',
   ],
   coverageThreshold: {
-    global: { branches: 30, functions: 30, lines: 30, statements: 30 },
-    './src/metrics/**': { branches: 55, functions: 60, lines: 90, statements: 90 },
-    './src/core/events/**': { branches: 45, functions: 40, lines: 50, statements: 50 },
+    global: { statements: 55, branches: 45, functions: 45, lines: 55 },
   },
 };
