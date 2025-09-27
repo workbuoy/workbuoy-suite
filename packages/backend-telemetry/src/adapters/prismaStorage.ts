@@ -1,4 +1,3 @@
-import { PrismaClient, Prisma } from '@prisma/client';
 import type { PrismaClient as PrismaClientType } from '@prisma/client';
 import type { TelemetryEvent, TelemetryStorage } from '../types.js';
 
@@ -41,15 +40,15 @@ export function createPrismaTelemetryStorage(client: PrismaClientLike): Telemetr
         _count: { _all: true },
       });
 
-      return rows.reduce<Record<string, number>>((acc, row) => {
+      const initial = {} as Record<string, number>;
+      const result = (rows as any[]).reduce((acc: any, row: any) => {
         acc[row.featureId] = row._count._all;
         return acc;
-      }, {});
+      }, initial as any);
+
+      return result as Record<string, number>;
     },
   };
-
-  void PrismaClient; // ensure PrismaClient import is retained for NodeNext tooling
-  void Prisma; // ensure Prisma import is retained for NodeNext tooling
 
   return storage;
 }
