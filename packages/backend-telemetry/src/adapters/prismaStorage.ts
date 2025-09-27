@@ -1,14 +1,17 @@
+import type { PrismaClient } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 import type { TelemetryEvent, TelemetryStorage } from '../types.js';
-import { Prisma, PrismaClient, FeatureUsageAction } from '@prisma/client';
 
 // Keep this minimal: only require the model we use.
 type PrismaClientLike = Pick<PrismaClient, 'featureUsage'>;
 
-const toAction = (s: string): FeatureUsageAction => {
-  const k = s?.toLowerCase?.() ?? '';
-  if (k === 'open' || k === 'view' || k === 'start') return 'open';
-  if (k === 'complete' || k === 'finish') return 'complete';
-  if (k === 'dismiss' || k === 'error' || k === 'cancel') return 'dismiss';
+const toPrismaJson = (value: unknown): any => (value === null ? (null as any) : (value as any));
+
+const toAction = (input: string): string => {
+  const value = input?.toLowerCase?.() ?? '';
+  if (value === 'open' || value === 'view' || value === 'start') return 'open';
+  if (value === 'complete' || value === 'finish') return 'complete';
+  if (value === 'dismiss' || value === 'error' || value === 'cancel') return 'dismiss';
   return 'open';
 };
 
@@ -22,10 +25,9 @@ export function createPrismaTelemetryStorage(client: PrismaClientLike): Telemetr
           userId: ev.userId,
           tenantId: ev.tenantId,
           featureId: ev.featureId,
-          action: toAction(ev.action),
+          action: toAction(ev.action) as any,
           ts: new Date(),
-          // Ensure metadata matches Prisma JSON type
-          metadata: ev.metadata as Prisma.InputJsonValue,
+          metadata: toPrismaJson(ev.metadata),
         },
       });
     },
@@ -45,6 +47,8 @@ export function createPrismaTelemetryStorage(client: PrismaClientLike): Telemetr
       }, {});
     },
   };
+
+  void Prisma; // ensure Prisma import is retained for NodeNext tooling
 
   return storage;
 }

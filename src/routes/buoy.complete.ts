@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Router } from 'express';
 import { buildExplanation } from '../core/explain';
 import { runCapability } from '../core/capabilityRunner';

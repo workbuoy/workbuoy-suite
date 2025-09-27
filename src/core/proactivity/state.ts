@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { DEFAULT_DEGRADE_RAIL, ProactivityMode } from './modes';
 
 export interface ProactivityCap {

@@ -1,12 +1,23 @@
-import client from 'prom-client';
-import { wb_connector_errors_total, wb_connector_ingest_total, wb_connector_retries_total } from '../connectors/metrics.js';
+import { collectDefaultMetrics, Registry } from 'prom-client';
+import {
+  wb_connector_errors_total,
+  wb_connector_ingest_total,
+  wb_connector_retries_total,
+} from '../connectors/metrics.js';
 
-const register = new client.Registry();
-client.collectDefaultMetrics({ register });
+const METRICS_ENABLED = String(process.env.METRICS_ENABLED ?? 'false').toLowerCase() === 'true';
 
-// Register connector metrics
-register.registerMetric(wb_connector_ingest_total);
-register.registerMetric(wb_connector_errors_total);
-register.registerMetric(wb_connector_retries_total);
+const registry = new Registry();
 
-export { register };
+if (METRICS_ENABLED) {
+  collectDefaultMetrics({ register: registry });
+  registry.registerMetric(wb_connector_ingest_total);
+  registry.registerMetric(wb_connector_errors_total);
+  registry.registerMetric(wb_connector_retries_total);
+}
+
+export const metricsEnabled = METRICS_ENABLED;
+
+export function getRegistry(): Registry {
+  return registry;
+}

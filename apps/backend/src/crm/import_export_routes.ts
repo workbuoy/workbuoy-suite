@@ -19,8 +19,10 @@ function parseCSV(buf: Buffer) {
   const text = buf.toString('utf8').replace('\r\n','\n');
   const lines = text.split(/\n/).filter(l => l.trim().length>0);
   if (lines.length<1) return [];
-  const header = lines[0].split(',').map(s => s.trim());
-  return lines.slice(1).map(line => {
+  const [headerLine, ...rows] = lines;
+  if (!headerLine) return [];
+  const header = headerLine.split(',').map(s => s.trim());
+  return rows.map(line => {
     const cols = line.split(',');
     const obj:any = {};
     header.forEach((h, i) => obj[h] = (cols[i]||'').trim());

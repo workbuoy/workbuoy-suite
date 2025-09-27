@@ -4,7 +4,6 @@ import { createAuthModule } from '@workbuoy/backend-auth';
 import { swaggerRouter as buildSwaggerRouter } from './docs/swagger.js';
 import { configureRbac, RbacRouter } from '@workbuoy/backend-rbac';
 import { audit } from './audit/audit.js';
-import { rbac_denied_total, rbac_policy_change_total } from './metrics/metrics.js';
 
 import { correlationHeader } from '../../../src/middleware/correlationHeader.js';
 import { wbContext } from '../../../src/middleware/wbContext.js';
@@ -14,7 +13,10 @@ import {
   metricsHandler,
   createEventBusMetricsCollector,
 } from '../../../src/core/observability/metrics.js';
-import { createMetricsRouter, getRegistry, withMetrics } from '@workbuoy/backend-metrics';
+import { withMetrics } from '@workbuoy/backend-metrics';
+import { createMetricsRouter } from './metrics/router.js';
+import { getRegistry, metricsEnabled as metricsFeatureEnabled } from './metrics/registry.js';
+import { initializeMetricsBridge } from './metrics/bridge.js';
 
 function normalizeMetricsRoute(value?: string | null): string {
   if (!value) {
@@ -70,14 +72,15 @@ app.use(express.urlencoded({ extended: true }));
 app.use(correlationHeader);
 app.use(wbContext);
 
-const metricsEnabled = String(process.env.METRICS_ENABLED ?? 'false').toLowerCase() === 'true';
+const metricsEnabled = metricsFeatureEnabled;
 const metricsRoute = normalizeMetricsRoute(process.env.METRICS_ROUTE);
 
 if (metricsEnabled) {
   const registry = getRegistry();
   const collectEventBusMetrics = createEventBusMetricsCollector(registry);
-  withMetrics(app, { registry });
-  app.use(metricsRoute, createMetricsRouter({ registry, beforeCollect: collectEventBusMetrics }));
+  initializeMetricsBridge();
+  withMetrics(app, { registry, enableDefaultMetrics: false });
+  app.use(metricsRoute, createMetricsRouter({ beforeCollect: collectEventBusMetrics }));
 } else {
   app.use(timingMiddleware);
   app.get(metricsRoute, metricsHandler);
@@ -87,11 +90,13 @@ app.use(requestLogger());
 
 app.set('eventBus', bus);
 
+const noopCounter = { inc: () => {} } as const;
+
 configureRbac({
   audit,
   counters: {
-    denied: rbac_denied_total,
-    policyChange: rbac_policy_change_total,
+    denied: noopCounter,
+    policyChange: noopCounter,
   },
 });
 

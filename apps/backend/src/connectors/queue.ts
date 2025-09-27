@@ -14,7 +14,7 @@ export async function enqueue(job: Job) {
 }
 
 export async function requeue(job: Job, delaySec: number) {
-  wb_connector_retries_total.inc();
+  wb_connector_retries_total.labels(job.provider).inc();
   // naive delay: setTimeout on worker side would be cleaner; use a zset for real delays (future PR)
   const j = { ...job, attempt: (job.attempt||0)+1, ts: Date.now() };
   await redis.lpush(qKey, JSON.stringify(j));

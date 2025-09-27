@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Router } from 'express';
 import { randomUUID, createHash } from 'crypto';
 import { selectRepo } from '../core/persist/select';

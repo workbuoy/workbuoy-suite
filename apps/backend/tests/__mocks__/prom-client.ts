@@ -47,12 +47,22 @@ class MockRegistry {
   });
 }
 
-const register = new MockRegistry();
+const defaultRegistry = new MockRegistry();
 
 const createMetricFactory = (type: RegisteredMetric['type']) => {
-  return jest.fn((config: { name?: string } = {}) => {
+  return jest.fn((config: { name?: string; registers?: MockRegistry[] } = {}) => {
     const metric = createMetric();
-    register.registerMetric({ name: config.name, type });
+    const name = config.name ?? `mock_metric_${Math.random().toString(36).slice(2)}`;
+    const registries = Array.isArray(config.registers) ? config.registers : [];
+    if (registries.length === 0) {
+      defaultRegistry.registerMetric({ name, type });
+    } else {
+      for (const registry of registries) {
+        if (registry && typeof registry.registerMetric === 'function') {
+          registry.registerMetric({ name, type });
+        }
+      }
+    }
     return metric;
   });
 };
@@ -64,7 +74,7 @@ const promClientMock = {
   Summary: createMetricFactory('summary'),
   Registry: MockRegistry,
   collectDefaultMetrics: jest.fn(),
-  register,
+  register: defaultRegistry,
 };
 
 export default promClientMock;

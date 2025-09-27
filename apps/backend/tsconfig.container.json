@@ -1,31 +1,30 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "target": "ES2022",
+    "lib": ["ES2022"],
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
     "outDir": "dist",
     "noEmit": false,
     "strict": false,
     "baseUrl": ".",
     "paths": {
       "@workbuoy/backend-rbac": ["../../packages/backend-rbac/src/index.ts"],
-      "@workbuoy/backend-telemetry": ["../../packages/backend-telemetry/src/index.ts"]
+      "@workbuoy/backend-telemetry": ["../../packages/backend-telemetry/src/index.ts"],
+      "@workbuoy/backend-metrics": ["../../packages/backend-metrics/src/index.ts"]
     },
     "rootDirs": [
       ".",
       "../../packages/backend-rbac/src",
-      "../../packages/backend-telemetry/src"
+      "../../packages/backend-telemetry/src",
+      "../../packages/backend-metrics/src"
     ]
   },
-  "include": [
-    "src/index.ts",
-    "src/server.ts",
-    "src/app.secure.ts",
-    "src/security/**/*.ts",
-    "src/middleware/**/*.ts",
-    "src/observability/**/*.ts",
-    "src/**/*.d.ts"
-  ],
+  "include": ["src/**/*.ts", "src/**/*.d.ts"],
   "exclude": [
-    // Exclude optional/experimental areas not required for the runtime image
     "src/crm/",
     "src/connectors/",
     "src/meta-evolution/",
@@ -35,7 +34,6 @@
     "src/identity/",
     "src/scim/",
     "src/rbac/",
-    // generic excludes
     "**/*.test.ts",
     "**/*.spec.ts"
   ]
