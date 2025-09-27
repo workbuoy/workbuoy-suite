@@ -4,13 +4,23 @@ import { requireRole } from '@workbuoy/backend-rbac';
 
 export const crmDbRouter = Router();
 
+function requireParam(req: any, res: any, name: string): string | null {
+  const value = String(req.params?.[name] ?? '').trim();
+  if (!value) {
+    res.status(400).json({ error: `${name}_required` });
+    return null;
+  }
+  return value;
+}
+
 crmDbRouter.get('/contacts', async (req, res, next) => {
   try {
     const ctx = { tenant_id: (req as any).tenant_id || 'demo-tenant', user_id: (req as any).actor_user_id };
     const limit = parseInt(String(req.query.limit||'50'),10);
     const cursor = req.query.cursor ? String(req.query.cursor) : undefined;
     const items = await repo.listContacts(ctx, limit, cursor);
-    res.json({ items, next_cursor: items.length ? items[items.length-1].id : null });
+    const last = items.at(-1) ?? null;
+    res.json({ items, next_cursor: last ? last.id : null });
   } catch (e) { next(e); }
 });
 
@@ -25,7 +35,9 @@ crmDbRouter.post('/contacts', requireRole('contributor'), async (req, res, next)
 crmDbRouter.patch('/contacts/:id', requireRole('contributor'), async (req, res, next) => {
   try {
     const ctx = { tenant_id: (req as any).tenant_id || 'demo-tenant', user_id: (req as any).actor_user_id, roles: (req as any).roles };
-    const c = await repo.updateContact(ctx, req.params.id, req.body);
+    const id = requireParam(req, res, 'id');
+    if (!id) return;
+    const c = await repo.updateContact(ctx, id, req.body);
     res.json(c);
   } catch (e) { next(e); }
 });
@@ -52,7 +64,8 @@ crmDbRouter.get('/opportunities', async (req, res, next) => {
     const limit = parseInt(String(req.query.limit||'50'),10);
     const cursor = req.query.cursor ? String(req.query.cursor) : undefined;
     const items = await repo.listOpportunities(ctx, limit, cursor);
-    res.json({ items, next_cursor: items.length ? items[items.length-1].id : null });
+    const last = items.at(-1) ?? null;
+    res.json({ items, next_cursor: last ? last.id : null });
   } catch (e) { next(e); }
 });
 
@@ -67,7 +80,9 @@ crmDbRouter.post('/opportunities', requireRole('contributor'), async (req, res, 
 crmDbRouter.patch('/opportunities/:id', requireRole('contributor'), async (req, res, next) => {
   try {
     const ctx = { tenant_id: (req as any).tenant_id || 'demo-tenant', user_id: (req as any).actor_user_id, roles: (req as any).roles };
-    const o = await repo.patchOpportunity(ctx, req.params.id, req.body);
+    const id = requireParam(req, res, 'id');
+    if (!id) return;
+    const o = await repo.patchOpportunity(ctx, id, req.body);
     res.json(o);
   } catch (e) { next(e); }
 });

@@ -1,12 +1,20 @@
-import type { UserRole as UserRoleRow } from '@prisma/client';
 import { prisma } from '../../core/db/prisma';
 import type { UserRoleBinding } from '../types';
+
+const toPrismaJson = (value: unknown): any => (value === null ? (null as any) : (value as any));
+
+type UserRoleRow = {
+  user_id: string;
+  tenant_id: string;
+  primaryRole: string | null;
+  secondaryRoles: unknown;
+};
 
 function mapRow(row: UserRoleRow): UserRoleBinding {
   return {
     userId: row.user_id,
     primaryRole: row.primaryRole as UserRoleBinding['primaryRole'],
-    secondaryRoles: row.secondaryRoles ?? [],
+    secondaryRoles: (row.secondaryRoles as UserRoleBinding['secondaryRoles']) ?? [],
   };
 }
 
@@ -30,12 +38,12 @@ export class UserRoleRepo {
         user_id: binding.userId,
         tenant_id: tenantId,
         primaryRole: binding.primaryRole,
-        secondaryRoles: binding.secondaryRoles ?? [],
+        secondaryRoles: toPrismaJson(binding.secondaryRoles ?? []),
       },
       update: {
         tenant_id: tenantId,
         primaryRole: binding.primaryRole,
-        secondaryRoles: binding.secondaryRoles ?? [],
+        secondaryRoles: toPrismaJson(binding.secondaryRoles ?? []),
       },
     });
     return mapRow(row);

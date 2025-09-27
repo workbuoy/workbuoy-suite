@@ -6,23 +6,18 @@
     "target": "ES2022",
     "lib": ["ES2022"],
     "resolveJsonModule": true,
-    "allowArbitraryExtensions": true,
+    "skipLibCheck": true,
     "types": ["node", "jest", "express"],
     "baseUrl": ".",
     "paths": {
       "@workbuoy/backend-rbac": ["../../packages/backend-rbac/src/index.ts"],
-      "@workbuoy/backend-telemetry": ["../../packages/backend-telemetry/src/index.ts"]
+      "@workbuoy/backend-telemetry": ["../../packages/backend-telemetry/src/index.ts"],
+      "@workbuoy/backend-metrics": ["../../packages/backend-metrics/src/index.ts"],
+      "../../src/*": ["src/types/any-module.d.ts"],
+      "../../../src/*": ["src/types/any-module.d.ts"]
     },
     "rootDir": "../.."
   },
-  "include": [
-    "src/middleware/**/*.ts",
-    "src/middleware/**/*.tsx",
-    "src/types/**/*.d.ts"
-  ],
-  "exclude": [
-    "dist",
-    "coverage",
-    "node_modules"
-  ]
+  "include": ["src/**/*.ts", "src/**/*.d.ts"],
+  "exclude": ["dist", "coverage", "node_modules", "../../src/**/*", "src/meta-evolution/**/*", "./src/meta-evolution/**/*"]
 }

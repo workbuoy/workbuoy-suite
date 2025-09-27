@@ -12,10 +12,11 @@ export async function ssoOptional(req: Request, _res: Response, next: NextFuncti
   if (!enabled) return next();
   const auth = req.header('Authorization') || '';
   const m = auth.match(/^Bearer\s+(.+)$/i);
-  if (!m) return next();
+  const token = m?.[1];
+  if (!token) return next();
   try {
     if (!jwks) return next();
-    const { payload } = await jwtVerify(m[1], jwks, {
+    const { payload } = await jwtVerify(token, jwks, {
       issuer: process.env.OIDC_ISSUER,
       audience: process.env.OIDC_AUDIENCE,
     });

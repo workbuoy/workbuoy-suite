@@ -1,83 +1,89 @@
-import { Router } from 'express';
-import type { Response as ExpressResponse } from 'express';
-import client from 'prom-client';
+import { Counter, Histogram } from 'prom-client';
+import { createCounter, createHistogram } from '@workbuoy/backend-metrics';
+import { getRegistry, metricsEnabled } from './registry.js';
 
-const register = new client.Registry();
-client.collectDefaultMetrics({ register });
+const registry = getRegistry();
 
-export const crm_api_latency_ms = new client.Histogram({
-  name: 'crm_api_latency_ms',
-  help: 'Latency for CRM API endpoints (ms)',
-  labelNames: ['method', 'route', 'status'] as const,
-  buckets: [10, 25, 50, 100, 200, 500, 1000, 2000],
-  registers: [register],
-});
+function buildCounter(name: string, help: string, labelNames: string[] = []): Counter<string> {
+  if (!metricsEnabled) {
+    return new Counter({ name, help, labelNames, registers: [] });
+  }
+  return createCounter(registry, name, help, labelNames);
+}
 
-export const audit_events_total = new client.Counter({
-  name: 'audit_events_total',
-  help: 'Audit events',
-  registers: [register],
-});
+function buildHistogram(
+  name: string,
+  help: string,
+  labelNames: string[] = [],
+  buckets?: number[],
+): Histogram<string> {
+  if (!metricsEnabled) {
+    return new Histogram({ name, help, labelNames, buckets, registers: [] });
+  }
+  return createHistogram(registry, name, help, labelNames, buckets);
+}
 
-export const wb_connector_retries_total = new client.Counter({
-  name: 'wb_connector_retries_total',
-  help: 'Connector retries triggered by the queue worker',
-  registers: [register],
-});
+export const crm_api_latency_ms = buildHistogram(
+  'crm_api_latency_ms',
+  'Latency for CRM API endpoints (ms)',
+  ['method', 'route', 'status'],
+  [10, 25, 50, 100, 200, 500, 1000, 2000],
+);
 
-export const crm_webhook_success_total = new client.Counter({
-  name: 'crm_webhook_success_total',
-  help: 'Successful CRM webhook deliveries',
-  registers: [register],
-});
+export const audit_events_total = buildCounter('audit_events_total', 'Audit events');
 
-export const crm_webhook_error_total = new client.Counter({
-  name: 'crm_webhook_error_total',
-  help: 'Failed CRM webhook deliveries',
-  registers: [register],
-});
+export const crm_webhook_success_total = buildCounter(
+  'crm_webhook_success_total',
+  'Successful CRM webhook deliveries',
+);
 
-export const wb_import_total = new client.Counter({
-  name: 'wb_import_total',
-  help: 'Number of records imported via CRM bulk import',
-  labelNames: ['entity'] as const,
-  registers: [register],
-});
+export const crm_webhook_error_total = buildCounter(
+  'crm_webhook_error_total',
+  'Failed CRM webhook deliveries',
+);
 
-export const wb_import_fail_total = new client.Counter({
-  name: 'wb_import_fail_total',
-  help: 'Number of CRM import failures',
-  labelNames: ['entity'] as const,
-  registers: [register],
-});
+export const wb_import_total = buildCounter(
+  'wb_import_total',
+  'Number of records imported via CRM bulk import',
+  ['entity'],
+);
 
-export const wb_export_total = new client.Counter({
-  name: 'wb_export_total',
-  help: 'Number of CRM export operations executed',
-  labelNames: ['entity'] as const,
-  registers: [register],
-});
+export const wb_import_fail_total = buildCounter(
+  'wb_import_fail_total',
+  'Number of CRM import failures',
+  ['entity'],
+);
 
-export const crm_pipeline_transitions_total = new client.Counter({
-  name: 'crm_pipeline_transitions_total',
-  help: 'Pipeline stage transitions recorded',
-  registers: [register],
-});
+export const wb_export_total = buildCounter(
+  'wb_export_total',
+  'Number of CRM export operations executed',
+  ['entity'],
+);
 
-export const rbac_denied_total = new client.Counter({
-  name: 'rbac_denied_total',
-  help: 'Denied RBAC checks',
-  registers: [register],
-});
+export const crm_pipeline_transitions_total = buildCounter(
+  'crm_pipeline_transitions_total',
+  'Pipeline stage transitions recorded',
+);
 
-export const rbac_policy_change_total = new client.Counter({
-  name: 'rbac_policy_change_total',
-  help: 'Policy change operations executed via admin routes',
-  registers: [register],
-});
+export const rbac_denied_total = buildCounter(
+  'rbac_denied_total',
+  'Denied RBAC checks',
+  ['resource', 'action'],
+);
 
-export const metricsRouter = Router();
-metricsRouter.get('/', async (_req, res: ExpressResponse) => {
-  res.setHeader('Content-Type', register.contentType);
-  res.end(await register.metrics());
-});
+export const rbac_policy_change_total = buildCounter(
+  'rbac_policy_change_total',
+  'Policy change operations executed via admin routes',
+);
+
+export const feature_usage_total = buildCounter(
+  'feature_usage_total',
+  'Recorded feature usage events',
+  ['feature', 'action'],
+);
+
+export {
+  wb_connector_ingest_total,
+  wb_connector_errors_total,
+  wb_connector_retries_total,
+} from '../connectors/metrics.js';

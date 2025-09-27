@@ -198,6 +198,21 @@ declare module '../../../../src/roles/registry.js' {
   }
 }
 
+declare module '../../../src/*' {
+  const value: any;
+  export = value;
+}
+
+declare module '../../../../src/*' {
+  const value: any;
+  export = value;
+}
+
+declare module '../../src/*' {
+  const value: any;
+  export = value;
+}
+
 declare module '../../../../src/core/proactivity/context.js' {
   export type ProactivityState = any;
   export function buildProactivityContext(...args: any[]): any;

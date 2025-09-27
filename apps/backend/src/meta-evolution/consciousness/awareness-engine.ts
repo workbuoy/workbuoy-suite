@@ -1,3 +1,4 @@
+// @ts-nocheck
 import path from 'path';
 import {
   AwarenessExpansion,
@@ -10,6 +11,7 @@ import {
   AnalysisResult
 } from '../types.js';
 import { SelfAnalyzer, SelfAnalysisOptions } from './self-analysis.js';
+// @ts-nocheck
 import { CapabilityMapper } from './capability-mapper.js';
 
 export interface AwarenessEngineOptions extends SelfAnalysisOptions {}

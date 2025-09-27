@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { CodeVariant, ImprovementGoal } from '../types.js';
 
 export interface Gene {

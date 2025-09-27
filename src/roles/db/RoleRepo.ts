@@ -1,11 +1,16 @@
-import type { Prisma, Role as RoleRow } from '@prisma/client';
 import { prisma } from '../../core/db/prisma';
 import type { RoleProfile } from '../types';
 
-function toJson(value: unknown): Prisma.InputJsonValue | undefined {
-  if (value === undefined) return undefined;
-  return value as Prisma.InputJsonValue;
-}
+const toPrismaJson = (value: unknown): any => (value === null ? (null as any) : (value as any));
+
+type RoleRow = {
+  role_id: string;
+  title: string | null;
+  inherits: string[] | null;
+  featureCaps: unknown;
+  scopeHints: unknown;
+  profile: unknown;
+};
 
 function mapRowToProfile(row: RoleRow): RoleProfile {
   const profile = (row.profile as unknown as RoleProfile | null) ?? ({} as RoleProfile);
@@ -33,25 +38,26 @@ export class RoleRepo {
   }
 
   async upsert(role: RoleProfile): Promise<RoleProfile> {
-    const data: Prisma.RoleUpsertArgs['create'] = {
+    const createData = {
       role_id: role.role_id,
       title: role.canonical_title ?? role.role_id,
       inherits: role.inherits ?? [],
-      featureCaps: toJson(role.featureCaps),
-      scopeHints: toJson(role.scopeHints),
-      profile: toJson(role),
+      featureCaps: toPrismaJson(role.featureCaps),
+      scopeHints: toPrismaJson(role.scopeHints),
+      profile: toPrismaJson(role),
     };
-    const updated = await prisma.role.upsert({
+    const args = {
       where: { role_id: role.role_id },
-      create: data,
+      create: createData,
       update: {
         title: role.canonical_title ?? role.role_id,
         inherits: role.inherits ?? [],
-        featureCaps: toJson(role.featureCaps),
-        scopeHints: toJson(role.scopeHints),
-        profile: toJson(role),
+        featureCaps: toPrismaJson(role.featureCaps),
+        scopeHints: toPrismaJson(role.scopeHints),
+        profile: toPrismaJson(role),
       },
-    });
+    } as any;
+    const updated = await prisma.role.upsert(args);
     return mapRowToProfile(updated);
   }
 
@@ -64,18 +70,18 @@ export class RoleRepo {
           role_id: role.role_id,
           title: role.canonical_title ?? role.role_id,
           inherits: role.inherits ?? [],
-          featureCaps: toJson(role.featureCaps),
-          scopeHints: toJson(role.scopeHints),
-          profile: toJson(role),
+          featureCaps: toPrismaJson(role.featureCaps),
+          scopeHints: toPrismaJson(role.scopeHints),
+          profile: toPrismaJson(role),
         },
         update: {
           title: role.canonical_title ?? role.role_id,
           inherits: role.inherits ?? [],
-          featureCaps: toJson(role.featureCaps),
-          scopeHints: toJson(role.scopeHints),
-          profile: toJson(role),
+          featureCaps: toPrismaJson(role.featureCaps),
+          scopeHints: toPrismaJson(role.scopeHints),
+          profile: toPrismaJson(role),
         },
-      })
+      }) as any
     ));
     return roles.length;
   }

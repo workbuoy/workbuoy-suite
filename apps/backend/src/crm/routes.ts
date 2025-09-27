@@ -15,6 +15,15 @@ const requireAdmin = requireRole('admin');
 function tenant(req:any){ return String(req.header('x-tenant-id') || 't1'); }
 function actor(req:any){ return String(req.header('x-user-id') || 'system'); }
 
+function requireParam(req: any, res: any, name: string): string | null {
+  const raw = String(req.params?.[name] ?? '').trim();
+  if (!raw) {
+    res.status(400).json({ error: `${name}_required` });
+    return null;
+  }
+  return raw;
+}
+
 // Pipelines
 crmRouter.get('/api/v1/crm/pipelines', requireRead, async (req, res) => {
   const items = await repo.list('pipelines', tenant(req), parseInt(String(req.query.limit||'50')));
@@ -28,21 +37,27 @@ crmRouter.post('/api/v1/crm/pipelines', requireWrite, async (req, res) => {
 });
 
 crmRouter.get('/api/v1/crm/pipelines/:id', requireRead, async (req, res) => {
-  const r = await repo.get('pipelines', tenant(req), req.params.id);
+  const id = requireParam(req, res, 'id');
+  if (!id) return;
+  const r = await repo.get('pipelines', tenant(req), id);
   if (!r) return res.status(404).json({ error: 'not found' });
   res.json(r);
 });
 
 crmRouter.patch('/api/v1/crm/pipelines/:id', requireWrite, async (req, res) => {
-  const r = await repo.patch('pipelines', tenant(req), req.params.id, req.body);
+  const id = requireParam(req, res, 'id');
+  if (!id) return;
+  const r = await repo.patch('pipelines', tenant(req), id, req.body);
   if (!r) return res.status(404).json({ error: 'not found' });
   audit({ type:'crm.mutation', op:'patch', entity:'pipeline', id: r.id, tenant_id: tenant(req), actor_id: actor(req) });
   res.json(r);
 });
 
 crmRouter.delete('/api/v1/crm/pipelines/:id', requireAdmin, async (req, res) => {
-  await repo.del('pipelines', tenant(req), req.params.id);
-  audit({ type:'crm.mutation', op:'delete', entity:'pipeline', id: req.params.id, tenant_id: tenant(req), actor_id: actor(req) });
+  const id = requireParam(req, res, 'id');
+  if (!id) return;
+  await repo.del('pipelines', tenant(req), id);
+  audit({ type:'crm.mutation', op:'delete', entity:'pipeline', id, tenant_id: tenant(req), actor_id: actor(req) });
   res.status(204).end();
 });
 
@@ -57,19 +72,25 @@ crmRouter.post('/api/v1/crm/contacts', requireWrite, async (req, res) => {
   res.status(201).json(row);
 });
 crmRouter.get('/api/v1/crm/contacts/:id', requireRead, async (req, res) => {
-  const r = await repo.get('contacts', tenant(req), req.params.id);
+  const id = requireParam(req, res, 'id');
+  if (!id) return;
+  const r = await repo.get('contacts', tenant(req), id);
   if (!r) return res.status(404).json({ error: 'not found' });
   res.json(r);
 });
 crmRouter.patch('/api/v1/crm/contacts/:id', requireWrite, async (req, res) => {
-  const r = await repo.patch('contacts', tenant(req), req.params.id, req.body);
+  const id = requireParam(req, res, 'id');
+  if (!id) return;
+  const r = await repo.patch('contacts', tenant(req), id, req.body);
   if (!r) return res.status(404).json({ error: 'not found' });
   audit({ type:'crm.mutation', op:'patch', entity:'contact', id: r.id, tenant_id: tenant(req), actor_id: actor(req) });
   res.json(r);
 });
 crmRouter.delete('/api/v1/crm/contacts/:id', requireAdmin, async (req, res) => {
-  await repo.del('contacts', tenant(req), req.params.id);
-  audit({ type:'crm.mutation', op:'delete', entity:'contact', id: req.params.id, tenant_id: tenant(req), actor_id: actor(req) });
+  const id = requireParam(req, res, 'id');
+  if (!id) return;
+  await repo.del('contacts', tenant(req), id);
+  audit({ type:'crm.mutation', op:'delete', entity:'contact', id, tenant_id: tenant(req), actor_id: actor(req) });
   res.status(204).end();
 });
 
@@ -84,19 +105,25 @@ crmRouter.post('/api/v1/crm/opportunities', requireWrite, async (req, res) => {
   res.status(201).json(row);
 });
 crmRouter.get('/api/v1/crm/opportunities/:id', requireRead, async (req, res) => {
-  const r = await repo.get('opportunities', tenant(req), req.params.id);
+  const id = requireParam(req, res, 'id');
+  if (!id) return;
+  const r = await repo.get('opportunities', tenant(req), id);
   if (!r) return res.status(404).json({ error: 'not found' });
   res.json(r);
 });
 crmRouter.patch('/api/v1/crm/opportunities/:id', requireWrite, async (req, res) => {
-  const r = await repo.patch('opportunities', tenant(req), req.params.id, req.body);
+  const id = requireParam(req, res, 'id');
+  if (!id) return;
+  const r = await repo.patch('opportunities', tenant(req), id, req.body);
   if (!r) return res.status(404).json({ error: 'not found' });
   audit({ type:'crm.mutation', op:'patch', entity:'opportunity', id: r.id, tenant_id: tenant(req), actor_id: actor(req) });
   res.json(r);
 });
 crmRouter.delete('/api/v1/crm/opportunities/:id', requireAdmin, async (req, res) => {
-  await repo.del('opportunities', tenant(req), req.params.id);
-  audit({ type:'crm.mutation', op:'delete', entity:'opportunity', id: req.params.id, tenant_id: tenant(req), actor_id: actor(req) });
+  const id = requireParam(req, res, 'id');
+  if (!id) return;
+  await repo.del('opportunities', tenant(req), id);
+  audit({ type:'crm.mutation', op:'delete', entity:'opportunity', id, tenant_id: tenant(req), actor_id: actor(req) });
   res.status(204).end();
 });
 

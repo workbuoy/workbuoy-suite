@@ -26,5 +26,6 @@ module.exports = {
     '<rootDir>/../../tests/features/active.api.test.ts',
     '<rootDir>/../../tests/admin/roles.api.test.ts',
     '<rootDir>/../../tests/proactivity/context.integration.test.ts',
+    '<rootDir>/src/metrics/**/*.spec.ts',
   ],
 };

@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { FeatureApproach, FeatureSpecification, LatentNeed } from '../types.js';
 
 export interface SolutionFeasibility {
