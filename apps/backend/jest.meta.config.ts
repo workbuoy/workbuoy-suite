@@ -1,10 +1,18 @@
-const path = require('path');
-const baseConfig = require('./jest.config.cjs');
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import type { Config } from 'jest';
+import baseConfig from './jest.config';
 
-module.exports = {
+const dirname = path.dirname(fileURLToPath(import.meta.url));
+
+const config: Config = {
   ...baseConfig,
-  rootDir: path.resolve(__dirname),
-  moduleDirectories: ['node_modules', '<rootDir>/node_modules', '<rootDir>/../../node_modules'],
+  rootDir: dirname,
+  moduleDirectories: [
+    ...(baseConfig.moduleDirectories ?? []),
+    '<rootDir>/node_modules',
+    '<rootDir>/../../node_modules',
+  ],
   setupFiles: [...(baseConfig.setupFiles ?? []), '<rootDir>/tests/setup-mime.cjs'],
   testEnvironment: 'node',
   testMatch: [
@@ -21,3 +29,5 @@ module.exports = {
     '<rootDir>/src/metrics/**/*.spec.ts',
   ],
 };
+
+export default config;
