@@ -1,12 +1,13 @@
 import { Router } from 'express';
-import multer from 'multer';
+import type { Request } from 'express';
 import { parse as parseCsv } from 'csv-parse/sync';
 import { repo } from './repo.js';
 import { requireRole } from '@workbuoy/backend-rbac';
 import { audit } from '../audit/audit.js';
+import { upload } from '../lib/upload.js';
+import type { UploadedFile } from '../lib/upload.js';
 
 export const crmRouter = Router();
-const upload = multer();
 
 const requireRead = requireRole('viewer');
 const requireWrite = requireRole('contributor');
@@ -128,7 +129,9 @@ crmRouter.delete('/api/v1/crm/opportunities/:id', requireAdmin, async (req, res)
 });
 
 // Import (CSV/JSON)
-crmRouter.post('/api/v1/crm/import', requireWrite, upload.single('file'), async (req, res) => {
+type CrmImportRequest = Request & { file?: UploadedFile };
+
+crmRouter.post('/api/v1/crm/import', requireWrite, upload.single('file'), async (req: CrmImportRequest, res) => {
   const tenantId = tenant(req);
   const entity = String(req.body.entity || 'contacts');
   const dry = String(req.body.dry_run || 'false') === 'true';

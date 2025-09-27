@@ -41,6 +41,7 @@ const config = {
     '<rootDir>/../../tests/admin/roles.api.test.ts',
     '<rootDir>/../../tests/proactivity/context.integration.test.ts',
     '<rootDir>/src/metrics/**/*.spec.ts',
+    '<rootDir>/src/crm/**/*.spec.ts',
   ],
   transform: {
     '^.+\\.(t|j)sx?$': ['@swc/jest', {
