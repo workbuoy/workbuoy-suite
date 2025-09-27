@@ -6,7 +6,7 @@ on:
     branches: [main]
 
 jobs:
-  lint-apps:
+  lint:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
@@ -17,20 +17,5 @@ jobs:
       - run: npm ci
       - name: Security audit (report only)
         run: npm audit --omit=dev || true
-      - name: ESLint (apps/*) — blocking
-        run: npm run lint:apps
-
-  lint-satellites:
-    runs-on: ubuntu-latest
-    continue-on-error: true # non-blocking by design
-    steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-node@v5
-        with:
-          node-version: '20.x'
-          cache: 'npm'
-      - run: npm ci
-      - name: Security audit (report only)
-        run: npm audit --omit=dev || true
-      - name: ESLint (repo-wide) — non-blocking report
+      - name: ESLint (shippable workspaces) — blocking
         run: npm run lint

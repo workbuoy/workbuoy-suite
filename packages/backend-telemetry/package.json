@@ -18,7 +18,8 @@
     "LICENSE"
   ],
   "scripts": {
-    "build": "tsc -p tsconfig.json"
+    "build": "tsc -p tsconfig.json",
+    "lint": "node ../../node_modules/eslint/bin/eslint.js --ignore-path ../../.eslintignore --ext .ts,.tsx,.js --max-warnings=0 --no-error-on-unmatched-pattern ."
   },
   "dependencies": {
     "express": "^4.19.2"
