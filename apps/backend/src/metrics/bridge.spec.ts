@@ -9,10 +9,15 @@ describe('metrics bridge', () => {
 
   afterEach(() => {
     delete process.env.METRICS_ENABLED;
+    delete process.env.METRICS_PREFIX;
+    delete process.env.METRICS_DEFAULT_LABELS;
+    delete process.env.METRICS_BUCKETS;
   });
 
   it('increments RBAC and feature usage metrics when events fire', () => {
     jest.isolateModules(() => {
+      const registry = require('./registry.js') as typeof import('./registry.js');
+      registry.resetRegistryForTests();
       const bridge = require('./bridge.js') as typeof import('./bridge.js');
       const events = require('./events.js') as typeof import('./events.js');
       const metrics = require('./metrics.js') as typeof import('./metrics.js');

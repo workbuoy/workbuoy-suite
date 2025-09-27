@@ -1,26 +1,39 @@
 import { Counter, Histogram } from 'prom-client';
 import { createCounter, createHistogram } from '@workbuoy/backend-metrics';
-import { getRegistry, metricsEnabled } from './registry.js';
+import { getRegistry } from './registry.js';
+import { getBuckets, getMetricsPrefix, isMetricsEnabled } from '../observability/metricsConfig.js';
 
-const registry = getRegistry();
+function buildCounter(name: string, help: string, labelNames: readonly string[] = []) {
+  const metricName = `${getMetricsPrefix()}${name}`;
 
-function buildCounter(name: string, help: string, labelNames: string[] = []): Counter<string> {
-  if (!metricsEnabled) {
-    return new Counter({ name, help, labelNames, registers: [] });
+  if (!isMetricsEnabled()) {
+    return new Counter({ name: metricName, help, labelNames, registers: [] });
   }
-  return createCounter(registry, name, help, labelNames);
+
+  return createCounter(getRegistry(), metricName, help, [...labelNames]);
 }
 
 function buildHistogram(
   name: string,
   help: string,
-  labelNames: string[] = [],
+  labelNames: readonly string[] = [],
   buckets?: number[],
-): Histogram<string> {
-  if (!metricsEnabled) {
-    return new Histogram({ name, help, labelNames, buckets, registers: [] });
+) {
+  const metricName = `${getMetricsPrefix()}${name}`;
+  const overrideBuckets = getBuckets();
+  const effectiveBuckets = overrideBuckets.length > 0 ? overrideBuckets : buckets;
+
+  if (!isMetricsEnabled()) {
+    return new Histogram({
+      name: metricName,
+      help,
+      labelNames,
+      buckets: effectiveBuckets,
+      registers: [],
+    });
   }
-  return createHistogram(registry, name, help, labelNames, buckets);
+
+  return createHistogram(getRegistry(), metricName, help, [...labelNames], effectiveBuckets);
 }
 
 export const crm_api_latency_ms = buildHistogram(

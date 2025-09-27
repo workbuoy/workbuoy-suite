@@ -21,6 +21,8 @@ const createMetric = (): Metric => ({
 
 class Registry {
   private metricsList: RegisteredMetric[] = [];
+  private defaultLabels: Record<string, string> = {};
+  contentType = 'text/plain; version=0.0.4; charset=utf-8';
 
   registerMetric = jest.fn((metric: Partial<RegisteredMetric> | undefined) => {
     if (!metric) {
@@ -28,6 +30,10 @@ class Registry {
     }
     const name =
       typeof metric.name === 'string' ? metric.name : `mock_metric_${this.metricsList.length}`;
+    if (this.metricsList.some((existing) => existing.name === name)) {
+      return;
+    }
+
     const type = metric.type ?? 'counter';
     this.metricsList.push({ name, type });
   });
@@ -44,6 +50,10 @@ class Registry {
 
   resetMetrics = jest.fn(() => {
     this.metricsList = [];
+  });
+
+  setDefaultLabels = jest.fn((labels: Record<string, string>) => {
+    this.defaultLabels = { ...labels };
   });
 }
 
@@ -70,7 +80,23 @@ const Counter = createMetricFactory('counter');
 const Gauge = createMetricFactory('gauge');
 const Histogram = createMetricFactory('histogram');
 const Summary = createMetricFactory('summary');
-const collectDefaultMetrics = jest.fn();
+
+const collectDefaultMetrics = jest.fn(
+  ({ register: providedRegister, prefix }: { register?: Registry; prefix?: string } = {}) => {
+    const target = providedRegister ?? register;
+    const normalizedPrefix = prefix ?? '';
+
+    const defaults: RegisteredMetric[] = [
+      { name: `${normalizedPrefix}process_cpu_user_seconds_total`, type: 'counter' },
+      { name: `${normalizedPrefix}process_resident_memory_bytes`, type: 'gauge' },
+      { name: `${normalizedPrefix}nodejs_eventloop_lag_seconds`, type: 'histogram' },
+    ];
+
+    for (const metric of defaults) {
+      target.registerMetric(metric);
+    }
+  },
+);
 
 const promClientMock = {
   Counter,

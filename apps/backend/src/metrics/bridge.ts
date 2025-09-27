@@ -1,5 +1,5 @@
 import { metricsEvents } from './events.js';
-import { metricsEnabled } from './registry.js';
+import { isMetricsEnabled } from '../observability/metricsConfig.js';
 import {
   feature_usage_total,
   rbac_denied_total,
@@ -20,7 +20,7 @@ function sanitizeLabel(value: unknown, fallback: string): string {
 let initialized = false;
 
 export function initializeMetricsBridge(): void {
-  if (initialized || !metricsEnabled) {
+  if (initialized || !isMetricsEnabled()) {
     return;
   }
 
