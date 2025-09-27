@@ -1,5 +1,3 @@
-/// <reference path="../types/esm-shims.d.ts" />
-
 import { Router, type Request, type Response, type NextFunction } from 'express';
 import { requirePrisma, requireUser } from '../require.js';
 import { assertDefined } from '../utils/assert.js';

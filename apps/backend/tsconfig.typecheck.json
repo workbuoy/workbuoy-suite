@@ -3,7 +3,9 @@
   "compilerOptions": {
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
+    "allowImportingTsExtensions": true,
     "resolvePackageJsonExports": true,
+    "resolveJsonModule": true,
     "baseUrl": "../..",
     "paths": {
       "@workbuoy/backend-metrics": ["packages/backend-metrics/src/index.ts"],
@@ -12,5 +14,8 @@
     },
     "skipLibCheck": true
   },
-  "include": ["src", "src/types", "src/**/*.d.ts", "src/types/**/*.d.ts"]
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.d.ts"
+  ]
 }

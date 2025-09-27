@@ -1,8 +1,7 @@
-import { Prisma } from '@prisma/client';
 import { prisma } from '../../core/db/prisma';
 import type { FeatureDef } from '../types';
 
-const toJsonInput = (v: unknown): any => v as any;
+const toPrismaJson = (v: unknown): any => (v === null ? (null as any) : (v as any));
 
 interface FeatureRow {
   id: string;
@@ -37,14 +36,14 @@ export class FeatureRepo {
         description: feature.description,
         defaultAutonomyCap: feature.defaultAutonomyCap ?? 3,
         capabilities: feature.capabilities,
-        metadata: toJsonInput({ ...feature }),
+        metadata: toPrismaJson({ ...feature }),
       },
       update: {
         title: feature.title,
         description: feature.description,
         defaultAutonomyCap: feature.defaultAutonomyCap ?? 3,
         capabilities: feature.capabilities,
-        metadata: toJsonInput({ ...feature }),
+        metadata: toPrismaJson({ ...feature }),
       },
     });
     return mapRowToFeature(row);
@@ -61,14 +60,14 @@ export class FeatureRepo {
           description: feature.description,
           defaultAutonomyCap: feature.defaultAutonomyCap ?? 3,
           capabilities: feature.capabilities,
-          metadata: toJsonInput({ ...feature }),
+          metadata: toPrismaJson({ ...feature }),
         },
         update: {
           title: feature.title,
           description: feature.description,
           defaultAutonomyCap: feature.defaultAutonomyCap ?? 3,
           capabilities: feature.capabilities,
-          metadata: toJsonInput({ ...feature }),
+          metadata: toPrismaJson({ ...feature }),
         },
       })
     ));

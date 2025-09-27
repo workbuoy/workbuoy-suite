@@ -1,8 +1,7 @@
-import { Prisma } from '@prisma/client';
 import { prisma } from '../../core/db/prisma';
 import type { OrgRoleOverride } from '../types';
 
-const toJsonInput = (v: unknown): any => v as any;
+const toPrismaJson = (v: unknown): any => (v === null ? (null as any) : (v as any));
 
 interface OverrideRow {
   tenant_id: string;
@@ -43,12 +42,12 @@ export class OverrideRepo {
         tenant_id: tenantId,
         role_id: roleId,
         featureCaps:
-          override.featureCaps === undefined ? undefined : toJsonInput(override.featureCaps),
+          override.featureCaps === undefined ? undefined : toPrismaJson(override.featureCaps),
         disabledFeatures: override.disabledFeatures ?? [],
       },
       update: {
         featureCaps:
-          override.featureCaps === undefined ? undefined : toJsonInput(override.featureCaps),
+          override.featureCaps === undefined ? undefined : toPrismaJson(override.featureCaps),
         disabledFeatures: override.disabledFeatures ?? [],
       },
     });
