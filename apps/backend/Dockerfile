@@ -1,8 +1,7 @@
 # Workspace-aware build using repo root context
 # --- builder ---
 
-FROM node:20-alpine AS builder
-RUN apk add --no-cache libc6-compat
+FROM node:20-bookworm-slim AS builder
 WORKDIR /repo
 
 # Copy root manifest(s) and workspace package.json files for proper workspaces install
