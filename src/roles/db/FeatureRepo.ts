@@ -1,16 +1,9 @@
+import type { Feature, Prisma } from '@prisma/client';
 import { prisma } from '../../core/db/prisma';
 import { toPrismaJson } from '../../lib/prismaJson.js';
 import type { FeatureDef } from '../types';
 
-type FeatureRow = {
-  id: string;
-  title: string;
-  description: string | null;
-  defaultAutonomyCap: number | null;
-  capabilities: FeatureDef['capabilities'];
-};
-
-function mapRowToFeature(row: FeatureRow): FeatureDef {
+function mapRowToFeature(row: Feature): FeatureDef {
   return {
     id: row.id,
     title: row.title,
@@ -27,7 +20,7 @@ export class FeatureRepo {
   }
 
   async upsert(feature: FeatureDef): Promise<FeatureDef> {
-    const row = await prisma.feature.upsert({
+    const args: Prisma.FeatureUpsertArgs = {
       where: { id: feature.id },
       create: {
         id: feature.id,
@@ -35,16 +28,17 @@ export class FeatureRepo {
         description: feature.description,
         defaultAutonomyCap: feature.defaultAutonomyCap ?? 3,
         capabilities: feature.capabilities,
-        metadata: toPrismaJson({ ...feature }),
+        metadata: toPrismaJson({ ...feature }) as Prisma.InputJsonValue,
       },
       update: {
         title: feature.title,
         description: feature.description,
         defaultAutonomyCap: feature.defaultAutonomyCap ?? 3,
         capabilities: feature.capabilities,
-        metadata: toPrismaJson({ ...feature }),
+        metadata: toPrismaJson({ ...feature }) as Prisma.InputJsonValue,
       },
-    });
+    };
+    const row = await prisma.feature.upsert(args);
     return mapRowToFeature(row);
   }
 
@@ -59,14 +53,14 @@ export class FeatureRepo {
           description: feature.description,
           defaultAutonomyCap: feature.defaultAutonomyCap ?? 3,
           capabilities: feature.capabilities,
-          metadata: toPrismaJson({ ...feature }),
+          metadata: toPrismaJson({ ...feature }) as Prisma.InputJsonValue,
         },
         update: {
           title: feature.title,
           description: feature.description,
           defaultAutonomyCap: feature.defaultAutonomyCap ?? 3,
           capabilities: feature.capabilities,
-          metadata: toPrismaJson({ ...feature }),
+          metadata: toPrismaJson({ ...feature }) as Prisma.InputJsonValue,
         },
       })
     ));

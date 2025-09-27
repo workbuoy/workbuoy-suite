@@ -1,11 +1,11 @@
-import type { PrismaClient as PrismaClientType } from '@prisma/client';
+import type { FeatureUsageAction, Prisma, PrismaClient } from '@prisma/client';
 import { toPrismaJson } from '../lib/prismaJson.js';
 import type { TelemetryEvent, TelemetryStorage } from '../types.js';
 
 // Keep this minimal: only require the model we use.
-type PrismaClientLike = Pick<PrismaClientType, 'featureUsage'>;
+type PrismaClientLike = Pick<PrismaClient, 'featureUsage'>;
 
-const toAction = (input: string): string => {
+const toAction = (input: string): FeatureUsageAction => {
   const value = input?.toLowerCase?.() ?? '';
   if (value === 'open' || value === 'view' || value === 'start') return 'open';
   if (value === 'complete' || value === 'finish') return 'complete';
@@ -23,29 +23,31 @@ export function createPrismaTelemetryStorage(client: PrismaClientLike): Telemetr
           userId: ev.userId,
           tenantId: ev.tenantId,
           featureId: ev.featureId,
-          action: toAction(ev.action) as any,
+          action: toAction(ev.action),
           ts: new Date(),
-          metadata: toPrismaJson(ev.metadata),
+          metadata: toPrismaJson(ev.metadata) as Prisma.InputJsonValue,
         },
       });
     },
     async aggregateFeatureUseCount(userId: string, tenantId?: string) {
-      const rows = await client.featureUsage.groupBy({
+      const groupByArgs = {
         by: ['featureId'],
         where: {
           userId,
           ...(tenantId ? { tenantId } : {}),
         },
         _count: { _all: true },
-      });
+      } satisfies Prisma.FeatureUsageGroupByArgs;
 
-      const initial = {} as Record<string, number>;
-      const result = (rows as any[]).reduce((acc: any, row: any) => {
-        acc[row.featureId] = row._count._all;
+      const rows = await client.featureUsage.groupBy(groupByArgs);
+
+      const result = rows.reduce<Record<string, number>>((acc, row) => {
+        const total = typeof row._count === 'object' && row._count ? row._count._all ?? 0 : 0;
+        acc[row.featureId] = total;
         return acc;
-      }, initial as any);
+      }, {});
 
-      return result as Record<string, number>;
+      return result;
     },
   };
 
