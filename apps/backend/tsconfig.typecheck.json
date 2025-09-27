@@ -3,19 +3,8 @@
   "compilerOptions": {
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
-    "target": "ES2022",
-    "lib": ["ES2022"],
     "resolveJsonModule": true,
     "skipLibCheck": true,
-    "types": ["node", "jest", "express"],
-    "baseUrl": ".",
-    "paths": {
-      "@workbuoy/backend-rbac": ["../../packages/backend-rbac/src/index.ts"],
-      "@workbuoy/backend-telemetry": ["../../packages/backend-telemetry/src/index.ts"],
-      "@workbuoy/backend-metrics": ["../../packages/backend-metrics/src/index.ts"],
-      "../../src/*": ["src/types/any-module.d.ts"],
-      "../../../src/*": ["src/types/any-module.d.ts"]
-    },
     "rootDir": "../.."
   },
   "include": ["src/**/*.ts", "src/**/*.d.ts"],
