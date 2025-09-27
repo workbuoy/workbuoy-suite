@@ -36,6 +36,8 @@ jobs:
           file: apps/backend/Dockerfile
           tags: workbuoy/backend:pr
           load: true
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
       # --- Build frontend image ---
       - name: Build frontend image
@@ -45,6 +47,8 @@ jobs:
           file: apps/frontend/Dockerfile
           tags: workbuoy/frontend:pr
           load: true
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
       # --- Trivy scan (backend) ---
       - name: Trivy Scan (backend) — non-blocking

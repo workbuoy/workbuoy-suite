@@ -33,6 +33,13 @@ jobs:
         with:
           node-version: 20
           cache: 'npm'
+
+      - name: Cache SWC artifacts
+        uses: actions/cache@v4
+        with:
+          path: node_modules/.cache/swc
+          key: ${{ runner.os }}-swc-${{ hashFiles('package-lock.json') }}
+
       - run: npm ci
       - run: npx prisma generate --schema=apps/backend/prisma/schema.prisma
       - run: npm run typecheck -w @workbuoy/backend

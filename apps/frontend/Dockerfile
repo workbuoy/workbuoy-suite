@@ -1,3 +1,4 @@
+# syntax=docker/dockerfile:1.7
 # Workspace-aware build using repo root context
 # --- builder ---
 
@@ -8,7 +9,7 @@ COPY package*.json ./
 RUN mkdir -p apps/frontend
 COPY apps/frontend/package*.json apps/frontend/
 # Installer kun deps for frontend-workspacet
-RUN npm ci --workspace @workbuoy/frontend
+RUN --mount=type=cache,target=/root/.npm npm ci --workspace @workbuoy/frontend
 # Kopier resten av repoet (for kildekode)
 COPY . .
 

@@ -1,3 +1,4 @@
+# syntax=docker/dockerfile:1.7
 # Workspace-aware build using repo root context
 # --- builder ---
 
@@ -16,7 +17,7 @@ COPY packages/backend-rbac/package*.json packages/backend-rbac/
 COPY packages/backend-metrics/package*.json packages/backend-metrics/
 
 # Install with the root lockfile and workspace manifests present
-RUN npm ci
+RUN --mount=type=cache,target=/root/.npm npm ci
 
 # Now copy the rest of the repo (respects root .dockerignore)
 COPY . .
