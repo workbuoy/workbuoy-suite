@@ -47,7 +47,7 @@ class Registry {
   });
 }
 
-const register = new Registry();
+const globalRegistry = new Registry();
 
 const createMetricFactory = (type: RegisteredMetric['type']) => {
   return jest.fn((config: { name?: string; registers?: Registry[] } = {}) => {
@@ -55,7 +55,7 @@ const createMetricFactory = (type: RegisteredMetric['type']) => {
     const name = config.name ?? `mock_metric_${Math.random().toString(36).slice(2)}`;
     const registries = Array.isArray(config.registers) ? config.registers : [];
     if (registries.length === 0) {
-      register.registerMetric({ name, type });
+      globalRegistry.registerMetric({ name, type });
     } else {
       for (const registry of registries) {
         if (registry && typeof registry.registerMetric === 'function') {
@@ -74,7 +74,7 @@ const promClientMock = {
   Summary: createMetricFactory('summary'),
   Registry,
   collectDefaultMetrics: jest.fn(),
-  register,
+  register: globalRegistry,
 };
 
 export default promClientMock;
@@ -82,6 +82,6 @@ export const Counter = promClientMock.Counter;
 export const Gauge = promClientMock.Gauge;
 export const Histogram = promClientMock.Histogram;
 export const Summary = promClientMock.Summary;
-export const Registry = promClientMock.Registry;
 export const collectDefaultMetrics = promClientMock.collectDefaultMetrics;
-export { register };
+export { Registry };
+export const register = globalRegistry;
