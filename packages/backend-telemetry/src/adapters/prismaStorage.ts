@@ -1,9 +1,9 @@
-import type { PrismaClient } from '@prisma/client';
-import { Prisma } from '@prisma/client';
+import { PrismaClient, Prisma } from '@prisma/client';
+import type { PrismaClient as PrismaClientType } from '@prisma/client';
 import type { TelemetryEvent, TelemetryStorage } from '../types.js';
 
 // Keep this minimal: only require the model we use.
-type PrismaClientLike = Pick<PrismaClient, 'featureUsage'>;
+type PrismaClientLike = Pick<PrismaClientType, 'featureUsage'>;
 
 const toPrismaJson = (value: unknown): any => (value === null ? (null as any) : (value as any));
 
@@ -48,6 +48,7 @@ export function createPrismaTelemetryStorage(client: PrismaClientLike): Telemetr
     },
   };
 
+  void PrismaClient; // ensure PrismaClient import is retained for NodeNext tooling
   void Prisma; // ensure Prisma import is retained for NodeNext tooling
 
   return storage;

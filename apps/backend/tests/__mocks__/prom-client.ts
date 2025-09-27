@@ -19,7 +19,7 @@ const createMetric = (): Metric => ({
   reset: jest.fn(),
 });
 
-class MockRegistry {
+class Registry {
   private metricsList: RegisteredMetric[] = [];
 
   registerMetric = jest.fn((metric: Partial<RegisteredMetric> | undefined) => {
@@ -47,15 +47,15 @@ class MockRegistry {
   });
 }
 
-const defaultRegistry = new MockRegistry();
+const register = new Registry();
 
 const createMetricFactory = (type: RegisteredMetric['type']) => {
-  return jest.fn((config: { name?: string; registers?: MockRegistry[] } = {}) => {
+  return jest.fn((config: { name?: string; registers?: Registry[] } = {}) => {
     const metric = createMetric();
     const name = config.name ?? `mock_metric_${Math.random().toString(36).slice(2)}`;
     const registries = Array.isArray(config.registers) ? config.registers : [];
     if (registries.length === 0) {
-      defaultRegistry.registerMetric({ name, type });
+      register.registerMetric({ name, type });
     } else {
       for (const registry of registries) {
         if (registry && typeof registry.registerMetric === 'function') {
@@ -72,9 +72,9 @@ const promClientMock = {
   Gauge: createMetricFactory('gauge'),
   Histogram: createMetricFactory('histogram'),
   Summary: createMetricFactory('summary'),
-  Registry: MockRegistry,
+  Registry,
   collectDefaultMetrics: jest.fn(),
-  register: defaultRegistry,
+  register,
 };
 
 export default promClientMock;
