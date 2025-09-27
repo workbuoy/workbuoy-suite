@@ -40,6 +40,10 @@ jobs:
           path: node_modules/.cache/swc
           key: ${{ runner.os }}-swc-${{ hashFiles('package-lock.json') }}
 
+      - name: Sanitize npm proxy config (legacy http-proxy)
+        shell: bash
+        run: scripts/ci/sanitize-npm-proxy.sh
+
       - run: npm ci
       - run: npx prisma generate --schema=apps/backend/prisma/schema.prisma
       - run: npm run typecheck -w @workbuoy/backend

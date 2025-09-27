@@ -19,6 +19,9 @@ jobs:
         with:
           path: node_modules/.cache/swc
           key: ${{ runner.os }}-swc-${{ hashFiles('package-lock.json') }}
+      - name: Sanitize npm proxy config (legacy http-proxy)
+        shell: bash
+        run: scripts/ci/sanitize-npm-proxy.sh
       - run: npm ci
       - name: Security audit (report only)
         run: npm audit --omit=dev || true
