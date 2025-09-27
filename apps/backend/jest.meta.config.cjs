@@ -6,14 +6,6 @@ module.exports = {
   rootDir: path.resolve(__dirname),
   moduleDirectories: ['node_modules', '<rootDir>/node_modules', '<rootDir>/../../node_modules'],
   setupFiles: [...(baseConfig.setupFiles ?? []), '<rootDir>/tests/setup-mime.cjs'],
-  transform: {
-    '^.+\\.[tj]sx?$': [
-      'ts-jest',
-      {
-        tsconfig: path.join(__dirname, 'tsconfig.jest.json'),
-      },
-    ],
-  },
   testEnvironment: 'node',
   testMatch: [
     '<rootDir>/tests/genesis.autonomy.test.ts',

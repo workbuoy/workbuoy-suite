@@ -1,27 +1,19 @@
 {
+  "extends": "./tsconfig.base.json",
   "compilerOptions": {
     "target": "ES2020",
-    "module": "commonjs",
     "lib": [
       "ES2020",
       "DOM",
       "DOM.Iterable"
     ],
     "jsx": "react-jsx",
-    "strict": true,
-    "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
-    "moduleResolution": "node",
-    "resolveJsonModule": true,
-    "skipLibCheck": true,
     "noEmit": true,
     "baseUrl": ".",
     "paths": {
       "@/*": [
         "apps/frontend/src/*"
-      ],
-      "prom-client": [
-        "apps/backend/node_modules/prom-client"
       ]
     },
     "types": [
