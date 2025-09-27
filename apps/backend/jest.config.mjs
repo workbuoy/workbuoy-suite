@@ -61,6 +61,14 @@ const config = {
     '/dist/',
   ],
   collectCoverageFrom: ['src/**/*.{ts,tsx}', '!src/**/*.d.ts'],
+  coverageThreshold: {
+    global: {
+      branches: 40,
+      functions: 40,
+      lines: 40,
+      statements: 40,
+    },
+  },
   setupFilesAfterEnv,
   moduleNameMapper,
 };

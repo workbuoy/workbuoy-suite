@@ -1,0 +1,55 @@
+name: Backend Tests
+on:
+  pull_request:
+    paths:
+      - 'apps/backend/**'
+      - 'packages/backend-*/**'
+      - 'package-lock.json'
+      - '.github/workflows/backend-tests.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'apps/backend/**'
+      - 'packages/backend-*/**'
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: wb
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd="pg_isready -U postgres"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+      - run: npm ci
+      - run: npx prisma generate --schema=apps/backend/prisma/schema.prisma
+      - run: npm run typecheck -w @workbuoy/backend
+      - name: Run backend tests (coverage + junit)
+        env:
+          CI: true
+          JEST_JUNIT_OUTPUT: apps/backend/junit.xml
+          FF_PERSISTENCE: false
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/wb?schema=public
+          ROLES_PATH: apps/backend/scripts/fixtures/minimal-roles.json
+          FEATURES_PATH: apps/backend/scripts/fixtures/minimal-features.json
+        run: npm run test -w @workbuoy/backend -- --ci --runInBand --reporters=default --reporters=jest-junit --coverage
+      - uses: actions/upload-artifact@v4
+        with:
+          name: backend-coverage
+          path: apps/backend/coverage
+      - uses: actions/upload-artifact@v4
+        with:
+          name: backend-junit
+          path: apps/backend/junit.xml
