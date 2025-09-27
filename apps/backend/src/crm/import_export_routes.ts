@@ -1,10 +1,10 @@
 import { Router } from 'express';
-import multer from 'multer';
+import type { Request } from 'express';
+import { upload } from '../lib/upload.js';
+import type { UploadedFile } from '../lib/upload.js';
 import { wb_import_total, wb_import_fail_total, wb_export_total } from '../metrics/metrics.js';
 
 export const importExportRouter = Router();
-const upload = multer({ storage: multer.memoryStorage() });
-
 type Entity = 'contacts'|'opportunities';
 type Store = { contacts: any[]; opportunities: any[]; };
 const memByTenant = new Map<string, Store>();
@@ -48,7 +48,9 @@ function toCSV(items: any[]) {
   return rows.join('\n');
 }
 
-importExportRouter.post('/import', upload.single('file'), async (req, res, next) => {
+type ImportRequest = Request & { file?: UploadedFile };
+
+importExportRouter.post('/import', upload.single('file'), async (req: ImportRequest, res, next) => {
   try {
     const tenant = String(req.header('x-tenant-id') || 'demo-tenant');
     const entity = String(req.body.entity || 'contacts') as Entity;
