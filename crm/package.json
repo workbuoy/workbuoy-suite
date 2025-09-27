@@ -35,6 +35,6 @@
     "ts-jest": "29.1.1",
     "@types/jest": "30.0.0",
     "playwright": "1.46.0",
-    "eslint": "^8.57.0"
+    "eslint": "^9.36.0"
   }
 }
