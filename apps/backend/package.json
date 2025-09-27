@@ -68,5 +68,8 @@
     "@types/supertest": "^2.0.16",
     "prisma": "6.16.2",
     "tsx": "^4"
+  },
+  "optionalDependencies": {
+    "@swc/core-linux-x64-musl": "^1.7.26"
   }
 }
