@@ -47,41 +47,40 @@ class Registry {
   });
 }
 
-const globalRegistry = new Registry();
+const register = new Registry();
 
-const createMetricFactory = (type: RegisteredMetric['type']) => {
-  return jest.fn((config: { name?: string; registers?: Registry[] } = {}) => {
+const createMetricFactory = (type: RegisteredMetric['type']) =>
+  jest.fn((config: { name?: string; registers?: Registry[] } = {}) => {
     const metric = createMetric();
     const name = config.name ?? `mock_metric_${Math.random().toString(36).slice(2)}`;
-    const registries = Array.isArray(config.registers) ? config.registers : [];
-    if (registries.length === 0) {
-      globalRegistry.registerMetric({ name, type });
-    } else {
-      for (const registry of registries) {
-        if (registry && typeof registry.registerMetric === 'function') {
-          registry.registerMetric({ name, type });
-        }
+    const registries = Array.isArray(config.registers) && config.registers.length > 0
+      ? config.registers
+      : [register];
+
+    for (const registry of registries) {
+      if (registry && typeof registry.registerMetric === 'function') {
+        registry.registerMetric({ name, type });
       }
     }
+
     return metric;
   });
-};
+
+const Counter = createMetricFactory('counter');
+const Gauge = createMetricFactory('gauge');
+const Histogram = createMetricFactory('histogram');
+const Summary = createMetricFactory('summary');
+const collectDefaultMetrics = jest.fn();
 
 const promClientMock = {
-  Counter: createMetricFactory('counter'),
-  Gauge: createMetricFactory('gauge'),
-  Histogram: createMetricFactory('histogram'),
-  Summary: createMetricFactory('summary'),
+  Counter,
+  Gauge,
+  Histogram,
+  Summary,
   Registry,
-  collectDefaultMetrics: jest.fn(),
-  register: globalRegistry,
+  collectDefaultMetrics,
+  register,
 };
 
 export default promClientMock;
-export const Counter = promClientMock.Counter;
-export const Gauge = promClientMock.Gauge;
-export const Histogram = promClientMock.Histogram;
-export const Summary = promClientMock.Summary;
-export const collectDefaultMetrics = promClientMock.collectDefaultMetrics;
-export { Registry };
-export const register = globalRegistry;
+export { Counter, Gauge, Histogram, Summary, collectDefaultMetrics, Registry, register };

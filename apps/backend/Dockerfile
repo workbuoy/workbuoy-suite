@@ -1,7 +1,7 @@
 # Workspace-aware build using repo root context
 # --- builder ---
 
-FROM node:20-alpine AS builder
+FROM node:20-bookworm-slim AS builder
 WORKDIR /repo
 
 # Copy root manifest(s) and workspace package.json files for proper workspaces install
@@ -32,6 +32,7 @@ RUN npx prisma generate --schema=apps/backend/prisma/schema.prisma \
 # --- runtime ---
 
 FROM node:20-alpine AS runtime
+RUN apk add --no-cache libc6-compat
 ENV NODE_ENV=production
 WORKDIR /app
 

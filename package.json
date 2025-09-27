@@ -26,7 +26,7 @@
     "seed:roles": "npm run seed:roles -w @workbuoy/backend",
     "check:roles": "tsx scripts/check-roles-json.ts",
     "typecheck:meta": "tsc -p tsconfig.meta.json",
-    "lint": "npx eslint . --ext .ts,.tsx,.js --no-error-on-unmatched-pattern || true",
+    "lint": "npx eslint . --ext .ts,.tsx,.js --no-error-on-unmatched-pattern",
     "lint:fix": "npx eslint . --ext .ts,.tsx,.js --fix",
     "format": "npx prettier --write .",
     "guard:ban-tracked-deps": "node tools/guard/ban-tracked-deps.js",

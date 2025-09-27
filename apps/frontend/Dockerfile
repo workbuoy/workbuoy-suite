@@ -1,13 +1,15 @@
 # Workspace-aware build using repo root context
 # --- builder ---
 
-FROM node:20-alpine AS builder
+FROM node:20-bookworm-slim AS builder
 WORKDIR /repo
 COPY package*.json ./
-RUN mkdir -p apps/backend apps/frontend
-COPY apps/backend/package*.json apps/backend/
+# Kun frontend-manifest, vi isolerer workspacet og unngår backend-devDeps (@swc/core)
+RUN mkdir -p apps/frontend
 COPY apps/frontend/package*.json apps/frontend/
-RUN npm ci
+# Installer kun deps for frontend-workspacet
+RUN npm ci --workspace @workbuoy/frontend
+# Kopier resten av repoet (for kildekode)
 COPY . .
 
 # Assumes workspace build outputs to apps/frontend/dist

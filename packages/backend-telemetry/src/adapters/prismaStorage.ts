@@ -1,10 +1,9 @@
 import type { PrismaClient as PrismaClientType } from '@prisma/client';
+import { toPrismaJson } from '../lib/prismaJson.js';
 import type { TelemetryEvent, TelemetryStorage } from '../types.js';
 
 // Keep this minimal: only require the model we use.
 type PrismaClientLike = Pick<PrismaClientType, 'featureUsage'>;
-
-const toPrismaJson = (value: unknown): any => (value === null ? (null as any) : (value as any));
 
 const toAction = (input: string): string => {
   const value = input?.toLowerCase?.() ?? '';
