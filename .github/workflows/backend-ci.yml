@@ -55,4 +55,4 @@ jobs:
         env:
           ROLES_PATH: ./scripts/fixtures/minimal-roles.json
           FEATURES_PATH: ./scripts/fixtures/minimal-features.json
-        run: npm run test -w @workbuoy/backend -- --runInBand --passWithNoTests --detectOpenHandles
+        run: npm run test -w @workbuoy/backend -- --passWithNoTests --detectOpenHandles

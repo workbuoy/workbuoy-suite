@@ -1,0 +1,14 @@
+{
+  "jsc": {
+    "target": "es2022",
+    "parser": { "syntax": "typescript", "tsx": true, "decorators": false },
+    "transform": {
+      "react": { "runtime": "automatic", "useBuiltins": true, "refresh": false }
+    },
+    "externalHelpers": false,
+    "loose": false
+  },
+  "module": { "type": "es6" },
+  "sourceMaps": "inline",
+  "minify": false
+}
