@@ -85,6 +85,7 @@ importExportRouter.get('/dlq', async (req,res)=>{
   const entity = req.query.entity as string;
   if(!entity) return res.status(400).json({error:'need entity'});
   const key=`dlq:crm:${entity}:${new Date().toISOString().slice(0,10)}`;
-  const items: string[] = await redis.lRange(key, 0, 9);
+  const rawItems = await redis.lRange(key, 0, 9);
+  const items = rawItems.map((item) => (typeof item === 'string' ? item : item.toString('utf8')));
   res.json({ items: items.map((item) => JSON.parse(item) as unknown) });
 });
