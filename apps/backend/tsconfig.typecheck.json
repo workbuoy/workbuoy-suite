@@ -3,7 +3,6 @@
   "compilerOptions": {
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
-    "allowImportingTsExtensions": true,
     "resolvePackageJsonExports": true,
     "resolveJsonModule": true,
     "baseUrl": "../..",
