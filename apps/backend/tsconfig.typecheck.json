@@ -1,13 +1,14 @@
 {
   "extends": "./tsconfig.meta.json",
   "compilerOptions": {
-    "module": "nodenext",
-    "moduleResolution": "nodenext",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
     "resolveJsonModule": true,
     "skipLibCheck": true,
     "types": ["node", "jest", "express"],
+    "typeRoots": ["../../types", "../../node_modules/@types"],
     "rootDir": "../.."
   },
-  "include": ["src/**/*.ts", "src/**/*.d.ts"],
+  "include": ["src/**/*.ts", "src/**/*.d.ts", "../../types/**/*.d.ts"],
   "exclude": ["dist", "coverage", "node_modules", "../../src/**/*", "src/meta-evolution/**/*", "./src/meta-evolution/**/*"]
 }

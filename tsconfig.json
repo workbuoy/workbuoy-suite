@@ -1,49 +1,24 @@
 {
   "extends": "./tsconfig.base.json",
   "compilerOptions": {
-    "target": "ES2020",
-    "lib": [
-      "ES2020",
-      "DOM",
-      "DOM.Iterable"
-    ],
-    "jsx": "react-jsx",
-    "allowSyntheticDefaultImports": true,
-    "noEmit": true,
-    "baseUrl": ".",
-    "paths": {
-      "@/*": [
-        "apps/frontend/src/*"
-      ]
-    },
-    "types": [
-      "node",
-      "jest",
-      "prisma__client"
-    ],
-    "typeRoots": [
-      "./types",
-      "./node_modules/@types",
-      "./apps/backend/node_modules/@types"
-    ]
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "target": "ES2022",
+    "lib": ["ES2022"],
+    "types": ["node"],
+    "resolveJsonModule": true,
+    "verbatimModuleSyntax": true,
+    "skipLibCheck": true
   },
-  "include": [
-    "src/**/*.ts",
-    "apps/backend/src/**/*.ts",
-    "apps/backend/routes/**/*.ts",
-    "apps/backend/tests/**/*.ts",
-    "apps/frontend/src/**/*.ts",
-    "apps/frontend/src/**/*.tsx",
-    "apps/frontend/src/**/*.d.ts",
-    "types/**/*.d.ts"
-  ],
+  "include": ["apps/**/src", "packages/**/src", "types/**/*.d.ts"],
   "exclude": [
-    "**/node_modules",
-    "**/dist"
-  ],
-  "references": [
-    {
-      "path": "./apps/frontend/tsconfig.json"
-    }
+    "node_modules",
+    "dist",
+    "coverage",
+    "**/__tests__/**",
+    "**/*.spec.ts",
+    "enterprise/**",
+    "desktop/**",
+    "crm/**"
   ]
 }

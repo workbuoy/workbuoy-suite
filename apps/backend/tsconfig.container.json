@@ -1,8 +1,8 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "module": "nodenext",
-    "moduleResolution": "nodenext",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
     "target": "ES2022",
     "lib": ["ES2022"],
     "resolveJsonModule": true,
@@ -11,6 +11,7 @@
     "noEmit": false,
     "strict": false,
     "baseUrl": ".",
+    "typeRoots": ["../../types", "../../node_modules/@types"],
     "paths": {
       "@workbuoy/backend-rbac": ["../../packages/backend-rbac/src/index.ts"],
       "@workbuoy/backend-telemetry": ["../../packages/backend-telemetry/src/index.ts"],
@@ -24,7 +25,7 @@
       "../../packages/backend-metrics/src"
     ]
   },
-  "include": ["src/**/*.ts", "src/**/*.d.ts"],
+  "include": ["src/**/*.ts", "src/**/*.d.ts", "../../types/**/*.d.ts"],
   "exclude": [
     "src/crm/",
     "src/connectors/",
