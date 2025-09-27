@@ -22,7 +22,7 @@
     "typecheck": "npm run typecheck -w @workbuoy/backend && npm run typecheck -w @workbuoy/frontend",
     "test": "npm run -w @workbuoy/backend test && npm run -w @workbuoy/frontend test --if-present",
     "test:ci": "npm test --workspaces --if-present",
-    "prisma:generate": "npm run prisma:generate -w @workbuoy/backend",
+    "prisma:generate": "npm -w @workbuoy/backend run prisma:generate",
     "seed:roles": "npm run seed:roles -w @workbuoy/backend",
     "check:roles": "tsx scripts/check-roles-json.ts",
     "typecheck:meta": "tsc -p tsconfig.meta.json",

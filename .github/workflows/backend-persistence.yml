@@ -63,7 +63,7 @@ jobs:
       - name: Generate Prisma client
         env:
           PRISMA_CLI_QUERY_ENGINE_TYPE: binary
-        run: npm run prisma:generate -w @workbuoy/backend
+        run: npm run prisma:generate
 
       - name: Prisma migrate deploy
         env:
