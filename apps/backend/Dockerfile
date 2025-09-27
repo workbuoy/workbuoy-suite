@@ -17,7 +17,7 @@ COPY packages/backend-rbac/package*.json packages/backend-rbac/
 COPY packages/backend-metrics/package*.json packages/backend-metrics/
 
 # Install with the root lockfile and workspace manifests present
-RUN --mount=type=cache,target=/root/.npm npm ci
+RUN --mount=type=cache,target=/root/.npm npm ci --ignore-scripts
 
 # Now copy the rest of the repo (respects root .dockerignore)
 COPY . .
@@ -51,13 +51,13 @@ COPY packages/backend-metrics/package*.json ./packages/backend-metrics/
 ENV WB_SKIP_PRISMA_GENERATE=1
 
 # Production install using the lockfile
-RUN npm ci --omit=dev --no-audit --fund=false
+RUN npm ci --omit=dev --no-audit --fund=false --ignore-scripts
 
 # Prisma schema for generate step
 COPY apps/backend/prisma ./prisma
 
 # Explicit generate in case postinstall was skipped
-RUN npx prisma generate --schema=prisma/schema.prisma
+RUN npx -y prisma generate --schema=prisma/schema.prisma
 
 # Copy compiled artifacts from builder
 COPY --from=builder /repo/apps/backend/dist ./dist
