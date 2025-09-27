@@ -3,6 +3,8 @@
   "compilerOptions": {
     "outDir": "dist",
     "baseUrl": ".",
+    "types": ["node", "jest", "express"],
+    "typeRoots": ["../../types", "../../node_modules/@types"],
     "paths": {
       "@workbuoy/backend-rbac": ["../../packages/backend-rbac/src/index.ts"],
       "@workbuoy/backend-telemetry": ["../../packages/backend-telemetry/src/index.ts"],
@@ -15,5 +17,5 @@
       "../../packages/backend-metrics/src"
     ]
   },
-  "include": ["src", "src/types"]
+  "include": ["src", "src/types", "../../types/**/*.d.ts"]
 }
