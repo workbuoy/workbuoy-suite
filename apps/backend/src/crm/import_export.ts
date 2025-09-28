@@ -1,4 +1,5 @@
-import { Router, Request, Response } from 'express';
+import express from 'express';
+import type { Request, Response } from 'express';
 import { parse } from 'csv-parse';
 import busboy from 'busboy';
 import { z } from 'zod';
@@ -7,7 +8,7 @@ import { importCounter, exportCounter } from '../observability/metrics.js';
 import { ContactCreate, OpportunityCreate } from './validation.js';
 import { audit } from '../audit/audit.js';
 
-export const importExportRouter = Router();
+export const importExportRouter = express.Router();
 
 // Map entity->schema
 const schemas: Record<string, z.ZodTypeAny> = {

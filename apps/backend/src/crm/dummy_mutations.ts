@@ -1,10 +1,10 @@
-import { Router } from 'express';
+import express from 'express';
 import { createPolicyEnforcer } from '@workbuoy/backend-rbac';
 
 // memory store for owners
 const owners = new Map<string, string>(); // id -> owner_id
 
-export const crmDummy = Router();
+export const crmDummy = express.Router();
 
 crmDummy.get('/contacts/:id', createPolicyEnforcer('read','record', (req)=>({ id: req.params.id })), (req, res)=>{
   res.json({ id: req.params.id, ok: true });

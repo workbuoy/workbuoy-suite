@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from 'express';
+import type { Request, Response, NextFunction } from 'express';
 import { prisma } from '../db/prisma.js';
 
 export async function rbacGuard(req: Request, res: Response, next: NextFunction) {

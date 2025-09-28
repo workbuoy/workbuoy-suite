@@ -1,4 +1,5 @@
-import { Router } from 'express';
+import express from 'express';
+import type { Router } from 'express';
 import { existsSync } from 'fs';
 import path from 'path';
 import { AwarenessEngine } from '../consciousness/awareness-engine.js';
@@ -11,7 +12,7 @@ export interface EvolutionRouterOptions {
 }
 
 export function createEvolutionRouter(options: EvolutionRouterOptions = {}): Router {
-  const router = Router();
+  const router = express.Router();
   const projectRoot = resolveProjectRoot(options.projectRoot);
   const awarenessEngine = new AwarenessEngine({ projectRoot });
   const evolutionSimulator = new EvolutionSimulator();

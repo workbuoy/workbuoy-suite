@@ -1,4 +1,4 @@
-import { Router } from 'express';
+import express from 'express';
 import type { Request } from 'express';
 import { parse as parseCsv } from 'csv-parse/sync';
 import { repo } from './repo.js';
@@ -7,7 +7,7 @@ import { audit } from '../audit/audit.js';
 import { upload } from '../lib/upload.js';
 import type { UploadedFile } from '../lib/upload.js';
 
-export const crmRouter = Router();
+export const crmRouter = express.Router();
 
 const requireRead = requireRole('viewer');
 const requireWrite = requireRole('contributor');

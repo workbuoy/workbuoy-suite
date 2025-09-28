@@ -1,8 +1,8 @@
-import { Router } from 'express';
+import express from 'express';
 import { repo } from './repo.js';
 import { requireRole } from '@workbuoy/backend-rbac';
 
-export const crmDbRouter = Router();
+export const crmDbRouter = express.Router();
 
 function requireParam(req: any, res: any, name: string): string | null {
   const value = String(req.params?.[name] ?? '').trim();

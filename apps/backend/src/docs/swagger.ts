@@ -1,4 +1,3 @@
-import { Router } from 'express';
 import express from 'express';
 import path from 'node:path';
 import fs from 'node:fs';
@@ -10,7 +9,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 export function swaggerRouter() {
-  const r = Router();
+  const r = express.Router();
   const dist: { getAbsoluteFSPath?: () => string } = swaggerDist as unknown as { getAbsoluteFSPath?: () => string };
   const swaggerPath = dist.getAbsoluteFSPath ? dist.getAbsoluteFSPath() : path.join(__dirname, '../../node_modules/swagger-ui-dist');
   const yamlPath = path.resolve(process.cwd(), 'openapi', 'workbuoy.yaml');

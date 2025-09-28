@@ -1,10 +1,10 @@
-import { Router } from 'express';
+import express from 'express';
 import type { Request } from 'express';
 import { upload } from '../lib/upload.js';
 import type { UploadedFile } from '../lib/upload.js';
 import { wb_import_total, wb_import_fail_total, wb_export_total } from '../metrics/metrics.js';
 
-export const importExportRouter = Router();
+export const importExportRouter = express.Router();
 type Entity = 'contacts'|'opportunities';
 type Store = { contacts: any[]; opportunities: any[]; };
 const memByTenant = new Map<string, Store>();

@@ -1,4 +1,4 @@
-import { Router } from 'express';
+import express from 'express';
 import { verifyProviderSignature } from './signature.js';
 import { wb_connector_ingest_total, wb_connector_errors_total } from './metrics.js';
 
@@ -15,7 +15,7 @@ export function connectorsRouterRawBody(raw: Buffer, provider: string, headers: 
 }
 
 export function connectorsRouter() {
-  const r = Router();
+  const r = express.Router();
 
   r.post('/api/v1/connectors/:provider/webhook', (req:any, res) => {
     const provider = String(req.params.provider || '');

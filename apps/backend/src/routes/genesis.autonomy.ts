@@ -1,7 +1,8 @@
 import { access } from 'fs/promises';
 import path from 'path';
 
-import { Router, Request, Response } from 'express';
+import express from 'express';
+import type { Request, Response, Router } from 'express';
 
 type AutonomySuggestion = {
   title: string;
@@ -77,7 +78,7 @@ function approvalFilePath() {
 }
 
 export function metaGenesisRouter() {
-  const router = Router();
+  const router = express.Router();
 
   router.get('/genesis/introspection-report', (_req: Request, res: Response) => {
     res.json(awarenessSnapshot());

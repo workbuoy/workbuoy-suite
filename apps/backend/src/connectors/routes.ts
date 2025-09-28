@@ -1,7 +1,7 @@
-import { Router } from 'express';
+import express from 'express';
 import { crm_webhook_success_total, crm_webhook_error_total } from '../metrics/metrics.js';
 
-export const connectorsRouter = Router();
+export const connectorsRouter = express.Router();
 
 connectorsRouter.post('/api/v1/connectors/:provider/webhook', (req, res) => {
   const provider = String(req.params.provider || 'unknown');

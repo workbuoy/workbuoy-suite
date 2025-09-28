@@ -1,7 +1,7 @@
-import { Router } from 'express';
+import express from 'express';
 import { crm_pipeline_transitions_total } from '../metrics/metrics.js';
 
-export const crmRouter = Router();
+export const crmRouter = express.Router();
 
 // Attach latency middleware at app-level; here only business route:
 crmRouter.post('/api/v1/crm/pipelines/:pipelineId/transitions', (req, res) => {

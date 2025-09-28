@@ -1,4 +1,4 @@
-import { Router } from 'express';
+import express from 'express';
 import { ensureDefaultNodeMetrics, getRegistry } from './registry.js';
 import { isMetricsEnabled } from '../observability/metricsConfig.js';
 
@@ -7,7 +7,7 @@ export interface MetricsRouterOptions {
 }
 
 export function createMetricsRouter(options: MetricsRouterOptions = {}) {
-  const router = Router();
+  const router = express.Router();
 
   router.get('/', async (_req, res) => {
     if (!isMetricsEnabled()) {

@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from 'express';
+import type { Request, Response, NextFunction } from 'express';
 
 const TOKEN = process.env.SCIM_BEARER_TOKEN || 'scim-dev-token';
 export function scimAuth(req: Request, res: Response, next: NextFunction) {

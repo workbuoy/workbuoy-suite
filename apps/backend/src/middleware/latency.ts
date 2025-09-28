@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from 'express';
+import type { Request, Response, NextFunction } from 'express';
 import { crm_api_latency_ms } from '../metrics/metrics.js';
 
 export function latency() {

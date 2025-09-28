@@ -1,4 +1,5 @@
-import express, { Router } from 'express';
+import express from 'express';
+import type { Router } from 'express';
 import app from './app.secure.js';
 import { createAuthModule } from '@workbuoy/backend-auth';
 import { swaggerRouter as buildSwaggerRouter } from './docs/swagger.js';

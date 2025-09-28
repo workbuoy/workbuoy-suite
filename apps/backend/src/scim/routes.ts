@@ -1,4 +1,4 @@
-import { Router } from 'express';
+import express from 'express';
 import { store, nowIso, ScimUser, ScimGroup } from './dir.js';
 import { audit } from '../audit/audit.js';
 
@@ -17,7 +17,7 @@ function paginate<T>(items: T[], startIndex: number, count: number) {
 }
 
 export function scimRouter() {
-  const r = Router();
+  const r = express.Router();
 
   // Users
   r.get('/scim/v2/Users', (req, res) => {
