@@ -62,8 +62,16 @@ jobs:
           FEATURES_PATH: ./scripts/fixtures/minimal-features.json
         run: npm run test -w @workbuoy/backend -- --passWithNoTests --detectOpenHandles
 
-      - name: Build workspaces (dist outputs)
-        run: npm run build -ws --if-present
+      - name: Build backend deps (targeted)
+        env:
+          NEXT_TELEMETRY_DISABLED: 1
+        run: |
+          set -e
+          # Bygg kun backend-relaterte workspaces som gir dist-artefakter brukt av apps/backend
+          npm run build -w @workbuoy/backend-rbac --if-present
+          npm run build -w @workbuoy/backend-metrics --if-present
+          npm run build -w @workbuoy/backend-telemetry --if-present
+          npm run build -w @workbuoy/backend-auth --if-present
 
   smoke:
     runs-on: ubuntu-latest
@@ -74,6 +82,7 @@ jobs:
     env:
       WB_CHAOS_READY: ${{ matrix.chaos }}
       GIT_SHA: ${{ github.sha }}
+      PORT: 3000
     steps:
       - name: Checkout
         uses: actions/checkout@v5
@@ -87,22 +96,36 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Build workspaces (dist outputs)
-        run: npm run build -ws --if-present
+      - name: Build backend deps (targeted)
+        env:
+          NEXT_TELEMETRY_DISABLED: 1
+        run: |
+          set -e
+          # Bygg kun backend-relaterte workspaces som gir dist-artefakter brukt av apps/backend
+          npm run build -w @workbuoy/backend-rbac --if-present
+          npm run build -w @workbuoy/backend-metrics --if-present
+          npm run build -w @workbuoy/backend-telemetry --if-present
+          npm run build -w @workbuoy/backend-auth --if-present
+
+      - name: Sanity check built dists
+        run: |
+          ls -la node_modules/@workbuoy/backend-rbac/dist || true
+          ls -la node_modules/@workbuoy/backend-metrics/dist || true
+          ls -la node_modules/@workbuoy/backend-telemetry/dist || true
+          ls -la node_modules/@workbuoy/backend-auth/dist || true
 
       - name: Start backend (background)
         env:
           PORT: 3000
         run: |
           set -e
-          START_SCRIPT=$(npm pkg get scripts.start -w @workbuoy/backend 2>/dev/null | tr -d '"')
-          if [ -n "$START_SCRIPT" ] && [ "$START_SCRIPT" != "undefined" ]; then
+          if npm run -w @workbuoy/backend start --silent >/dev/null 2>&1; then
             npm run -w @workbuoy/backend start & echo $! > server.pid
           else
             npx tsx apps/backend/src/index.ts & echo $! > server.pid
           fi
           for _ in $(seq 1 30); do
-            if curl -sSf "http://127.0.0.1:${PORT:-3000}/api/health" > /dev/null; then
+            if curl -sSf "http://127.0.0.1:${PORT}/api/health" > /dev/null; then
               exit 0
             fi
             sleep 1
@@ -111,15 +134,15 @@ jobs:
           exit 1
 
       - name: Probe /api/health
-        run: curl -sf http://127.0.0.1:3000/api/health
+        run: curl -sf "http://127.0.0.1:${PORT}/api/health"
 
       - name: Probe /api/version
-        run: curl -sf http://127.0.0.1:3000/api/version
+        run: curl -sf "http://127.0.0.1:${PORT}/api/version"
 
       - name: Probe /api/ready (expect 200 or 503)
         run: |
           set -e
-          STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:3000/api/ready)
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" "http://127.0.0.1:${PORT}/api/ready")
           if [ "${WB_CHAOS_READY}" = "1" ]; then
             [ "$STATUS" = "503" ] || (echo "Expected 503, got $STATUS" && exit 1)
           else
