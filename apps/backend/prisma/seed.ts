@@ -1,93 +1,134 @@
-import { existsSync, readFileSync } from 'node:fs';
-import { createRequire } from 'node:module';
+import prisma from '../src/db/prisma.js';
+import fs from 'node:fs/promises';
 import path from 'node:path';
-import process from 'node:process';
-import { fileURLToPath } from 'node:url';
-import { PrismaClient } from '@prisma/client';
-
-type RoleInput = {
-  role_id?: string;
-  id?: string;
-  title?: string;
-  name?: string;
-  description?: string;
-  [key: string]: unknown;
-};
-
-type FeatureInput = {
-  id?: string;
-  feature_id?: string;
-  title?: string;
-  name?: string;
-  description?: string;
-  capabilities?: unknown;
-  [key: string]: unknown;
-};
-
-export interface SeedSummary {
-  roles: number;
-  features: number;
-  dryRun: boolean;
-}
-
-const prisma = new PrismaClient();
-
-const prismaDir = path.dirname(fileURLToPath(import.meta.url));
-const workspaceRoot = path.resolve(prismaDir, '..');
-const repoRoot = path.resolve(workspaceRoot, '..', '..');
+import { createRequire } from 'node:module';
+import type { PrismaClient } from '@prisma/client';
 
 const requireFromHere = createRequire(import.meta.url);
-const DEFAULT_ROLES_PATH = requireFromHere.resolve('@workbuoy/roles-data/roles.json');
-const DEFAULT_FEATURES_PATH = requireFromHere.resolve('@workbuoy/roles-data/features.json');
 
-function envOrDefault(name: string, fallback: string): string {
-  const value = process.env[name];
-  if (value && value.trim().length) {
-    return value.trim();
-  }
-  return fallback;
-}
+type RoleItem = {
+  role_id?: string;
+  id?: string;
+  name?: string;
+  title?: string;
+  canonical_title?: string;
+  description?: string;
+  summary?: string;
+  inherits?: unknown;
+  featureCaps?: unknown;
+  scopeHints?: unknown;
+  profile?: unknown;
+};
 
-function resolveInputPath(rawPath: string): string {
-  if (path.isAbsolute(rawPath)) {
-    return rawPath;
-  }
+type FeatureItem = {
+  id?: string;
+  key?: string;
+  feature_id?: string;
+  name?: string;
+  title?: string;
+  description?: string;
+  defaultAutonomyCap?: unknown;
+  capabilities?: unknown;
+  metadata?: unknown;
+};
 
-  const workspaceCandidate = path.resolve(workspaceRoot, rawPath);
-  if (existsSync(workspaceCandidate)) {
-    return workspaceCandidate;
-  }
-
-  const repoCandidate = path.resolve(repoRoot, rawPath);
-  if (existsSync(repoCandidate)) {
-    return repoCandidate;
-  }
-
-  return workspaceCandidate;
-}
-
-function readJSON<T = unknown>(targetPath: string, label: string): T {
+async function loadJsonMaybe<T>(p?: string): Promise<T | null> {
+  if (!p) return null;
   try {
-    const raw = readFileSync(targetPath, 'utf8');
-    return JSON.parse(raw) as T;
-  } catch (err) {
-    throw new Error(`[seed] failed to read ${label} from ${targetPath}: ${(err as Error).message}`);
+    const abs = path.isAbsolute(p) ? p : path.join(process.cwd(), p);
+    const buf = await fs.readFile(abs, 'utf8');
+    return JSON.parse(buf) as T;
+  } catch {
+    return null;
   }
 }
 
-function toStringOrUndefined(value: unknown): string | undefined {
-  if (value === undefined || value === null) {
-    return undefined;
+async function loadCatalog() {
+  const rolesFromFile = await loadJsonMaybe<RoleItem[]>(process.env.ROLES_PATH);
+  const featsFromFile = await loadJsonMaybe<FeatureItem[]>(process.env.FEATURES_PATH);
+  if (Array.isArray(rolesFromFile) && Array.isArray(featsFromFile)) {
+    return { roles: rolesFromFile, features: featsFromFile };
   }
-  const normalized = String(value).trim();
-  return normalized.length ? normalized : undefined;
+
+  try {
+    const rolesPath = requireFromHere.resolve('@workbuoy/roles-data/roles.json');
+    const featuresPath = requireFromHere.resolve('@workbuoy/roles-data/features.json');
+    const [rolesPkg, featuresPkg] = await Promise.all([
+      loadJsonMaybe<RoleItem[]>(rolesPath),
+      loadJsonMaybe<FeatureItem[]>(featuresPath),
+    ]);
+    if (Array.isArray(rolesPkg) && rolesPkg.length) {
+      return {
+        roles: rolesPkg,
+        features: Array.isArray(featuresPkg) ? featuresPkg : [],
+      };
+    }
+  } catch {
+    // ignore
+  }
+
+  return {
+    roles: [
+      {
+        role_id: 'admin',
+        title: 'Administrator',
+        description: 'Default administrator role',
+      },
+    ],
+    features: [
+      {
+        id: 'crm-core',
+        title: 'CRM Core',
+        description: 'Core CRM feature',
+        capabilities: ['crm.pipeline.read', 'crm.pipeline.write'],
+      },
+    ],
+  };
+}
+
+type CountRow = { count: bigint };
+
+async function isMigrated(client: typeof prisma): Promise<boolean> {
+  try {
+    const rows = await client.$queryRaw<CountRow[]>`
+      SELECT count(*)::bigint AS count FROM information_schema.tables
+      WHERE table_schema = current_schema() AND table_name = '_prisma_migrations'
+    `;
+    if (!rows?.length || rows[0].count === 0n) return false;
+
+    const applied = await client.$queryRaw<CountRow[]>`
+      SELECT count(*)::bigint AS count FROM "_prisma_migrations"
+    `;
+    return (applied?.[0]?.count ?? 0n) >= 0n;
+  } catch {
+    return false;
+  }
+}
+
+async function tableExists(client: PrismaClient, tableName: string): Promise<boolean> {
+  try {
+    const rows = await client.$queryRaw<{ reg: string | null }[]>`
+      SELECT to_regclass(${tableName}) AS reg
+    `;
+    return !!rows?.[0]?.reg;
+  } catch {
+    return false;
+  }
+}
+
+function toStringOrNull(value: unknown): string | null {
+  if (value === null || value === undefined) {
+    return null;
+  }
+  const text = String(value).trim();
+  return text.length ? text : null;
 }
 
 function toStringArray(value: unknown): string[] {
   if (Array.isArray(value)) {
     return value.map((item) => String(item));
   }
-  if (value === undefined || value === null) {
+  if (value === null || value === undefined) {
     return [];
   }
   if (typeof value === 'string') {
@@ -99,230 +140,277 @@ function toStringArray(value: unknown): string[] {
   return [];
 }
 
-async function upsertRoles(roles: RoleInput[], dryRun: boolean): Promise<number> {
-  if (!roles.length) {
-    return 0;
+function toJsonValue(value: unknown): unknown {
+  if (value === null || value === undefined) {
+    return undefined;
   }
-
-  const seen = new Set<string>();
-  let processed = 0;
-
-  for (const role of roles) {
-    const roleId = toStringOrUndefined(role.role_id ?? role.id ?? role.name);
-    if (!roleId) {
-      console.warn('[seed] skip role without id:', role);
-      continue;
-    }
-    if (seen.has(roleId)) {
-      continue;
-    }
-    seen.add(roleId);
-
-    const title = toStringOrUndefined(role.title ?? role.name) ?? roleId;
-    const description = toStringOrUndefined(role.description);
-
-    if (!dryRun) {
-      await prisma.role.upsert({
-        where: { role_id: roleId },
-        create: {
-          role_id: roleId,
-          title,
-          description: description ?? undefined,
-        },
-        update: {
-          title,
-          description: description ?? undefined,
-        },
-      });
-    }
-
-    processed += 1;
-  }
-
-  return processed;
-}
-
-async function upsertFeatures(features: FeatureInput[], dryRun: boolean): Promise<number> {
-  if (!features.length) {
-    return 0;
-  }
-
-  const seen = new Set<string>();
-  let processed = 0;
-
-  for (const feature of features) {
-    const featureId = toStringOrUndefined(feature.id ?? feature.feature_id ?? feature.name);
-    if (!featureId) {
-      console.warn('[seed] skip feature without id:', feature);
-      continue;
-    }
-    if (seen.has(featureId)) {
-      continue;
-    }
-    seen.add(featureId);
-
-    const title = toStringOrUndefined(feature.title ?? feature.name) ?? featureId;
-    const description = toStringOrUndefined(feature.description);
-    const rawCapabilities = feature.capabilities;
-    const capabilities = toStringArray(rawCapabilities);
-
-    if (rawCapabilities === undefined || rawCapabilities === null) {
-      console.warn(`[seed] feature ${featureId}: missing 'capabilities' → defaulting to []`);
-    } else if (!Array.isArray(rawCapabilities) && typeof rawCapabilities !== 'string') {
-      console.warn(
-        `[seed] feature ${featureId}: invalid 'capabilities' type (${typeof rawCapabilities}) → defaulting to []`,
-      );
-    }
-
-    if (!dryRun) {
-      await prisma.feature.upsert({
-        where: { id: featureId },
-        create: {
-          id: featureId,
-          title,
-          description: description ?? undefined,
-          capabilities,
-        },
-        update: {
-          title,
-          description: description ?? undefined,
-          capabilities,
-        },
-      });
-    }
-
-    processed += 1;
-  }
-
-  return processed;
-}
-
-export async function seed(): Promise<SeedSummary> {
-  const dryRun = String(process.env.SEED_DRY_RUN || '').toLowerCase() === 'true';
-
-  if (!dryRun && !process.env.DATABASE_URL) {
-    throw new Error('DATABASE_URL must be set unless SEED_DRY_RUN=true');
-  }
-
-  const rolesPathInput = envOrDefault('ROLES_PATH', DEFAULT_ROLES_PATH);
-  const featuresPathInput = envOrDefault('FEATURES_PATH', DEFAULT_FEATURES_PATH);
-
-  const rolesPath = resolveInputPath(rolesPathInput);
-  const featuresPath = resolveInputPath(featuresPathInput);
-
-  const rolesFileExists = existsSync(rolesPath);
-  const featuresFileExists = existsSync(featuresPath);
-
-  if (!rolesFileExists) {
-    console.warn(`[seed] roles file not found at ${rolesPath}`);
-  }
-  if (!featuresFileExists) {
-    console.warn(`[seed] features file not found at ${featuresPath}`);
-  }
-
-  const rolesData = rolesFileExists ? readJSON<unknown>(rolesPath, 'roles') : [];
-  const featuresData = featuresFileExists ? readJSON<unknown>(featuresPath, 'features') : [];
-
-  const roles = Array.isArray(rolesData) ? (rolesData as RoleInput[]) : [];
-  const features = Array.isArray(featuresData) ? (featuresData as FeatureInput[]) : [];
-
-  if (rolesFileExists && !Array.isArray(rolesData)) {
-    console.warn(`[seed] roles payload is not an array at ${rolesPath}`);
-  }
-  if (featuresFileExists && !Array.isArray(featuresData)) {
-    console.warn(`[seed] features payload is not an array at ${featuresPath}`);
-  }
-  console.log(`[seed] configuration rolesPath=${rolesPath} featuresPath=${featuresPath} dryRun=${dryRun}`);
-
-  const summary: SeedSummary = {
-    roles: 0,
-    features: 0,
-    dryRun,
-  };
-
-  summary.roles = await upsertRoles(Array.isArray(roles) ? roles : [], dryRun);
-  summary.features = await upsertFeatures(Array.isArray(features) ? features : [], dryRun);
-
-  return summary;
-}
-
-async function disconnectPrismaSafely(): Promise<unknown | null> {
   try {
-    await prisma.$disconnect();
-    return null;
-  } catch (disconnectError) {
-    console.warn('[seed] prisma disconnect failed:', disconnectError);
-    return disconnectError;
+    JSON.stringify(value);
+    return value;
+  } catch {
+    return undefined;
   }
 }
 
-export async function runSeed(options?: { dryRun?: boolean }): Promise<SeedSummary> {
-  if (options?.dryRun) {
-    process.env.SEED_DRY_RUN = 'true';
-  }
+type NormalizedRole = {
+  id: string;
+  title: string;
+  description: string | null;
+  inherits: string[];
+  featureCaps: unknown;
+  scopeHints: unknown;
+  profile: unknown;
+};
 
-  let caughtError: unknown;
+type NormalizedFeature = {
+  id: string;
+  title: string;
+  description: string | null;
+  defaultAutonomyCap: number | undefined;
+  capabilities: string[];
+  metadata: unknown;
+};
 
-  try {
-    return await seed();
-  } catch (err) {
-    caughtError = err;
-    throw err;
-  } finally {
-    const disconnectError = await disconnectPrismaSafely();
-    if (!caughtError && disconnectError) {
-      throw disconnectError;
+function normalizeRoles(raw: RoleItem[]): NormalizedRole[] {
+  const dedup = new Map<string, NormalizedRole>();
+  for (const role of raw) {
+    const id =
+      toStringOrNull(role.role_id) ??
+      toStringOrNull(role.id) ??
+      toStringOrNull(role.name) ??
+      toStringOrNull(role.title) ??
+      toStringOrNull(role.canonical_title);
+    if (!id) {
+      console.warn('[seed] skipping role without identifier', role);
+      continue;
+    }
+    const title =
+      toStringOrNull(role.title) ??
+      toStringOrNull(role.name) ??
+      toStringOrNull(role.canonical_title) ??
+      id;
+    const description =
+      toStringOrNull(role.description) ?? toStringOrNull(role.summary);
+    const inherits = Array.isArray(role.inherits)
+      ? role.inherits.map((value) => String(value))
+      : [];
+    const normalized: NormalizedRole = {
+      id,
+      title,
+      description,
+      inherits,
+      featureCaps: toJsonValue(role.featureCaps),
+      scopeHints: toJsonValue(role.scopeHints),
+      profile: toJsonValue(role.profile),
+    };
+    if (!dedup.has(id)) {
+      dedup.set(id, normalized);
     }
   }
+  return [...dedup.values()];
+}
+
+function normalizeFeatures(raw: FeatureItem[]): NormalizedFeature[] {
+  const dedup = new Map<string, NormalizedFeature>();
+  for (const feature of raw) {
+    const id =
+      toStringOrNull(feature.id) ??
+      toStringOrNull(feature.feature_id) ??
+      toStringOrNull(feature.key) ??
+      toStringOrNull(feature.name);
+    if (!id) {
+      console.warn('[seed] skipping feature without identifier', feature);
+      continue;
+    }
+    const title =
+      toStringOrNull(feature.title) ??
+      toStringOrNull(feature.name) ??
+      id;
+    const description = toStringOrNull(feature.description);
+    const capabilities = toStringArray(feature.capabilities);
+    const rawDefaultCap =
+      typeof feature.defaultAutonomyCap === 'string'
+        ? Number(feature.defaultAutonomyCap)
+        : feature.defaultAutonomyCap;
+    const defaultCap =
+      typeof rawDefaultCap === 'number' && Number.isFinite(rawDefaultCap)
+        ? rawDefaultCap
+        : undefined;
+    const normalized: NormalizedFeature = {
+      id,
+      title,
+      description,
+      defaultAutonomyCap: defaultCap,
+      capabilities,
+      metadata: toJsonValue(feature.metadata),
+    };
+    if (!dedup.has(id)) {
+      dedup.set(id, normalized);
+    }
+  }
+  return [...dedup.values()];
 }
 
 async function main() {
-  const args = process.argv.slice(2);
-  const argDryRun = args.some((arg) => arg === '--dry-run' || arg === '--dryRun');
-  let npmDryRun = false;
+  const allowSeed = process.env.SEED === 'true' || process.env.NODE_ENV !== 'production';
+  if (!allowSeed) {
+    console.log('[seed] Skipping (prod w/o SEED=true)');
+    return;
+  }
 
-  const npmArgv = process.env.npm_config_argv;
-  if (npmArgv) {
-    try {
-      const parsed = JSON.parse(npmArgv) as { original?: unknown };
-      const original = parsed.original;
-      if (Array.isArray(original)) {
-        npmDryRun = original.some((arg) => arg === '--dry-run' || arg === '--dryRun');
+  if (!(await isMigrated(prisma))) {
+    console.warn(
+      '[seed] No _prisma_migrations found; continuing (db:deploy already runs before this script).',
+    );
+  }
+
+  const { roles, features } = await loadCatalog();
+  const normalizedRoles = normalizeRoles(Array.isArray(roles) ? roles : []);
+  const normalizedFeatures = normalizeFeatures(Array.isArray(features) ? features : []);
+
+  const haveTenant = await tableExists(prisma, '"Tenant"');
+  const haveFeature = await tableExists(prisma, '"Feature"');
+  const haveRole = await tableExists(prisma, '"Role"');
+  const haveRoleBinding = await tableExists(prisma, '"RoleBinding"');
+
+  if (!haveTenant) {
+    console.warn(
+      '[seed] Skipping tenant/role/feature seed: table "Tenant" is missing in current schema.'
+    );
+    return;
+  }
+  if (!haveFeature) {
+    console.warn('[seed] Table "Feature" missing; feature upserts will be skipped.');
+  }
+  if (!haveRole) {
+    console.warn('[seed] Table "Role" missing; role upserts will be skipped.');
+  }
+  if (!haveRoleBinding) {
+    console.warn('[seed] Table "RoleBinding" missing; admin binding will be skipped.');
+  }
+
+  let seededRoles = 0;
+  let seededFeatures = 0;
+
+  await prisma.$transaction(async (tx) => {
+    const systemTenant = await tx.tenant.upsert({
+      where: { slug: 'system' },
+      create: { slug: 'system', name: 'System' },
+      update: { name: 'System' },
+    });
+
+    if (haveFeature) {
+      for (const feature of normalizedFeatures) {
+        const createData = {
+          id: feature.id,
+          title: feature.title,
+          ...(feature.description !== null
+            ? { description: feature.description }
+            : {}),
+          ...(feature.defaultAutonomyCap !== undefined
+            ? { defaultAutonomyCap: feature.defaultAutonomyCap }
+            : {}),
+          capabilities: feature.capabilities,
+          ...(feature.metadata !== undefined ? { metadata: feature.metadata } : {}),
+        } as const;
+
+        const updateData = {
+          title: feature.title,
+          description: feature.description ?? null,
+          ...(feature.defaultAutonomyCap !== undefined
+            ? { defaultAutonomyCap: feature.defaultAutonomyCap }
+            : {}),
+          capabilities: feature.capabilities,
+          ...(feature.metadata !== undefined ? { metadata: feature.metadata } : {}),
+        } as const;
+
+        await tx.feature.upsert({
+          where: { id: feature.id },
+          create: createData,
+          update: updateData,
+        });
+        seededFeatures += 1;
       }
-    } catch (err) {
-      console.warn('[seed] failed to parse npm_config_argv:', err);
+    }
+
+    if (haveRole) {
+      for (const role of normalizedRoles) {
+        const createData = {
+          role_id: role.id,
+          title: role.title,
+          ...(role.description !== null ? { description: role.description } : {}),
+          inherits: role.inherits,
+          ...(role.featureCaps !== undefined ? { featureCaps: role.featureCaps } : {}),
+          ...(role.scopeHints !== undefined ? { scopeHints: role.scopeHints } : {}),
+          ...(role.profile !== undefined ? { profile: role.profile } : {}),
+        } as const;
+
+        const updateData = {
+          title: role.title,
+          description: role.description ?? null,
+          inherits: role.inherits,
+          ...(role.featureCaps !== undefined ? { featureCaps: role.featureCaps } : {}),
+          ...(role.scopeHints !== undefined ? { scopeHints: role.scopeHints } : {}),
+          ...(role.profile !== undefined ? { profile: role.profile } : {}),
+        } as const;
+
+        await tx.role.upsert({
+          where: { role_id: role.id },
+          create: createData,
+          update: updateData,
+        });
+        seededRoles += 1;
+      }
+    }
+
+    if (haveRoleBinding && haveRole) {
+      try {
+        const admin = await tx.role.findUnique({ where: { role_id: 'admin' } });
+        if (admin) {
+          await tx.roleBinding.deleteMany({
+            where: {
+              tenantId: systemTenant.id,
+              role: admin.role_id,
+              group: 'system-admins',
+            },
+          });
+          await tx.roleBinding.create({
+            data: {
+              tenantId: systemTenant.id,
+              role: admin.role_id,
+              group: 'system-admins',
+            },
+          });
+        }
+      } catch (err) {
+        const message =
+          err instanceof Error ? err.message : '[unknown error while creating role binding]';
+        console.warn('[seed] roleBinding operation failed; skipping binding');
+        console.warn(message);
+      }
+    }
+  });
+
+  console.log(`[seed] Done: roles=${seededRoles}, features=${seededFeatures}`);
+}
+
+async function run() {
+  let exitCode = 0;
+  try {
+    await main();
+  } catch (err) {
+    exitCode = 1;
+    console.error('[seed] Failed:', err);
+  } finally {
+    try {
+      await prisma.$disconnect();
+    } catch (disconnectErr) {
+      exitCode = 1;
+      console.error('[seed] Failed to disconnect prisma:', disconnectErr);
     }
   }
 
-  if (argDryRun || npmDryRun) {
-    process.env.SEED_DRY_RUN = 'true';
-  }
-
-  console.log('[seed] starting…');
-  const result = await seed();
-  console.log(`[seed] roles=${result.roles}, features=${result.features}, dryRun=${result.dryRun}`);
+  process.exit(exitCode);
 }
 
-const modulePath = fileURLToPath(import.meta.url);
-const entryPath = process.argv[1] ? path.resolve(process.argv[1]) : undefined;
-const isDirectExecution = entryPath === modulePath;
-
-if (isDirectExecution) {
-  let exitCode = 0;
-
-  main()
-    .then(() => {
-      console.log('[seed] completed successfully');
-    })
-    .catch((err) => {
-      exitCode = 1;
-      console.error('[seed] failed:', err);
-    })
-    .finally(async () => {
-      const disconnectError = await disconnectPrismaSafely();
-      if (!exitCode && disconnectError) {
-        exitCode = 1;
-      }
-      process.exit(exitCode);
-    });
-}
+run();
