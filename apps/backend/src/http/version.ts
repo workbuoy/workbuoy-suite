@@ -1,21 +1,30 @@
-import type { Request, Response } from 'express';
-import { createRequire } from 'node:module';
+import type { Request, Response } from "express";
+import { createRequire } from "node:module";
+
 const require = createRequire(import.meta.url);
 
-// Load apps/backend/package.json
-// NodeNext + ESM: use createRequire to read JSON synchronously.
-const pkg = require('../../package.json');
+function readPkgVersion(): string | undefined {
+  try {
+    // I transpilet kode blir dette dist/src/http/version.js → ../../package.json = dist/package.json
+    // Hvis filen mangler i image, returner undefined (ingen crash).
+    // @ts-ignore – runtime narrow
+    return (require("../../package.json").version as string) || undefined;
+  } catch {
+    return undefined;
+  }
+}
 
 export function versionHandler(_req: Request, res: Response) {
-  const version: string = pkg?.version ?? '0.0.0';
-  const commit: string = process.env.GIT_SHA ?? 'unknown';
+  const envVersion =
+    process.env.APP_VERSION ||
+    process.env.BACKEND_VERSION ||
+    undefined;
 
-  res.status(200).json({
-    version,
-    commit,
-    node: process.version,
-    pid: process.pid,
-    uptimeSec: Math.round(process.uptime()),
-    timestamp: new Date().toISOString(),
-  });
+  const sha =
+    process.env.GIT_SHA ||
+    process.env.COMMIT_SHA ||
+    undefined;
+
+  const version = envVersion ?? readPkgVersion() ?? "unknown";
+  res.json({ version, sha });
 }

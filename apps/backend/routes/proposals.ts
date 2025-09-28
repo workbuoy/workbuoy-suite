@@ -23,24 +23,31 @@ import { runCapabilityWithRole } from '../../../src/core/capabilityRunnerRole.js
 type PolicyResult = { allowed: boolean; basis?: string[] };
 import { logIntent } from '../../../src/core/intentLog.js';
 
-let _policyMod: any;
-const loadPolicyMod = async () => {
-  if (_policyMod) return _policyMod;
-  try {
-    _policyMod = await import('../src/core/policy.js');
-  } catch {
-    _policyMod = {};
-  }
-  return _policyMod;
-};
+type PolicyCheck = (input: any, ctx: any) => Promise<PolicyResult>;
 
-const policyCheck = async (input: any, ctx: any): Promise<PolicyResult> => {
-  const mod = await loadPolicyMod();
-  const impl =
-    (typeof mod?.policyCheck === 'function' && mod.policyCheck) ||
-    (typeof mod?.checkPolicy === 'function' && mod.checkPolicy);
-  if (impl) return impl(input, ctx);
-  return { allowed: true as const };
+/**
+ * Lazy/guarded loader for policyCheck.
+ * - Tåler at modul eller eksport mangler.
+ * - Godtar både default og named eksport.
+ * - Faller tilbake til "allow all" for PR4-builds der modulen ikke pakkes.
+ */
+async function getPolicyCheck(): Promise<PolicyCheck> {
+  try {
+    const mod: any = await import('../src/core/policy.js');
+    const fn: any = mod?.policyCheck ?? mod?.default;
+    if (typeof fn === 'function') {
+      return fn as PolicyCheck;
+    }
+  } catch {
+    // ignorér og fall tilbake
+  }
+  return async () => ({ allowed: true });
+}
+
+const policyCheck: PolicyCheck = async (input, ctx) => {
+  const policy = await getPolicyCheck();
+  const result = await policy(input, ctx);
+  return result ?? { allowed: true };
 };
 
 const router = Router();
