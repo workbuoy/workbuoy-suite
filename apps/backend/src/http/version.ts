@@ -5,9 +5,9 @@ const require = createRequire(import.meta.url);
 
 function readPkgVersion(): string | undefined {
   try {
-    // I transpilet kode blir dette dist/src/http/version.js → ../../package.json = dist/package.json
-    // Mangler filen, returner undefined (ingen crash).
-    // @ts-ignore - type narrowing ved runtime
+    // Transpilert sti: dist/src/http/version.js → ../../package.json = dist/package.json
+    // Mangler filen i image? Returner undefined (ingen crash).
+    // @ts-ignore – runtime narrow på require-resultatet
     return (require("../../package.json").version as string) || undefined;
   } catch {
     return undefined;

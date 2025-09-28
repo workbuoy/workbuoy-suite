@@ -48,15 +48,48 @@ import { metaGenesisRouter } from '../../../src/routes/genesis.autonomy.js';
 import { debugDlqRouter } from '../../../src/routes/debug.dlq.js';
 import { debugCircuitRouter } from '../../../src/routes/debug.circuit.js';
 
-import usageRouter from '../routes/usage.js';
-import featuresRouter from '../routes/features.js';
-import proactivityRouter from '../routes/proactivity.js';
-import adminSubscriptionRouter from '../routes/admin.subscription.js';
-import adminRolesRouter from '../routes/admin.roles.js';
-import explainabilityRouter from '../routes/explainability.js';
-import proposalsRouter from '../routes/proposals.js';
-import connectorsHealthRouter from '../routes/connectors.health.js';
-import devRunnerRouter from '../routes/dev.runner.js';
+import { versionHandler } from './http/version.js';
+
+type MiddlewareFn = (...args: any[]) => any;
+
+function isObject(v: unknown): v is Record<string, unknown> {
+  return !!v && typeof v === 'object';
+}
+
+function asMiddleware(mod: unknown): MiddlewareFn | undefined {
+  if (typeof mod === 'function') return mod as MiddlewareFn;
+  if (isObject(mod)) {
+    const m = mod as Record<string, unknown>;
+    if (typeof m.default === 'function') return m.default as MiddlewareFn;
+    if (typeof m.router === 'function') return m.router as MiddlewareFn;
+  }
+  return undefined;
+}
+
+async function mountOptionalRoute(
+  app: import('express').Express,
+  base: string,
+  spec: string,
+) {
+  try {
+    const mod = await import(spec);
+    const mw = asMiddleware(mod);
+    if (!mw) {
+      console.warn(
+        `[routes] Skipping ${spec}: no callable middleware. typeof=${typeof mod}; keys=${
+          isObject(mod) ? Object.keys(mod).join(',') : ''
+        }`,
+      );
+      return;
+    }
+    app.use(base, mw);
+    console.log(`[routes] Mounted ${spec} at ${base}`);
+  } catch (err) {
+    console.warn(
+      `[routes] Skipping ${spec} due to import error: ${(err as Error)?.message}`,
+    );
+  }
+}
 
 // core body parsing for JSON payloads and raw capture for connector webhooks
 app.use(
@@ -115,14 +148,14 @@ app.use('/api/finance', financeReminderRouter());
 app.use('/api', manualCompleteRouter());
 app.use('/', metaGenesisRouter());
 
-app.use('/api', usageRouter);
-app.use('/api', featuresRouter);
-app.use('/api', proactivityRouter);
-app.use('/api', adminSubscriptionRouter);
-app.use('/api', adminRolesRouter);
-app.use('/api', explainabilityRouter);
-app.use('/api', proposalsRouter);
-app.use('/api', connectorsHealthRouter);
+await mountOptionalRoute(app, '/api', '../routes/usage.js');
+await mountOptionalRoute(app, '/api', '../routes/features.js');
+await mountOptionalRoute(app, '/api', '../routes/proactivity.js');
+await mountOptionalRoute(app, '/api', '../routes/admin.subscription.js');
+await mountOptionalRoute(app, '/api', '../routes/admin.roles.js');
+await mountOptionalRoute(app, '/api', '../routes/explainability.js');
+await mountOptionalRoute(app, '/api', '../routes/proposals.js');
+await mountOptionalRoute(app, '/api', '../routes/connectors.health.js');
 
 app.use('/api', knowledgeRouter as unknown as Router);
 app.use('/api/audit', auditRouter());
@@ -131,7 +164,7 @@ app.use('/api/rbac', RbacRouter);
 if (process.env.NODE_ENV !== 'production') {
   app.use('/api', debugDlqRouter());
   app.use('/api', debugCircuitRouter());
-  app.use('/api', devRunnerRouter);
+  await mountOptionalRoute(app, '/api', '../routes/dev.runner.js');
 }
 
 app.get('/status', async (_req, res) => {
@@ -149,6 +182,7 @@ app.get('/status', async (_req, res) => {
   }
 });
 
+app.get('/api/version', versionHandler);
 app.get('/_debug/bus', debugBusHandler);
 app.get('/healthz', (_req, res) => res.json({ ok: true }));
 app.get('/readyz', (_req, res) => res.json({ ok: true }));
