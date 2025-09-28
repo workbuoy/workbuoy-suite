@@ -1,44 +1,30 @@
-import { createRequire } from 'node:module';
-import type { PrismaClient } from '@prisma/client';
+import type { Prisma, PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
 
-const require = createRequire(import.meta.url);
+const globalForPrisma = globalThis as typeof globalThis & { prisma?: PrismaClient };
 
-declare global {
-  // eslint-disable-next-line no-var
-  var __prisma__: PrismaClient | undefined;
-}
-
-type PrismaClientConstructor = new (...args: unknown[]) => PrismaClient;
-
-let PrismaClientCtor: PrismaClientConstructor | undefined;
-
-function envBool(key: string, fallback: boolean): boolean {
-  const value = process.env[key];
-  if (value === undefined) {
-    return fallback;
-  }
-  const normalized = value.toLowerCase();
-  return normalized === '1' || normalized === 'true' || normalized === 'yes' || normalized === 'on';
-}
-
-function loadPrismaCtor(): PrismaClientConstructor | undefined {
-  if (PrismaClientCtor) {
-    return PrismaClientCtor;
-  }
-  try {
-    const mod = require('@prisma/client') as { PrismaClient: PrismaClientConstructor };
-    PrismaClientCtor = mod.PrismaClient;
-    return PrismaClientCtor;
-  } catch (error) {
-    if (envBool('FF_PERSISTENCE', false)) {
-      throw error;
-    }
+function parseLogLevels(input: string | undefined): Prisma.LogLevel[] | undefined {
+  if (!input) {
     return undefined;
   }
+  const allowed: Prisma.LogLevel[] = ['info', 'query', 'warn', 'error'];
+  const entries = input
+    .split(',')
+    .map((item) => item.trim())
+    .filter((item): item is Prisma.LogLevel => allowed.includes(item as Prisma.LogLevel));
+  return entries.length > 0 ? entries : undefined;
+}
+
+function createClient(): PrismaClient {
+  const log = parseLogLevels(process.env.PRISMA_LOG);
+  return new PrismaClient({
+    log,
+  });
 }
 
 function createNoopClient(): PrismaClient {
-  const message = 'Prisma client is not available. Install @prisma/client or disable FF_PERSISTENCE.';
+  const message =
+    'Prisma persistence is disabled. Enable FF_PERSISTENCE or run with SEED=true to allow database access.';
   const handler: ProxyHandler<Record<string, unknown>> = {
     get(_target, prop) {
       if (prop === '$connect' || prop === '$disconnect') {
@@ -52,45 +38,26 @@ function createNoopClient(): PrismaClient {
   return new Proxy({}, handler) as unknown as PrismaClient;
 }
 
-const noopClient = createNoopClient();
-let realClient: PrismaClient | null = null;
+const shouldUseRealClient = (() => {
+  if (process.env.SEED === 'true') {
+    return true;
+  }
+  if (process.env.FF_PERSISTENCE === 'true') {
+    return true;
+  }
+  if (process.env.NODE_ENV === 'production' || process.env.NODE_ENV === 'test') {
+    return true;
+  }
+  return false;
+})();
 
-function resolveClient(): PrismaClient {
-  if (envBool('FF_PERSISTENCE', false)) {
-    if (!realClient) {
-      const ctor = loadPrismaCtor();
-      if (!ctor) {
-        throw new Error('Prisma client is not available. Install @prisma/client or disable FF_PERSISTENCE.');
-      }
-      const globalRef = globalThis as typeof globalThis & { __prisma__?: PrismaClient };
-      if (globalRef.__prisma__ && globalRef.__prisma__ !== noopClient) {
-        realClient = globalRef.__prisma__;
-      } else {
-        realClient = new ctor();
-        if (process.env.NODE_ENV !== 'production') {
-          globalRef.__prisma__ = realClient;
-        }
-      }
-    }
-    return realClient;
-  }
-  if (process.env.NODE_ENV !== 'production') {
-    (globalThis as typeof globalThis & { __prisma__?: PrismaClient }).__prisma__ = noopClient;
-  }
-  return noopClient;
+const prisma = shouldUseRealClient
+  ? globalForPrisma.prisma ?? createClient()
+  : createNoopClient();
+
+if (shouldUseRealClient && process.env.NODE_ENV !== 'production') {
+  globalForPrisma.prisma = prisma;
 }
 
-export const prisma: PrismaClient = new Proxy(noopClient, {
-  get(_target, prop, receiver) {
-    const client = resolveClient();
-    const value = Reflect.get(client as unknown as Record<string, unknown>, prop, receiver);
-    if (typeof value === 'function') {
-      return value.bind(client);
-    }
-    return value;
-  },
-  set(_target, prop, value, receiver) {
-    const client = resolveClient();
-    return Reflect.set(client as unknown as Record<string, unknown>, prop, value, receiver);
-  },
-});
+export { prisma };
+export default prisma;

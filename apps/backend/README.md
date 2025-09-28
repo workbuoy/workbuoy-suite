@@ -1,10 +1,22 @@
 # Backend seeding
 
-Run database migrations, then seed baseline roles/features:
+Standard database bootstrap commands:
 
 ```
-npm run prisma:migrate:deploy -w @workbuoy/backend
-npm run seed:roles -w @workbuoy/backend
+npm run db:deploy -w @workbuoy/backend
+npm run db:seed -w @workbuoy/backend
+```
+
+Set `SEED=true` when running against production-like environments to opt in explicitly:
+
+```
+SEED=true npm run db:seed -w @workbuoy/backend
+```
+
+Regenerate the Prisma client after schema updates with:
+
+```
+npm run db:generate -w @workbuoy/backend
 ```
 
 To verify the script without a database connection (dry run):
