@@ -4,6 +4,9 @@ import { createAuthModule } from '@workbuoy/backend-auth';
 import { swaggerRouter as buildSwaggerRouter } from './docs/swagger.js';
 import { configureRbac, RbacRouter } from '@workbuoy/backend-rbac';
 import { audit } from './audit/audit.js';
+import { healthHandler } from './http/health.js';
+import { readyHandler } from './http/ready.js';
+import { versionHandler } from './http/version.js';
 
 import { correlationHeader } from '../../../src/middleware/correlationHeader.js';
 import { wbContext } from '../../../src/middleware/wbContext.js';
@@ -104,6 +107,13 @@ const { router: authRouter } = createAuthModule({ audit });
 
 app.use('/', authRouter);
 app.use('/', buildSwaggerRouter());
+
+const api = express.Router();
+api.get('/health', healthHandler);
+api.get('/ready', readyHandler);
+api.get('/version', versionHandler);
+
+app.use('/api', api);
 
 app.use('/api/crm', crmRouter());
 app.use('/api/tasks', tasksRouter());

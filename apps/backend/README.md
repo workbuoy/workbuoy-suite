@@ -35,3 +35,9 @@ curl http://localhost:3000/metrics
 - `METRICS_BUCKETS` &mdash; comma-separated list of histogram bucket boundaries shared by backend histograms.
 
 When `METRICS_ENABLED` is true, hitting `/metrics` returns a `200` response with Prometheus text and registers default Node.js/HTTP metrics against a shared registry. The registry, default labels, and prefix are all resolved at request time so you can toggle the feature between test runs.
+
+## Ops endpoints (backend)
+- `GET /api/health` → `200` `{ "status": "ok" }`
+- `GET /api/ready`  → `200` when ready, `503` otherwise. Set `WB_CHAOS_READY=1` to force `503` (useful in tests/CI).
+- `GET /api/version` → `{ version, commit, node, uptimeSec, timestamp }`
+Tip: in CI, set `GIT_SHA=$GITHUB_SHA` for accurate commit.
