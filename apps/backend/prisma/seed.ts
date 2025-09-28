@@ -329,15 +329,23 @@ async function main() {
   console.log(`[seed] Done: roles=${normalizedRoles.length}, features=${normalizedFeatures.length}`);
 }
 
-main()
-  .then(() => prisma.$disconnect())
-  .then(() => process.exit(0))
-  .catch(async (err) => {
+async function run() {
+  let exitCode = 0;
+  try {
+    await main();
+  } catch (err) {
+    exitCode = 1;
     console.error('[seed] Failed:', err);
+  } finally {
     try {
       await prisma.$disconnect();
     } catch (disconnectErr) {
+      exitCode = 1;
       console.error('[seed] Failed to disconnect prisma:', disconnectErr);
     }
-    process.exit(1);
-  });
+  }
+
+  process.exit(exitCode);
+}
+
+run();
