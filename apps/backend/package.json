@@ -6,8 +6,8 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "build:prisma": "prisma generate --schema=prisma/schema.prisma",
-    "build:container": "npm run build:prisma && tsc -p tsconfig.container.json && node -e \"const fs=require('fs');const path=require('path');const source=path.join('dist','apps','backend','src','index.js');const target=path.join('dist','index.js');if(!fs.existsSync(source)){throw new Error('missing '+source);}fs.mkdirSync(path.dirname(target),{recursive:true});fs.copyFileSync(source,target);\"",
-    "build:container:verify": "node -e \"require('fs').accessSync('dist/index.js'); console.log('[verify] dist/index.js present')\"",
+    "build:container": "npm run build:prisma && tsc -p tsconfig.container.json && node -e \"const fs=require('fs');const path=require('path');const source=path.join('dist','apps','backend','src','index.js');const target=path.join('dist','index.js');if(!fs.existsSync(source)){throw new Error('missing '+source);}fs.mkdirSync(path.dirname(target),{recursive:true});fs.copyFileSync(source,target);fs.copyFileSync('package.json', path.join('dist','package.json'));\"",
+    "build:container:verify": "node -e \"const fs=require('fs');['dist/index.js','dist/package.json'].forEach(p=>fs.accessSync(p)); console.log('[verify] dist artifacts present');\"",
     "test": "jest --ci --runInBand --reporters=default --reporters=jest-junit --coverage",
     "test:ci": "npm run test -- --runInBand",
     "test:watch": "jest --watch",
