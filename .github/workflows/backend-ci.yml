@@ -56,6 +56,13 @@ jobs:
       - name: Backend typecheck
         run: npm run typecheck -w @workbuoy/backend
 
+      - name: Backend smoke tests (in-memory)
+        env:
+          FF_PERSISTENCE: '0'
+          WB_CHAOS_READY: '0'
+          SMOKE_PORT: 3100
+        run: npm run -w @workbuoy/backend test:smoke
+
       - name: Run backend Jest suite
         env:
           ROLES_PATH: ./scripts/fixtures/minimal-roles.json
