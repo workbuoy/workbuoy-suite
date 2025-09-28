@@ -148,14 +148,14 @@ app.use('/api/finance', financeReminderRouter());
 app.use('/api', manualCompleteRouter());
 app.use('/', metaGenesisRouter());
 
-await mountOptionalRoute(app, '/api', './routes/usage.js');
-await mountOptionalRoute(app, '/api', './routes/features.js');
-await mountOptionalRoute(app, '/api', './routes/proactivity.js');
-await mountOptionalRoute(app, '/api', './routes/admin.subscription.js');
-await mountOptionalRoute(app, '/api', './routes/admin.roles.js');
-await mountOptionalRoute(app, '/api', './routes/explainability.js');
-await mountOptionalRoute(app, '/api', './routes/proposals.js');
-await mountOptionalRoute(app, '/api', './routes/connectors.health.js');
+await mountOptionalRoute(app, '/api', '../routes/usage.js');
+await mountOptionalRoute(app, '/api', '../routes/features.js');
+await mountOptionalRoute(app, '/api', '../routes/proactivity.js');
+await mountOptionalRoute(app, '/api', '../routes/admin.subscription.js');
+await mountOptionalRoute(app, '/api', '../routes/admin.roles.js');
+await mountOptionalRoute(app, '/api', '../routes/explainability.js');
+await mountOptionalRoute(app, '/api', '../routes/proposals.js');
+await mountOptionalRoute(app, '/api', '../routes/connectors.health.js');
 
 app.use('/api', knowledgeRouter as unknown as Router);
 app.use('/api/audit', auditRouter());
@@ -164,7 +164,7 @@ app.use('/api/rbac', RbacRouter);
 if (process.env.NODE_ENV !== 'production') {
   app.use('/api', debugDlqRouter());
   app.use('/api', debugCircuitRouter());
-  await mountOptionalRoute(app, '/api', './routes/dev.runner.js');
+  await mountOptionalRoute(app, '/api', '../routes/dev.runner.js');
 }
 
 app.get('/status', async (_req, res) => {
