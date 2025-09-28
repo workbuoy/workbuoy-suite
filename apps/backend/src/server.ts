@@ -99,29 +99,22 @@ const { router: authRouter } = createAuthModule({ audit });
 app.use('/', authRouter);
 app.use('/', buildSwaggerRouter());
 
-type MaybeMiddleware =
-  | ((...args: any[]) => any)
-  | { default?: (...args: any[]) => any; router?: (...args: any[]) => any }
-  | undefined;
+// Narrow unknown module to an Express middleware/router function.
+type MiddlewareFn = (...args: any[]) => any;
 
-/**
- * Narrow a loaded module to an Express middleware/router function.
- * Accepts:
- *  - default export that is a function
- *  - named `router` export that is a function
- *  - the module itself if it's a function (some routers export function directly)
- */
-function pickMiddleware(mod: unknown): ((...args: any[]) => any) | undefined {
-  const m = mod as MaybeMiddleware;
-  const candidates = [
-    typeof m === 'function' ? (m as any) : undefined,
-    typeof m?.default === 'function' ? (m.default as any) : undefined,
-    typeof (m as any)?.router === 'function' ? ((m as any).router as any) : undefined,
-  ].filter(Boolean) as ((...args: any[]) => any)[];
+function isObject(v: unknown): v is Record<string, unknown> {
+  return !!v && typeof v === 'object';
+}
 
-  // Express routers/middleware are callables. A router also has .handle/.use typically.
-  for (const c of candidates) {
-    if (typeof c === 'function') return c;
+function asMiddleware(mod: unknown): MiddlewareFn | undefined {
+  // Some routers export the function directly
+  if (typeof mod === 'function') return mod as MiddlewareFn;
+
+  // ESM/CJS interop: default or named `router`
+  if (isObject(mod)) {
+    const anyMod = mod as Record<string, unknown>;
+    if (typeof anyMod.default === 'function') return anyMod.default as MiddlewareFn;
+    if (typeof anyMod.router === 'function') return anyMod.router as MiddlewareFn;
   }
   return undefined;
 }
@@ -130,7 +123,7 @@ async function mountOptionalRoute(app: express.Express, basePath: string, spec: 
   try {
     // Dynamic import – do not crash if missing, log and continue
     const mod = await import(spec).catch(() => undefined);
-    const mw = pickMiddleware(mod);
+    const mw = asMiddleware(mod);
     if (!mw) {
       console.warn(`[routes] Skipping ${spec}: no middleware export (got ${typeof mod}).`);
       return;
