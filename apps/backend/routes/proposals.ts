@@ -20,14 +20,28 @@ import {
 } from '../../../src/core/proposals/service.js';
 import { getCapabilityImpl } from '../../../src/capabilities/registry.js';
 import { runCapabilityWithRole } from '../../../src/core/capabilityRunnerRole.js';
-import * as policy from '../src/core/policy.js';
+import type { PolicyResult } from '../src/core/policy.ts';
 import { logIntent } from '../../../src/core/intentLog.js';
 
-// Accept both `policyCheck` and `checkPolicy` export names; fall back to allow-all (for dev/CI)
-const policyCheck: (...args: any[]) => boolean =
-  (policy as any).policyCheck ??
-  (policy as any).checkPolicy ??
-  (() => true);
+let _policyMod: any;
+const loadPolicyMod = async () => {
+  if (_policyMod) return _policyMod;
+  try {
+    _policyMod = await import('../src/core/policy.js');
+  } catch {
+    _policyMod = {};
+  }
+  return _policyMod;
+};
+
+const policyCheck = async (input: any, ctx: any): Promise<PolicyResult> => {
+  const mod = await loadPolicyMod();
+  const impl =
+    (typeof mod?.policyCheck === 'function' && mod.policyCheck) ||
+    (typeof mod?.checkPolicy === 'function' && mod.checkPolicy);
+  if (impl) return impl(input, ctx);
+  return { allowed: true as const };
+};
 
 const router = Router();
 

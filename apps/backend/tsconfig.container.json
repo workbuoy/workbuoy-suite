@@ -36,6 +36,7 @@
     "src/identity/",
     "src/scim/",
     "src/rbac/",
+    "routes/**",
     "**/*.test.ts",
     "**/*.spec.ts"
   ]

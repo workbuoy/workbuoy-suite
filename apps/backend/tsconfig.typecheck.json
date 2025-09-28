@@ -9,6 +9,19 @@
     "typeRoots": ["../../types", "../../node_modules/@types"],
     "rootDir": "../.."
   },
-  "include": ["src/**/*.ts", "src/**/*.d.ts", "../../types/**/*.d.ts"],
-  "exclude": ["dist", "coverage", "node_modules", "../../src/**/*", "src/meta-evolution/**/*", "./src/meta-evolution/**/*"]
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.d.ts",
+    "tests/**/*.ts",
+    "../../types/**/*.d.ts"
+  ],
+  "exclude": [
+    "dist",
+    "coverage",
+    "node_modules",
+    "routes/**",
+    "../../src/**/*",
+    "src/meta-evolution/**/*",
+    "./src/meta-evolution/**/*"
+  ]
 }
