@@ -20,7 +20,7 @@ import {
 } from '../../../src/core/proposals/service.js';
 import { getCapabilityImpl } from '../../../src/capabilities/registry.js';
 import { runCapabilityWithRole } from '../../../src/core/capabilityRunnerRole.js';
-import type { PolicyResult } from '../src/core/policy.ts';
+type PolicyResult = { allowed: boolean; basis?: string[] };
 import { logIntent } from '../../../src/core/intentLog.js';
 
 let _policyMod: any;

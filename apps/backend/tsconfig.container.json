@@ -1,42 +1,15 @@
 {
-  "extends": "../../tsconfig.base.json",
+  "extends": "./tsconfig.json",
   "compilerOptions": {
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
-    "target": "ES2022",
-    "lib": ["ES2022"],
-    "resolveJsonModule": true,
-    "skipLibCheck": true,
     "outDir": "dist",
-    "noEmit": false,
-    "strict": false,
-    "baseUrl": ".",
-    "typeRoots": ["../../types", "../../node_modules/@types"],
-    "paths": {
-      "@workbuoy/backend-rbac": ["../../packages/backend-rbac/src/index.ts"],
-      "@workbuoy/backend-telemetry": ["../../packages/backend-telemetry/src/index.ts"],
-      "@workbuoy/backend-metrics": ["../../packages/backend-metrics/src/index.ts"]
-    },
-    "types": ["node", "jest", "express"],
-    "rootDirs": [
-      ".",
-      "../../packages/backend-rbac/src",
-      "../../packages/backend-telemetry/src",
-      "../../packages/backend-metrics/src"
-    ]
+    "types": ["node", "express"]
   },
-  "include": ["src/**/*.ts", "src/**/*.d.ts", "../../types/**/*.d.ts"],
+  "include": [
+    "src/**/*.ts"
+  ],
   "exclude": [
-    "src/crm/",
-    "src/connectors/",
-    "src/meta-evolution/",
-    "src/metrics/",
-    "src/docs/",
-    "src/swagger.ts",
-    "src/identity/",
-    "src/scim/",
-    "src/rbac/",
     "routes/**",
+    "tests/**",
     "**/*.test.ts",
     "**/*.spec.ts"
   ]

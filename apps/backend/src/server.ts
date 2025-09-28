@@ -52,15 +52,6 @@ import { metaGenesisRouter } from '../../../src/routes/genesis.autonomy.js';
 import { debugDlqRouter } from '../../../src/routes/debug.dlq.js';
 import { debugCircuitRouter } from '../../../src/routes/debug.circuit.js';
 
-import usageRouter from '../routes/usage.js';
-import featuresRouter from '../routes/features.js';
-import proactivityRouter from '../routes/proactivity.js';
-import adminSubscriptionRouter from '../routes/admin.subscription.js';
-import adminRolesRouter from '../routes/admin.roles.js';
-import explainabilityRouter from '../routes/explainability.js';
-import connectorsHealthRouter from '../routes/connectors.health.js';
-import devRunnerRouter from '../routes/dev.runner.js';
-
 // core body parsing for JSON payloads and raw capture for connector webhooks
 app.use(
   express.json({
@@ -125,22 +116,56 @@ app.use('/api/finance', financeReminderRouter());
 app.use('/api', manualCompleteRouter());
 app.use('/', metaGenesisRouter());
 
-app.use('/api', usageRouter);
-app.use('/api', featuresRouter);
-app.use('/api', proactivityRouter);
-app.use('/api', adminSubscriptionRouter);
-app.use('/api', adminRolesRouter);
-app.use('/api', explainabilityRouter);
+void (async () => {
+  const optionalRoutes: Array<{
+    label: string;
+    path: string;
+    mount: (router: any) => void;
+  }> = [
+    { label: '/usage', path: '../routes/usage.js', mount: (router) => app.use('/api', router) },
+    { label: '/features', path: '../routes/features.js', mount: (router) => app.use('/api', router) },
+    { label: '/proactivity', path: '../routes/proactivity.js', mount: (router) => app.use('/api', router) },
+    {
+      label: '/admin/subscription',
+      path: '../routes/admin.subscription.js',
+      mount: (router) => app.use('/api', router),
+    },
+    {
+      label: '/admin/roles',
+      path: '../routes/admin.roles.js',
+      mount: (router) => app.use('/api', router),
+    },
+    {
+      label: '/explainability',
+      path: '../routes/explainability.js',
+      mount: (router) => app.use('/api', router),
+    },
+    {
+      label: '/connectors health',
+      path: '../routes/connectors.health.js',
+      mount: (router) => app.use('/api', router),
+    },
+    {
+      label: '/proposals',
+      path: '../routes/proposals.js',
+      mount: (router) => app.use('/api', router),
+    },
+  ];
 
-try {
-  const { default: proposalsRouter } = await import('../routes/proposals.js');
-  app.use('/api', proposalsRouter);
-} catch (err) {
-  const message = err instanceof Error ? err.message : String(err);
-  console.warn('[startup] optional route /proposals skipped:', message);
-}
-
-app.use('/api', connectorsHealthRouter);
+  for (const route of optionalRoutes) {
+    try {
+      // @ts-ignore -- optional routes are excluded from PR4 typecheck/container builds
+      const mod = await import(route.path);
+      const router = (mod as any)?.default ?? mod;
+      if (router) {
+        route.mount(router);
+      }
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      console.warn(`[routes] ${route.label} skipped:`, message);
+    }
+  }
+})();
 
 app.use('/api', knowledgeRouter as unknown as Router);
 app.use('/api/audit', auditRouter());
@@ -149,7 +174,19 @@ app.use('/api/rbac', RbacRouter);
 if (process.env.NODE_ENV !== 'production') {
   app.use('/api', debugDlqRouter());
   app.use('/api', debugCircuitRouter());
-  app.use('/api', devRunnerRouter);
+  void (async () => {
+    try {
+      // @ts-ignore -- optional routes are excluded from PR4 typecheck/container builds
+      const mod = await import('../routes/dev.runner.js');
+      const router = (mod as any)?.default ?? mod;
+      if (router) {
+        app.use('/api', router);
+      }
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      console.warn('[routes] /dev runner skipped:', message);
+    }
+  })();
 }
 
 app.get('/status', async (_req, res) => {

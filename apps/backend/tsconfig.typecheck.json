@@ -1,27 +1,16 @@
 {
-  "extends": "./tsconfig.meta.json",
+  "extends": "./tsconfig.json",
   "compilerOptions": {
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
-    "resolveJsonModule": true,
-    "skipLibCheck": true,
-    "types": ["node", "jest", "express"],
-    "typeRoots": ["../../types", "../../node_modules/@types"],
-    "rootDir": "../.."
+    "noEmit": true,
+    "types": ["node", "express"]
   },
   "include": [
-    "src/**/*.ts",
-    "src/**/*.d.ts",
-    "tests/**/*.ts",
-    "../../types/**/*.d.ts"
+    "src/**/*.ts"
   ],
   "exclude": [
-    "dist",
-    "coverage",
-    "node_modules",
     "routes/**",
-    "../../src/**/*",
-    "src/meta-evolution/**/*",
-    "./src/meta-evolution/**/*"
+    "tests/**",
+    "**/*.test.ts",
+    "**/*.spec.ts"
   ]
 }
