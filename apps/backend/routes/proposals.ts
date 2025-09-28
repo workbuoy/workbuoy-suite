@@ -32,17 +32,12 @@ type PolicyCheck = (input: any, ctx: any) => Promise<PolicyResult>;
  * - Faller tilbake til "allow all" for PR4-builds der modulen ikke pakkes.
  */
 async function getPolicyCheck(): Promise<PolicyCheck> {
-  try {
-    // Bygg spec som beregnet streng for å unngå TS2307 i PR4-typecheck:
-    const POLICY_SPEC = ['..', '/src/core/', 'policy.js'].join('');
-    // @ts-expect-error: modul kan mangle i PR4-build; import() bruker any-typer
-    const mod: any = await import(POLICY_SPEC).catch(() => undefined);
-    const fn: any = mod?.policyCheck ?? mod?.default;
-    if (typeof fn === 'function') {
-      return fn as PolicyCheck;
-    }
-  } catch {
-    // ignorér og fall tilbake
+  // Bygg import-spesifikasjon som beregnet streng for å unngå TS2307 i PR4-typecheck
+  const POLICY_SPEC = ['..', '/src/core/', 'policy.js'].join('');
+  const mod = (await import(POLICY_SPEC).catch(() => undefined)) as any;
+  const fn: any = mod?.policyCheck ?? mod?.default;
+  if (typeof fn === 'function') {
+    return fn as PolicyCheck;
   }
   return async () => ({ allowed: true });
 }

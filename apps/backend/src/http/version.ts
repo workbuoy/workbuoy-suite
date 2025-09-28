@@ -7,7 +7,7 @@ function readPkgVersion(): string | undefined {
   try {
     // I transpilet kode: dist/src/http/version.js → ../../package.json = dist/package.json
     // Mangler filen i image? Returner undefined (ingen crash).
-    // @ts-ignore – runtime narrow
+    // @ts-ignore – runtime narrow på require-resultatet
     return (require("../../package.json").version as string) || undefined;
   } catch {
     return undefined;
