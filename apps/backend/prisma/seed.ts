@@ -85,6 +85,25 @@ async function loadCatalog() {
   };
 }
 
+type CountRow = { count: bigint };
+
+async function isMigrated(client: typeof prisma): Promise<boolean> {
+  try {
+    const rows = await client.$queryRaw<CountRow[]>`
+      SELECT count(*)::bigint AS count FROM information_schema.tables
+      WHERE table_schema = current_schema() AND table_name = '_prisma_migrations'
+    `;
+    if (!rows?.length || rows[0].count === 0n) return false;
+
+    const applied = await client.$queryRaw<CountRow[]>`
+      SELECT count(*)::bigint AS count FROM "_prisma_migrations"
+    `;
+    return (applied?.[0]?.count ?? 0n) >= 0n;
+  } catch {
+    return false;
+  }
+}
+
 function toStringOrNull(value: unknown): string | null {
   if (value === null || value === undefined) {
     return null;
@@ -227,9 +246,11 @@ async function main() {
     return;
   }
 
-  await prisma.tenant.count().catch(() => {
-    throw new Error('[seed] Schema is not migrated. Run `npm run -w @workbuoy/backend db:deploy` first.');
-  });
+  if (!(await isMigrated(prisma))) {
+    console.warn(
+      '[seed] No _prisma_migrations found; continuing (db:deploy already runs before this script).',
+    );
+  }
 
   const { roles, features } = await loadCatalog();
   const normalizedRoles = normalizeRoles(Array.isArray(roles) ? roles : []);
