@@ -99,31 +99,46 @@ const { router: authRouter } = createAuthModule({ audit });
 app.use('/', authRouter);
 app.use('/', buildSwaggerRouter());
 
-type MiddlewareLike = any;
+type MaybeMiddleware =
+  | ((...args: any[]) => any)
+  | { default?: (...args: any[]) => any; router?: (...args: any[]) => any }
+  | undefined;
 
-const isMiddleware = (x: any) =>
-  typeof x === 'function' || (x && typeof x.handle === 'function' && typeof x.use === 'function');
+/**
+ * Narrow a loaded module to an Express middleware/router function.
+ * Accepts:
+ *  - default export that is a function
+ *  - named `router` export that is a function
+ *  - the module itself if it's a function (some routers export function directly)
+ */
+function pickMiddleware(mod: unknown): ((...args: any[]) => any) | undefined {
+  const m = mod as MaybeMiddleware;
+  const candidates = [
+    typeof m === 'function' ? (m as any) : undefined,
+    typeof m?.default === 'function' ? (m.default as any) : undefined,
+    typeof (m as any)?.router === 'function' ? ((m as any).router as any) : undefined,
+  ].filter(Boolean) as ((...args: any[]) => any)[];
 
-async function mountOptionalRoute(
-  app: express.Express,
-  basePath: string,
-  loader: () => Promise<any>,
-) {
+  // Express routers/middleware are callables. A router also has .handle/.use typically.
+  for (const c of candidates) {
+    if (typeof c === 'function') return c;
+  }
+  return undefined;
+}
+
+async function mountOptionalRoute(app: express.Express, basePath: string, spec: string) {
   try {
-    const mod = await loader();
-    const candidate: MiddlewareLike =
-      mod?.default ?? mod?.router ?? mod?.routes ?? (typeof mod === 'function' ? mod : null);
-
-    if (isMiddleware(candidate)) {
-      app.use(basePath, candidate);
-      console.log(`[routes] mounted ${basePath}`);
-    } else {
-      console.warn(
-        `[routes] skipped ${basePath}: not a middleware (got ${typeof candidate || typeof mod})`,
-      );
+    // Dynamic import – do not crash if missing, log and continue
+    const mod = await import(spec).catch(() => undefined);
+    const mw = pickMiddleware(mod);
+    if (!mw) {
+      console.warn(`[routes] Skipping ${spec}: no middleware export (got ${typeof mod}).`);
+      return;
     }
-  } catch (err: any) {
-    console.warn(`[routes] skipped ${basePath}: ${err?.message || err}`);
+    app.use(basePath, mw);
+    console.log(`[routes] Mounted ${spec} at ${basePath}`);
+  } catch (err) {
+    console.warn(`[routes] Skipping ${spec} due to load error:`, (err as Error)?.message);
   }
 }
 
@@ -145,14 +160,14 @@ app.use('/api', manualCompleteRouter());
 app.use('/', metaGenesisRouter());
 
 void (async () => {
-  await mountOptionalRoute(app, '/api', () => import('../routes/usage.js'));
-  await mountOptionalRoute(app, '/api', () => import('../routes/features.js'));
-  await mountOptionalRoute(app, '/api', () => import('../routes/proactivity.js'));
-  await mountOptionalRoute(app, '/api', () => import('../routes/admin.subscription.js'));
-  await mountOptionalRoute(app, '/api', () => import('../routes/admin.roles.js'));
-  await mountOptionalRoute(app, '/api', () => import('../routes/explainability.js'));
-  await mountOptionalRoute(app, '/api', () => import('../routes/connectors.health.js'));
-  await mountOptionalRoute(app, '/api/proposals', () => import('../routes/proposals.js'));
+  await mountOptionalRoute(app, '/api', '../routes/usage.js');
+  await mountOptionalRoute(app, '/api', '../routes/features.js');
+  await mountOptionalRoute(app, '/api', '../routes/proactivity.js');
+  await mountOptionalRoute(app, '/api', '../routes/admin.subscription.js');
+  await mountOptionalRoute(app, '/api', '../routes/admin.roles.js');
+  await mountOptionalRoute(app, '/api', '../routes/explainability.js');
+  await mountOptionalRoute(app, '/api', '../routes/connectors.health.js');
+  await mountOptionalRoute(app, '/api/proposals', '../routes/proposals.js');
 })();
 
 app.use('/api', knowledgeRouter as unknown as Router);
@@ -163,7 +178,7 @@ if (process.env.NODE_ENV !== 'production') {
   app.use('/api', debugDlqRouter());
   app.use('/api', debugCircuitRouter());
   void (async () => {
-    await mountOptionalRoute(app, '/api', () => import('../routes/dev.runner.js'));
+    await mountOptionalRoute(app, '/api', '../routes/dev.runner.js');
   })();
 }
 
