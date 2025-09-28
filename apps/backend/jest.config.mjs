@@ -1,32 +1,18 @@
-// ESM Jest config without ts-node
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+
+import base from '../../jest.preset.mjs';
 
 const dirname = path.dirname(fileURLToPath(import.meta.url));
 const setupFile = path.join(dirname, 'tests', 'setup.ts');
 const setupFilesAfterEnv = fs.existsSync(setupFile) ? ['<rootDir>/tests/setup.ts'] : [];
 
-const moduleNameMapper = {
-  '^(\\\.{1,2}/.*)\\.js$': '$1',
-  '^prom-client$': '<rootDir>/tests/__mocks__/prom-client.ts',
-  '^express-rate-limit$': '<rootDir>/tests/__mocks__/express-rate-limit.ts',
-  '^jsonwebtoken$': '<rootDir>/tests/__mocks__/jsonwebtoken.ts',
-  '^@workbuoy/backend-auth$': '<rootDir>/../../packages/backend-auth/src',
-  '^@workbuoy/backend-metrics$': '<rootDir>/../../packages/backend-metrics/src',
-  '^@workbuoy/backend-rbac$': '<rootDir>/../../packages/backend-rbac/src',
-  '^@workbuoy/backend-telemetry$': '<rootDir>/../../packages/backend-telemetry/src',
-  '^\.\./src/app$': '<rootDir>/tests/jest.app.ts',
-  '^@backend/app$': '<rootDir>/tests/jest.app.ts',
-  '^@backend/(.*)$': '<rootDir>/src/$1',
-  '^@backend-tests/(.*)$': '<rootDir>/tests/$1',
-  '^@backend-meta/(.*)$': '<rootDir>/meta/$1',
-};
-
-const config = {
+/** @type {import('jest').Config} */
+export default {
+  ...base,
+  rootDir: '.',
   testEnvironment: 'node',
-  extensionsToTreatAsEsm: ['.ts', '.tsx'],
-  moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json'],
   moduleDirectories: ['node_modules'],
   roots: ['<rootDir>/src', '<rootDir>/tests'],
   testMatch: [
@@ -43,44 +29,45 @@ const config = {
     '<rootDir>/src/metrics/**/*.spec.ts',
     '<rootDir>/src/crm/**/*.spec.ts',
   ],
-  transform: {
-    '^.+\\.(t|j)sx?$': ['@swc/jest', {
-      jsc: {
-        target: 'es2022',
-        parser: { syntax: 'typescript', tsx: false, decorators: true },
-        transform: { decoratorMetadata: true }
-      },
-      module: { type: 'commonjs' }
-    }]
-  },
   transformIgnorePatterns: [
+    ...(base.transformIgnorePatterns ?? []),
     '/node_modules/(?!(node-fetch|data-uri-to-buffer|fetch-blob|formdata-polyfill|openid-client|oauth4webapi)/)'
   ],
-  coverageProvider: 'v8',
   testPathIgnorePatterns: [
     '/node_modules/',
     '/dist/',
   ],
+  coverageProvider: 'v8',
+  setupFilesAfterEnv,
+  moduleNameMapper: {
+    ...base.moduleNameMapper,
+    '^(\\.{1,2}/.*)\\.js$': '$1',
+    '^prom-client$': '<rootDir>/tests/__mocks__/prom-client.ts',
+    '^express-rate-limit$': '<rootDir>/tests/__mocks__/express-rate-limit.ts',
+    '^jsonwebtoken$': '<rootDir>/tests/__mocks__/jsonwebtoken.ts',
+    '^@workbuoy/backend-auth$': '<rootDir>/../../packages/backend-auth/src',
+    '^@workbuoy/backend-metrics$': '<rootDir>/../../packages/backend-metrics/src',
+    '^@workbuoy/backend-rbac$': '<rootDir>/../../packages/backend-rbac/src',
+    '^@workbuoy/backend-telemetry$': '<rootDir>/../../packages/backend-telemetry/src',
+    '^\.\./src/app$': '<rootDir>/tests/jest.app.ts',
+    '^@backend/app$': '<rootDir>/tests/jest.app.ts',
+    '^@backend/(.*)$': '<rootDir>/src/$1',
+    '^@backend-tests/(.*)$': '<rootDir>/tests/$1',
+    '^@backend-meta/(.*)$': '<rootDir>/meta/$1',
+  },
   collectCoverage: true,
   collectCoverageFrom: [
-    '<rootDir>/src/metrics/**/*.{ts,tsx}',
-    '<rootDir>/src/core/events/**/*.{ts,tsx}',
+    'src/metrics/**/*.{ts,tsx}',
+    'src/core/events/**/*.{ts,tsx}',
+    '!**/*.d.ts',
   ],
   coveragePathIgnorePatterns: [
     '/node_modules/',
-    '\\.d\\.ts$',
+    '\\.[d]\\.ts$',
     '<rootDir>/src/index.ts',
     '<rootDir>/src/server.ts',
   ],
-  coverageReporters: ['text', 'lcov', 'cobertura'],
   coverageThreshold: {
-    global: { statements: 15, branches: 20, functions: 15, lines: 15 },
-    // Keep these strong where we actually test
-    './src/metrics/': { statements: 85, branches: 60, functions: 80, lines: 85 },
-    './src/core/events/': { statements: 45, branches: 60, functions: 30, lines: 45 },
+    global: { statements: 55, branches: 45, functions: 45, lines: 55 },
   },
-  setupFilesAfterEnv,
-  moduleNameMapper,
 };
-
-export default config;

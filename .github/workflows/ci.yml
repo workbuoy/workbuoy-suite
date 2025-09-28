@@ -48,6 +48,10 @@ jobs:
         shell: bash
         run: scripts/ci/sanitize-npm-proxy.sh
       - run: npm ci
+      - name: Generate Prisma client
+        run: npm run prisma:generate
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/wb?schema=public
       - run: npm run typecheck
       - run: npm run typecheck:meta --if-present
 
@@ -70,6 +74,10 @@ jobs:
         shell: bash
         run: scripts/ci/sanitize-npm-proxy.sh
       - run: npm ci
+      - name: Generate Prisma client
+        run: npm run prisma:generate
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/wb?schema=public
       - run: npm test -- --ci --reporters=default --reporters=jest-junit
         env:
           CI: "true"
