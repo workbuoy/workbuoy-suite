@@ -14,7 +14,7 @@
     "typecheck": "tsc --noEmit -p tsconfig.typecheck.json",
     "db:generate": "prisma generate --schema=prisma/schema.prisma",
     "db:deploy": "prisma migrate deploy --schema=prisma/schema.prisma",
-    "db:seed": "node --import tsx prisma/seed.ts",
+    "db:seed": "npm run db:deploy && node --import tsx prisma/seed.ts",
     "db:prepare": "npm run db:generate && npm run db:deploy",
     "seed:all": "npm run db:deploy && npm run db:seed",
     "prisma:generate": "npm run db:generate",
