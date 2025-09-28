@@ -222,3 +222,4 @@ router.post('/proposals/:id/reject', requiresProMode(ProactivityMode.Ambisiøs),
 });
 
 export default router;
+export { router };

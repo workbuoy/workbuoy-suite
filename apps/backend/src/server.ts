@@ -99,6 +99,34 @@ const { router: authRouter } = createAuthModule({ audit });
 app.use('/', authRouter);
 app.use('/', buildSwaggerRouter());
 
+type MiddlewareLike = any;
+
+const isMiddleware = (x: any) =>
+  typeof x === 'function' || (x && typeof x.handle === 'function' && typeof x.use === 'function');
+
+async function mountOptionalRoute(
+  app: express.Express,
+  basePath: string,
+  loader: () => Promise<any>,
+) {
+  try {
+    const mod = await loader();
+    const candidate: MiddlewareLike =
+      mod?.default ?? mod?.router ?? mod?.routes ?? (typeof mod === 'function' ? mod : null);
+
+    if (isMiddleware(candidate)) {
+      app.use(basePath, candidate);
+      console.log(`[routes] mounted ${basePath}`);
+    } else {
+      console.warn(
+        `[routes] skipped ${basePath}: not a middleware (got ${typeof candidate || typeof mod})`,
+      );
+    }
+  } catch (err: any) {
+    console.warn(`[routes] skipped ${basePath}: ${err?.message || err}`);
+  }
+}
+
 const api = express.Router();
 api.get('/health', healthHandler);
 api.get('/ready', readyHandler);
@@ -117,54 +145,14 @@ app.use('/api', manualCompleteRouter());
 app.use('/', metaGenesisRouter());
 
 void (async () => {
-  const optionalRoutes: Array<{
-    label: string;
-    path: string;
-    mount: (router: any) => void;
-  }> = [
-    { label: '/usage', path: '../routes/usage.js', mount: (router) => app.use('/api', router) },
-    { label: '/features', path: '../routes/features.js', mount: (router) => app.use('/api', router) },
-    { label: '/proactivity', path: '../routes/proactivity.js', mount: (router) => app.use('/api', router) },
-    {
-      label: '/admin/subscription',
-      path: '../routes/admin.subscription.js',
-      mount: (router) => app.use('/api', router),
-    },
-    {
-      label: '/admin/roles',
-      path: '../routes/admin.roles.js',
-      mount: (router) => app.use('/api', router),
-    },
-    {
-      label: '/explainability',
-      path: '../routes/explainability.js',
-      mount: (router) => app.use('/api', router),
-    },
-    {
-      label: '/connectors health',
-      path: '../routes/connectors.health.js',
-      mount: (router) => app.use('/api', router),
-    },
-    {
-      label: '/proposals',
-      path: '../routes/proposals.js',
-      mount: (router) => app.use('/api', router),
-    },
-  ];
-
-  for (const route of optionalRoutes) {
-    try {
-      // @ts-ignore -- optional routes are excluded from PR4 typecheck/container builds
-      const mod = await import(route.path);
-      const router = (mod as any)?.default ?? mod;
-      if (router) {
-        route.mount(router);
-      }
-    } catch (err) {
-      const message = err instanceof Error ? err.message : String(err);
-      console.warn(`[routes] ${route.label} skipped:`, message);
-    }
-  }
+  await mountOptionalRoute(app, '/api', () => import('../routes/usage.js'));
+  await mountOptionalRoute(app, '/api', () => import('../routes/features.js'));
+  await mountOptionalRoute(app, '/api', () => import('../routes/proactivity.js'));
+  await mountOptionalRoute(app, '/api', () => import('../routes/admin.subscription.js'));
+  await mountOptionalRoute(app, '/api', () => import('../routes/admin.roles.js'));
+  await mountOptionalRoute(app, '/api', () => import('../routes/explainability.js'));
+  await mountOptionalRoute(app, '/api', () => import('../routes/connectors.health.js'));
+  await mountOptionalRoute(app, '/api/proposals', () => import('../routes/proposals.js'));
 })();
 
 app.use('/api', knowledgeRouter as unknown as Router);
@@ -175,17 +163,7 @@ if (process.env.NODE_ENV !== 'production') {
   app.use('/api', debugDlqRouter());
   app.use('/api', debugCircuitRouter());
   void (async () => {
-    try {
-      // @ts-ignore -- optional routes are excluded from PR4 typecheck/container builds
-      const mod = await import('../routes/dev.runner.js');
-      const router = (mod as any)?.default ?? mod;
-      if (router) {
-        app.use('/api', router);
-      }
-    } catch (err) {
-      const message = err instanceof Error ? err.message : String(err);
-      console.warn('[routes] /dev runner skipped:', message);
-    }
+    await mountOptionalRoute(app, '/api', () => import('../routes/dev.runner.js'));
   })();
 }
 
