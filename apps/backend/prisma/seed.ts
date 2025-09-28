@@ -2,6 +2,7 @@ import prisma from '../src/db/prisma.js';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { createRequire } from 'node:module';
+import type { PrismaClient } from '@prisma/client';
 
 const requireFromHere = createRequire(import.meta.url);
 
@@ -99,6 +100,17 @@ async function isMigrated(client: typeof prisma): Promise<boolean> {
       SELECT count(*)::bigint AS count FROM "_prisma_migrations"
     `;
     return (applied?.[0]?.count ?? 0n) >= 0n;
+  } catch {
+    return false;
+  }
+}
+
+async function tableExists(client: PrismaClient, tableName: string): Promise<boolean> {
+  try {
+    const rows = await client.$queryRaw<{ reg: string | null }[]>`
+      SELECT to_regclass(${tableName}) AS reg
+    `;
+    return !!rows?.[0]?.reg;
   } catch {
     return false;
   }
@@ -256,6 +268,30 @@ async function main() {
   const normalizedRoles = normalizeRoles(Array.isArray(roles) ? roles : []);
   const normalizedFeatures = normalizeFeatures(Array.isArray(features) ? features : []);
 
+  const haveTenant = await tableExists(prisma, '"Tenant"');
+  const haveFeature = await tableExists(prisma, '"Feature"');
+  const haveRole = await tableExists(prisma, '"Role"');
+  const haveRoleBinding = await tableExists(prisma, '"RoleBinding"');
+
+  if (!haveTenant) {
+    console.warn(
+      '[seed] Skipping tenant/role/feature seed: table "Tenant" is missing in current schema.'
+    );
+    return;
+  }
+  if (!haveFeature) {
+    console.warn('[seed] Table "Feature" missing; feature upserts will be skipped.');
+  }
+  if (!haveRole) {
+    console.warn('[seed] Table "Role" missing; role upserts will be skipped.');
+  }
+  if (!haveRoleBinding) {
+    console.warn('[seed] Table "RoleBinding" missing; admin binding will be skipped.');
+  }
+
+  let seededRoles = 0;
+  let seededFeatures = 0;
+
   await prisma.$transaction(async (tx) => {
     const systemTenant = await tx.tenant.upsert({
       where: { slug: 'system' },
@@ -263,91 +299,99 @@ async function main() {
       update: { name: 'System' },
     });
 
-    for (const feature of normalizedFeatures) {
-      const createData = {
-        id: feature.id,
-        title: feature.title,
-        ...(feature.description !== null
-          ? { description: feature.description }
-          : {}),
-        ...(feature.defaultAutonomyCap !== undefined
-          ? { defaultAutonomyCap: feature.defaultAutonomyCap }
-          : {}),
-        capabilities: feature.capabilities,
-        ...(feature.metadata !== undefined ? { metadata: feature.metadata } : {}),
-      } as const;
+    if (haveFeature) {
+      for (const feature of normalizedFeatures) {
+        const createData = {
+          id: feature.id,
+          title: feature.title,
+          ...(feature.description !== null
+            ? { description: feature.description }
+            : {}),
+          ...(feature.defaultAutonomyCap !== undefined
+            ? { defaultAutonomyCap: feature.defaultAutonomyCap }
+            : {}),
+          capabilities: feature.capabilities,
+          ...(feature.metadata !== undefined ? { metadata: feature.metadata } : {}),
+        } as const;
 
-      const updateData = {
-        title: feature.title,
-        description: feature.description ?? null,
-        ...(feature.defaultAutonomyCap !== undefined
-          ? { defaultAutonomyCap: feature.defaultAutonomyCap }
-          : {}),
-        capabilities: feature.capabilities,
-        ...(feature.metadata !== undefined ? { metadata: feature.metadata } : {}),
-      } as const;
+        const updateData = {
+          title: feature.title,
+          description: feature.description ?? null,
+          ...(feature.defaultAutonomyCap !== undefined
+            ? { defaultAutonomyCap: feature.defaultAutonomyCap }
+            : {}),
+          capabilities: feature.capabilities,
+          ...(feature.metadata !== undefined ? { metadata: feature.metadata } : {}),
+        } as const;
 
-      await tx.feature.upsert({
-        where: { id: feature.id },
-        create: createData,
-        update: updateData,
-      });
-    }
-
-    for (const role of normalizedRoles) {
-      const createData = {
-        role_id: role.id,
-        title: role.title,
-        ...(role.description !== null ? { description: role.description } : {}),
-        inherits: role.inherits,
-        ...(role.featureCaps !== undefined ? { featureCaps: role.featureCaps } : {}),
-        ...(role.scopeHints !== undefined ? { scopeHints: role.scopeHints } : {}),
-        ...(role.profile !== undefined ? { profile: role.profile } : {}),
-      } as const;
-
-      const updateData = {
-        title: role.title,
-        description: role.description ?? null,
-        inherits: role.inherits,
-        ...(role.featureCaps !== undefined ? { featureCaps: role.featureCaps } : {}),
-        ...(role.scopeHints !== undefined ? { scopeHints: role.scopeHints } : {}),
-        ...(role.profile !== undefined ? { profile: role.profile } : {}),
-      } as const;
-
-      await tx.role.upsert({
-        where: { role_id: role.id },
-        create: createData,
-        update: updateData,
-      });
-    }
-
-    try {
-      const admin = await tx.role.findUnique({ where: { role_id: 'admin' } });
-      if (admin) {
-        await tx.roleBinding.deleteMany({
-          where: {
-            tenantId: systemTenant.id,
-            role: admin.role_id,
-            group: 'system-admins',
-          },
+        await tx.feature.upsert({
+          where: { id: feature.id },
+          create: createData,
+          update: updateData,
         });
-        await tx.roleBinding.create({
-          data: {
-            tenantId: systemTenant.id,
-            role: admin.role_id,
-            group: 'system-admins',
-          },
-        });
+        seededFeatures += 1;
       }
-    } catch (err) {
-      const message =
-        err instanceof Error ? err.message : '[unknown error while creating role binding]';
-      console.warn('[seed] roleBinding table not available, skipping binding');
-      console.warn(message);
+    }
+
+    if (haveRole) {
+      for (const role of normalizedRoles) {
+        const createData = {
+          role_id: role.id,
+          title: role.title,
+          ...(role.description !== null ? { description: role.description } : {}),
+          inherits: role.inherits,
+          ...(role.featureCaps !== undefined ? { featureCaps: role.featureCaps } : {}),
+          ...(role.scopeHints !== undefined ? { scopeHints: role.scopeHints } : {}),
+          ...(role.profile !== undefined ? { profile: role.profile } : {}),
+        } as const;
+
+        const updateData = {
+          title: role.title,
+          description: role.description ?? null,
+          inherits: role.inherits,
+          ...(role.featureCaps !== undefined ? { featureCaps: role.featureCaps } : {}),
+          ...(role.scopeHints !== undefined ? { scopeHints: role.scopeHints } : {}),
+          ...(role.profile !== undefined ? { profile: role.profile } : {}),
+        } as const;
+
+        await tx.role.upsert({
+          where: { role_id: role.id },
+          create: createData,
+          update: updateData,
+        });
+        seededRoles += 1;
+      }
+    }
+
+    if (haveRoleBinding && haveRole) {
+      try {
+        const admin = await tx.role.findUnique({ where: { role_id: 'admin' } });
+        if (admin) {
+          await tx.roleBinding.deleteMany({
+            where: {
+              tenantId: systemTenant.id,
+              role: admin.role_id,
+              group: 'system-admins',
+            },
+          });
+          await tx.roleBinding.create({
+            data: {
+              tenantId: systemTenant.id,
+              role: admin.role_id,
+              group: 'system-admins',
+            },
+          });
+        }
+      } catch (err) {
+        const message =
+          err instanceof Error ? err.message : '[unknown error while creating role binding]';
+        console.warn('[seed] roleBinding operation failed; skipping binding');
+        console.warn(message);
+      }
     }
   });
 
-  console.log(`[seed] Done: roles=${normalizedRoles.length}, features=${normalizedFeatures.length}`);
+  console.log(`[seed] Done: roles=${seededRoles}, features=${seededFeatures}`);
 }
 
 async function run() {
