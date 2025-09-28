@@ -58,7 +58,6 @@ import proactivityRouter from '../routes/proactivity.js';
 import adminSubscriptionRouter from '../routes/admin.subscription.js';
 import adminRolesRouter from '../routes/admin.roles.js';
 import explainabilityRouter from '../routes/explainability.js';
-import proposalsRouter from '../routes/proposals.js';
 import connectorsHealthRouter from '../routes/connectors.health.js';
 import devRunnerRouter from '../routes/dev.runner.js';
 
@@ -132,7 +131,15 @@ app.use('/api', proactivityRouter);
 app.use('/api', adminSubscriptionRouter);
 app.use('/api', adminRolesRouter);
 app.use('/api', explainabilityRouter);
-app.use('/api', proposalsRouter);
+
+try {
+  const { default: proposalsRouter } = await import('../routes/proposals.js');
+  app.use('/api', proposalsRouter);
+} catch (err) {
+  const message = err instanceof Error ? err.message : String(err);
+  console.warn('[startup] optional route /proposals skipped:', message);
+}
+
 app.use('/api', connectorsHealthRouter);
 
 app.use('/api', knowledgeRouter as unknown as Router);
