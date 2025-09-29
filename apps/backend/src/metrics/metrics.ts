@@ -30,7 +30,9 @@ export async function mountMetrics(app: Express): Promise<boolean> {
   }
 
   try {
-    const mod = await import("@workbuoy/backend-metrics/dist/index.js");
+    const pkgSpec: string =
+      process.env.WB_METRICS_SPEC ?? "@workbuoy/backend-metrics/dist/index.js";
+    const mod = await import(pkgSpec);
     const mw = asMw(mod);
     if (!mw) {
       console.warn("[metrics] export not callable, mounting fallback");
