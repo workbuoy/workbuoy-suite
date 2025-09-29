@@ -1,0 +1,49 @@
+name: ui
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'packages/ui/**'
+      - '.github/workflows/ui.yml'
+  pull_request:
+    paths:
+      - 'packages/ui/**'
+      - '.github/workflows/ui.yml'
+
+jobs:
+  ui:
+    runs-on: ubuntu-latest
+    env:
+      CI: 'true'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Cache SWC artifacts
+        uses: actions/cache@v4
+        with:
+          path: node_modules/.cache/swc
+          key: ${{ runner.os }}-swc-${{ hashFiles('package-lock.json') }}
+
+      - name: Sanitize npm proxy config (legacy http-proxy)
+        shell: bash
+        run: scripts/ci/sanitize-npm-proxy.sh
+
+      - name: Install dependencies
+        run: npm ci --omit=optional --no-audit --fund=false
+
+      - name: Lint UI package
+        run: npm run lint -w @workbuoy/ui
+
+      - name: Test UI package
+        run: npm run test -w @workbuoy/ui
+
+      - name: Build Storybook
+        run: npm run -w @workbuoy/ui build:storybook

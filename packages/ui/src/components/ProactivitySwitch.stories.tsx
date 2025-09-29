@@ -4,7 +4,7 @@ import { useState } from "react";
 import type { Mode, ProactivitySwitchProps } from "./ProactivitySwitch";
 import { ProactivitySwitch } from "./ProactivitySwitch";
 
-const meta: Meta<ProactivitySwitchProps> = {
+const meta = {
   title: "Components/ProactivitySwitch",
   component: ProactivitySwitch,
   args: {
@@ -29,17 +29,15 @@ const meta: Meta<ProactivitySwitchProps> = {
       action: "changed",
     },
   },
-};
+} satisfies Meta<typeof ProactivitySwitch>;
 
 export default meta;
 
-type Story = StoryObj<ProactivitySwitchProps>;
-
-export const Default: Story = {
+export const Default = {
   render: (args: ProactivitySwitchProps) => <ProactivitySwitch {...args} />,
-};
+} satisfies StoryObj<typeof ProactivitySwitch>;
 
-export const Controlled: Story = {
+export const Controlled = {
   render: (args: ProactivitySwitchProps) => {
     const [mode, setMode] = useState<Mode>("reactive");
 
@@ -63,4 +61,4 @@ export const Controlled: Story = {
       reactive: "Reactive",
     },
   },
-};
+} satisfies StoryObj<typeof ProactivitySwitch>;
