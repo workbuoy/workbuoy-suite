@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react";
 import { useState } from "react";
 
 import FlipCard from "./FlipCard";
+import type { FlipCardProps } from "./FlipCard";
 
 const meta: Meta<typeof FlipCard> = {
   title: "Components/FlipCard",
@@ -43,11 +44,11 @@ export default meta;
 type Story = StoryObj<typeof FlipCard>;
 
 export const Default: Story = {
-  render: (args) => <FlipCard {...args} />,
+  render: (args: FlipCardProps) => <FlipCard {...args} />,
 };
 
 export const Controlled: Story = {
-  render: (args) => {
+  render: (args: FlipCardProps) => {
     const [isFlipped, setIsFlipped] = useState(false);
 
     return (

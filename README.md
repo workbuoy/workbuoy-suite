@@ -13,21 +13,18 @@ What’s here
 - deploy/ — Helm charts & k8s manifests
 - docs/ — guides, ADRs, policies
 
-Quick start
------------
+Quickstart
+----------
 
-```
-git clean -fdx         # clean workspace (removes old node_modules, builds)
-npm ci                 # install for the workspace
-npm run typecheck      # types across apps
-npm test               # tests across apps
-# (optional) generate prisma client + seed baseline roles/features
-npm run prisma:generate -w @workbuoy/backend
-npm run prisma:migrate:deploy -w @workbuoy/backend
-npm run seed:dry-run   -w @workbuoy/backend  # CI-safe
-# run apps
-npm run -w @workbuoy/backend start  # adjust if start script exists
-npm run -w @workbuoy/frontend dev   # dev server
+- Install dependencies: `npm ci`
+- Run backend smoke tests to verify core routes: `npm run -w @workbuoy/backend test:smoke`
+- Persistence workflow:
+  1. `npm run db:prepare -w @workbuoy/backend` (generate Prisma client → deploy migrations)
+  2. `npm run db:seed -w @workbuoy/backend` to load baseline data
+- Run the backend locally with optional routes disabled:
+
+```bash
+WB_SKIP_OPTIONAL_ROUTES=1 node --import tsx apps/backend/src/index.ts
 ```
 
 ### Backend metrics
@@ -55,6 +52,11 @@ Docs
 - [CI Notes](docs/CI_NOTES.md)
 - [Governance](docs/GOVERNANCE.md)
 - [Workbuoy Architecture (Core/Flex/Secure + Navi/Buoy AI/Roles/Proactivity)](docs/architecture/workbuoy-architecture.md)
+
+UI components
+-------------
+
+- [@workbuoy/ui component library](packages/ui/README.md)
 
 Governance
 ----------

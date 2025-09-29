@@ -36,11 +36,11 @@ export default meta;
 type Story = StoryObj<ProactivitySwitchProps>;
 
 export const Default: Story = {
-  render: (args) => <ProactivitySwitch {...args} />,
+  render: (args: ProactivitySwitchProps) => <ProactivitySwitch {...args} />,
 };
 
 export const Controlled: Story = {
-  render: (args) => {
+  render: (args: ProactivitySwitchProps) => {
     const [mode, setMode] = useState<Mode>("reactive");
 
     return (

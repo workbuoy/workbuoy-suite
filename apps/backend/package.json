@@ -1,6 +1,6 @@
 {
   "name": "@workbuoy/backend",
-  "version": "1.0.0-pr-an",
+  "version": "1.0.1",
   "private": true,
   "type": "module",
   "scripts": {
