@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { useState } from "react";
 
-import type { Mode, ProactivitySwitchProps } from "./ProactivitySwitch";
-import { ProactivitySwitch } from "./ProactivitySwitch";
+import type { Mode, ProactivitySwitchProps } from "./ProactivitySwitch.js";
+import { ProactivitySwitch } from "./ProactivitySwitch.js";
 
 const meta = {
   title: "Components/ProactivitySwitch",
@@ -46,7 +46,7 @@ export const Controlled = {
         <ProactivitySwitch
           {...args}
           value={mode}
-          onChange={(next) => {
+          onChange={(next: Mode) => {
             setMode(next);
             args.onChange?.(next);
           }}

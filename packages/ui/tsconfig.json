@@ -7,8 +7,7 @@
     "types": [
       "vitest/globals",
       "vitest/importMeta",
-      "@testing-library/jest-dom",
-      "storybook__react"
+      "@testing-library/jest-dom"
     ]
   },
   "include": [

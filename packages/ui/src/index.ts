@@ -1,5 +1,5 @@
-export { default as FlipCard } from "./components/FlipCard";
-export type { FlipCardProps } from "./components/FlipCard";
+export { default as FlipCard } from "./components/FlipCard.js";
+export type { FlipCardProps } from "./components/FlipCard.js";
 
-export { default as ProactivitySwitch } from "./components/ProactivitySwitch";
-export * from "./components/ProactivitySwitch";
+export { default as ProactivitySwitch } from "./components/ProactivitySwitch.js";
+export * from "./components/ProactivitySwitch.js";

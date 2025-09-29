@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { useState } from "react";
 
-import FlipCard from "./FlipCard";
-import type { FlipCardProps } from "./FlipCard";
+import FlipCard from "./FlipCard.js";
+import type { FlipCardProps } from "./FlipCard.js";
 
 const meta = {
   title: "Components/FlipCard",

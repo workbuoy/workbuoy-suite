@@ -1,8 +1,8 @@
 import { act, render, screen } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
+import { userEvent } from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
-import FlipCard from "./FlipCard";
+import FlipCard from "./FlipCard.js";
 
 describe("FlipCard", () => {
   it("toggles aria-pressed on click when uncontrolled", async () => {
