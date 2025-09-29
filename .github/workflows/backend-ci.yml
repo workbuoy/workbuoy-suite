@@ -61,7 +61,12 @@ jobs:
           FF_PERSISTENCE: '0'
           WB_CHAOS_READY: '0'
           SMOKE_PORT: 3100
-        run: npm run -w @workbuoy/backend test:smoke
+          CRM_ENABLED: 'true'
+          METRICS_ENABLED: 'true'
+          NODE_ENV: test
+        run: |
+          npm run -w @workbuoy/backend test:smoke:crm
+          npm run -w @workbuoy/backend test:smoke:metrics
 
       - name: Run backend Jest suite
         env:

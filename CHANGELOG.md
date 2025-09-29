@@ -1,3 +1,7 @@
+## PR13 – CRM smoke-tester
+
+### Added – CRM smoke-tester og /metrics-validering.
+
 ## PR9 – Release & polish
 
 ### Features

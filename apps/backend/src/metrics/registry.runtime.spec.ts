@@ -63,7 +63,10 @@ describe('metrics registry runtime behavior', () => {
     expect(response.text).toContain('wb_process_cpu_user_seconds_total');
     expect(response.text).toContain('service="backend"');
 
-    expect(registry.setDefaultLabels).toHaveBeenCalledWith({ service: 'backend' });
+    // Tillat flere default labels (service_name, version) – verifiser at 'service' finnes.
+    expect(registry.setDefaultLabels).toHaveBeenCalledWith(
+      expect.objectContaining({ service: 'backend' })
+    );
     expect(metricsSpy).toHaveBeenCalled();
 
     const promClient = await import('prom-client');

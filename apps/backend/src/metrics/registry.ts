@@ -1,5 +1,17 @@
 import { collectDefaultMetrics, Registry } from 'prom-client';
+import pkg from '../../package.json' with { type: 'json' };
 import { getDefaultLabels, getMetricsPrefix, isMetricsEnabled } from '../observability/metricsConfig.js';
+
+type PackageJson = { version?: string };
+
+const packageJson = pkg as PackageJson;
+const PACKAGE_VERSION =
+  typeof packageJson?.version === 'string' ? packageJson.version : 'dev';
+
+const BASE_DEFAULT_LABELS: Record<string, string> = {
+  service_name: 'workbuoy-backend',
+  version: PACKAGE_VERSION,
+};
 
 let registry: Registry | null = null;
 let defaultMetricsRegistered = false;
@@ -7,10 +19,8 @@ let defaultMetricsRegistered = false;
 export function getRegistry(): Registry {
   if (!registry) {
     registry = new Registry();
-    const labels = getDefaultLabels();
-    if (labels && Object.keys(labels).length > 0) {
-      registry.setDefaultLabels(labels);
-    }
+    const labels = { ...BASE_DEFAULT_LABELS, ...getDefaultLabels() };
+    registry.setDefaultLabels(labels);
   }
 
   return registry;

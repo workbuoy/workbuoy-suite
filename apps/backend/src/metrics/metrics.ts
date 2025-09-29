@@ -1,6 +1,6 @@
 import type { Express, Request, Response } from "express";
 import { Counter, Histogram } from "prom-client";
-import { getRegistry } from "./registry.js";
+import { ensureDefaultNodeMetrics, getRegistry } from "./registry.js";
 import { getBuckets, getMetricsPrefix, isMetricsEnabled } from "../observability/metricsConfig.js";
 
 const SKIP_OPTIONAL = process.env.WB_SKIP_OPTIONAL_ROUTES === "1";
@@ -54,13 +54,15 @@ function mountFallback(app: Express) {
   }
   fallbackMounted = true;
   app.get("/metrics", async (_req: Request, res: Response) => {
-    res.type("text/plain");
     try {
+      ensureDefaultNodeMetrics();
       const registry = getRegistry();
       const body = await registry.metrics();
+      res.set("Content-Type", registry.contentType);
       res.status(200).send(body);
     } catch (err) {
       console.warn("[metrics] registry export failed:", (err as Error)?.message ?? err);
+      res.set("Content-Type", "text/plain; charset=utf-8; version=0.0.4");
       res.status(200).send("# workbuoy_metrics{noop=\"true\"} 1\n");
     }
   });
