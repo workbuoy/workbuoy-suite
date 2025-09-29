@@ -46,6 +46,10 @@ export function InlineFlip() {
 }
 ```
 
+### Storybook
+- Start: `npm run -w @workbuoy/ui storybook`
+- Build: `npm run -w @workbuoy/ui build:storybook`
+
 ### Controlled flip
 
 ```tsx

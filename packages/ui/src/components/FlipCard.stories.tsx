@@ -1,10 +1,10 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { useState } from "react";
 
-import FlipCard from "./FlipCard";
-import type { FlipCardProps } from "./FlipCard";
+import FlipCard from "./FlipCard.js";
+import type { FlipCardProps } from "./FlipCard.js";
 
-const meta: Meta<typeof FlipCard> = {
+const meta = {
   title: "Components/FlipCard",
   component: FlipCard,
   args: {
@@ -37,17 +37,15 @@ const meta: Meta<typeof FlipCard> = {
   parameters: {
     layout: "centered",
   },
-};
+} satisfies Meta<typeof FlipCard>;
 
 export default meta;
 
-type Story = StoryObj<typeof FlipCard>;
-
-export const Default: Story = {
+export const Default = {
   render: (args: FlipCardProps) => <FlipCard {...args} />,
-};
+} satisfies StoryObj<typeof FlipCard>;
 
-export const Controlled: Story = {
+export const Controlled = {
   render: (args: FlipCardProps) => {
     const [isFlipped, setIsFlipped] = useState(false);
 
@@ -59,4 +57,4 @@ export const Controlled: Story = {
       />
     );
   },
-};
+} satisfies StoryObj<typeof FlipCard>;
