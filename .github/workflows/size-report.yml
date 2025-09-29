@@ -1,0 +1,166 @@
+name: size-report
+
+# Give this workflow just enough permission to post/update PR comments
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  push:
+    branches: [main]
+
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    # Also set job-level permissions (some org policies require this)
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Cache SWC artifacts
+        uses: actions/cache@v4
+        with:
+          path: node_modules/.cache/swc
+          key: ${{ runner.os }}-swc-${{ hashFiles('package-lock.json') }}
+
+      - name: Sanitize npm proxy config (legacy http-proxy)
+        shell: bash
+        run: scripts/ci/sanitize-npm-proxy.sh
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate repository size report
+        run: npm run size:report
+
+      - name: Evaluate size thresholds
+        run: node --import tsx tools/size-thresholds.ts size-report.json
+
+      - name: Upload size report artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: repo-size-report
+          path: size-report.json
+          if-no-files-found: warn
+
+      # ... dine eksisterende steg som genererer size-report.json ...
+
+      - name: Comment size report (PRs only)
+        if: ${{ github.event_name == 'pull_request' && !github.event.pull_request.head.repo.fork }}
+        uses: actions/github-script@v8
+        env:
+          SIZE_MAX_GB: ${{ env.SIZE_MAX_GB }}
+          NODE_MODULES_MAX: ${{ env.NODE_MODULES_MAX }}
+          FILES_MAX: ${{ env.FILES_MAX }}
+        with:
+          script: |
+            const fs = require('node:fs');
+            const tag = '<!-- size-report -->';
+            const dataTagStart = '<!-- size-report:data ';
+            const dataTagEnd = ' -->';
+            const report = JSON.parse(fs.readFileSync('size-report.json', 'utf8'));
+
+            const thresholds = {
+              sizeMax: Number(process.env.SIZE_MAX_GB ?? 2.6),
+              nodeModules: Number(process.env.NODE_MODULES_MAX ?? 220),
+              files: Number(process.env.FILES_MAX ?? 150000),
+            };
+
+            const metrics = {
+              repoSizeGiB: report.metrics.workingTreeBytes / 1024 ** 3,
+              nodeModules: report.metrics.nodeModulesCount,
+              files: report.metrics.filesCount,
+            };
+
+            const formatValue = (value, unit) => unit === 'GiB'
+              ? `${value.toFixed(2)} ${unit}`
+              : value.toLocaleString('en-US');
+
+            const results = [
+              { key: 'repoSizeGiB', label: 'Repo size', value: metrics.repoSizeGiB, threshold: thresholds.sizeMax, unit: 'GiB' },
+              { key: 'nodeModules', label: 'node_modules directories', value: metrics.nodeModules, threshold: thresholds.nodeModules, unit: '' },
+              { key: 'files', label: 'Files', value: metrics.files, threshold: thresholds.files, unit: '' },
+            ];
+
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+
+            const existing = comments.find(c => c.body && c.body.includes(tag)) ?? null;
+
+            let baseline = {};
+            if (existing) {
+              const m = existing.body.match(/<!-- size-report:data (?<json>{.+}) -->/);
+              if (m?.groups?.json) {
+                try { baseline = JSON.parse(m.groups.json); }
+                catch (e) { core.warning(`Failed to parse size-report baseline: ${e.message}`); }
+              }
+            }
+
+            const formatDiff = (key, unit) => {
+              const prev = baseline[key];
+              if (typeof prev !== 'number') return 'n/a';
+              const current = results.find(r => r.key === key).value;
+              const diff = current - prev;
+              if (unit === 'GiB') return `${diff > 0 ? '+' : ''}${diff.toFixed(2)} ${unit}`;
+              const rounded = Math.round(diff);
+              return rounded === 0 ? '0' : `${diff > 0 ? '+' : ''}${rounded.toLocaleString('en-US')}`;
+            };
+
+            const rowStatus = (value, threshold) => value > threshold ? '⚠️ Breach' : '✅ OK';
+
+            const tableRows = results.map(r => {
+              const thr = r.unit === 'GiB' ? `${r.threshold.toFixed(2)} ${r.unit}` : r.threshold.toLocaleString('en-US');
+              return `| ${r.label} | ${formatValue(r.value, r.unit)} | ${thr} | ${formatDiff(r.key, r.unit)} | ${rowStatus(r.value, r.threshold)} |`;
+            }).join('\n');
+
+            const body = `${tag}
+            ### Repository size report
+
+            | Metric | Value | Threshold | Δ vs prev | Status |
+            | --- | --- | --- | --- | --- |
+            ${tableRows}
+
+            Threshold overrides: \`SIZE_MAX_GB\`, \`NODE_MODULES_MAX\`, \`FILES_MAX\`.
+
+            ${dataTagStart}${JSON.stringify(metrics)}${dataTagEnd}`;
+
+            try {
+              if (existing) {
+                await github.rest.issues.updateComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  comment_id: existing.id,
+                  body,
+                });
+              } else {
+                await github.rest.issues.createComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: context.issue.number,
+                  body,
+                });
+              }
+            } catch (e) {
+              core.warning(`Skipping size-report comment: ${e.message}`);
+            }
+
+      - name: Print size report to logs (non-PR or fork)
+        if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.fork }}
+        run: |
+          echo "size-report.json:"
+          cat size-report.json || true
