@@ -1,5 +1,10 @@
 name: repo-guards
 
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
 on:
   pull_request:
   push:
@@ -62,17 +67,18 @@ jobs:
           name: repo-size-report
           path: size-report.json
           if-no-files-found: warn
-      - name: Comment PR with size report
+      - name: Prepare size report body
         if: github.event_name == 'pull_request'
-        uses: actions/github-script@v7
+        id: sizereport
+        uses: actions/github-script@v8
         env:
           SIZE_MAX_GB: ${{ env.SIZE_MAX_GB }}
           NODE_MODULES_MAX: ${{ env.NODE_MODULES_MAX }}
           FILES_MAX: ${{ env.FILES_MAX }}
         with:
           script: |
+            const core = require('@actions/core');
             const fs = require('node:fs');
-
             const tag = '<!-- size-report -->';
             const dataTagStart = '<!-- size-report:data ';
             const dataTagEnd = ' -->';
@@ -91,55 +97,37 @@ jobs:
               files: report.metrics.filesCount,
             };
 
-            const formatValue = (value, unit) => {
-              if (unit === 'GiB') {
-                return `${value.toFixed(2)} ${unit}`;
-              }
-              return value.toLocaleString('en-US');
-            };
+            const formatValue = (value, unit) => unit === 'GiB'
+              ? `${value.toFixed(2)} ${unit}`
+              : value.toLocaleString('en-US');
 
             const results = [
-              {
-                key: 'repoSizeGiB',
-                label: 'Repo size',
-                value: metrics.repoSizeGiB,
-                threshold: thresholds.sizeMax,
-                unit: 'GiB',
-              },
-              {
-                key: 'nodeModules',
-                label: 'node_modules directories',
-                value: metrics.nodeModules,
-                threshold: thresholds.nodeModules,
-                unit: '',
-              },
-              {
-                key: 'files',
-                label: 'Files',
-                value: metrics.files,
-                threshold: thresholds.files,
-                unit: '',
-              },
+              { key: 'repoSizeGiB', label: 'Repo size', value: metrics.repoSizeGiB, threshold: thresholds.sizeMax, unit: 'GiB' },
+              { key: 'nodeModules', label: 'node_modules directories', value: metrics.nodeModules, threshold: thresholds.nodeModules, unit: '' },
+              { key: 'files', label: 'Files', value: metrics.files, threshold: thresholds.files, unit: '' },
             ];
 
-            const { data: comments } = await github.rest.issues.listComments({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: context.issue.number,
-            });
-
-            const existing = comments.find((comment) => comment.body && comment.body.includes(tag));
-
             let baseline = {};
-            if (existing) {
-              const match = existing.body.match(/<!-- size-report:data (?<json>{.+}) -->/);
-              if (match?.groups?.json) {
-                try {
-                  baseline = JSON.parse(match.groups.json);
-                } catch (error) {
-                  core.warning(`Failed to parse size-report baseline: ${error.message}`);
+            try {
+              const { data: comments } = await github.rest.issues.listComments({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+              });
+              const existing = comments.find((comment) => comment.body && comment.body.includes(tag));
+              if (existing) {
+                const match = existing.body.match(/<!-- size-report:data (?<json>{.+}) -->/);
+                if (match?.groups?.json) {
+                  try {
+                    baseline = JSON.parse(match.groups.json);
+                  } catch (parseError) {
+                    core.warning(`Failed to parse size-report baseline: ${parseError.message}`);
+                  }
                 }
+                core.setOutput('existing_comment_id', String(existing.id));
               }
+            } catch (error) {
+              core.notice(`Skipping baseline fetch: ${error.message}`);
             }
 
             const formatDiff = (key, unit) => {
@@ -147,7 +135,8 @@ jobs:
               if (typeof previous !== 'number') {
                 return 'n/a';
               }
-              const diff = results.find((item) => item.key === key).value - previous;
+              const current = results.find((item) => item.key === key).value;
+              const diff = current - previous;
               if (unit === 'GiB') {
                 return `${diff > 0 ? '+' : ''}${diff.toFixed(2)} ${unit}`;
               }
@@ -158,9 +147,7 @@ jobs:
               return `${diff > 0 ? '+' : ''}${rounded.toLocaleString('en-US')}`;
             };
 
-            const rowStatus = (value, threshold) => {
-              return value > threshold ? '⚠️ Breach' : '✅ OK';
-            };
+            const rowStatus = (value, threshold) => (value > threshold ? '⚠️ Breach' : '✅ OK');
 
             const tableRows = results
               .map((result) => {
@@ -171,20 +158,81 @@ jobs:
               })
               .join('\n');
 
-            const body = `${tag}\n### Repository size report\n\n| Metric | Value | Threshold | Δ vs prev | Status |\n| --- | --- | --- | --- | --- |\n${tableRows}\n\nThreshold overrides: \`SIZE_MAX_GB\`, \`NODE_MODULES_MAX\`, \`FILES_MAX\`.\n\n${dataTagStart}${JSON.stringify(metrics)}${dataTagEnd}`;
+            const body = [
+              tag,
+              '### Repository size report',
+              '',
+              '| Metric | Value | Threshold | Δ vs prev | Status |',
+              '| --- | --- | --- | --- | --- |',
+              tableRows,
+              '',
+              'Threshold overrides: `SIZE_MAX_GB`, `NODE_MODULES_MAX`, `FILES_MAX`.',
+              '',
+              `${dataTagStart}${JSON.stringify(metrics)}${dataTagEnd}`,
+            ].join('\n');
 
-            if (existing) {
-              await github.rest.issues.updateComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                comment_id: existing.id,
-                body,
-              });
-            } else {
-              await github.rest.issues.createComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: context.issue.number,
-                body,
-              });
+            core.setOutput('body', body);
+
+            const isSameRepo = Boolean(
+              context.payload.pull_request &&
+              context.payload.pull_request.head &&
+              context.payload.pull_request.head.repo &&
+              context.payload.pull_request.head.repo.full_name === `${context.repo.owner}/${context.repo.repo}`,
+            );
+
+            core.setOutput('can_comment', String(isSameRepo));
+
+      - name: Post size report as PR comment (or fallback to summary)
+        if: ${{ always() && github.event_name == 'pull_request' }}
+        uses: actions/github-script@v8
+        env:
+          BODY: ${{ steps.sizereport.outputs.body }}
+          EXISTING_ID: ${{ steps.sizereport.outputs.existing_comment_id }}
+          CAN_COMMENT: ${{ steps.sizereport.outputs.can_comment }}
+        with:
+          script: |
+            const core = require('@actions/core');
+            const body = process.env.BODY;
+            const canComment = process.env.CAN_COMMENT === 'true';
+            const existingId = process.env.EXISTING_ID;
+
+            async function writeSummary() {
+              await core.summary
+                .addHeading('Repository size report')
+                .addRaw(body ?? '', true)
+                .write();
+              core.notice('Posted size report to GITHUB_STEP_SUMMARY (no comment permissions).');
+            }
+
+            if (!body) {
+              core.warning('Size report body is empty; skipping comment and summary.');
+              return;
+            }
+
+            if (!canComment) {
+              await writeSummary();
+              return;
+            }
+
+            try {
+              if (existingId) {
+                await github.rest.issues.updateComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  comment_id: Number(existingId),
+                  body,
+                });
+                core.info('Updated existing size-report comment.');
+              } else {
+                await github.rest.issues.createComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: context.issue.number,
+                  body,
+                });
+                core.info('Created new size-report comment.');
+              }
+            } catch (error) {
+              core.warning(`Could not post PR comment (${error.status}): ${error.message}`);
+              await writeSummary();
             }
