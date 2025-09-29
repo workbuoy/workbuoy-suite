@@ -1,17 +1,17 @@
-# WorkBuoy CRM MVP – Release Notes (v0.1.0)
+# WorkBuoy Suite – Release Notes (PR9)
 
 ## Highlights
-- **Policy v2 guard** now enforces `x-autonomy-level >= 2` on all write routes with explicit 400 errors for missing or invalid headers.
-- **Request context + correlation IDs** wired globally so every request emits structured logs with masked fields.
-- **Persistence** for CRM contacts, tasks, logs and deals now uses the shared `selectRepo<T>` layer (default `PERSIST_MODE=file`) so data survives restarts.
-- **Operability endpoints** exposed at `/status`, `/metrics`, and `/_debug/bus` together with append-only audit trail (`/api/audit`, `/api/audit/verify`).
-- **Frontend bridge** routes all fetches through `@/api` with automatic `x-autonomy-level`/`x-role` headers; CRM panel import is stable for Navi.
+- Backend now exposes `/api/health` and `/api/version` endpoints backed by optional route guards, making it easy to trim the API surface with `WB_SKIP_OPTIONAL_ROUTES=1` during local runs.
+- Database bootstrap is steadier thanks to updated Prisma seeds and new smoke tests validating health, metrics, and CRM routes in CI.
+- Shared UI library ships new `FlipCard` and `ProactivitySwitch` components used across proactive workflows.
 
-## Upgrade notes
-1. Install dependencies: `npm install --prefix backend && npm install --prefix frontend`.
-2. Launch the API via `docker compose up app` (or `NODE_PATH=backend/node_modules node -r ts-node/register src/bin/www.ts`).
-3. Verify `/status` and `/metrics`, then seed demo data via the documented `curl` commands.
+## How to upgrade
+- Install dependencies from the repo root: `npm ci`.
+- Prepare persistence: `npm run db:prepare -w @workbuoy/backend` followed by `npm run db:seed -w @workbuoy/backend` if you need demo data.
+- Optional routes can be disabled during local development with `WB_SKIP_OPTIONAL_ROUTES=1 node --import tsx apps/backend/src/index.ts`.
+- Run smoke tests before cutting a tag: `npm run -w @workbuoy/backend test:smoke`.
 
-## Known considerations
-- Metrics are served in Prometheus text format at `/metrics` and include queue gauges (`eventbus_queue_high|med|low`, `eventbus_dlq_size`).
-- Audit entries persist to `data/audit_log.json`; avoid editing this file manually to preserve the hash chain.
+## Workspace docs
+- [apps/backend README](apps/backend/README.md)
+- [@workbuoy/ui README](packages/ui/README.md)
+- [Frontend README](apps/frontend/README_frontend.md)
