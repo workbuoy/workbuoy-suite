@@ -77,34 +77,27 @@ jobs:
           FILES_MAX: ${{ env.FILES_MAX }}
         with:
           script: |
-            const core = require('@actions/core');
             const fs = require('node:fs');
             const tag = '<!-- size-report -->';
             const dataTagStart = '<!-- size-report:data ';
             const dataTagEnd = ' -->';
 
-            const report = JSON.parse(fs.readFileSync('size-report.json', 'utf8'));
-
+            const report = JSON.parse(fs.readFileSync('size-report.json','utf8'));
             const thresholds = {
               sizeMax: Number(process.env.SIZE_MAX_GB ?? 2.6),
               nodeModules: Number(process.env.NODE_MODULES_MAX ?? 220),
               files: Number(process.env.FILES_MAX ?? 150000),
             };
-
             const metrics = {
               repoSizeGiB: report.metrics.workingTreeBytes / 1024 ** 3,
               nodeModules: report.metrics.nodeModulesCount,
               files: report.metrics.filesCount,
             };
-
-            const formatValue = (value, unit) => unit === 'GiB'
-              ? `${value.toFixed(2)} ${unit}`
-              : value.toLocaleString('en-US');
-
+            const formatValue = (value, unit) => unit === 'GiB' ? `${value.toFixed(2)} ${unit}` : value.toLocaleString('en-US');
             const results = [
-              { key: 'repoSizeGiB', label: 'Repo size', value: metrics.repoSizeGiB, threshold: thresholds.sizeMax, unit: 'GiB' },
-              { key: 'nodeModules', label: 'node_modules directories', value: metrics.nodeModules, threshold: thresholds.nodeModules, unit: '' },
-              { key: 'files', label: 'Files', value: metrics.files, threshold: thresholds.files, unit: '' },
+              { key:'repoSizeGiB', label:'Repo size', value:metrics.repoSizeGiB, threshold:thresholds.sizeMax, unit:'GiB' },
+              { key:'nodeModules', label:'node_modules directories', value:metrics.nodeModules, threshold:thresholds.nodeModules, unit:'' },
+              { key:'files', label:'Files', value:metrics.files, threshold:thresholds.files, unit:'' },
             ];
 
             let baseline = {};
@@ -114,76 +107,52 @@ jobs:
                 repo: context.repo.repo,
                 issue_number: context.issue.number,
               });
-              const existing = comments.find((comment) => comment.body && comment.body.includes(tag));
+              const existing = comments.find(c => c.body && c.body.includes(tag));
               if (existing) {
-                const match = existing.body.match(/<!-- size-report:data (?<json>{.+}) -->/);
-                if (match?.groups?.json) {
-                  try {
-                    baseline = JSON.parse(match.groups.json);
-                  } catch (parseError) {
-                    core.warning(`Failed to parse size-report baseline: ${parseError.message}`);
-                  }
-                }
+                const m = existing.body.match(/<!-- size-report:data (?<json>{.+}) -->/);
+                if (m?.groups?.json) baseline = JSON.parse(m.groups.json);
                 core.setOutput('existing_comment_id', String(existing.id));
               }
-            } catch (error) {
-              core.notice(`Skipping baseline fetch: ${error.message}`);
+            } catch (e) {
+              core.notice(`Skipping baseline fetch: ${e.message}`);
             }
 
             const formatDiff = (key, unit) => {
-              const previous = baseline[key];
-              if (typeof previous !== 'number') {
-                return 'n/a';
-              }
-              const current = results.find((item) => item.key === key).value;
-              const diff = current - previous;
-              if (unit === 'GiB') {
-                return `${diff > 0 ? '+' : ''}${diff.toFixed(2)} ${unit}`;
-              }
+              const prev = baseline[key];
+              if (typeof prev !== 'number') return 'n/a';
+              const curr = results.find(r => r.key === key).value;
+              const diff = curr - prev;
+              if (unit === 'GiB') return `${diff > 0 ? '+' : ''}${diff.toFixed(2)} ${unit}`;
               const rounded = Math.round(diff);
-              if (rounded === 0) {
-                return '0';
-              }
-              return `${diff > 0 ? '+' : ''}${rounded.toLocaleString('en-US')}`;
+              return rounded === 0 ? '0' : `${diff > 0 ? '+' : ''}${rounded.toLocaleString('en-US')}`;
             };
+            const rowStatus = (value, threshold) => value > threshold ? '⚠️ Breach' : '✅ OK';
+            const tableRows = results.map(r => {
+              const thr = r.unit === 'GiB' ? `${r.threshold.toFixed(2)} ${r.unit}` : r.threshold.toLocaleString('en-US');
+              return `| ${r.label} | ${formatValue(r.value, r.unit)} | ${thr} | ${formatDiff(r.key, r.unit)} | ${rowStatus(r.value, r.threshold)} |`;
+            }).join('\n');
 
-            const rowStatus = (value, threshold) => (value > threshold ? '⚠️ Breach' : '✅ OK');
+            const body = `${tag}
+            ### Repository size report
 
-            const tableRows = results
-              .map((result) => {
-                const thresholdValue = result.unit === 'GiB'
-                  ? `${result.threshold.toFixed(2)} ${result.unit}`
-                  : result.threshold.toLocaleString('en-US');
-                return `| ${result.label} | ${formatValue(result.value, result.unit)} | ${thresholdValue} | ${formatDiff(result.key, result.unit)} | ${rowStatus(result.value, result.threshold)} |`;
-              })
-              .join('\n');
+            | Metric | Value | Threshold | Δ vs prev | Status |
+            | --- | --- | --- | --- | --- |
+            ${tableRows}
 
-            const body = [
-              tag,
-              '### Repository size report',
-              '',
-              '| Metric | Value | Threshold | Δ vs prev | Status |',
-              '| --- | --- | --- | --- | --- |',
-              tableRows,
-              '',
-              'Threshold overrides: `SIZE_MAX_GB`, `NODE_MODULES_MAX`, `FILES_MAX`.',
-              '',
-              `${dataTagStart}${JSON.stringify(metrics)}${dataTagEnd}`,
-            ].join('\n');
+            Threshold overrides: \`SIZE_MAX_GB\`, \`NODE_MODULES_MAX\`, \`FILES_MAX\`.
+
+            ${dataTagStart}${JSON.stringify(metrics)}${dataTagEnd}`;
 
             core.setOutput('body', body);
 
-            const isSameRepo = Boolean(
-              context.payload.pull_request &&
-              context.payload.pull_request.head &&
-              context.payload.pull_request.head.repo &&
-              context.payload.pull_request.head.repo.full_name === `${context.repo.owner}/${context.repo.repo}`,
-            );
-
+            const isSameRepo = !!(context.payload.pull_request &&
+                                  context.payload.pull_request.head &&
+                                  context.payload.pull_request.head.repo &&
+                                  context.payload.pull_request.head.repo.full_name === `${context.repo.owner}/${context.repo.repo}`);
             core.setOutput('can_comment', String(isSameRepo));
 
       - name: Post size report as PR comment (or fallback to summary)
-        if: ${{ always() && github.event_name == 'pull_request' }}
+        if: always()
         uses: actions/github-script@v8
         env:
           BODY: ${{ steps.sizereport.outputs.body }}
@@ -191,22 +160,13 @@ jobs:
           CAN_COMMENT: ${{ steps.sizereport.outputs.can_comment }}
         with:
           script: |
-            const core = require('@actions/core');
             const body = process.env.BODY;
             const canComment = process.env.CAN_COMMENT === 'true';
             const existingId = process.env.EXISTING_ID;
 
             async function writeSummary() {
-              await core.summary
-                .addHeading('Repository size report')
-                .addRaw(body ?? '', true)
-                .write();
+              await core.summary.addRaw(body).write();
               core.notice('Posted size report to GITHUB_STEP_SUMMARY (no comment permissions).');
-            }
-
-            if (!body) {
-              core.warning('Size report body is empty; skipping comment and summary.');
-              return;
             }
 
             if (!canComment) {
@@ -232,7 +192,7 @@ jobs:
                 });
                 core.info('Created new size-report comment.');
               }
-            } catch (error) {
-              core.warning(`Could not post PR comment (${error.status}): ${error.message}`);
+            } catch (e) {
+              core.warning(`Could not post PR comment (${e.status}): ${e.message}`);
               await writeSummary();
             }
