@@ -5,7 +5,7 @@ import NaviGrid from "@/features/navi/NaviGrid";
 import useDockStatus from "@/features/core/useDockStatus";
 import { useSettings, setDockPosition, setDockSize } from "@/store/settings";
 import DockBubble from "./DockBubble";
-import DockHost from "./DockHost";
+import DockHost from "./DockHostLegacy";
 import PeripheralCue, { type PeripheralStatus } from "./PeripheralCue";
 import { dockStrings } from "./strings";
 import "./dock.css";

@@ -1,123 +1,117 @@
-import React, { useEffect, useRef, useState } from "react";
-import type { ReactNode } from "react";
-import { describe, expect, it, vi } from "vitest";
-import { act, render, screen, waitFor } from "@testing-library/react";
-import { dockStrings } from "../strings";
+import React from "react";
+import { describe, expect, it } from "vitest";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import DockHost from "../DockHost";
+import { useFocusReturn } from "../useFocusReturn";
 
-vi.mock("@/core/ActiveContext", () => ({
-  ActiveContextProvider: ({ children }: { children: ReactNode }) => children,
-  useActiveContext: () => ({
-    timeOfDay: "morning" as const,
-    selectedEntity: null,
-    recentIntents: [],
-    setSelectedEntity: () => {},
-    pushIntent: () => {},
-  }),
-}));
+function ModalHarness() {
+  const [open, setOpen] = React.useState(false);
+  const lastActiveRef = useFocusReturn(open);
 
-const { default: DockHost } = await import("../DockHost");
-
-const frontStub = <div>Front</div>;
-const backStub = <div>Back</div>;
-
-function dispatchKey(key: string, options: { ctrl?: boolean; shift?: boolean } = {}) {
-  const event = new KeyboardEvent("keydown", {
-    key,
-    ctrlKey: options.ctrl ?? false,
-    shiftKey: options.shift ?? false,
-    bubbles: true,
-  });
-  Object.defineProperty(event, "target", {
-    value: document.body,
-    configurable: true,
-  });
-  act(() => {
-    window.dispatchEvent(event);
-  });
-}
-
-function HostHarness({ hotkeysEnabled = true }: { hotkeysEnabled?: boolean }) {
-  const [open, setOpen] = useState(false);
-  const anchorRef = useRef<HTMLButtonElement | null>(null);
-  useEffect(() => {
-    anchorRef.current?.focus();
-    setOpen(true);
-  }, []);
   return (
     <>
-      <button ref={anchorRef}>anchor</button>
-      <DockHost
-        open={open}
-        onClose={() => setOpen(false)}
-        front={frontStub}
-        back={backStub}
-        onConnect={() => undefined}
-        hotkeysEnabled={hotkeysEnabled}
-      />
+      <button type="button" onClick={() => setOpen(true)}>
+        Open Dock
+      </button>
+      {open ? (
+        <DockHost
+          open={open}
+          onClose={() => setOpen(false)}
+          title="Dock Host"
+          description="Controls focus for the dock host dialog"
+          liveMessage=""
+          lastActiveElement={lastActiveRef.current}
+        >
+          <button type="button">Approve</button>
+          <button type="button">Cancel</button>
+        </DockHost>
+      ) : null}
     </>
   );
 }
 
 describe("DockHost", () => {
-  it("focuses the close button when opened", async () => {
-    render(<HostHarness />);
-    await waitFor(() => {
-      const close = screen.getByRole("button", { name: dockStrings.toolbar.close });
-      expect(document.activeElement).toBe(close);
-    });
-  });
-
-  it("handles hotkeys when enabled", () => {
-    const onSideChange = vi.fn();
+  it("mounts with initial focus on the first tabbable element", async () => {
     render(
-      <DockHost
-        open
-        onClose={() => undefined}
-        onSideChange={onSideChange}
-        front={frontStub}
-        back={backStub}
-        onConnect={() => undefined}
-        hotkeysEnabled
-      />,
+      <DockHost open onClose={() => undefined} title="Dock Host">
+        <button type="button">Approve</button>
+        <button type="button">Cancel</button>
+      </DockHost>,
     );
-    dispatchKey(" ", { ctrl: true });
-    expect(onSideChange).toHaveBeenCalledWith("back");
-    onSideChange.mockClear();
-    dispatchKey(" ", { ctrl: true });
-    expect(onSideChange).toHaveBeenCalledWith("front");
-    onSideChange.mockClear();
-    dispatchKey(" ", { ctrl: true, shift: true });
-    expect(onSideChange).toHaveBeenCalledWith("back");
+
+    const approve = await screen.findByRole("button", { name: "Approve" });
+    await waitFor(() => expect(document.activeElement).toBe(approve));
   });
 
-  it("ignores hotkeys when disabled", () => {
-    const onSideChange = vi.fn();
+  it("wraps focus when tabbing forward and backward", async () => {
+    const user = userEvent.setup();
+
     render(
-      <DockHost
-        open
-        onClose={() => undefined}
-        onSideChange={onSideChange}
-        front={frontStub}
-        back={backStub}
-        onConnect={() => undefined}
-        hotkeysEnabled={false}
-      />,
+      <DockHost open onClose={() => undefined} title="Dock Host">
+        <button type="button">Approve</button>
+        <button type="button">Cancel</button>
+      </DockHost>,
     );
-    dispatchKey(" ", { ctrl: true, shift: true });
-    expect(onSideChange).not.toHaveBeenCalled();
+
+    const approve = await screen.findByRole("button", { name: "Approve" });
+    const cancel = await screen.findByRole("button", { name: "Cancel" });
+
+    await waitFor(() => expect(document.activeElement).toBe(approve));
+
+    await user.tab();
+    expect(document.activeElement).toBe(cancel);
+
+    await user.tab();
+    expect(document.activeElement).toBe(approve);
+
+    await user.tab({ shift: true });
+    expect(document.activeElement).toBe(cancel);
   });
 
-  it("closes on escape and restores focus", async () => {
-    render(<HostHarness />);
-    await waitFor(() =>
-      expect(
-        screen.getByRole("button", { name: dockStrings.toolbar.close }),
-      ).toBeInTheDocument(),
+  it("closes on escape and restores focus to the opener", async () => {
+    const user = userEvent.setup();
+    render(<ModalHarness />);
+
+    const openButton = screen.getByRole("button", { name: "Open Dock" });
+    openButton.focus();
+    await fireEvent.click(openButton);
+
+    const dialog = await screen.findByRole("dialog", { name: "Dock Host" });
+    expect(dialog).toBeInTheDocument();
+
+    await fireEvent.keyDown(dialog, { key: "Escape" });
+
+    await waitFor(() => expect(document.querySelector('[role="dialog"]')).toBeNull());
+    expect(document.activeElement).toBe(openButton);
+  });
+
+  it("renders aria-live region with provided message", async () => {
+    render(
+      <DockHost open onClose={() => undefined} title="Dock Host" liveMessage="Approved">
+        <button type="button">Approve</button>
+      </DockHost>,
     );
-    dispatchKey("Escape");
-    await waitFor(() => expect(() => screen.getByRole("dialog")).toThrow());
-    expect(document.activeElement).toBe(
-      screen.getByRole("button", { name: "anchor" }),
+
+    const liveRegion = document.querySelector('[data-testid="dock-live"]');
+    expect(liveRegion?.getAttribute("aria-live")).toBe("polite");
+    expect(liveRegion?.textContent).toContain("Approved");
+  });
+
+  it("exposes dialog role and aria relationships", async () => {
+    render(
+      <DockHost open onClose={() => undefined} title="Dock Host" description="Example description">
+        <button type="button">Approve</button>
+      </DockHost>,
     );
+
+    const dialog = await screen.findByRole("dialog", { name: "Dock Host" });
+    expect(dialog.getAttribute("aria-modal")).toBe("true");
+    const descriptionId = dialog.getAttribute("aria-describedby");
+    expect(descriptionId).toBeTruthy();
+    if (descriptionId) {
+      const description = document.getElementById(descriptionId);
+      expect(description?.textContent).toBe("Example description");
+    }
   });
 });

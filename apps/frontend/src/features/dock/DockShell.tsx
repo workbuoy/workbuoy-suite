@@ -1,5 +1,5 @@
 import React from "react";
-import DockHost, { type DockHostProps } from "./DockHost";
+import DockHost, { type DockHostProps } from "./DockHostLegacy";
 import "./dock.css";
 
 export type DockShellProps = DockHostProps;

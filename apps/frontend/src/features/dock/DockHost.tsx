@@ -1,315 +1,218 @@
-import React, {
-  useCallback,
-  useEffect,
-  useId,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
-import FlipCard, { type FlipCardProps, type FlipCardSize } from "@/components/FlipCard";
-import PeripheralCue, { type PeripheralStatus } from "./PeripheralCue";
-import { dockStrings } from "./strings";
-import "./dock.css";
-
-type Side = "front" | "back";
+import React from "react";
+import { createPortal } from "react-dom";
 
 export type DockHostProps = {
   open: boolean;
   onClose: () => void;
-  initialSide?: Side;
-  side?: Side;
-  onSideChange?: (side: Side) => void;
-  front?: React.ReactNode;
-  back?: React.ReactNode;
-  hotkeysEnabled?: boolean;
-  status?: PeripheralStatus;
-  enablePeripheralCue?: boolean;
-  fastFlip?: boolean;
-  onResize?: (size: FlipCardSize) => void;
-  onConnect?: NonNullable<FlipCardProps["onConnect"]>;
+  title?: string;
+  description?: string;
+  liveMessage?: string;
+  initialFocusRef?: React.RefObject<HTMLElement>;
+  lastActiveElement?: HTMLElement | null;
+  children?: React.ReactNode;
 };
 
-const FOCUSABLE_SELECTOR =
-  'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
-const HOST_SIZE_ORDER: FlipCardSize[] = ["md", "lg", "xl"];
+const TABBABLE_SELECTOR = [
+  "a[href]",
+  "area[href]",
+  "button:not([disabled])",
+  "input:not([disabled]):not([type=\"hidden\"])",
+  "select:not([disabled])",
+  "textarea:not([disabled])",
+  "[tabindex]:not([tabindex=\"-1\"])",
+  "[contenteditable=\"true\"]",
+].join(",");
 
-function getFocusableElements(node: HTMLElement): HTMLElement[] {
-  return Array.from(node.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR)).filter(
-    (element) => !element.hasAttribute("data-dock-sentinel"),
-  );
+function getTabbableElements(root: HTMLElement): HTMLElement[] {
+  const nodes = Array.from(root.querySelectorAll<HTMLElement>(TABBABLE_SELECTOR));
+  const hasWindow = typeof window !== "undefined";
+  return nodes.filter((element) => {
+    if (element.getAttribute("tabindex") === "-1") {
+      return false;
+    }
+    if (element.hasAttribute("disabled")) {
+      return false;
+    }
+    if (element instanceof HTMLAnchorElement && !element.href) {
+      return false;
+    }
+    const style = hasWindow ? window.getComputedStyle(element) : null;
+    if (style && (style.display === "none" || style.visibility === "hidden")) {
+      return false;
+    }
+    return true;
+  });
 }
 
-function emitDockEvent(action: string, meta?: Record<string, unknown>) {
-  if (typeof window === "undefined") return;
-  window.dispatchEvent(new CustomEvent("wb:ux", { detail: { action, meta } }));
-}
+const visuallyHidden: React.CSSProperties = {
+  position: "absolute",
+  width: 1,
+  height: 1,
+  padding: 0,
+  margin: -1,
+  overflow: "hidden",
+  clip: "rect(0, 0, 0, 0)",
+  whiteSpace: "nowrap",
+  border: 0,
+};
 
 export default function DockHost({
   open,
   onClose,
-  initialSide = "front",
-  side: controlledSide,
-  onSideChange,
-  front,
-  back,
-  hotkeysEnabled = true,
-  status = "ok",
-  enablePeripheralCue = true,
-  fastFlip = false,
-  onResize,
-  onConnect,
+  title,
+  description,
+  liveMessage,
+  initialFocusRef,
+  lastActiveElement,
+  children,
 }: DockHostProps) {
-  const dialogRef = useRef<HTMLDivElement | null>(null);
-  const closeButtonRef = useRef<HTMLButtonElement | null>(null);
-  const connectButtonRef = useRef<HTMLButtonElement | null>(null);
-  const previousFocusRef = useRef<HTMLElement | null>(null);
-  const [localSide, setLocalSide] = useState<Side>(controlledSide ?? initialSide);
-  const [cardSize, setCardSize] = useState<FlipCardSize>("xl");
-  const titleId = useId();
+  const overlayRef = React.useRef<HTMLDivElement | null>(null);
+  const dialogRef = React.useRef<HTMLDivElement | null>(null);
+  const containerRef = React.useRef<HTMLDivElement | null>(null);
+  const titleId = React.useId();
+  const descriptionId = React.useId();
+  const restoreFocusRef = React.useRef<HTMLElement | null>(null);
 
-  const side = controlledSide ?? localSide;
+  if (typeof document !== "undefined" && containerRef.current === null) {
+    containerRef.current = document.createElement("div");
+    containerRef.current.setAttribute("data-dockhost-portal", "");
+  }
 
-  const focusFirstElement = useCallback(() => {
-    const node = dialogRef.current;
-    if (!node) return;
-    const focusable = getFocusableElements(node);
-    if (focusable.length === 0) return;
-    const first = focusable[0];
-    first?.focus();
-  }, []);
-
-  const focusLastElement = useCallback(() => {
-    const node = dialogRef.current;
-    if (!node) return;
-    const focusable = getFocusableElements(node);
-    if (focusable.length === 0) return;
-    const last = focusable[focusable.length - 1];
-    last?.focus();
-  }, []);
-
-  useEffect(() => {
-    if (controlledSide !== undefined) {
-      setLocalSide(controlledSide);
-    }
-  }, [controlledSide]);
-
-  useEffect(() => {
-    if (!open) return;
-    previousFocusRef.current = document.activeElement as HTMLElement | null;
-    const id = window.setTimeout(() => closeButtonRef.current?.focus(), 30);
+  React.useEffect(() => {
+    const container = containerRef.current;
+    if (!container || typeof document === "undefined") return;
+    document.body.appendChild(container);
     return () => {
-      window.clearTimeout(id);
+      document.body.removeChild(container);
+    };
+  }, []);
+
+  React.useEffect(() => {
+    if (!open) return;
+    if (lastActiveElement) {
+      restoreFocusRef.current = lastActiveElement;
+    } else {
+      restoreFocusRef.current = document.activeElement as HTMLElement | null;
+    }
+  }, [open, lastActiveElement]);
+
+  React.useEffect(() => {
+    if (!open) return undefined;
+    return () => {
+      const target = restoreFocusRef.current;
+      if (target && typeof target.focus === "function") {
+        if (typeof window !== "undefined" && window.requestAnimationFrame) {
+          window.requestAnimationFrame(() => target.focus());
+        } else {
+          target.focus();
+        }
+      }
     };
   }, [open]);
 
-  useEffect(() => {
-    if (open) return;
-    const previous = previousFocusRef.current;
-    if (previous) {
-      previous.focus?.();
-    }
-  }, [open]);
-
-  useEffect(() => {
+  React.useEffect(() => {
     if (!open) return;
-    const node = dialogRef.current;
-    if (!node) return;
-    const handleKeyDown = (event: KeyboardEvent) => {
+    const dialog = dialogRef.current;
+    if (!dialog) return;
+    const target = initialFocusRef?.current ?? getTabbableElements(dialog)[0] ?? dialog;
+    if (typeof window !== "undefined" && window.requestAnimationFrame) {
+      window.requestAnimationFrame(() => target.focus());
+    } else {
+      target.focus();
+    }
+  }, [open, initialFocusRef]);
+
+  const handleKeyDown = React.useCallback(
+    (event: React.KeyboardEvent<HTMLDivElement>) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        onClose();
+        return;
+      }
       if (event.key !== "Tab") return;
-      const focusable = getFocusableElements(node);
-      if (focusable.length === 0) return;
-      const first = focusable[0];
-      const last = focusable[focusable.length - 1];
-      if (!first || !last) return;
+      const dialog = dialogRef.current;
+      if (!dialog) return;
+      const tabbable = getTabbableElements(dialog);
+      if (tabbable.length === 0) {
+        event.preventDefault();
+        return;
+      }
+      const first = tabbable[0];
+      const last = tabbable[tabbable.length - 1];
+      const active = document.activeElement as HTMLElement | null;
       if (event.shiftKey) {
-        if (document.activeElement === first) {
+        if (active === first || !dialog.contains(active)) {
           event.preventDefault();
           last.focus();
         }
-      } else if (document.activeElement === last) {
+      } else if (active === last || !dialog.contains(active)) {
         event.preventDefault();
         first.focus();
       }
-    };
-    node.addEventListener("keydown", handleKeyDown);
-    return () => node.removeEventListener("keydown", handleKeyDown);
-  }, [open]);
-
-  const handleFlip = useCallback(
-    (next: Side) => {
-      if (controlledSide === undefined) {
-        setLocalSide(next);
-      }
-      onSideChange?.(next);
     },
-    [controlledSide, onSideChange],
+    [onClose],
   );
-
-  const cycleSize = useCallback(() => {
-    const index = HOST_SIZE_ORDER.indexOf(cardSize);
-    const next = HOST_SIZE_ORDER[(index + 1) % HOST_SIZE_ORDER.length] ?? HOST_SIZE_ORDER[0];
-    if (!next) return;
-    setCardSize(next);
-    onResize?.(next);
-  }, [cardSize, onResize]);
-
-  const handleCardResize = useCallback(
-    (next: FlipCardSize) => {
-      if (!HOST_SIZE_ORDER.includes(next)) return;
-      setCardSize(next);
-      onResize?.(next);
-    },
-    [onResize],
-  );
-
-  useEffect(() => {
-    if (!open) return;
-    const node = dialogRef.current;
-    if (!node) return;
-    connectButtonRef.current = node.querySelector<HTMLButtonElement>(
-      ".flip-card-toolbar__connect",
-    );
-  }, [open, side, cardSize]);
-
-  const handleClose = useCallback(() => {
-    onClose();
-  }, [onClose]);
-
-  useEffect(() => {
-    if (!open) return;
-    const handleKey = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        event.preventDefault();
-        event.stopPropagation();
-        handleClose();
-        return;
-      }
-      if (!hotkeysEnabled) return;
-      if ((event.target as HTMLElement)?.closest("input,textarea,[contenteditable=true]")) {
-        return;
-      }
-      if (event.key === " " && event.ctrlKey && event.shiftKey) {
-        event.preventDefault();
-        handleFlip("back");
-        emitDockEvent("hotkey_flip_to_navi");
-        return;
-      }
-      if (event.key === " " && event.ctrlKey) {
-        event.preventDefault();
-        handleFlip(side === "back" ? "front" : "back");
-        emitDockEvent("hotkey_flip");
-      }
-    };
-    window.addEventListener("keydown", handleKey);
-    return () => window.removeEventListener("keydown", handleKey);
-  }, [handleClose, handleFlip, hotkeysEnabled, open, side]);
-
-  const frontContent = useMemo(() => front ?? null, [front]);
-  const backContent = useMemo(() => back ?? null, [back]);
 
   if (!open) {
     return null;
   }
 
-  return (
-    <div className="wb-dock-host" role="presentation">
-      <div className="wb-dock-host__backdrop" aria-hidden="true" />
+  const labelledBy = title ? titleId : undefined;
+  const describedBy = description ? descriptionId : undefined;
+
+  const dialog = (
+    <div
+      ref={overlayRef}
+      role="presentation"
+      style={{
+        position: "fixed",
+        inset: 0,
+        zIndex: 1000,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        backgroundColor: "rgba(15, 23, 42, 0.48)",
+        padding: "16px",
+      }}
+    >
       <div
-        className="wb-dock-host__dialog"
+        ref={dialogRef}
         role="dialog"
         aria-modal="true"
-        aria-labelledby={titleId}
-        ref={dialogRef}
-        tabIndex={-1}
+        aria-labelledby={labelledBy}
+        aria-describedby={describedBy}
+        onKeyDown={handleKeyDown}
+        style={{
+          backgroundColor: "var(--dockhost-bg, #0f172a)",
+          color: "var(--dockhost-fg, #f8fafc)",
+          minWidth: "min(420px, 90vw)",
+          maxWidth: "min(640px, 94vw)",
+          borderRadius: "12px",
+          boxShadow: "0 20px 48px rgba(15, 23, 42, 0.45)",
+          padding: "24px",
+          display: "flex",
+          flexDirection: "column",
+          gap: "16px",
+          outline: "none",
+        }}
       >
-        <div
-          tabIndex={0}
-          data-dock-sentinel="start"
-          className="wb-dock-host__sentinel"
-          onFocus={focusLastElement}
-          aria-hidden="true"
-        />
-        <header className="wb-dock-host__header">
-          <div className="wb-dock-host__title-group">
-            <h2 id={titleId}>{dockStrings.host.title}</h2>
-            <span className="chip" aria-live="polite">
-              {side === "back" ? "Navi" : "Buoy"}
-            </span>
-          </div>
-          <div className="wb-dock-host__actions">
-            <button
-              type="button"
-              className="chip"
-              onClick={() => handleFlip(side === "back" ? "front" : "back")}
-              aria-label={side === "back" ? dockStrings.toolbar.flipToBuoy : dockStrings.toolbar.flipToNavi}
-            >
-              {side === "back" ? dockStrings.toolbar.flipToBuoy : dockStrings.toolbar.flipToNavi}
-            </button>
-            <button
-              type="button"
-              className="chip"
-              onClick={() => {
-                connectButtonRef.current?.focus();
-                connectButtonRef.current?.click();
-              }}
-              aria-label={dockStrings.toolbar.connect}
-            >
-              {dockStrings.toolbar.connect}
-            </button>
-            <button
-              type="button"
-              className="chip"
-              onClick={cycleSize}
-              aria-label={`${dockStrings.toolbar.resize} (${cardSize})`}
-            >
-              {dockStrings.toolbar.resize}
-            </button>
-            <button
-              type="button"
-              className="chip"
-              onClick={handleClose}
-              aria-label={dockStrings.toolbar.close}
-              ref={closeButtonRef}
-            >
-              {dockStrings.toolbar.close}
-            </button>
-          </div>
-        </header>
-        <div className="wb-dock-host__body">
-          <FlipCard
-            front={frontContent}
-            back={backContent}
-            size={cardSize}
-            onFlip={handleFlip}
-            onResize={handleCardResize}
-            onConnect={onConnect}
-            side={side}
-            allowedSizes={HOST_SIZE_ORDER}
-            motionProfile="calm"
-            fastFlip={fastFlip}
-            strings={{
-              flipToBuoy: dockStrings.toolbar.flipToBuoy,
-              flipToNavi: dockStrings.toolbar.flipToNavi,
-              connect: dockStrings.toolbar.connect,
-              resize: dockStrings.toolbar.resize,
-            }}
-            className="wb-dock__flipcard"
-          />
-          <PeripheralCue
-            status={status}
-            placement="full-right"
-            active={enablePeripheralCue}
-          />
+        <div style={visuallyHidden} aria-live="polite" aria-atomic="true" data-testid="dock-live">
+          {liveMessage || ""}
         </div>
-        <footer className="wb-dock-host__footer">{dockStrings.host.statusLine}</footer>
-        <div
-          tabIndex={0}
-          data-dock-sentinel="end"
-          className="wb-dock-host__sentinel"
-          onFocus={focusFirstElement}
-          aria-hidden="true"
-        />
+        {title ? (
+          <h2 id={titleId} style={{ margin: 0, fontSize: "1.25rem", fontWeight: 600 }}>
+            {title}
+          </h2>
+        ) : null}
+        {description ? (
+          <p id={descriptionId} style={{ margin: 0, color: "rgba(226, 232, 240, 0.84)" }}>
+            {description}
+          </p>
+        ) : null}
+        <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>{children}</div>
       </div>
     </div>
   );
+
+  return containerRef.current ? createPortal(dialog, containerRef.current) : dialog;
 }
