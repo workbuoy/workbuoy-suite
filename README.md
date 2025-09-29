@@ -50,6 +50,7 @@ Docs
 - [Asset Policy](docs/ASSET_POLICY.md)
 - [ADR Template](docs/adr/README.md)
 - [CI Notes](docs/CI_NOTES.md)
+- [Infra & Storage Guide](docs/Infra.md)
 - [Governance](docs/GOVERNANCE.md)
 - [Workbuoy Architecture (Core/Flex/Secure + Navi/Buoy AI/Roles/Proactivity)](docs/architecture/workbuoy-architecture.md)
 
