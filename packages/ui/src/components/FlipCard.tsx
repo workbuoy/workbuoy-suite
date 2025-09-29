@@ -1,0 +1,111 @@
+import type { CSSProperties, KeyboardEvent, ReactNode } from "react";
+import { useCallback, useMemo, useState } from "react";
+import type { MotionProps } from "framer-motion";
+import { motion } from "framer-motion";
+
+export type FlipCardProps = {
+  front: ReactNode;
+  back: ReactNode;
+  isFlipped?: boolean;
+  onFlip?: () => void;
+  className?: string;
+};
+
+const transition: MotionProps["transition"] = {
+  duration: 0.6,
+  ease: [0.45, 0, 0.15, 1],
+};
+
+const baseCardClass = "wbui-flip-card";
+const faceClass = "wbui-flip-card__face";
+
+function mergeClassName(extra?: string) {
+  return extra ? `${baseCardClass} ${extra}` : baseCardClass;
+}
+
+const baseCardStyle: CSSProperties = {
+  position: "relative",
+  display: "grid",
+  cursor: "pointer",
+  transformStyle: "preserve-3d",
+};
+
+const frontStyle: CSSProperties = {
+  gridArea: "1 / 1",
+  backfaceVisibility: "hidden",
+};
+
+const backStyle: CSSProperties = {
+  ...frontStyle,
+  transform: "rotateY(180deg)",
+};
+
+const wrapperStyle: CSSProperties = {
+  perspective: "1200px",
+  display: "inline-block",
+};
+
+export default function FlipCard({
+  front,
+  back,
+  isFlipped,
+  onFlip,
+  className,
+}: FlipCardProps) {
+  const [internalFlipped, setInternalFlipped] = useState(false);
+
+  const resolvedFlipped = isFlipped ?? internalFlipped;
+
+  const toggle = useCallback(() => {
+    if (isFlipped === undefined) {
+      setInternalFlipped((value) => !value);
+    }
+
+    onFlip?.();
+  }, [isFlipped, onFlip]);
+
+  const handleKeyDown = useCallback(
+    (event: KeyboardEvent<HTMLDivElement>) => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        toggle();
+      }
+    },
+    [toggle],
+  );
+
+  const cardClassName = useMemo(() => mergeClassName(className), [className]);
+
+  return (
+    <div style={wrapperStyle}>
+      <motion.div
+        role="button"
+        tabIndex={0}
+        aria-pressed={resolvedFlipped}
+        data-flipped={resolvedFlipped}
+        className={cardClassName}
+        style={baseCardStyle}
+        animate={{ rotateY: resolvedFlipped ? 180 : 0 }}
+        initial={false}
+        transition={transition}
+        onClick={toggle}
+        onKeyDown={handleKeyDown}
+      >
+        <div
+          className={`${faceClass} ${faceClass}--front`}
+          style={frontStyle}
+          aria-hidden={resolvedFlipped}
+        >
+          {front}
+        </div>
+        <div
+          className={`${faceClass} ${faceClass}--back`}
+          style={backStyle}
+          aria-hidden={!resolvedFlipped}
+        >
+          {back}
+        </div>
+      </motion.div>
+    </div>
+  );
+}
