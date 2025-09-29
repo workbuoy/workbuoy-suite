@@ -1,6 +1,6 @@
 import client from 'prom-client';
 import express from 'express';
-import pkg from '../../package.json' assert { type: 'json' };
+import pkg from '../../package.json' with { type: 'json' };
 import { getDefaultLabels } from './metricsConfig.js';
 
 type PackageJson = { version?: string };

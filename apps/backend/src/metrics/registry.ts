@@ -1,5 +1,5 @@
 import { collectDefaultMetrics, Registry } from 'prom-client';
-import pkg from '../../package.json' assert { type: 'json' };
+import pkg from '../../package.json' with { type: 'json' };
 import { getDefaultLabels, getMetricsPrefix, isMetricsEnabled } from '../observability/metricsConfig.js';
 
 type PackageJson = { version?: string };
