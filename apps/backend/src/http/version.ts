@@ -23,7 +23,7 @@ export function versionHandler(_req: Request, res: Response) {
   const sha =
     process.env.GIT_SHA ||
     process.env.COMMIT_SHA ||
-    undefined;
+    'dev';
 
   const version = envVersion ?? readPkgVersion() ?? "unknown";
   res.json({ version, sha });

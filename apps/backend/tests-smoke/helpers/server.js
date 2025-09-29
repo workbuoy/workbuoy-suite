@@ -35,6 +35,7 @@ async function bootServer() {
         PORT,
         FF_PERSISTENCE: "0",
         WB_CHAOS_READY: "0",
+        WB_SKIP_OPTIONAL_ROUTES: "1",
         NODE_ENV: "test",
       },
       stdio: ["ignore", "pipe", "pipe"],
