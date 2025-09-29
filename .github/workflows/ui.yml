@@ -16,6 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       CI: 'true'
+      ROLLUP_SKIP_NODEJS_NATIVE: '1'
     steps:
       - name: Checkout
         uses: actions/checkout@v5
