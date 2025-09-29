@@ -2,19 +2,8 @@ import express from 'express';
 import type { RequestHandler, Router } from 'express';
 import { createAuthModule } from '@workbuoy/backend-auth';
 import { audit } from './audit/audit.js';
+import { mountMetrics } from './metrics/metrics.js';
 
-function normalizeMetricsRoute(value?: string | null): string {
-  if (!value) {
-    return '/metrics';
-  }
-
-  const trimmed = value.trim();
-  if (!trimmed) {
-    return '/metrics';
-  }
-
-  return trimmed.startsWith('/') ? trimmed : `/${trimmed}`;
-}
 type MiddlewareFn = RequestHandler;
 
 const SKIP_OPTIONAL = process.env.WB_SKIP_OPTIONAL_ROUTES === '1';
@@ -215,10 +204,6 @@ const timingMiddleware = pickRequiredExport<MiddlewareFn>(
   metricsModule as Record<string, unknown>,
   'timingMiddleware',
 );
-const createEventBusMetricsCollector = pickRequiredExport<
-  (registry: unknown) => () => Promise<void>
->(metricsModule as Record<string, unknown>, 'createEventBusMetricsCollector');
-
 const metricsBridgeModule = await import(resolveModulePath('./metrics/bridge.js'));
 const initializeMetricsBridge = pickRequiredExport<() => void>(
   metricsBridgeModule as Record<string, unknown>,
@@ -376,64 +361,6 @@ app.use(express.urlencoded({ extended: true }));
 app.use(correlationHeader);
 app.use(wbContext);
 
-const metricsRoute = normalizeMetricsRoute(process.env.METRICS_ROUTE);
-let metricsMounted = false;
-
-if (isMetricsEnabled()) {
-  initializeMetricsBridge();
-  metricsMounted = await mountOptionalPackage(app, '@workbuoy/backend-metrics/dist/index.js', 'metrics', {
-    async mount(expressApp, mod) {
-      const withMetricsFn =
-        typeof mod.withMetrics === 'function'
-          ? mod.withMetrics
-          : typeof mod.default?.withMetrics === 'function'
-            ? mod.default.withMetrics
-            : undefined;
-      const createMetricsRouterFn =
-        typeof mod.createMetricsRouter === 'function'
-          ? mod.createMetricsRouter
-          : typeof mod.default?.createMetricsRouter === 'function'
-            ? mod.default.createMetricsRouter
-            : undefined;
-      const getRegistryFn =
-        typeof mod.getRegistry === 'function'
-          ? mod.getRegistry
-          : typeof mod.default?.getRegistry === 'function'
-            ? mod.default.getRegistry
-            : undefined;
-
-      if (!withMetricsFn || !createMetricsRouterFn) {
-        return false;
-      }
-
-      const registry = getRegistryFn ? getRegistryFn() : undefined;
-      let beforeCollect: (() => Promise<void> | void) | undefined;
-      if (registry && typeof createEventBusMetricsCollector === 'function') {
-        try {
-          beforeCollect = createEventBusMetricsCollector(registry);
-        } catch (err) {
-          console.warn('[server] optional metrics collector failed:', (err as Error).message);
-        }
-      }
-
-      withMetricsFn(expressApp, { registry, enableDefaultMetrics: false });
-      expressApp.use(
-        metricsRoute,
-        createMetricsRouterFn({ registry, beforeCollect }) as unknown as Middleware,
-      );
-      return true;
-    },
-  });
-}
-
-if (!metricsMounted) {
-  app.use(timingMiddleware);
-  app.get(metricsRoute, (_req, res) => {
-    res.type('text/plain').status(200).send('# workbuoy_metrics{noop="true"} 1\n');
-  });
-  console.log('[server] mounted fallback /metrics');
-}
-
 app.use(requestLogger());
 
 const eventBus = await loadEventBus();
@@ -501,6 +428,16 @@ app.get('/api/health', (_req, res) => {
 });
 
 app.get('/api/version', versionHandler);
+
+const metricsEnabled = isMetricsEnabled();
+if (metricsEnabled) {
+  initializeMetricsBridge();
+}
+
+const metricsMounted = await mountMetrics(app);
+if (!metricsMounted) {
+  app.use(timingMiddleware);
+}
 
 app.get('/status', async (_req, res) => {
   try {

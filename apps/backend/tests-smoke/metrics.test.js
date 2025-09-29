@@ -6,19 +6,19 @@ const BASE_PORT = Number(process.env.SMOKE_PORT ?? 3100);
 
 test("GET /metrics returns 200 text/plain", { concurrency: false, timeout: 15_000 }, async (t) => {
   const backend = await startBackend(BASE_PORT + 2);
-  t.after(async () => {
+  try {
+    const res = await fetch(`${backend.url}/metrics`);
+    if (res.status === 404) {
+      t.skip("Metrics endpoint not mounted in this build");
+      return;
+    }
+
+    assert.equal(res.status, 200);
+    const contentType = res.headers.get("content-type") ?? "";
+    assert.ok(contentType.includes("text/plain"));
+    const body = await res.text();
+    assert.ok(body.length > 0);
+  } finally {
     await backend.stop();
-  });
-
-  const res = await fetch(`${backend.url}/metrics`);
-  if (res.status === 404) {
-    t.skip("Metrics endpoint not mounted in this build");
-    return;
   }
-
-  assert.equal(res.status, 200);
-  const contentType = res.headers.get("content-type") ?? "";
-  assert.ok(contentType.includes("text/plain"));
-  const body = await res.text();
-  assert.ok(body.length > 0);
 });

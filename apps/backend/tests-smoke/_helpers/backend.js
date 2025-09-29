@@ -7,10 +7,32 @@ import { fileURLToPath } from "node:url";
  * @typedef {{ stop: () => Promise<void>, url: string }} BackendRunner
  */
 
-const SPAWN_CMD = process.platform === "win32" ? "npx.cmd" : "npx";
+const SPAWN_CMD = process.execPath;
 const HERE = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = resolve(HERE, "../../../..");
 const ENTRYPOINT = "apps/backend/src/index.ts";
+const SPAWN_ARGS = ["--import", "tsx", ENTRYPOINT];
+
+function createTimeout(ms, onTimeout) {
+  let timer;
+  const promise = new Promise((resolve) => {
+    timer = setTimeout(() => {
+      Promise.resolve(onTimeout()).finally(resolve);
+    }, ms);
+    if (typeof timer?.unref === "function") {
+      timer.unref();
+    }
+  });
+
+  return {
+    promise,
+    cancel() {
+      if (typeof timer !== "undefined") {
+        clearTimeout(timer);
+      }
+    },
+  };
+}
 
 /**
  * Starts the backend on the provided port and waits until /api/health responds.
@@ -28,7 +50,7 @@ export async function startBackend(port) {
     NODE_ENV: "test",
   };
 
-  const child = spawn(SPAWN_CMD, ["tsx", ENTRYPOINT], {
+  const child = spawn(SPAWN_CMD, SPAWN_ARGS, {
     stdio: "inherit",
     env,
     cwd: REPO_ROOT,
@@ -99,12 +121,12 @@ export async function startBackend(port) {
       });
 
       try {
-        child.kill("SIGTERM");
+        child.kill("SIGINT");
       } catch (error) {
         // ignore kill errors
       }
 
-      const timeout = delay(5_000).then(async () => {
+      const timeout = createTimeout(2_000, async () => {
         if (!exitInfo) {
           try {
             child.kill("SIGKILL");
@@ -114,7 +136,8 @@ export async function startBackend(port) {
         }
       });
 
-      await Promise.race([waitForExit, timeout]);
+      await Promise.race([waitForExit, timeout.promise]);
+      timeout.cancel();
     },
   };
 }
@@ -125,13 +148,14 @@ async function terminateChild(child) {
   });
 
   try {
-    child.kill("SIGTERM");
+    child.kill("SIGINT");
   } catch (error) {
     // ignore
   }
 
-  const termTimeout = delay(500);
-  await Promise.race([waitForExit, termTimeout]);
+  const termTimeout = createTimeout(500, () => {});
+  await Promise.race([waitForExit, termTimeout.promise]);
+  termTimeout.cancel();
 
   if (child.exitCode === null && child.signalCode === null) {
     try {
@@ -139,6 +163,8 @@ async function terminateChild(child) {
     } catch (error) {
       // ignore
     }
-    await Promise.race([waitForExit, delay(500)]);
+    const killTimeout = createTimeout(500, () => {});
+    await Promise.race([waitForExit, killTimeout.promise]);
+    killTimeout.cancel();
   }
 }

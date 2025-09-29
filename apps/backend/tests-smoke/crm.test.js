@@ -6,15 +6,15 @@ const BASE_PORT = Number(process.env.SMOKE_PORT ?? 3100);
 
 test("CRM health (optional, skipped if 404)", { concurrency: false, timeout: 15_000 }, async (t) => {
   const backend = await startBackend(BASE_PORT + 3);
-  t.after(async () => {
+  try {
+    const res = await fetch(`${backend.url}/api/crm/health`).catch(() => null);
+    if (!res || res.status === 404) {
+      t.skip("CRM router not mounted in this build");
+      return;
+    }
+
+    assert.equal(res.status, 200);
+  } finally {
     await backend.stop();
-  });
-
-  const res = await fetch(`${backend.url}/api/crm/health`).catch(() => null);
-  if (!res || res.status === 404) {
-    t.skip("CRM router not mounted in this build");
-    return;
   }
-
-  assert.equal(res.status, 200);
 });
