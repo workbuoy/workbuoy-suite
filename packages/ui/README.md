@@ -2,6 +2,13 @@
 
 Shared UI components for Workbuoy applications.
 
+## Storybook
+
+- Local dev server: `npm run -w @workbuoy/ui storybook`
+- Production build check: `npm run -w @workbuoy/ui storybook:check`
+- Pull request preview: every PR touching `packages/ui/**` runs the **ui-storybook** workflow in GitHub Actions and uploads a `storybook-preview` artifact containing the static build.
+- Production deploy: merges to `main` trigger the **deploy-ui-storybook** workflow, which publishes the latest static build to GitHub Pages.
+
 ## ProactivitySwitch
 
 ### Controlled toggle
@@ -45,10 +52,6 @@ export function InlineFlip() {
   );
 }
 ```
-
-### Storybook
-- Start: `npm run -w @workbuoy/ui storybook`
-- Build: `npm run -w @workbuoy/ui build:storybook`
 
 ### Controlled flip
 
