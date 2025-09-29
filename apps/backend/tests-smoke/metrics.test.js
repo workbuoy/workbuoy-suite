@@ -1,19 +1,21 @@
-import { test } from "node:test";
+import test from "node:test";
 import assert from "node:assert/strict";
-import { startServer } from "./helpers/server.js";
+import { startBackend } from "./_helpers/backend.js";
 
-let srv;
+const BASE_PORT = Number(process.env.SMOKE_PORT ?? 3100);
 
-test.before(async () => {
-  srv = await startServer();
-});
+test("GET /metrics returns 200 text/plain", { concurrency: false, timeout: 15_000 }, async (t) => {
+  const backend = await startBackend(BASE_PORT + 2);
+  t.after(async () => {
+    await backend.stop();
+  });
 
-test("GET /metrics returns 200 text/plain", async (t) => {
-  const res = await fetch(`${srv.baseUrl}/metrics`);
+  const res = await fetch(`${backend.url}/metrics`);
   if (res.status === 404) {
     t.skip("Metrics endpoint not mounted in this build");
     return;
   }
+
   assert.equal(res.status, 200);
   const contentType = res.headers.get("content-type") ?? "";
   assert.ok(contentType.includes("text/plain"));

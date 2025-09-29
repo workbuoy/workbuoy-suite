@@ -1,18 +1,20 @@
-import { test } from "node:test";
+import test from "node:test";
 import assert from "node:assert/strict";
-import { startServer } from "./helpers/server.js";
+import { startBackend } from "./_helpers/backend.js";
 
-let srv;
+const BASE_PORT = Number(process.env.SMOKE_PORT ?? 3100);
 
-test.before(async () => {
-  srv = await startServer();
-});
+test("CRM health (optional, skipped if 404)", { concurrency: false, timeout: 15_000 }, async (t) => {
+  const backend = await startBackend(BASE_PORT + 3);
+  t.after(async () => {
+    await backend.stop();
+  });
 
-test("CRM health (optional, skipped if 404)", async (t) => {
-  const res = await fetch(`${srv.baseUrl}/api/crm/health`).catch(() => null);
+  const res = await fetch(`${backend.url}/api/crm/health`).catch(() => null);
   if (!res || res.status === 404) {
     t.skip("CRM router not mounted in this build");
     return;
   }
+
   assert.equal(res.status, 200);
 });

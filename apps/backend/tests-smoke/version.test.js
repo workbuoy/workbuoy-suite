@@ -1,15 +1,16 @@
-import { test } from "node:test";
+import test from "node:test";
 import assert from "node:assert/strict";
-import { startServer } from "./helpers/server.js";
+import { startBackend } from "./_helpers/backend.js";
 
-let srv;
+const BASE_PORT = Number(process.env.SMOKE_PORT ?? 3100);
 
-test.before(async () => {
-  srv = await startServer();
-});
+test("GET /api/version returns { version, sha }", { concurrency: false, timeout: 15_000 }, async (t) => {
+  const backend = await startBackend(BASE_PORT + 1);
+  t.after(async () => {
+    await backend.stop();
+  });
 
-test("GET /api/version returns { version, sha }", async () => {
-  const res = await fetch(`${srv.baseUrl}/api/version`);
+  const res = await fetch(`${backend.url}/api/version`);
   assert.equal(res.status, 200);
   const data = await res.json();
   assert.ok(Object.hasOwn(data, "version"), "missing version");
