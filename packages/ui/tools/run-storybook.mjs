@@ -1,4 +1,5 @@
 process.env.ROLLUP_SKIP_NODEJS_NATIVE = 'true';
+process.env.ROLLUP_SKIP_NATIVE = 'true';
 
 const cli = await import('@storybook/cli');
 void cli;
