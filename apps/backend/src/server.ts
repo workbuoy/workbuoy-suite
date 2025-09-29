@@ -1,8 +1,7 @@
-import express, { Router } from 'express';
+import express from 'express';
+import type { RequestHandler, Router } from 'express';
 import { createAuthModule } from '@workbuoy/backend-auth';
-import { configureRbac, RbacRouter } from '@workbuoy/backend-rbac';
 import { audit } from './audit/audit.js';
-import { withMetrics } from '@workbuoy/backend-metrics';
 
 function normalizeMetricsRoute(value?: string | null): string {
   if (!value) {
@@ -16,7 +15,7 @@ function normalizeMetricsRoute(value?: string | null): string {
 
   return trimmed.startsWith('/') ? trimmed : `/${trimmed}`;
 }
-type MiddlewareFn = (...args: any[]) => any;
+type MiddlewareFn = RequestHandler;
 
 const SKIP_OPTIONAL = process.env.WB_SKIP_OPTIONAL_ROUTES === '1';
 const OPTIONAL_ROUTES_SKIP_MESSAGE =
@@ -216,24 +215,9 @@ const timingMiddleware = pickRequiredExport<MiddlewareFn>(
   metricsModule as Record<string, unknown>,
   'timingMiddleware',
 );
-const metricsHandler = pickRequiredExport<MiddlewareFn>(
-  metricsModule as Record<string, unknown>,
-  'metricsHandler',
-);
 const createEventBusMetricsCollector = pickRequiredExport<
   (registry: unknown) => () => Promise<void>
 >(metricsModule as Record<string, unknown>, 'createEventBusMetricsCollector');
-
-const metricsRouterModule = await import(resolveModulePath('./metrics/router.js'));
-const createMetricsRouter = pickRequiredExport<
-  (options?: Record<string, unknown>) => Router
->(metricsRouterModule as Record<string, unknown>, 'createMetricsRouter');
-
-const metricsRegistryModule = await import(resolveModulePath('./metrics/registry.js'));
-const getRegistry = pickRequiredExport<() => any>(
-  metricsRegistryModule as Record<string, unknown>,
-  'getRegistry',
-);
 
 const metricsBridgeModule = await import(resolveModulePath('./metrics/bridge.js'));
 const initializeMetricsBridge = pickRequiredExport<() => void>(
@@ -285,15 +269,15 @@ function isObject(v: unknown): v is Record<string, unknown> {
   return !!v && typeof v === 'object';
 }
 
-function asMiddleware(mod: unknown): MiddlewareFn | undefined {
-  if (typeof mod === 'function') return mod as MiddlewareFn;
-  if (isObject(mod)) {
-    const m = mod as Record<string, unknown>;
-    if (typeof m.default === 'function') return m.default as MiddlewareFn;
-    if (typeof m.router === 'function') return m.router as MiddlewareFn;
-  }
-  return undefined;
-}
+type Middleware = (...args: any[]) => any;
+const asMw = (m: any): Middleware | undefined =>
+  typeof m === 'function'
+    ? (m as Middleware)
+    : typeof m?.default === 'function'
+      ? (m.default as Middleware)
+      : typeof m?.router === 'function'
+        ? (m.router as Middleware)
+        : undefined;
 
 async function mountOptionalRoute(
   app: import('express').Express,
@@ -302,11 +286,11 @@ async function mountOptionalRoute(
 ) {
   try {
     const mod = await import(resolveModulePath(spec));
-    const mw = asMiddleware(mod);
+    const mw = asMw(mod);
     if (!mw) {
       console.warn(
         `[routes] Skipping ${spec}: no callable middleware. typeof=${typeof mod}; keys=${
-          isObject(mod) ? Object.keys(mod).join(',') : ''
+          mod && typeof mod === 'object' ? Object.keys(mod).join(',') : ''
         }`,
       );
       return;
@@ -317,6 +301,63 @@ async function mountOptionalRoute(
     console.warn(
       `[routes] Skipping ${spec} due to import error: ${(err as Error)?.message}`,
     );
+  }
+}
+
+type OptionalPackageMount = (
+  app: import('express').Express,
+  mod: any,
+) => boolean | Middleware | Promise<boolean | Middleware | void> | void;
+
+async function mountOptionalPackage(
+  app: import('express').Express,
+  spec: string,
+  label: string,
+  options?: { mount?: OptionalPackageMount },
+): Promise<boolean> {
+  if (SKIP_OPTIONAL) {
+    console.log(`[server] skip optional ${label} (WB_SKIP_OPTIONAL_ROUTES=1)`);
+    return false;
+  }
+  try {
+    const mod = await import(spec);
+    if (options?.mount) {
+      const result = await options.mount(app, mod);
+      if (typeof result === 'boolean') {
+        if (result) {
+          console.log(`[server] mounted optional ${label}`);
+        }
+        return result;
+      }
+
+      const candidate = result ?? mod;
+      const mw = asMw(candidate);
+      if (!mw) {
+        console.warn(
+          `[server] optional ${label} export not callable:`,
+          candidate && typeof candidate === 'object' ? Object.keys(candidate) : [],
+        );
+        return false;
+      }
+      app.use(mw as Middleware);
+      console.log(`[server] mounted optional ${label}`);
+      return true;
+    }
+
+    const mw = asMw(mod);
+    if (!mw) {
+      console.warn(
+        `[server] optional ${label} export not callable:`,
+        mod && typeof mod === 'object' ? Object.keys(mod) : [],
+      );
+      return false;
+    }
+    app.use(mw as Middleware);
+    console.log(`[server] mounted optional ${label}`);
+    return true;
+  } catch (err) {
+    console.warn(`[server] optional ${label} not available:`, (err as Error).message);
+    return false;
   }
 }
 
@@ -336,16 +377,61 @@ app.use(correlationHeader);
 app.use(wbContext);
 
 const metricsRoute = normalizeMetricsRoute(process.env.METRICS_ROUTE);
+let metricsMounted = false;
 
 if (isMetricsEnabled()) {
-  const registry = getRegistry();
-  const collectEventBusMetrics = createEventBusMetricsCollector(registry);
   initializeMetricsBridge();
-  withMetrics(app, { registry, enableDefaultMetrics: false });
-  app.use(metricsRoute, createMetricsRouter({ beforeCollect: collectEventBusMetrics }));
-} else {
+  metricsMounted = await mountOptionalPackage(app, '@workbuoy/backend-metrics/dist/index.js', 'metrics', {
+    async mount(expressApp, mod) {
+      const withMetricsFn =
+        typeof mod.withMetrics === 'function'
+          ? mod.withMetrics
+          : typeof mod.default?.withMetrics === 'function'
+            ? mod.default.withMetrics
+            : undefined;
+      const createMetricsRouterFn =
+        typeof mod.createMetricsRouter === 'function'
+          ? mod.createMetricsRouter
+          : typeof mod.default?.createMetricsRouter === 'function'
+            ? mod.default.createMetricsRouter
+            : undefined;
+      const getRegistryFn =
+        typeof mod.getRegistry === 'function'
+          ? mod.getRegistry
+          : typeof mod.default?.getRegistry === 'function'
+            ? mod.default.getRegistry
+            : undefined;
+
+      if (!withMetricsFn || !createMetricsRouterFn) {
+        return false;
+      }
+
+      const registry = getRegistryFn ? getRegistryFn() : undefined;
+      let beforeCollect: (() => Promise<void> | void) | undefined;
+      if (registry && typeof createEventBusMetricsCollector === 'function') {
+        try {
+          beforeCollect = createEventBusMetricsCollector(registry);
+        } catch (err) {
+          console.warn('[server] optional metrics collector failed:', (err as Error).message);
+        }
+      }
+
+      withMetricsFn(expressApp, { registry, enableDefaultMetrics: false });
+      expressApp.use(
+        metricsRoute,
+        createMetricsRouterFn({ registry, beforeCollect }) as unknown as Middleware,
+      );
+      return true;
+    },
+  });
+}
+
+if (!metricsMounted) {
   app.use(timingMiddleware);
-  app.get(metricsRoute, metricsHandler);
+  app.get(metricsRoute, (_req, res) => {
+    res.type('text/plain').status(200).send('# workbuoy_metrics{noop="true"} 1\n');
+  });
+  console.log('[server] mounted fallback /metrics');
 }
 
 app.use(requestLogger());
@@ -355,18 +441,81 @@ app.set('eventBus', eventBus);
 
 const noopCounter = { inc: () => {} } as const;
 
-configureRbac({
-  audit,
-  counters: {
-    denied: noopCounter,
-    policyChange: noopCounter,
+await mountOptionalPackage(app, '@workbuoy/backend-rbac/dist/index.js', 'rbac', {
+  mount(expressApp, mod) {
+    const configure =
+      typeof mod.configureRbac === 'function'
+        ? mod.configureRbac
+        : typeof mod.default?.configureRbac === 'function'
+          ? mod.default.configureRbac
+          : undefined;
+
+    if (configure) {
+      try {
+        configure({
+          audit,
+          counters: {
+            denied: noopCounter,
+            policyChange: noopCounter,
+          },
+        });
+      } catch (err) {
+        console.warn('[server] optional rbac configure failed:', (err as Error).message);
+      }
+    }
+
+    const routerCandidate =
+      typeof mod.RbacRouter === 'function'
+        ? mod.RbacRouter
+        : typeof mod.router === 'function'
+          ? mod.router
+          : typeof mod.default === 'function'
+            ? mod.default
+            : typeof mod.default?.router === 'function'
+              ? mod.default.router
+              : undefined;
+
+    const routerMw = asMw(routerCandidate ?? mod);
+    if (!routerMw) {
+      console.warn(
+        '[server] optional rbac export not callable:',
+        mod && typeof mod === 'object' ? Object.keys(mod) : [],
+      );
+      return false;
+    }
+
+    expressApp.use('/api/rbac', routerMw as Middleware);
+    return true;
   },
 });
+
+await mountOptionalPackage(app, '@workbuoy/backend-telemetry/dist/index.js', 'telemetry');
 
 const { router: authRouter } = createAuthModule({ audit });
 
 app.use('/', authRouter);
 app.use('/', buildSwaggerRouter());
+
+app.get('/api/health', (_req, res) => {
+  res.json({ ok: true, status: true, ts: new Date().toISOString() });
+});
+
+app.get('/api/version', versionHandler);
+
+app.get('/status', async (_req, res) => {
+  try {
+    const stats = await eventBus.stats();
+    const summary = stats.summary ?? { high: 0, medium: 0, low: 0, dlq: 0 };
+    res.json({
+      ok: true,
+      ts: new Date().toISOString(),
+      persistMode: (process.env.PERSIST_MODE || 'file').toLowerCase(),
+      queues: summary,
+    });
+  } catch (err: any) {
+    res.status(500).json({ error: 'status_unavailable', message: err?.message || String(err) });
+  }
+});
 
 await mountOptionalRouter(app, '/api/crm', '../../../src/features/crm/routes.js', 'crmRouter');
 await mountOptionalRouter(app, '/api/tasks', '../../../src/features/tasks/routes.js', 'tasksRouter');
@@ -399,8 +548,6 @@ if (!SKIP_OPTIONAL) {
 await mountOptionalRouter(app, '/api', '../../../src/routes/knowledge.router.js');
 await mountOptionalRouter(app, '/api/audit', '../../../src/routes/audit.js', 'auditRouter');
 
-app.use('/api/rbac', RbacRouter);
-
 if (process.env.NODE_ENV !== 'production') {
   app.use('/api', debugDlqRouter());
   app.use('/api', debugCircuitRouter());
@@ -410,27 +557,6 @@ if (process.env.NODE_ENV !== 'production') {
     warnSkippingOptionalRoutes();
   }
 }
-
-app.get('/status', async (_req, res) => {
-  try {
-    const stats = await eventBus.stats();
-    const summary = stats.summary ?? { high: 0, medium: 0, low: 0, dlq: 0 };
-    res.json({
-      ok: true,
-      ts: new Date().toISOString(),
-      persistMode: (process.env.PERSIST_MODE || 'file').toLowerCase(),
-      queues: summary,
-    });
-  } catch (err: any) {
-    res.status(500).json({ error: 'status_unavailable', message: err?.message || String(err) });
-  }
-});
-
-app.get('/api/health', (_req, res) => {
-  res.json({ ok: true, status: true, ts: new Date().toISOString() });
-});
-
-app.get('/api/version', versionHandler);
 app.get('/_debug/bus', debugBusHandler);
 app.get('/healthz', (_req, res) => res.json({ ok: true }));
 app.get('/readyz', (_req, res) => res.json({ ok: true }));
