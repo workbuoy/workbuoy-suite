@@ -26,6 +26,8 @@
     "postinstall": "node scripts/postinstall.cjs",
     "test:smoke:crm": "vitest run tests/smoke/crm.proposal.smoke.test.ts",
     "test:smoke:metrics": "vitest run tests/smoke/metrics.smoke.test.ts",
+    "test:observability": "jest --ci --runInBand --coverage=false --testPathPatterns=observability/.*\\.spec\\.ts$",
+    "test:smoke:observability": "jest --ci --runInBand --coverage=false --testPathPatterns=observability/.+router\\.spec\\.ts$",
     "test:smoke": "vitest run",
     "smoke": "npm run test:smoke"
   },

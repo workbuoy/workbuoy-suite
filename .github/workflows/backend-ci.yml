@@ -68,6 +68,15 @@ jobs:
           npm run -w @workbuoy/backend test:smoke:crm
           npm run -w @workbuoy/backend test:smoke:metrics
 
+      - name: Run observability tests
+        env:
+          TELEMETRY_ENABLED: 'true'
+          LOGGING_ENABLED: 'true'
+          NODE_ENV: test
+        run: |
+          npm run -w @workbuoy/backend test:observability || \
+            (echo "Observability tests failed. Se loggene for detaljer." >> "$GITHUB_STEP_SUMMARY" && exit 1)
+
       - name: Run backend Jest suite
         env:
           ROLES_PATH: ./scripts/fixtures/minimal-roles.json

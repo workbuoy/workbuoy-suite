@@ -28,6 +28,7 @@ export default {
     '<rootDir>/../../tests/proactivity/context.integration.test.ts',
     '<rootDir>/src/metrics/**/*.spec.ts',
     '<rootDir>/src/crm/**/*.spec.ts',
+    '<rootDir>/src/observability/**/*.spec.ts',
   ],
   transformIgnorePatterns: [
     ...(base.transformIgnorePatterns ?? []),
