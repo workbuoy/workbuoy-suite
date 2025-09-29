@@ -1,0 +1,5 @@
+{
+  "name": "@workbuoy/backend-smoke-tests",
+  "private": true,
+  "type": "module"
+}

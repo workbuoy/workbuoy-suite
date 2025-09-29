@@ -1,5 +1,4 @@
 import { Counter } from 'prom-client';
-import { createCounter } from '@workbuoy/backend-metrics';
 import { getRegistry } from '../metrics/registry.js';
 import { getMetricsPrefix, isMetricsEnabled } from '../observability/metricsConfig.js';
 
@@ -7,10 +6,25 @@ function buildCounter(name: string, help: string, labelNames: readonly string[] 
   const metricName = `${getMetricsPrefix()}${name}`;
 
   if (!isMetricsEnabled()) {
-    return new Counter({ name: metricName, help, labelNames, registers: [] });
+    return new Counter({ name: metricName, help, labelNames: [...labelNames], registers: [] });
   }
 
-  return createCounter(getRegistry(), metricName, help, [...labelNames]);
+  const registry = getRegistry();
+  const existing = safeGetCounter(registry, metricName);
+  if (existing) {
+    return existing;
+  }
+
+  return new Counter({ name: metricName, help, labelNames: [...labelNames], registers: [registry] });
+}
+
+function safeGetCounter(registry: ReturnType<typeof getRegistry>, metricName: string) {
+  try {
+    const metric = registry.getSingleMetric(metricName);
+    return metric instanceof Counter ? metric : undefined;
+  } catch {
+    return undefined;
+  }
 }
 
 export const wb_connector_ingest_total = buildCounter(
