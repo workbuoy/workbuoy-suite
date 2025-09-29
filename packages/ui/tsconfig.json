@@ -5,6 +5,7 @@
     "rootDir": "src",
     "jsx": "react-jsx",
     "types": [
+      "vite/client",
       "vitest/globals",
       "vitest/importMeta",
       "@testing-library/jest-dom"
