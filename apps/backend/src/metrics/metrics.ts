@@ -18,21 +18,20 @@ const asMw = (m: any): Middleware | undefined =>
 let fallbackMounted = false;
 
 export async function mountMetrics(app: Express): Promise<boolean> {
-  if (!isMetricsEnabled()) {
+  if (!isMetricsEnabled() || SKIP_OPTIONAL) {
+    if (SKIP_OPTIONAL) {
+      console.log("[metrics] skipping optional metrics (WB_SKIP_OPTIONAL_ROUTES=1)");
+    }
     mountFallback(app);
     return false;
   }
 
-  if (SKIP_OPTIONAL) {
-    console.log("[metrics] skipping optional metrics (WB_SKIP_OPTIONAL_ROUTES=1)");
-    mountFallback(app);
-    return false;
-  }
+  const pkgSpec = String(
+    process.env.WB_METRICS_SPEC ?? "@workbuoy/backend-metrics/dist/index.js",
+  );
 
   try {
-    const pkgSpec: string =
-      process.env.WB_METRICS_SPEC ?? "@workbuoy/backend-metrics/dist/index.js";
-    const mod = await import(pkgSpec);
+    const mod = (await import(pkgSpec)) as OptionalMetricsModule;
     const mw = asMw(mod);
     if (!mw) {
       console.warn("[metrics] export not callable, mounting fallback");
@@ -54,11 +53,24 @@ function mountFallback(app: Express) {
     return;
   }
   fallbackMounted = true;
-  app.get("/metrics", (_req: Request, res: Response) => {
-    res.type("text/plain").status(200).send("# workbuoy_metrics{noop=\"true\"} 1\n");
+  app.get("/metrics", async (_req: Request, res: Response) => {
+    res.type("text/plain");
+    try {
+      const registry = getRegistry();
+      const body = await registry.metrics();
+      res.status(200).send(body);
+    } catch (err) {
+      console.warn("[metrics] registry export failed:", (err as Error)?.message ?? err);
+      res.status(200).send("# workbuoy_metrics{noop=\"true\"} 1\n");
+    }
   });
   console.log("[metrics] mounted fallback /metrics");
 }
+
+type OptionalMetricsModule = {
+  default?: Middleware;
+  router?: Middleware;
+} & Record<string, unknown>;
 
 function buildCounter(name: string, help: string, labelNames: readonly string[] = []) {
   const metricName = `${getMetricsPrefix()}${name}`;

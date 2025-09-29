@@ -19,10 +19,23 @@ function warnSkippingOptionalRoutes() {
 }
 
 function resolveModulePath(spec: string): string {
-  if (SKIP_OPTIONAL && spec.endsWith('.js')) {
-    return spec.slice(0, -3) + '.ts';
+  if (spec.startsWith('.') || spec.startsWith('/')) {
+    return new URL(spec, import.meta.url).href;
   }
   return spec;
+}
+
+async function importModule(spec: string) {
+  const resolved = resolveModulePath(spec);
+  try {
+    return await import(resolved);
+  } catch (err) {
+    if (resolved.startsWith('file:') && resolved.endsWith('.js')) {
+      const tsCandidate = `${resolved.slice(0, -3)}.ts`;
+      return import(tsCandidate);
+    }
+    throw err;
+  }
 }
 
 function pickRequiredExport<T>(
@@ -98,7 +111,7 @@ async function mountOptionalRouter(
     return;
   }
   try {
-    const mod = await import(resolveModulePath(spec));
+    const mod = await importModule(spec);
     const candidate = pickRouterExport(mod, exportName);
     const router = resolveRouter(candidate);
     if (router) {
@@ -146,7 +159,7 @@ function createStubBus(): PriorityBus {
 
 async function loadEventBus(): Promise<PriorityBus> {
   try {
-    const mod = await import(resolveModulePath('../../../src/core/eventBusV2.js'));
+    const mod = await importModule('../../../src/core/eventBusV2.js');
     const instance =
       (mod as { bus?: PriorityBus }).bus ?? (mod as { default?: PriorityBus }).default;
     if (instance) {
@@ -165,86 +178,86 @@ async function loadEventBus(): Promise<PriorityBus> {
   }
 }
 
-const appModule = await import(resolveModulePath('./app.secure.js'));
+const appModule = await importModule('./app.secure.js');
 const app = pickRequiredExport<import('express').Express>(
   appModule as Record<string, unknown>,
   'default',
 );
 
-const swaggerModule = await import(resolveModulePath('./docs/swagger.js'));
+const swaggerModule = await importModule('./docs/swagger.js');
 const buildSwaggerRouter = pickRequiredExport<(...args: unknown[]) => Router>(
   swaggerModule as Record<string, unknown>,
   'swaggerRouter',
 );
 
-const correlationModule = await import(
-  resolveModulePath('../../../src/middleware/correlationHeader.js'),
+const correlationModule = await importModule(
+  '../../../src/middleware/correlationHeader.js',
 );
 const correlationHeader = pickRequiredExport<MiddlewareFn>(
   correlationModule as Record<string, unknown>,
   'correlationHeader',
 );
 
-const wbContextModule = await import(resolveModulePath('../../../src/middleware/wbContext.js'));
+const wbContextModule = await importModule('../../../src/middleware/wbContext.js');
 const wbContext = pickRequiredExport<MiddlewareFn>(
   wbContextModule as Record<string, unknown>,
   'wbContext',
 );
 
-const loggerModule = await import(resolveModulePath('../../../src/core/logging/logger.js'));
+const loggerModule = await importModule('../../../src/core/logging/logger.js');
 const requestLogger = pickRequiredExport<() => MiddlewareFn>(
   loggerModule as Record<string, unknown>,
   'requestLogger',
 );
 
-const metricsModule = await import(
-  resolveModulePath('../../../src/core/observability/metrics.js'),
+const metricsModule = await importModule(
+  '../../../src/core/observability/metrics.js',
 );
 const timingMiddleware = pickRequiredExport<MiddlewareFn>(
   metricsModule as Record<string, unknown>,
   'timingMiddleware',
 );
-const metricsBridgeModule = await import(resolveModulePath('./metrics/bridge.js'));
+const metricsBridgeModule = await importModule('./metrics/bridge.js');
 const initializeMetricsBridge = pickRequiredExport<() => void>(
   metricsBridgeModule as Record<string, unknown>,
   'initializeMetricsBridge',
 );
 
-const metricsConfigModule = await import(
-  resolveModulePath('./observability/metricsConfig.js'),
+const metricsConfigModule = await importModule(
+  './observability/metricsConfig.js',
 );
 const isMetricsEnabled = pickRequiredExport<() => boolean>(
   metricsConfigModule as Record<string, unknown>,
   'isMetricsEnabled',
 );
 
-const errorHandlerModule = await import(
-  resolveModulePath('../../../src/core/http/middleware/errorHandler.js'),
+const errorHandlerModule = await importModule(
+  '../../../src/core/http/middleware/errorHandler.js',
 );
 const errorHandler = pickRequiredExport<MiddlewareFn>(
   errorHandlerModule as Record<string, unknown>,
   'errorHandler',
 );
 
-const debugBusModule = await import(resolveModulePath('../../../src/routes/_debug.bus.js'));
+const debugBusModule = await importModule('../../../src/routes/_debug.bus.js');
 const debugBusHandler = pickRequiredExport<MiddlewareFn>(
   debugBusModule as Record<string, unknown>,
   'debugBusHandler',
 );
 
-const debugDlqModule = await import(resolveModulePath('../../../src/routes/debug.dlq.js'));
+const debugDlqModule = await importModule('../../../src/routes/debug.dlq.js');
 const debugDlqRouter = pickRequiredExport<() => Router>(
   debugDlqModule as Record<string, unknown>,
   'debugDlqRouter',
 );
 
-const versionModule = await import(resolveModulePath('./http/version.js'));
+const versionModule = await importModule('./http/version.js');
 const versionHandler = pickRequiredExport<MiddlewareFn>(
   versionModule as Record<string, unknown>,
   'versionHandler',
 );
 
-const debugCircuitModule = await import(resolveModulePath('../../../src/routes/debug.circuit.js'));
+const debugCircuitModule = await importModule('../../../src/routes/debug.circuit.js');
 const debugCircuitRouter = pickRequiredExport<() => Router>(
   debugCircuitModule as Record<string, unknown>,
   'debugCircuitRouter',
@@ -270,7 +283,7 @@ async function mountOptionalRoute(
   spec: string,
 ) {
   try {
-    const mod = await import(resolveModulePath(spec));
+    const mod = await importModule(spec);
     const mw = asMw(mod);
     if (!mw) {
       console.warn(
@@ -366,6 +379,12 @@ app.use(requestLogger());
 const eventBus = await loadEventBus();
 app.set('eventBus', eventBus);
 
+app.get('/api/health', (_req, res) => {
+  res.json({ ok: true, status: true, ts: new Date().toISOString() });
+});
+
+app.get('/api/version', versionHandler);
+
 const noopCounter = { inc: () => {} } as const;
 
 await mountOptionalPackage(app, '@workbuoy/backend-rbac/dist/index.js', 'rbac', {
@@ -422,12 +441,6 @@ const { router: authRouter } = createAuthModule({ audit });
 
 app.use('/', authRouter);
 app.use('/', buildSwaggerRouter());
-
-app.get('/api/health', (_req, res) => {
-  res.json({ ok: true, status: true, ts: new Date().toISOString() });
-});
-
-app.get('/api/version', versionHandler);
 
 const metricsEnabled = isMetricsEnabled();
 if (metricsEnabled) {

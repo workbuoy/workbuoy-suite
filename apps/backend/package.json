@@ -24,7 +24,7 @@
     "seed:dry-run": "npm run db:seed -- --dry-run",
     "lint": "node ../../node_modules/eslint/bin/eslint.js --max-warnings=0 --no-error-on-unmatched-pattern --cwd ../../ apps/backend",
     "postinstall": "node scripts/postinstall.cjs",
-    "test:smoke": "node --test --test-timeout=20000 ./tests-smoke/*.test.js",
+    "test:smoke": "node --test --test-timeout=20000 ./tests-smoke",
     "smoke": "npm run test:smoke"
   },
   "dependencies": {
