@@ -232,6 +232,16 @@ const isMetricsEnabled = pickRequiredExport<() => boolean>(
   'isMetricsEnabled',
 );
 
+const flagsModule = await importModule('./config/flags.js');
+const isTelemetryEnabled = pickRequiredExport<() => boolean>(
+  flagsModule as Record<string, unknown>,
+  'isTelemetryEnabled',
+);
+const isLoggingEnabled = pickRequiredExport<() => boolean>(
+  flagsModule as Record<string, unknown>,
+  'isLoggingEnabled',
+);
+
 const errorHandlerModule = await importModule(
   '../../../src/core/http/middleware/errorHandler.js',
 );
@@ -448,6 +458,28 @@ const { router: authRouter } = createAuthModule({ audit });
 
 app.use('/', authRouter);
 app.use('/', buildSwaggerRouter());
+
+if (isTelemetryEnabled()) {
+  const telemetryRouterModule = await importModule(
+    './observability/telemetry/router.js',
+  );
+  const createTelemetryRouter = pickRequiredExport<() => Router>(
+    telemetryRouterModule as Record<string, unknown>,
+    'createTelemetryRouter',
+  );
+  app.use('/observability/telemetry', createTelemetryRouter());
+  console.log('[routes] Observability telemetry enabled (TELEMETRY_ENABLED=true)');
+}
+
+if (isLoggingEnabled()) {
+  const logsRouterModule = await importModule('./observability/logs/router.js');
+  const createLogsRouter = pickRequiredExport<() => Router>(
+    logsRouterModule as Record<string, unknown>,
+    'createLogsRouter',
+  );
+  app.use('/observability/logs', createLogsRouter());
+  console.log('[routes] Observability log ingest enabled (LOGGING_ENABLED=true)');
+}
 
 const metricsEnabled = isMetricsEnabled();
 if (metricsEnabled) {

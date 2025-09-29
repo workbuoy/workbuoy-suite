@@ -1,3 +1,7 @@
+## PR14 – Observability-tester (telemetry & logging)
+
+### Added – observability-tester for telemetry/logging.
+
 ## PR13 – CRM smoke-tester
 
 ### Added – CRM smoke-tester og /metrics-validering.

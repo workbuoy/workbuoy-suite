@@ -29,6 +29,8 @@ coverage/
 
 *.log
 logs/
+!apps/backend/src/observability/logs/
+!apps/backend/src/observability/logs/**
 
 # Misc
 

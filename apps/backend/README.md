@@ -61,3 +61,14 @@ To run the metrics validation alongside the CRM flow:
 ```bash
 CRM_ENABLED=true METRICS_ENABLED=true npm run -w @workbuoy/backend test:smoke
 ```
+
+## Observability tester – hvordan kjøre lokalt
+
+Aktiver både telemetri- og logging-endepunktene og kjør Jest-suiten for observability:
+
+```bash
+TELEMETRY_ENABLED=true LOGGING_ENABLED=true npm run -w @workbuoy/backend test:observability
+```
+
+Testene validerer `traceparent`-propagasjon, svarformater for `/observability/telemetry/export` og `/observability/logs/ingest`,
+og at eksport-hookene blir trigget.
