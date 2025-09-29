@@ -1,3 +1,7 @@
+## Unreleased
+
+- Fix: Vitest/Storybook use Rollup JS fallback in CI; add framer-motion devDependency.
+
 ## PR9 – Release & polish
 
 ### Features

@@ -5,11 +5,11 @@
   "type": "module",
   "scripts": {
     "lint": "eslint \"src/**/*.{ts,tsx}\" --max-warnings=0",
-    "test": "ROLLUP_SKIP_NODEJS_NATIVE=1 vitest run",
-    "test:watch": "ROLLUP_SKIP_NODEJS_NATIVE=1 vitest",
+    "test": "node ./tools/run-vitest.mjs",
+    "test:watch": "node ./tools/run-vitest.mjs --watch",
     "typecheck": "tsc --noEmit",
-    "storybook": "ROLLUP_SKIP_NODEJS_NATIVE=1 node ./scripts/run-storybook.cjs dev -p 6006",
-    "build:storybook": "ROLLUP_SKIP_NODEJS_NATIVE=1 node ./scripts/run-storybook.cjs build",
+    "storybook": "ROLLUP_SKIP_NODEJS_NATIVE=1 storybook dev -p 6006",
+    "build:storybook": "ROLLUP_SKIP_NODEJS_NATIVE=1 storybook build",
     "test:storybook": "tsc -p tsconfig.json --noEmit"
   },
   "peerDependencies": {
