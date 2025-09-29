@@ -9,7 +9,8 @@
     "test:watch": "node ./tools/run-vitest.mjs --watch",
     "typecheck": "tsc --noEmit",
     "storybook": "ROLLUP_SKIP_NODEJS_NATIVE=1 node ./scripts/run-storybook.cjs dev -p 6006",
-    "build:storybook": "ROLLUP_SKIP_NODEJS_NATIVE=1 node ./scripts/run-storybook.cjs build",
+    "build:storybook": "ROLLUP_SKIP_NODEJS_NATIVE=1 ROLLUP_SKIP_NATIVE=1 node ./scripts/run-storybook.cjs build",
+    "storybook:check": "npm run build:storybook",
     "test:storybook": "tsc -p tsconfig.json --noEmit"
   },
   "peerDependencies": {

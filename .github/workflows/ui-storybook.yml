@@ -1,0 +1,47 @@
+name: ui-storybook
+
+on:
+  pull_request:
+    paths:
+      - 'packages/ui/**'
+      - '.github/workflows/ui-storybook.yml'
+
+jobs:
+  build-storybook:
+    name: Build Storybook preview
+    runs-on: ubuntu-latest
+    env:
+      CI: 'true'
+      ROLLUP_SKIP_NODEJS_NATIVE: '1'
+      ROLLUP_SKIP_NATIVE: '1'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Cache SWC artifacts
+        uses: actions/cache@v4
+        with:
+          path: node_modules/.cache/swc
+          key: ${{ runner.os }}-swc-${{ hashFiles('package-lock.json') }}
+
+      - name: Sanitize npm proxy config (legacy http-proxy)
+        shell: bash
+        run: scripts/ci/sanitize-npm-proxy.sh
+
+      - name: Install dependencies
+        run: npm ci --omit=optional --no-audit --fund=false
+
+      - name: Build Storybook
+        run: npm run storybook:check -w @workbuoy/ui
+
+      - name: Upload Storybook artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: storybook-preview
+          path: packages/ui/storybook-static
