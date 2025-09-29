@@ -3,6 +3,7 @@ import type { RequestHandler, Router } from 'express';
 import { createAuthModule } from '@workbuoy/backend-auth';
 import { audit } from './audit/audit.js';
 import { mountMetrics } from './metrics/metrics.js';
+import { crmProposalRouter } from './routes/crm.proposals.js';
 
 type MiddlewareFn = RequestHandler;
 
@@ -384,6 +385,12 @@ app.get('/api/health', (_req, res) => {
 });
 
 app.get('/api/version', versionHandler);
+
+const crmEnabled = String(process.env.CRM_ENABLED ?? '').toLowerCase() === 'true';
+if (crmEnabled) {
+  app.use('/api/crm', crmProposalRouter);
+  console.log('[routes] CRM proposals enabled (CRM_ENABLED=true)');
+}
 
 const noopCounter = { inc: () => {} } as const;
 

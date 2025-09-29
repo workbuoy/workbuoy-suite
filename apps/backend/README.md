@@ -47,3 +47,17 @@ curl http://localhost:3000/metrics
 - `METRICS_BUCKETS` &mdash; comma-separated list of histogram bucket boundaries shared by backend histograms.
 
 When `METRICS_ENABLED` is true, hitting `/metrics` returns a `200` response with Prometheus text and registers default Node.js/HTTP metrics against a shared registry. The registry, default labels, and prefix are all resolved at request time so you can toggle the feature between test runs.
+
+## CRM smoke-tester
+
+Smoke tests spin up the backend, toggle the CRM feature flag, and verify `POST`/`GET` behaviour for `/api/crm/proposals`.
+
+```bash
+CRM_ENABLED=true npm run -w @workbuoy/backend test:smoke:crm
+```
+
+To run the metrics validation alongside the CRM flow:
+
+```bash
+CRM_ENABLED=true METRICS_ENABLED=true npm run -w @workbuoy/backend test:smoke
+```

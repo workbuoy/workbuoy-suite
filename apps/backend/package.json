@@ -24,7 +24,9 @@
     "seed:dry-run": "npm run db:seed -- --dry-run",
     "lint": "node ../../node_modules/eslint/bin/eslint.js --max-warnings=0 --no-error-on-unmatched-pattern --cwd ../../ apps/backend",
     "postinstall": "node scripts/postinstall.cjs",
-    "test:smoke": "node --test --test-timeout=20000 ./tests-smoke",
+    "test:smoke:crm": "vitest run tests/smoke/crm.proposal.smoke.test.ts",
+    "test:smoke:metrics": "vitest run tests/smoke/metrics.smoke.test.ts",
+    "test:smoke": "vitest run",
     "smoke": "npm run test:smoke"
   },
   "dependencies": {
@@ -72,6 +74,7 @@
     "jest": "^30.0.0",
     "supertest": "^7.0.0",
     "prisma": "^6.16.2",
-    "tsx": "^4"
+    "tsx": "^4",
+    "vitest": "^3.2.4"
   }
 }
