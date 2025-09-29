@@ -1,7 +1,7 @@
 // packages/ui/eslint.config.mjs
 import js from '@eslint/js';
+import tsParser from '@typescript-eslint/parser';
 import reactHooks from 'eslint-plugin-react-hooks';
-import reactRefresh from 'eslint-plugin-react-refresh';
 import importPlugin from 'eslint-plugin-import';
 
 export default [
@@ -18,10 +18,10 @@ export default [
     ignores: [],
     plugins: {
       'react-hooks': reactHooks,
-      'react-refresh': reactRefresh,
       import: importPlugin,
     },
     languageOptions: {
+      parser: tsParser,
       parserOptions: {
         // Kritisk: ikke prøv prosjekt-basert typeinfo (hindrer TS-resolver)
         project: null,
