@@ -24,6 +24,8 @@ const nodePathEntries = new Set([
 const env = {
   ...process.env,
   NODE_PATH: Array.from(nodePathEntries).join(path.delimiter),
+  ROLLUP_SKIP_NODEJS_NATIVE: process.env.ROLLUP_SKIP_NODEJS_NATIVE ?? '1',
+  ROLLUP_SKIP_NATIVE: process.env.ROLLUP_SKIP_NATIVE ?? '1',
 };
 
 const cliPath = path.resolve(rootNodeModules, 'storybook', 'bin', 'index.cjs');
