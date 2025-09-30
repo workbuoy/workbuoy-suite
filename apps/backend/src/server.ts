@@ -4,6 +4,7 @@ import { createAuthModule } from '@workbuoy/backend-auth';
 import { audit } from './audit/audit.js';
 import { mountMetrics } from './metrics/metrics.js';
 import { crmProposalRouter } from './routes/crm.proposals.js';
+import { isTelemetryPersistenceEnabled, telemetryRouter } from './telemetry/context.js';
 
 type MiddlewareFn = RequestHandler;
 
@@ -242,25 +243,8 @@ const isLoggingEnabled = pickRequiredExport<() => boolean>(
   'isLoggingEnabled',
 );
 
-const telemetryContextModule = await importModule('../telemetryContext.js');
-const shouldPersistTelemetry = pickRequiredExport<() => boolean>(
-  telemetryContextModule as Record<string, unknown>,
-  'isTelemetryPersistenceEnabled',
-);
-
-if (shouldPersistTelemetry()) {
-  try {
-    const ensurePersistent = pickRequiredExport<() => unknown>(
-      telemetryContextModule as Record<string, unknown>,
-      'ensureTelemetryPersistentStore',
-    );
-    await Promise.resolve(ensurePersistent());
-    console.log('[telemetry] Feature usage persistence enabled via Prisma storage');
-  } catch (err) {
-    console.warn(
-      `[telemetry] Failed to initialize Prisma telemetry storage: ${(err as Error)?.message}`,
-    );
-  }
+if (isTelemetryPersistenceEnabled()) {
+  console.log('[telemetry] Feature usage persistence enabled via Prisma storage');
 } else {
   console.log('[telemetry] Feature usage persistence disabled; using in-memory store');
 }
@@ -481,6 +465,7 @@ const { router: authRouter } = createAuthModule({ audit });
 
 app.use('/', authRouter);
 app.use('/', buildSwaggerRouter());
+app.use('/api/telemetry', telemetryRouter);
 
 if (isTelemetryEnabled()) {
   const telemetryRouterModule = await importModule(

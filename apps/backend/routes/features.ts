@@ -2,15 +2,9 @@ import { Router } from 'express';
 import type { UserRoleBinding } from '../../../src/roles/types.js';
 import { getRoleRegistry, resolveUserBinding } from '../../../src/roles/service.js';
 import { getActiveFeatures } from '../../../src/features/activation/featureActivation.js';
-import { getTelemetryFallbackStore, ensureTelemetryPersistentStore, isTelemetryPersistenceEnabled } from '../src/telemetryContext.js';
+import { telemetryStorage } from '../src/telemetry/context.js';
 
 const router = Router();
-const usePersistence = isTelemetryPersistenceEnabled();
-const fallbackStore = getTelemetryFallbackStore();
-
-function getTelemetryStore() {
-  return usePersistence ? ensureTelemetryPersistentStore() : fallbackStore;
-}
 
 // NB: Router mountes under /api i server.ts, så path her skal ikke ha /api-prefiks.
 router.get('/features/active', async (req, res) => {
@@ -23,7 +17,7 @@ router.get('/features/active', async (req, res) => {
     const fallback: UserRoleBinding = { userId, primaryRole: role };
     const binding = (await resolveUserBinding(tenantId, userId, fallback)) ?? fallback;
 
-    const usageStore = getTelemetryStore();
+    const usageStore = telemetryStorage;
     const aggregate = (usageStore as any).aggregateFeatureUseCount;
     const usage = typeof aggregate === 'function'
       ? await aggregate.call(usageStore, userId, tenantId)
