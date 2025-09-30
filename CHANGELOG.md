@@ -1,3 +1,8 @@
+## PR18 – Dashboard-shell (frontend, a11y-first)
+
+### Added – dashboard-shell.
+- apps/frontend: Ny `/dashboard`-rute med tilgjengelige tiles, ProactivitySwitch og FlipCard med skjelettlasting.
+
 ## PR16 – Frontend demo-app (FlipCard + ProactivitySwitch)
 
 ### Added
