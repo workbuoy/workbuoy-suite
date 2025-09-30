@@ -1,14 +1,18 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "dist",
-    "rootDir": "src",
+    "composite": true,
     "declaration": true,
     "declarationMap": true,
-    "sourceMap": true,
+    "emitDeclarationOnly": false,
+    "outDir": "dist",
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "target": "ES2022",
+    "lib": ["ES2022"],
     "types": ["node"],
-    "emitDeclarationOnly": false
+    "rootDir": "src",
+    "strict": true
   },
-  "include": ["src/**/*.ts", "../../types/**/*.d.ts"],
-  "exclude": ["dist", "node_modules"]
+  "include": ["src/**/*"]
 }

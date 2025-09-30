@@ -3,15 +3,17 @@
   "version": "1.1.0",
   "private": true,
   "type": "module",
+  "types": "./dist/index.d.ts",
   "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "default": "./dist/index.js"
-    }
+    ".": { "types": "./dist/index.d.ts", "import": "./dist/index.js" },
+    "./router": { "types": "./dist/router.d.ts", "import": "./dist/router.js" },
+    "./middleware": { "types": "./dist/middleware.d.ts", "import": "./dist/middleware.js" },
+    "./registry": { "types": "./dist/registry.d.ts", "import": "./dist/registry.js" },
+    "./createCounter": { "types": "./dist/createCounter.d.ts", "import": "./dist/createCounter.js" },
+    "./createHistogram": { "types": "./dist/createHistogram.d.ts", "import": "./dist/createHistogram.js" }
   },
   "main": "./dist/index.js",
   "module": "./dist/index.js",
-  "types": "./dist/index.d.ts",
   "files": [
     "dist",
     "README.md",
