@@ -5,6 +5,28 @@
   color: var(--foreground, #0f172a);
 }
 
+.dashboard:focus-visible {
+  outline: 3px solid var(--wbui-focus-ring-color, #2563eb);
+  outline-offset: 4px;
+}
+
+.dashboard__sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.wbui-contrast-strong {
+  color: var(--foreground, #0f172a);
+  font-weight: 600;
+}
+
 .dashboard__layout {
   margin: 0 auto;
   max-width: 1120px;
@@ -94,6 +116,25 @@
   background: var(--surface, rgba(255, 255, 255, 0.92));
   padding: 20px;
   min-height: 196px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.dashboard__tile[data-active="true"] {
+  border-color: rgba(37, 99, 235, 0.65);
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.18);
+  background: rgba(37, 99, 235, 0.08);
+}
+
+.dashboard__tile-surface {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  border-radius: 16px;
+  padding: 0;
+}
+
+.dashboard__tile-surface:focus-visible {
+  outline-offset: 4px;
 }
 
 .dashboard__tile-header {
