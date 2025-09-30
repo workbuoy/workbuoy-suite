@@ -1,19 +1,21 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
     "outDir": "dist",
     "baseUrl": ".",
     "types": ["node", "jest", "express"],
     "typeRoots": ["../../types", "../../node_modules/@types"],
     "paths": {
-      "@workbuoy/backend-rbac": ["../../packages/backend-rbac/src/index"],
       "@workbuoy/backend-telemetry": ["../../packages/backend-telemetry/src/index"],
+      "@workbuoy/backend-rbac": ["../../packages/backend-rbac/src/index"],
       "@workbuoy/backend-metrics": ["../../packages/backend-metrics/src/index"]
     },
     "rootDirs": [
       ".",
-      "../../packages/backend-rbac/src",
       "../../packages/backend-telemetry/src",
+      "../../packages/backend-rbac/src",
       "../../packages/backend-metrics/src"
     ]
   },
