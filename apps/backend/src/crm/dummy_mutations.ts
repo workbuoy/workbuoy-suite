@@ -7,6 +7,17 @@ const owners = new Map<string, string>(); // id -> owner_id
 
 export const crmDummy = Router();
 
+function requireParam(req: Request, key: string): string {
+  const params = req.params as Record<string, string | undefined>;
+  const value = params[key]?.trim() ?? '';
+  if (value) {
+    return value;
+  }
+  const error = new Error(`Missing ${key}`) as Error & { status?: number };
+  error.status = 400;
+  throw error;
+}
+
 crmDummy.get(
   '/contacts/:id',
   createPolicyEnforcer('read', 'record', (req: Request) => ({ id: req.params.id })),
@@ -59,13 +70,15 @@ export function createDummyProposal(req: Request, _res?: Response): DummyProposa
 }
 
 export function updateDummyProposal(req: Request, _res?: Response): DummyProposal {
-  const payload: DummyProposal = { id: req.params.id, patched: true };
+  const id = requireParam(req, 'id');
+  const payload: DummyProposal = { id, patched: true };
   _res?.json(payload);
   return payload;
 }
 
 export function getDummyProposal(req: Request, _res?: Response): DummyProposal {
-  const payload: DummyProposal = { id: req.params.id, ok: true };
+  const id = requireParam(req, 'id');
+  const payload: DummyProposal = { id, ok: true };
   _res?.json(payload);
   return payload;
 }
