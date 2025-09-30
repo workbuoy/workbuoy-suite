@@ -3,6 +3,7 @@ import {
   createPrismaTelemetryStorage,
 } from '@workbuoy/backend-telemetry';
 import type { TelemetryStorage } from '@workbuoy/backend-telemetry';
+import { envBool, envStr } from '../../../src/core/env.js';
 import { prisma } from '../../../src/core/db/prisma.js';
 import { emitMetricsEvent } from './metrics/events.js';
 
@@ -35,13 +36,28 @@ function wrapTelemetryStore<T extends TelemetryStorage>(store: T): T {
 const fallbackStorage = wrapTelemetryStore(createInMemoryTelemetryStorage());
 let persistentStorage: TelemetryStorage | null = null;
 
+const persistenceFlagEnabled = envBool('FF_PERSISTENCE', false);
+const hasDatabaseUrl = envStr('DATABASE_URL', '').trim().length > 0;
+const telemetryPersistenceEnabled = persistenceFlagEnabled && hasDatabaseUrl;
+
+export function isTelemetryPersistenceEnabled(): boolean {
+  return telemetryPersistenceEnabled;
+}
+
 export function getTelemetryFallbackStore(): TelemetryStorage {
   return fallbackStorage;
 }
 
 export function ensureTelemetryPersistentStore(): TelemetryStorage {
+  if (!telemetryPersistenceEnabled) {
+    throw new Error('Telemetry persistence is disabled');
+  }
   if (!persistentStorage) {
     persistentStorage = wrapTelemetryStore(createPrismaTelemetryStorage(prisma));
   }
   return persistentStorage;
+}
+
+export function resolveTelemetryStore(): TelemetryStorage {
+  return telemetryPersistenceEnabled ? ensureTelemetryPersistentStore() : fallbackStorage;
 }

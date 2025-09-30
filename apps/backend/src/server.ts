@@ -242,6 +242,29 @@ const isLoggingEnabled = pickRequiredExport<() => boolean>(
   'isLoggingEnabled',
 );
 
+const telemetryContextModule = await importModule('../telemetryContext.js');
+const shouldPersistTelemetry = pickRequiredExport<() => boolean>(
+  telemetryContextModule as Record<string, unknown>,
+  'isTelemetryPersistenceEnabled',
+);
+
+if (shouldPersistTelemetry()) {
+  try {
+    const ensurePersistent = pickRequiredExport<() => unknown>(
+      telemetryContextModule as Record<string, unknown>,
+      'ensureTelemetryPersistentStore',
+    );
+    await Promise.resolve(ensurePersistent());
+    console.log('[telemetry] Feature usage persistence enabled via Prisma storage');
+  } catch (err) {
+    console.warn(
+      `[telemetry] Failed to initialize Prisma telemetry storage: ${(err as Error)?.message}`,
+    );
+  }
+} else {
+  console.log('[telemetry] Feature usage persistence disabled; using in-memory store');
+}
+
 const errorHandlerModule = await importModule(
   '../../../src/core/http/middleware/errorHandler.js',
 );

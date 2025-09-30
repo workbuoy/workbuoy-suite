@@ -20,6 +20,10 @@ Denne siden beskriver hvor Workbuoy-suite lagrer data (“WB-ting”), hvilke ek
   - Backend eksponerer `/metrics` (Prometheus-format).
   - Prod: Konfigurer Prometheus scrape + Grafana dashboards.
   - Fallback: Ingen persistens uten ekstern Prometheus.
+- **Telemetry / feature-bruk**
+  - `FF_PERSISTENCE=true` + gyldig `DATABASE_URL` aktiverer Prisma-lagring (tabell `FeatureUsage`).
+  - Mangler en av disse (typisk lokalt dev), brukes kun et in-memory-lager som nullstilles ved restart.
+  - Sjekk loggmelding `[telemetry] Feature usage persistence ...` for aktiv modus ved oppstart.
 
 - **Logger**
   - Skrives til stdout. I prod: ship til logg-lager (Loki, Datadog, CloudWatch).

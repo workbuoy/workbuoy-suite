@@ -2,11 +2,10 @@ import { Router } from 'express';
 import type { UserRoleBinding } from '../../../src/roles/types.js';
 import { getRoleRegistry, resolveUserBinding } from '../../../src/roles/service.js';
 import { getActiveFeatures } from '../../../src/features/activation/featureActivation.js';
-import { envBool } from '../../../src/core/env.js';
-import { getTelemetryFallbackStore, ensureTelemetryPersistentStore } from '../src/telemetryContext.js';
+import { getTelemetryFallbackStore, ensureTelemetryPersistentStore, isTelemetryPersistenceEnabled } from '../src/telemetryContext.js';
 
 const router = Router();
-const usePersistence = envBool('FF_PERSISTENCE', false);
+const usePersistence = isTelemetryPersistenceEnabled();
 const fallbackStore = getTelemetryFallbackStore();
 
 function getTelemetryStore() {
