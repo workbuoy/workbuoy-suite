@@ -32,7 +32,7 @@ describe('observability logs router', () => {
       .send({ level: 'info', message: 'hello world' });
 
     expect(response.status).toBe(202);
-    expect(response.headers['content-type']).toContain('application/json');
+    expect(response.headers['content-type']).toBe('application/json; charset=utf-8');
     expect(response.headers['trace-id']).toBe(traceId);
     expect(response.body.id).toMatch(
       /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i,
@@ -50,6 +50,7 @@ describe('observability logs router', () => {
       .send({ level: 'debug', message: '' });
 
     expect(response.status).toBe(400);
+    expect(response.headers['content-type']).toBe('application/json; charset=utf-8');
     expect(response.body).toEqual({ error: 'invalid_payload' });
   });
 

@@ -32,7 +32,7 @@ describe('observability telemetry router', () => {
       .send({ resourceSpans: [{}] });
 
     expect(response.status).toBe(202);
-    expect(response.headers['content-type']).toContain('application/json');
+    expect(response.headers['content-type']).toBe('application/json; charset=utf-8');
     expect(response.body).toEqual({ accepted: 1 });
     expect(response.headers['trace-id']).toBe(traceId);
   });
@@ -47,6 +47,7 @@ describe('observability telemetry router', () => {
       .send({});
 
     expect(response.status).toBe(400);
+    expect(response.headers['content-type']).toBe('application/json; charset=utf-8');
     expect(response.body).toEqual({ error: 'invalid_payload' });
   });
 
