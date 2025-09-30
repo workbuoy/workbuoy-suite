@@ -53,8 +53,17 @@ jobs:
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/wb?schema=public
 
+      - name: Build backend RBAC workspace package
+        run: npm run -w @workbuoy/backend-rbac build
+
+      - name: Build backend telemetry workspace package
+        run: npm run -w @workbuoy/backend-telemetry build
+
+      - name: Build backend metrics workspace package
+        run: npm run -w @workbuoy/backend-metrics build
+
       - name: Backend typecheck
-        run: npm run typecheck -w @workbuoy/backend
+        run: npm run -w @workbuoy/backend typecheck
 
       - name: Backend smoke tests (in-memory)
         env:

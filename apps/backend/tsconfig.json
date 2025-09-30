@@ -1,21 +1,21 @@
 {
-  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "target": "ES2022",
+    "strict": true,
+    "rootDir": "src",
     "outDir": "dist",
-    "baseUrl": ".",
-    "types": ["node", "jest", "express"],
-    "typeRoots": ["../../types", "../../node_modules/@types"],
-    "paths": {
-      "@workbuoy/backend-rbac": ["../../packages/backend-rbac/src/index.ts"],
-      "@workbuoy/backend-telemetry": ["../../packages/backend-telemetry/src/index.ts"],
-      "@workbuoy/backend-metrics": ["../../packages/backend-metrics/src/index.ts"]
-    },
-    "rootDirs": [
-      ".",
-      "../../packages/backend-rbac/src",
-      "../../packages/backend-telemetry/src",
-      "../../packages/backend-metrics/src"
-    ]
+    "esModuleInterop": true,
+    "skipLibCheck": true
   },
-  "include": ["src", "src/types", "../../types/**/*.d.ts"]
+  "include": ["src/**/*.ts", "types/**/*.d.ts"],
+  "exclude": [
+    "tests/**",
+    "dist/**",
+    "node_modules/**",
+    "src/**/*.spec.ts",
+    "src/**/*.test.ts",
+    "src/**/*.e2e.ts"
+  ]
 }
