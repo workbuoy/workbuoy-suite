@@ -9,7 +9,8 @@
     "preview": "vite preview",
     "typecheck": "tsc -p tsconfig.json",
     "test": "vitest run",
-    "lint": "eslint --max-warnings=0 --no-error-on-unmatched-pattern src routes"
+    "lint": "eslint --max-warnings=0 --no-error-on-unmatched-pattern src routes",
+    "qa:a11y": "vitest run --config vitest.a11y.config.ts --reporter=dot --silent=true"
   },
   "dependencies": {
     "@workbuoy/ui": "file:../../packages/ui",
@@ -27,6 +28,8 @@
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
     "@vitejs/plugin-react": "^4.3.1",
+    "axe-core": "^4.10.0",
+    "jest-axe": "^9.0.0",
     "jsdom": "^24.0.0",
     "typescript": "^5.9.2",
     "vite": "^7.1.7",

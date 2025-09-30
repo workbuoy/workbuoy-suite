@@ -93,6 +93,13 @@ jobs:
       - run: npm test -- --ci --reporters=default --reporters=jest-junit
         env:
           CI: "true"
+      - name: QA a11y (frontend)
+        run: npm run -w @workbuoy/frontend qa:a11y || echo "QA a11y failed" >> "$GITHUB_STEP_SUMMARY"
+      - name: Contract tests (backend)
+        env:
+          METRICS_ENABLED: true
+          WB_SKIP_OPTIONAL_ROUTES: 0
+        run: npm run -w @workbuoy/backend test:contract || echo "Contract tests failed" >> "$GITHUB_STEP_SUMMARY"
 
   seed:
     needs: setup

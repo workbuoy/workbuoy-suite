@@ -48,6 +48,21 @@ curl http://localhost:3000/metrics
 
 When `METRICS_ENABLED` is true, hitting `/metrics` returns a `200` response with Prometheus text and registers default Node.js/HTTP metrics against a shared registry. The registry always emits the Prometheus text media-type (`text/plain; version=0.0.4; charset=utf-8`) and applies default labels `service="backend"` and `version="<package.json version>"` alongside any additional runtime labels. The registry, default labels, and prefix are all resolved at request time so you can toggle the feature between test runs.
 
+## Contract tests
+
+Vitest-kontraktstestene spretter opp backend-appen via `src/server.ts` og verifiserer de to basisendepunktene som overvåkning og deploy-pipelines avhenger av:
+
+- `GET /api/version` svarer `200 OK`, `application/json; charset=utf-8` og et JSON-objekt `{ name, version }` der `version` matcher SemVer.
+- `GET /metrics` svarer `200 OK`, `text/plain; version=0.0.4; charset=utf-8` og Prometheus-tekst som inkluderer `# HELP`, `# TYPE` og en `service="backend"`- eller `service_name="workbuoy-backend"`-label med `version="<semver>"`.
+
+Kjør lokalt med:
+
+```bash
+METRICS_ENABLED=true npm run -w @workbuoy/backend test:contract
+```
+
+CI-steget logger eventuelle avvik i `$GITHUB_STEP_SUMMARY` uten å gjøre byggene røde.
+
 ## CRM smoke-tester
 
 Smoke tests spin up the backend, toggle the CRM feature flag, and verify `POST`/`GET` behaviour for `/api/crm/proposals`.
