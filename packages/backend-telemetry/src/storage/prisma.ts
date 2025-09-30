@@ -16,18 +16,22 @@ async function getClient(): Promise<PrismaClient> {
   return sharedClient;
 }
 
+const DEFAULT_ACTION: FeatureUsageAction = 'open';
+
+const ACTION_MAP: Record<string, FeatureUsageAction> = {
+  open: 'open',
+  view: 'open',
+  start: 'open',
+  complete: 'complete',
+  finish: 'complete',
+  dismiss: 'dismiss',
+  error: 'dismiss',
+  cancel: 'dismiss',
+};
+
 const toAction = (input: string): FeatureUsageAction => {
   const value = input?.toLowerCase?.() ?? '';
-  if (value === 'open' || value === 'view' || value === 'start') {
-    return 'open';
-  }
-  if (value === 'complete' || value === 'finish') {
-    return 'complete';
-  }
-  if (value === 'dismiss' || value === 'error' || value === 'cancel') {
-    return 'dismiss';
-  }
-  return 'open';
+  return ACTION_MAP[value] ?? DEFAULT_ACTION;
 };
 
 export function createPrismaTelemetryStorage(existingClient?: PrismaClient): PrismaTelemetryStorage {
