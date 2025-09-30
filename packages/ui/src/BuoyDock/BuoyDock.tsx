@@ -28,6 +28,24 @@ export type BuoyDockProps = {
 const focusableSelectors =
   'a[href], area[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
+function isElementVisible(element: HTMLElement | null) {
+  if (!element) {
+    return false;
+  }
+
+  if (typeof window === "undefined") {
+    return true;
+  }
+
+  const style = window.getComputedStyle(element);
+
+  if (style.visibility === "hidden" || style.display === "none") {
+    return false;
+  }
+
+  return element.getClientRects().length > 0;
+}
+
 export function BuoyDock({
   initialSide = "front",
   expanded,
@@ -44,10 +62,11 @@ export function BuoyDock({
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
   const isExpanded = expanded ?? internalExpanded;
 
-  const panelRef = useRef<HTMLElement | null>(null);
+  const containerRef = useRef<HTMLDivElement | null>(null);
   const frontHeaderRef = useRef<HTMLDivElement | null>(null);
   const backHeaderRef = useRef<HTMLDivElement | null>(null);
   const expandButtonRef = useRef<HTMLButtonElement | null>(null);
+  const flipButtonRef = useRef<HTMLButtonElement | null>(null);
   const prevExpandedRef = useRef(isExpanded);
   const liveRegionRef = useRef<HTMLDivElement | null>(null);
   const hasAnnouncedRef = useRef(false);
@@ -108,13 +127,35 @@ export function BuoyDock({
       });
     } else {
       queueMicrotask(() => {
-        expandButtonRef.current?.focus();
+        if (isBack && isElementVisible(expandButtonRef.current)) {
+          expandButtonRef.current?.focus();
+          return;
+        }
+
+        if (!isBack) {
+          if (isElementVisible(flipButtonRef.current)) {
+            flipButtonRef.current?.focus();
+            return;
+          }
+
+          if (isElementVisible(frontHeaderRef.current)) {
+            frontHeaderRef.current?.focus();
+            return;
+          }
+        }
+
+        if (isElementVisible(backHeaderRef.current)) {
+          backHeaderRef.current?.focus();
+          return;
+        }
+
+        containerRef.current?.focus?.();
       });
     }
-  }, [isExpanded]);
+  }, [isBack, isExpanded]);
 
   useEffect(() => {
-    const node = panelRef.current;
+    const node = containerRef.current;
     if (!isExpanded || !node) {
       return;
     }
@@ -230,6 +271,7 @@ export function BuoyDock({
           type="button"
           className="wbui-buoydock__control wbui-focus-ring"
           onClick={handleFlip}
+          ref={flipButtonRef}
         >
           Flip to {titleBack}
         </button>
@@ -298,7 +340,8 @@ export function BuoyDock({
       }}
       initial={false}
       transition={transition}
-      ref={panelRef}
+      ref={containerRef}
+      tabIndex={-1}
     >
       <FlipCard
         {...flipCardProps}
