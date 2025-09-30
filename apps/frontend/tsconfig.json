@@ -9,8 +9,8 @@
     "rootDirs": ["./src", "../../packages/ui/src"],
     "paths": {
       "@/*": ["./*"],
-      "@workbuoy/ui": ["../../packages/ui/src/index.ts"],
-      "@workbuoy/ui/*": ["../../packages/ui/src/*"]
+      "@workbuoy/ui": ["../../../packages/ui/src/index.ts"],
+      "@workbuoy/ui/*": ["../../../packages/ui/src/*"]
     },
     "types": ["vitest", "node", "@testing-library/jest-dom"]
   },

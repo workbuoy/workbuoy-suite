@@ -1,0 +1,113 @@
+:root {
+  --wbui-dock-w: 420px;
+  --wbui-dock-h: 560px;
+  --wbui-dock-w-expanded: 900px;
+  --wbui-dock-h-expanded: 680px;
+  --wbui-dock-radius: 20px;
+  --wbui-dock-shadow: 0 24px 60px rgba(15, 23, 42, 0.32);
+  --wbui-dock-surface: var(--wbui-color-surface, #0f172a);
+  --wbui-dock-surface-alt: var(--wbui-color-surface-alt, #111827);
+  --wbui-dock-border: rgba(148, 163, 184, 0.2);
+}
+
+.wbui-buoydock {
+  position: fixed;
+  inset: auto var(--wbui-space-4) var(--wbui-space-4) auto;
+  width: var(--wbui-dock-w);
+  height: var(--wbui-dock-h);
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  background: var(--wbui-dock-surface);
+  border-radius: var(--wbui-dock-radius);
+  box-shadow: var(--wbui-dock-shadow);
+  overflow: hidden;
+  border: 1px solid var(--wbui-dock-border);
+  color: var(--wbui-color-text-on-surface, #f8fafc);
+}
+
+.wbui-buoydock[data-expanded="true"] {
+  z-index: 60;
+}
+
+.wbui-buoydock__card {
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  cursor: default;
+}
+
+.wbui-buoydock__card .wbui-flip-card__face {
+  pointer-events: auto;
+}
+
+.wbui-buoydock__face {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: var(--wbui-dock-surface-alt);
+}
+
+.wbui-buoydock__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--wbui-space-2, 0.5rem);
+  padding: var(--wbui-space-3, 0.75rem) var(--wbui-space-4, 1rem);
+  background: transparent;
+}
+
+.wbui-buoydock__title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  outline: none;
+}
+
+.wbui-buoydock__actions {
+  display: flex;
+  gap: var(--wbui-space-2, 0.5rem);
+}
+
+.wbui-buoydock__control {
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  background: rgba(15, 23, 42, 0.6);
+  color: inherit;
+  border-radius: 9999px;
+  padding: 0.25rem 0.75rem;
+  font-size: 0.85rem;
+  line-height: 1.2;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.wbui-buoydock__control:hover,
+.wbui-buoydock__control:focus-visible {
+  background: rgba(148, 163, 184, 0.16);
+  border-color: rgba(148, 163, 184, 0.4);
+}
+
+.wbui-buoydock__content {
+  flex: 1;
+  overflow: auto;
+  padding: var(--wbui-space-4, 1rem);
+  background: transparent;
+}
+
+.wbui-buoydock__live-region {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wbui-buoydock {
+    transition: width 0.1s linear, height 0.1s linear;
+  }
+}
