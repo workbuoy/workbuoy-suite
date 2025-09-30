@@ -1,3 +1,7 @@
+## PR15 – Observability-tester (telemetry & logging, backend/Jest)
+
+### Added – observability-testdekning.
+
 ## PR14 – Observability-tester (telemetry & logging)
 
 ### Added – observability-tester for telemetry/logging.

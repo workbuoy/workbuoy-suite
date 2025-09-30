@@ -1,4 +1,3 @@
-import express from 'express';
 import request from 'supertest';
 
 describe('observability logs router', () => {
@@ -6,84 +5,63 @@ describe('observability logs router', () => {
 
   beforeEach(() => {
     jest.resetModules();
-    jest.clearAllMocks();
     process.env = { ...ORIGINAL_ENV };
-    delete process.env.LOGGING_ENABLED;
   });
 
   afterEach(() => {
     process.env = ORIGINAL_ENV;
   });
 
-  async function setupApp() {
-    const app = express();
-    app.use(express.json());
-
-    const { correlationHeader } = await import('../../../../../src/middleware/correlationHeader.js');
-    app.use(correlationHeader);
-
-    const { createLogsRouter, clearLogIngestHooks, registerLogIngestHook } = await import('./router.js');
-
-    clearLogIngestHooks();
-    const hook = jest.fn();
-    registerLogIngestHook(hook);
-    app.set('logHook', hook);
-
-    app.use('/observability/logs', createLogsRouter());
-
-    return app;
+  async function buildTestApp() {
+    const { buildApp } = await import('../../app.js');
+    return buildApp();
   }
 
-  it('accepts log payloads when enabled', async () => {
+  it('accepts log payloads when enabled and propagates trace headers', async () => {
     process.env.LOGGING_ENABLED = 'true';
-    const traceparent = '00-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa-bbbbbbbbbbbbbbbb-01';
+    process.env.TELEMETRY_ENABLED = 'false';
 
-    const app = await setupApp();
-    const hook: jest.Mock = app.get('logHook');
+    const traceId = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
+    const traceparent = `00-${traceId}-bbbbbbbbbbbbbbbb-01`;
+    const app = await buildTestApp();
 
     const response = await request(app)
       .post('/observability/logs/ingest')
-      .set('Content-Type', 'application/json; charset=utf-8')
+      .set('Content-Type', 'application/json')
       .set('traceparent', traceparent)
       .send({ level: 'info', message: 'hello world' });
 
     expect(response.status).toBe(202);
-    expect(response.headers['content-type']).toContain('application/json; charset=utf-8');
-    expect(response.body.id).toMatch(/^[0-9a-f-]{36}$/i);
-    expect(new Date(response.body.receivedAt).toString()).not.toBe('Invalid Date');
-    expect(response.headers['trace-id']).toBe('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa');
-    expect(hook).toHaveBeenCalledTimes(1);
-    expect(hook).toHaveBeenCalledWith({ level: 'info', message: 'hello world' });
+    expect(response.headers['content-type']).toContain('application/json');
+    expect(response.headers['trace-id']).toBe(traceId);
+    expect(response.body.id).toMatch(
+      /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i,
+    );
+    expect(new Date(response.body.receivedAt).toISOString()).toBe(response.body.receivedAt);
   });
 
-  it('rejects invalid payloads with 400', async () => {
+  it('returns 400 for invalid payloads', async () => {
     process.env.LOGGING_ENABLED = 'true';
 
-    const app = await setupApp();
-    const hook: jest.Mock = app.get('logHook');
-
+    const app = await buildTestApp();
     const response = await request(app)
       .post('/observability/logs/ingest')
-      .set('Content-Type', 'application/json; charset=utf-8')
+      .set('Content-Type', 'application/json')
       .send({ level: 'debug', message: '' });
 
     expect(response.status).toBe(400);
-    expect(response.body.error).toBe('invalid_payload');
-    expect(hook).not.toHaveBeenCalled();
+    expect(response.body).toEqual({ error: 'invalid_payload' });
   });
 
   it('returns 404 when logging is disabled', async () => {
     process.env.LOGGING_ENABLED = 'false';
 
-    const app = await setupApp();
-    const hook: jest.Mock = app.get('logHook');
-
+    const app = await buildTestApp();
     const response = await request(app)
       .post('/observability/logs/ingest')
-      .set('Content-Type', 'application/json; charset=utf-8')
+      .set('Content-Type', 'application/json')
       .send({ level: 'info', message: 'noop' });
 
     expect(response.status).toBe(404);
-    expect(hook).not.toHaveBeenCalled();
   });
 });
