@@ -65,9 +65,14 @@ Denne siden beskriver hvor Workbuoy-suite lagrer data (“WB-ting”), hvilke ek
    - Sett opp secrets i prod-plattformen (ikke sjekk inn `.env`).  
    - Roter nøkler regelmessig.
 
-6. **Sikkerhet & compliance**  
-   - Definér data residency pr kunde.  
+6. **Sikkerhet & compliance**
+   - Definér data residency pr kunde.
    - Sett opp IAM-roller, minst-privilegium, og MFA for drift.
+
+## Auth & cookies
+
+- **Secure cookies i prod:** Autentiseringsmodulen setter sesjonskaker med `HttpOnly`, `SameSite=lax` og `Secure` når `NODE_ENV=production`. I lokale/dev-miljøer (annet enn `production`) droppes `Secure` slik at http://-apper fortsatt kan logge inn.
+- **Dev-mock av OIDC:** Mock-inloggingsflyten er nå av som standard. Sett `OIDC_DEV_MOCK=1` eksplisitt dersom dere ønsker den for lokale tester. I prod bør dette være `0` eller unset.
 
 ## Miljøvariabler
 
@@ -76,6 +81,7 @@ Denne siden beskriver hvor Workbuoy-suite lagrer data (“WB-ting”), hvilke ek
 **Generelle:**
 - `NODE_ENV` = `development` | `production`
 - `LOG_LEVEL` = `info` | `debug` | `warn` | `error`
+- `OIDC_DEV_MOCK` = `1` for å aktivere mock-login i dev (default `0`/av)
 
 **Database (Prisma/Backend):**
 - `DATABASE_URL` (Postgres-URL. Eksempel: `postgresql://user:pass@host:5432/db?schema=public`)
