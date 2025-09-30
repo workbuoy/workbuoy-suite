@@ -1,5 +1,3 @@
-import { axe, toHaveNoViolations } from "jest-axe";
-
-expect.extend(toHaveNoViolations);
+import { axe } from "jest-axe";
 
 export { axe };

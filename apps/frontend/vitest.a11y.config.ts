@@ -7,7 +7,7 @@ export default mergeConfig(
     test: {
       environment: "jsdom",
       globals: true,
-      setupFiles: "./vitest.setup.ts",
+      setupFiles: ["./vitest.setup.ts", "./src/test-utils/axe.setup.ts"],
       include: ["src/routes/**/*.a11y.spec.tsx"],
       coverage: {
         enabled: false,

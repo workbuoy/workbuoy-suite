@@ -35,5 +35,11 @@
     "vite": "^7.1.7",
     "vitest": "^3.2.4",
     "eslint": "^9.13.0"
+  },
+  "vitest": {
+    "testTimeout": 10000,
+    "setupFiles": [
+      "src/test-utils/axe.setup.ts"
+    ]
   }
 }

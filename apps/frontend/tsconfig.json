@@ -15,5 +15,10 @@
     "types": ["vitest", "node", "@testing-library/jest-dom"]
   },
   "include": ["src", "src/types"],
-  "exclude": ["src/**/*.test.ts", "src/**/*.test.tsx"]
+  "exclude": [
+    "**/*.test.*",
+    "**/*.spec.*",
+    "src/test-utils/axe.ts",
+    "src/test-utils/axe.setup.ts"
+  ]
 }
