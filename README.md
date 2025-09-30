@@ -8,6 +8,7 @@ What’s here
 
 - apps/backend — API & services
 - apps/frontend — Web app
+  - `/dashboard` har semantiske landmarks, tydelige fokusringer og tastaturnavigasjon.
 - types/ — shared ambient types
 - tools/ — repo guards, scripts
 - deploy/ — Helm charts & k8s manifests
@@ -58,6 +59,11 @@ UI components
 -------------
 
 - [@workbuoy/ui component library](packages/ui/README.md)
+
+Dashboard accessibility
+-----------------------
+
+- `/dashboard` fokuserer hovedinnholdet ved rute-aktivering, har live-status for proaktiv/reaktiv visning og skjermleservennlig skjelettlasting.
 
 Governance
 ----------

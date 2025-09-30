@@ -1,3 +1,11 @@
+## PR19 – Dashboard UI-polish (a11y, fokus, semantikk)
+
+### Improved
+- apps/frontend: `/dashboard` bruker nå semantiske `main`/`section`-landemerker med ryddig heading-hierarki og fokus-flyt til hovedinnholdet.
+- apps/frontend: Interaktive tiles er tabbable toggle-knapper med tydelige fokusringer, tastatursnarveier (Enter/Space) og live-status for proaktiv/reaktiv visning.
+- apps/frontend: Skjelettlasting annonseres via `aria-busy` + `aria-describedby`, og statusmeldinger bruker `role="status"` for skjermlesere.
+- apps/frontend: Nye Vitest + Testing Library a11y-tester verifiserer landmarks, tabrekkefølge, tastaturstøtte, live-region og busy-state.
+
 ## PR18 – Dashboard-shell (frontend, a11y-first)
 
 ### Added – dashboard-shell.
