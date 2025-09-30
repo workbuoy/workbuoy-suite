@@ -33,6 +33,9 @@ function getTabbableElements(root: HTMLElement): HTMLElement[] {
     if (element.hasAttribute("disabled")) {
       return false;
     }
+    if (element.getAttribute("aria-hidden") === "true") {
+      return false;
+    }
     if (element instanceof HTMLAnchorElement && !element.href) {
       return false;
     }
@@ -114,11 +117,19 @@ export default function DockHost({
     if (!open) return;
     const dialog = dialogRef.current;
     if (!dialog) return;
-    const target = initialFocusRef?.current ?? getTabbableElements(dialog)[0] ?? dialog;
+    const tabbables = getTabbableElements(dialog);
+    let target: HTMLElement | null = initialFocusRef?.current ?? null;
+    if (!target) {
+      target = tabbables.length > 0 ? tabbables[0] ?? null : dialog;
+    }
+    if (!target) {
+      return;
+    }
+    const focusTarget = target;
     if (typeof window !== "undefined" && window.requestAnimationFrame) {
-      window.requestAnimationFrame(() => target.focus());
+      window.requestAnimationFrame(() => focusTarget.focus());
     } else {
-      target.focus();
+      focusTarget.focus();
     }
   }, [open, initialFocusRef]);
 
@@ -133,12 +144,22 @@ export default function DockHost({
       const dialog = dialogRef.current;
       if (!dialog) return;
       const tabbable = getTabbableElements(dialog);
-      if (tabbable.length === 0) {
+      const count = tabbable.length;
+      if (count === 0) {
+        return;
+      }
+      if (count === 1) {
+        const only = tabbable[0];
+        if (!only) return;
         event.preventDefault();
+        only.focus();
         return;
       }
       const first = tabbable[0];
-      const last = tabbable[tabbable.length - 1];
+      const last = tabbable[count - 1];
+      if (!first || !last) {
+        return;
+      }
       const active = document.activeElement as HTMLElement | null;
       if (event.shiftKey) {
         if (active === first || !dialog.contains(active)) {
