@@ -3,7 +3,7 @@ import {
   createPrismaTelemetryStorage,
 } from '@workbuoy/backend-telemetry';
 import type { TelemetryStorage } from '@workbuoy/backend-telemetry';
-import { prisma } from '../../../src/core/db/prisma.js';
+import { prisma } from './db/prisma.js';
 import { emitMetricsEvent } from './metrics/events.js';
 
 function wrapTelemetryStore<T extends TelemetryStorage>(store: T): T {
