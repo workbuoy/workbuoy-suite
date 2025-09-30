@@ -1,6 +1,9 @@
 import { createTelemetryRouter } from '@workbuoy/backend-telemetry';
 import { envBool } from '../../../src/core/env.js';
-import { getTelemetryFallbackStore, ensureTelemetryPersistentStore } from '../src/telemetryContext.js';
+import {
+  getTelemetryFallbackStore,
+  ensureTelemetryPersistentStore,
+} from '../src/telemetry/context.js';
 
 const usePersistence = envBool('FF_PERSISTENCE', false);
 

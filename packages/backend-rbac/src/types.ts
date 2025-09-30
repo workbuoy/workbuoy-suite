@@ -63,3 +63,5 @@ export interface RbacConfiguration {
   }>;
   audit?: ((event: AuditEvent) => void | Promise<void>) | null;
 }
+
+export type PolicyRule = RoleBinding;

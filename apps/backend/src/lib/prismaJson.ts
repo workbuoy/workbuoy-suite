@@ -1,2 +1,3 @@
-// Re-export the shared Prisma JSON helper for backend consumers
-export { toPrismaJson } from '../../../../src/lib/prismaJson.js';
+// Centralize JSON portability for Prisma clients from the backend package.
+export const toPrismaJson = (value: unknown): unknown =>
+  value === null ? null : value;

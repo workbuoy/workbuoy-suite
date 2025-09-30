@@ -20,6 +20,9 @@ on:
       - 'scripts/roles-io.ts'
       - '.github/workflows/**'
 
+permissions:
+  contents: read
+
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -52,6 +55,12 @@ jobs:
         run: npm run prisma:generate
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/wb?schema=public
+
+      - name: Build workspace libs
+        run: |
+          npm run -w @workbuoy/backend-rbac build
+          npm run -w @workbuoy/backend-telemetry build
+          npm run -w @workbuoy/backend-metrics build
 
       - name: Backend typecheck
         run: npm run typecheck -w @workbuoy/backend

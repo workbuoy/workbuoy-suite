@@ -1,6 +1,6 @@
 import type { Request, Response } from 'express';
 import { Router } from 'express';
-import { createInMemoryTelemetryStorage } from './stores/inMemory.js';
+import { createInMemoryTelemetryStorage } from './storage/memory.js';
 import type { TelemetryEvent, TelemetryStorage } from './types.js';
 
 export interface TelemetryRouterOptions {
@@ -14,6 +14,10 @@ export interface TelemetryRouterOptions {
 
 interface StoreCache {
   persistent: TelemetryStorage | null;
+}
+
+function isTelemetryStorage(value: unknown): value is TelemetryStorage {
+  return !!value && typeof (value as TelemetryStorage).record === 'function';
 }
 
 function resolveTenantIdFromRequest(req: Request, fallbackTenantId: string): string {
@@ -77,9 +81,16 @@ function aggregateIfSupported(
   return {};
 }
 
-export function createTelemetryRouter(options: TelemetryRouterOptions = {}) {
+export function createTelemetryRouter(
+  storageOrOptions: TelemetryStorage | TelemetryRouterOptions = {},
+  maybeOptions: TelemetryRouterOptions = {},
+) {
   const router = Router();
-  const fallbackStore = options.fallbackStore ?? createInMemoryTelemetryStorage();
+  const usingStorage = isTelemetryStorage(storageOrOptions);
+  const options = usingStorage ? { ...maybeOptions } : { ...(storageOrOptions as TelemetryRouterOptions) };
+  const fallbackStore = usingStorage
+    ? options.fallbackStore ?? (storageOrOptions as TelemetryStorage)
+    : options.fallbackStore ?? createInMemoryTelemetryStorage();
   const cache: StoreCache = { persistent: null };
   const getStore = ensureStore(cache, options, fallbackStore);
   const fallbackTenantId = options.defaultTenantId ?? 'DEV';

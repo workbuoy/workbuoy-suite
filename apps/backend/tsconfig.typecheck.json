@@ -1,16 +1,6 @@
 {
   "extends": "./tsconfig.json",
-  "compilerOptions": {
-    "noEmit": true,
-    "types": ["node", "express"]
-  },
+  "compilerOptions": { "noEmit": true },
   "include": ["src/**/*.ts"],
-  "exclude": [
-    "routes/**",
-    "tests/**",
-    "src/**/*.spec.ts",
-    "src/**/*.test.ts",
-    "src/**/*.e2e.ts",
-    "../../src/**/*"
-  ]
+  "exclude": ["dist", "node_modules", "tests", "**/*.spec.ts", "**/*.test.ts"]
 }

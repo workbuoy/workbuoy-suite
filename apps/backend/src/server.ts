@@ -4,6 +4,7 @@ import { createAuthModule } from '@workbuoy/backend-auth';
 import { audit } from './audit/audit.js';
 import { mountMetrics } from './metrics/metrics.js';
 import { crmProposalRouter } from './routes/crm.proposals.js';
+import { telemetryRouter, telemetryMode } from './telemetry/context.js';
 
 type MiddlewareFn = RequestHandler;
 
@@ -210,6 +211,10 @@ const requestLogger = pickRequiredExport<() => MiddlewareFn>(
   loggerModule as Record<string, unknown>,
   'requestLogger',
 );
+const logger = pickRequiredExport<{ info: (...args: unknown[]) => void }>(
+  loggerModule as Record<string, unknown>,
+  'logger',
+);
 
 const metricsModule = await importModule(
   '../../../src/core/observability/metrics.js',
@@ -401,6 +406,11 @@ if (crmEnabled) {
   app.use('/api/crm', crmProposalRouter);
   console.log('[routes] CRM proposals enabled (CRM_ENABLED=true)');
 }
+
+if (process.env.TELEMETRY_ENABLED !== '0') {
+  app.use('/api/telemetry', telemetryRouter);
+}
+logger.info(`telemetry mode: ${telemetryMode}`);
 
 const noopCounter = { inc: () => {} } as const;
 
