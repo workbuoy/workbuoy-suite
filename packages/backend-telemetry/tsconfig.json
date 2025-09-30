@@ -1,14 +1,14 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "dist",
-    "rootDir": "src",
     "declaration": true,
-    "declarationMap": true,
-    "sourceMap": true,
-    "types": ["node"],
-    "emitDeclarationOnly": false
+    "emitDeclarationOnly": false,
+    "outDir": "dist",
+    "moduleResolution": "NodeNext",
+    "module": "NodeNext",
+    "target": "ES2022",
+    "strict": true,
+    "types": ["node"]
   },
-  "include": ["src/**/*.ts", "../../types/**/*.d.ts"],
-  "exclude": ["dist", "node_modules"]
+  "include": ["src"]
 }

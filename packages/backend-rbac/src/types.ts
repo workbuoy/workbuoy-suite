@@ -63,3 +63,16 @@ export interface RbacConfiguration {
   }>;
   audit?: ((event: AuditEvent) => void | Promise<void>) | null;
 }
+
+export interface Binding {
+  tenant_id: string;
+  group: string;
+  role: Exclude<Role, 'deny'>;
+  resource?: { kind: ResourceKind; id?: string };
+}
+
+export interface PolicyRule {
+  action: Action;
+  resource: ResourceKind;
+  role: Role;
+}

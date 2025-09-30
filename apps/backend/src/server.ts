@@ -4,7 +4,6 @@ import { createAuthModule } from '@workbuoy/backend-auth';
 import { audit } from './audit/audit.js';
 import { mountMetrics } from './metrics/metrics.js';
 import { crmProposalRouter } from './routes/crm.proposals.js';
-import { isTelemetryPersistenceEnabled, telemetryRouter } from './telemetry/context.js';
 
 type MiddlewareFn = RequestHandler;
 
@@ -242,6 +241,11 @@ const isLoggingEnabled = pickRequiredExport<() => boolean>(
   flagsModule as Record<string, unknown>,
   'isLoggingEnabled',
 );
+
+const {
+  isTelemetryPersistenceEnabled,
+  telemetryRouter,
+} = (await import('./telemetryContext.js')) as typeof import('./telemetryContext.js');
 
 if (isTelemetryPersistenceEnabled()) {
   console.log('[telemetry] Feature usage persistence enabled via Prisma storage');

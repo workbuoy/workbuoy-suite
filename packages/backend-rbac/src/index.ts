@@ -1,6 +1,20 @@
-import type { Action, ResourceKind, Role } from './types.js';
+// Types
+export type {
+  Role,
+  PolicyRule,
+  Binding,
+  Decision,
+  RoleBinding,
+  Subject,
+  Store,
+  ResourceResolver,
+  AuditEvent,
+  RbacConfiguration,
+} from './types.js';
 
-export { MemoryStore, createMemoryStore } from './store.js';
+// Middleware / helpers
+export { requireRole, createPolicyEnforcer, requireFeature } from './middleware.js';
+export { resolveRoles, upsertBinding, resetBindings } from './binding.js';
 export {
   configureRbac,
   getStore as getRbacStore,
@@ -10,25 +24,7 @@ export {
   isEnforced,
 } from './config.js';
 export { decide } from './policy.js';
-export { createPolicyEnforcer, requireRole, requireFeature } from './middleware.js';
-export { RbacRouter } from './router.js';
-export { resolveRoles, upsertBinding, resetBindings } from './binding.js';
-export type {
-  Action,
-  Role,
-  ResourceKind,
-  Decision,
-  RoleBinding,
-  Subject,
-  Store,
-  ResourceResolver,
-  AuditEvent,
-  RbacConfiguration,
-} from './types.js';
-export type { GroupBinding as Binding } from './binding.js';
+export { MemoryStore, createMemoryStore } from './store.js';
 
-export type PolicyRule = {
-  action: Action;
-  resource: ResourceKind;
-  role: Role;
-};
+// Router
+export { RbacRouter } from './router.js';

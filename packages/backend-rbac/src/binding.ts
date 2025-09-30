@@ -1,15 +1,8 @@
-import type { Role } from './types.js';
+import type { Binding, Role } from './types.js';
 
-export interface GroupBinding {
-  tenant_id: string;
-  group: string;
-  role: Exclude<Role, 'deny'>;
-  resource?: { kind: 'pipeline' | 'record' | 'org'; id?: string };
-}
+const bindings: Binding[] = [];
 
-const bindings: GroupBinding[] = [];
-
-export function upsertBinding(binding: GroupBinding): GroupBinding {
+export function upsertBinding(binding: Binding): Binding {
   const idx = bindings.findIndex(
     (item) =>
       item.tenant_id === binding.tenant_id &&

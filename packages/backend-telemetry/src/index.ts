@@ -1,10 +1,9 @@
-// Types first
+// Types
 export type { TelemetryEvent, TelemetryStorage } from './types.js';
 
-// Storages
+// Storage factories
 export { createInMemoryTelemetryStorage } from './stores/inMemory.js';
 export { createPrismaTelemetryStorage } from './adapters/prismaStorage.js';
 
-// HTTP router factory
+// HTTP router
 export { createTelemetryRouter } from './router.js';
-export type { TelemetryRouterOptions } from './router.js';
