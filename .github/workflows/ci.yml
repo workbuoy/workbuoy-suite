@@ -5,9 +5,15 @@ on:
   push:
     branches: [main]
 
+permissions:
+  contents: read
+
 jobs:
   setup:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: write
     outputs:
       node_version: ${{ steps.versions.outputs.node }}
     steps:
@@ -32,6 +38,9 @@ jobs:
   typecheck:
     needs: setup
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: write
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v4
@@ -58,6 +67,9 @@ jobs:
   test:
     needs: setup
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: write
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v4
@@ -86,6 +98,9 @@ jobs:
     needs: setup
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: write
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v4
