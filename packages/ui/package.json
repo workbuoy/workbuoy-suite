@@ -4,6 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "build": "tsc -p tsconfig.json",
     "lint": "eslint \"src/**/*.{ts,tsx}\" --max-warnings=0",
     "test": "node ./tools/run-vitest.mjs",
     "test:watch": "node ./tools/run-vitest.mjs --watch",
