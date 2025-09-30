@@ -20,7 +20,7 @@ jobs:
       - uses: actions/checkout@v5
       - id: versions
         run: echo "node=20.x" >> "$GITHUB_OUTPUT"
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version: ${{ steps.versions.outputs.node }}
           cache: 'npm'
@@ -43,7 +43,7 @@ jobs:
       actions: write
     steps:
       - uses: actions/checkout@v5
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version: ${{ needs.setup.outputs.node_version }}
           cache: 'npm'
@@ -72,7 +72,7 @@ jobs:
       actions: write
     steps:
       - uses: actions/checkout@v5
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version: ${{ needs.setup.outputs.node_version }}
           cache: 'npm'
@@ -103,7 +103,7 @@ jobs:
       actions: write
     steps:
       - uses: actions/checkout@v5
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version: ${{ needs.setup.outputs.node_version }}
           cache: 'npm'
