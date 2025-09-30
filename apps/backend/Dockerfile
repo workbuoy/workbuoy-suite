@@ -9,12 +9,13 @@ WORKDIR /repo
 COPY package*.json ./
 
 # Pre-create workspace dirs and copy their package manifests to enable npm workspaces resolution
-RUN mkdir -p apps/backend apps/frontend packages/backend-telemetry packages/backend-rbac packages/backend-metrics
+RUN mkdir -p apps/backend apps/frontend packages/backend-telemetry packages/backend-rbac packages/backend-metrics packages/ui
 COPY apps/backend/package*.json apps/backend/
 COPY apps/frontend/package*.json apps/frontend/
 COPY packages/backend-telemetry/package*.json packages/backend-telemetry/
 COPY packages/backend-rbac/package*.json packages/backend-rbac/
 COPY packages/backend-metrics/package*.json packages/backend-metrics/
+COPY packages/ui/package*.json packages/ui/
 
 # Install with the root lockfile and workspace manifests present
 RUN --mount=type=cache,target=/root/.npm npm ci --ignore-scripts
@@ -41,11 +42,12 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 
 # Needed workspace manifests for prod resolution
-RUN mkdir -p apps/backend packages/backend-telemetry packages/backend-rbac packages/backend-metrics
+RUN mkdir -p apps/backend packages/backend-telemetry packages/backend-rbac packages/backend-metrics packages/ui
 COPY apps/backend/package*.json ./apps/backend/
 COPY packages/backend-telemetry/package*.json ./packages/backend-telemetry/
 COPY packages/backend-rbac/package*.json ./packages/backend-rbac/
 COPY packages/backend-metrics/package*.json ./packages/backend-metrics/
+COPY packages/ui/package*.json ./packages/ui/
 
 # Skip Prisma generate during runtime install; schema copied later for explicit generate
 ENV WB_SKIP_PRISMA_GENERATE=1

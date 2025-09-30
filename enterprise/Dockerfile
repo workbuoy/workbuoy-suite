@@ -2,6 +2,7 @@
 FROM node:20-alpine AS deps
 WORKDIR /app
 COPY package.json package-lock.json* pnpm-lock.yaml* yarn.lock* ./
+COPY packages/ui/package*.json ./packages/ui/
 RUN --mount=type=cache,target=/root/.npm npm ci || npm install
 
 FROM node:20-alpine AS builder

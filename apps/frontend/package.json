@@ -12,7 +12,8 @@
     "lint": "eslint --max-warnings=0 --no-error-on-unmatched-pattern src routes"
   },
   "dependencies": {
-    "@workbuoy/ui": "workspace:*",
+    "@workbuoy/ui": "file:../../packages/ui",
+    "framer-motion": "^11.11.17",
     "mapbox-gl": "^2.15.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"

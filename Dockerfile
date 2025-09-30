@@ -2,6 +2,8 @@
 FROM node:20-alpine AS deps
 WORKDIR /app
 COPY package*.json ./
+RUN mkdir -p packages/ui
+COPY packages/ui/package*.json packages/ui/
 RUN npm ci
 
 FROM node:20-alpine AS build
