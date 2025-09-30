@@ -49,6 +49,34 @@ function Shell() {
             </div>
           </div>
           <ModeSwitcher />
+          <nav aria-label="Demo routes" style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+            <a
+              href="/demo"
+              style={{
+                padding: "6px 12px",
+                borderRadius: 999,
+                background: "var(--surface, rgba(15,23,42,0.08))",
+                color: "inherit",
+                textDecoration: "none",
+                border: "1px solid rgba(148, 163, 184, 0.5)",
+              }}
+            >
+              Controls demo
+            </a>
+            <a
+              href="/dock-demo"
+              style={{
+                padding: "6px 12px",
+                borderRadius: 999,
+                background: "var(--surface, rgba(15,23,42,0.08))",
+                color: "inherit",
+                textDecoration: "none",
+                border: "1px solid rgba(148, 163, 184, 0.5)",
+              }}
+            >
+              Dock demo
+            </a>
+          </nav>
         </header>
         <FlipCard
           front={<BuoyPanel onQuickConnect={addConnection} />}

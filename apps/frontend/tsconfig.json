@@ -7,7 +7,8 @@
     "jsx": "react-jsx",
     "baseUrl": "./src",
     "paths": {
-      "@/*": ["./*"]
+      "@/*": ["./*"],
+      "@workbuoy/ui": ["../../packages/ui/src"]
     },
     "types": ["vitest", "node", "@testing-library/jest-dom"]
   },

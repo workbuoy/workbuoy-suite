@@ -2,6 +2,7 @@ import React from "react";
 import { createRoot } from "react-dom/client";
 import App from "./App";
 import DockDemo from "./routes/dock-demo";
+import ControlsDemo from "./routes/demo/controls-demo";
 import "./styles/tokens.css";
 import "./styles/base.css";
 import "mapbox-gl/dist/mapbox-gl.css";
@@ -12,6 +13,10 @@ if (!rootElement) {
   throw new Error("Missing root element");
 }
 
-const isDockDemo = window.location.pathname.includes("dock-demo");
+const path = window.location.pathname;
+const isDockDemo = path.includes("dock-demo");
+const isControlsDemo = path === "/demo" || path.startsWith("/demo/");
 
-createRoot(rootElement).render(isDockDemo ? <DockDemo /> : <App />);
+const element = isDockDemo ? <DockDemo /> : isControlsDemo ? <ControlsDemo /> : <App />;
+
+createRoot(rootElement).render(element);
