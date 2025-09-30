@@ -82,7 +82,7 @@ export default function ControlsDemo() {
       event.key === "Spacebar"
     ) {
       event.preventDefault();
-      setMode((current) =>
+      setMode((current: Mode) =>
         current === "proactive" ? "reactive" : "proactive",
       );
     }
