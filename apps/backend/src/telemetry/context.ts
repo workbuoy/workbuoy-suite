@@ -1,23 +1,14 @@
 import type { Router } from 'express';
+import {
+  createInMemoryTelemetryStorage,
+  createPrismaTelemetryStorage,
+  createTelemetryRouter,
+  type TelemetryEvent,
+  type TelemetryStorage,
+} from '@workbuoy/backend-telemetry';
+
 import { emitMetricsEvent } from '../metrics/events.js';
 import { prisma } from '../../../../src/core/db/prisma.js';
-
-type TelemetryStorage = any;
-let createInMemoryTelemetryStorage: any;
-let createPrismaTelemetryStorage: any;
-let createTelemetryRouter: any;
-
-async function loadTelemetryModule() {
-  try {
-    return await import('@workbuoy/backend-telemetry');
-  } catch (_err) {
-    return await import('../../../../packages/backend-telemetry/src/index.ts');
-  }
-}
-
-const telemetryModule = await loadTelemetryModule();
-({ createInMemoryTelemetryStorage, createPrismaTelemetryStorage, createTelemetryRouter } =
-  telemetryModule);
 
 const usePersist =
   (process.env.FF_PERSISTENCE ?? '0') === '1' &&
@@ -26,7 +17,7 @@ const usePersist =
 
 function wrapTelemetryStore<T extends TelemetryStorage>(store: T): T {
   const wrapped: TelemetryStorage & Record<string, unknown> = {
-    async record(event) {
+    async record(event: TelemetryEvent) {
       emitMetricsEvent('telemetry:feature_used', {
         feature: event.featureId,
         action: event.action,
@@ -40,7 +31,8 @@ function wrapTelemetryStore<T extends TelemetryStorage>(store: T): T {
       continue;
     }
     const value = (store as Record<string, unknown>)[key];
-    wrapped[key] = typeof value === 'function' ? (value as (...args: any[]) => unknown).bind(store) : value;
+    wrapped[key] =
+      typeof value === 'function' ? (value as (...args: unknown[]) => unknown).bind(store) : value;
   }
 
   return wrapped as T;

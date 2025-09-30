@@ -23,9 +23,9 @@
       "@backend/*": ["src/*"],
       "@backend-tests/*": ["tests/*"],
       "@backend-meta/*": ["meta/*"],
-      "@workbuoy/backend-rbac": ["../../packages/backend-rbac/src/index.ts"],
-      "@workbuoy/backend-telemetry": ["../../packages/backend-telemetry/src/index.ts"],
-      "@workbuoy/backend-metrics": ["../../packages/backend-metrics/src/index.ts"]
+      "@workbuoy/backend-rbac": ["../../packages/backend-rbac/src/index"],
+      "@workbuoy/backend-telemetry": ["../../packages/backend-telemetry/src/index"],
+      "@workbuoy/backend-metrics": ["../../packages/backend-metrics/src/index"]
     }
   },
   "include": [
