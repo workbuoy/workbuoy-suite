@@ -1,0 +1,28 @@
+.wbui-focus-ring {
+  position: relative;
+  outline: none;
+}
+
+.wbui-focus-ring:focus-visible {
+  outline: 2px solid var(--wbui-focus-ring-color, #2563eb);
+  outline-offset: 2px;
+}
+
+.wbui-focus-ring--inset:focus-visible {
+  box-shadow: 0 0 0 2px var(--wbui-focus-ring-offset, #ffffff),
+    0 0 0 4px var(--wbui-focus-ring-color, #2563eb);
+  outline: none;
+}
+
+.wbui-focus-ring--light:focus-visible {
+  outline-color: var(--wbui-focus-ring-color-light, #4f46e5);
+}
+
+.wbui-focus-ring--dark:focus-visible {
+  outline-color: var(--wbui-focus-ring-color-dark, #1d4ed8);
+}
+
+.wbui-focus-ring:focus-visible,
+.wbui-focus-ring--inset:focus-visible {
+  transition: outline-color 0.2s ease-in-out;
+}
