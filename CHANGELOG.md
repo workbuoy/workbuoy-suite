@@ -1,3 +1,12 @@
+## PR22 – Observability polish (metrics + logs)
+
+### Improved
+- apps/backend: Prometheus registry enforces `service="backend"` and `version="<package version>"` default labels without duplicate `service_name` entries.
+- apps/backend: `/metrics` always responds `200 OK` with `text/plain; version=0.0.4; charset=utf-8`, returning an empty body when no metrics are registered.
+- apps/backend: `/observability/logs/ingest` writes structured log lines `{ level, message, ts, reqId }` and generates a UUID `reqId` when trace headers are absent.
+- apps/backend: Trace middleware backfills `reqId` for downstream log ingestion.
+- Docs/tests: Updated observability docs and Jest coverage for metrics headers/labels and structured logging.
+
 ## PR20 – Dashboard state views (empty/error/partial)
 
 ### Added

@@ -17,7 +17,7 @@ describe('metrics registry runtime behavior', () => {
     process.env = ORIGINAL_ENV;
   });
 
-  it('returns 204 when metrics are disabled via runtime flag', async () => {
+  it('returns 200 with an empty payload when metrics are disabled via runtime flag', async () => {
     process.env.METRICS_ENABLED = 'false';
 
     const { resetRegistryForTests } = await import('./registry.js');
@@ -29,7 +29,10 @@ describe('metrics registry runtime behavior', () => {
 
     const response = await request(app).get('/metrics');
 
-    expect(response.status).toBe(204);
+    expect(response.status).toBe(200);
+    expect(response.headers['content-type']).toContain('text/plain');
+    expect(response.headers['content-type']).toContain('version=0.0.4');
+    expect(response.headers['content-type']).toContain('charset=utf-8');
     expect(response.text).toBe('');
 
     const promClient = await import('prom-client');
@@ -64,8 +67,21 @@ describe('metrics registry runtime behavior', () => {
     expect(response.text).toContain('service="backend"');
 
     // Tillat flere default labels (service_name, version) – verifiser at 'service' finnes.
+    const { readFileSync } = await import('node:fs');
+    const { fileURLToPath } = await import('node:url');
+    const { dirname, join } = await import('node:path');
+    const thisFilePath = fileURLToPath(import.meta.url);
+    const metricsDir = dirname(thisFilePath);
+    const srcDir = dirname(metricsDir);
+    const backendRoot = dirname(srcDir);
+    const backendPackageJsonPath = join(backendRoot, 'package.json');
+    const backendPackage = JSON.parse(readFileSync(backendPackageJsonPath, 'utf8')) as { version?: string };
+
     expect(registry.setDefaultLabels).toHaveBeenCalledWith(
-      expect.objectContaining({ service: 'backend' })
+      expect.objectContaining({
+        service: 'backend',
+        version: backendPackage.version,
+      }),
     );
     expect(metricsSpy).toHaveBeenCalled();
 

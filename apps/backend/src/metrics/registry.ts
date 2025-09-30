@@ -9,9 +9,23 @@ const PACKAGE_VERSION =
   typeof packageJson?.version === 'string' ? packageJson.version : 'dev';
 
 const BASE_DEFAULT_LABELS: Record<string, string> = {
-  service_name: 'workbuoy-backend',
+  service: 'backend',
   version: PACKAGE_VERSION,
 };
+
+function normaliseCustomLabels(
+  rawLabels: Record<string, string>,
+): Record<string, string> {
+  const entries = Object.entries(rawLabels ?? {});
+  return entries.reduce<Record<string, string>>((acc, [key, value]) => {
+    if (key === 'service_name' || key === 'service' || key === 'version') {
+      return acc;
+    }
+
+    acc[key] = value;
+    return acc;
+  }, {});
+}
 
 let registry: Registry | null = null;
 let defaultMetricsRegistered = false;
@@ -19,7 +33,10 @@ let defaultMetricsRegistered = false;
 export function getRegistry(): Registry {
   if (!registry) {
     registry = new Registry();
-    const labels = { ...BASE_DEFAULT_LABELS, ...getDefaultLabels() };
+    const labels = {
+      ...BASE_DEFAULT_LABELS,
+      ...normaliseCustomLabels(getDefaultLabels()),
+    };
     registry.setDefaultLabels(labels);
   }
 
