@@ -56,11 +56,37 @@ export default function ControlsDemo() {
   const [mode, setMode] = useState<Mode>("reactive");
   const [isFlipped, setIsFlipped] = useState(false);
 
+  const isProactive = mode === "proactive";
+
   const cardRegionId = useId();
   const liveAnnouncement =
     mode === "proactive"
       ? "Proactive mode enabled"
       : "Reactive mode enabled";
+
+  const handleSegmentChange = (nextMode: Mode) => {
+    if (mode === nextMode) {
+      return;
+    }
+
+    setMode(nextMode);
+  };
+
+  const handleSegmentKeyDown = (
+    event: React.KeyboardEvent<HTMLButtonElement>,
+  ) => {
+    if (
+      event.key === " " ||
+      event.key === "Enter" ||
+      event.key === "Space" ||
+      event.key === "Spacebar"
+    ) {
+      event.preventDefault();
+      setMode((current: Mode) =>
+        current === "proactive" ? "reactive" : "proactive",
+      );
+    }
+  };
 
   const handleFlipToggle = () => {
     setIsFlipped((previous) => !previous);
@@ -116,6 +142,64 @@ export default function ControlsDemo() {
 
       <div style={{ display: "grid", gap: "24px", justifyItems: "center" }}>
         <div style={{ display: "grid", gap: "12px", justifyItems: "center" }}>
+          <div
+            role="group"
+            aria-label="Proactivity mode"
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "8px",
+              padding: "4px",
+              borderRadius: "999px",
+              border: "1px solid rgba(148, 163, 184, 0.4)",
+              background: "rgba(15, 23, 42, 0.7)",
+            }}
+          >
+            <button
+              type="button"
+              onClick={() => handleSegmentChange("reactive")}
+              onKeyDown={handleSegmentKeyDown}
+              aria-pressed={!isProactive}
+              style={{
+                padding: "8px 16px",
+                borderRadius: "999px",
+                border: "none",
+                fontWeight: 600,
+                letterSpacing: 0.3,
+                background: !isProactive
+                  ? "rgba(59, 130, 246, 0.35)"
+                  : "transparent",
+                color: !isProactive ? "#0f172a" : "#e2e8f0",
+                cursor: "pointer",
+                transition: "background 0.2s ease, color 0.2s ease",
+                outline: "none",
+              }}
+            >
+              Reactive
+            </button>
+            <button
+              type="button"
+              onClick={() => handleSegmentChange("proactive")}
+              onKeyDown={handleSegmentKeyDown}
+              aria-pressed={isProactive}
+              style={{
+                padding: "8px 16px",
+                borderRadius: "999px",
+                border: "none",
+                fontWeight: 600,
+                letterSpacing: 0.3,
+                background: isProactive
+                  ? "rgba(59, 130, 246, 0.35)"
+                  : "transparent",
+                color: isProactive ? "#0f172a" : "#e2e8f0",
+                cursor: "pointer",
+                transition: "background 0.2s ease, color 0.2s ease",
+                outline: "none",
+              }}
+            >
+              Proactive
+            </button>
+          </div>
           <ProactivitySwitch
             value={mode}
             onChange={setMode}

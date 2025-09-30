@@ -1,3 +1,5 @@
+import "./index.css";
+
 export { default as FlipCard } from "./components/FlipCard.js";
 export type { FlipCardProps } from "./components/FlipCard.js";
 

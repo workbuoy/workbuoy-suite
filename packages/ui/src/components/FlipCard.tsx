@@ -1,5 +1,5 @@
 import type { CSSProperties, KeyboardEvent, ReactNode } from "react";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import type { MotionProps } from "framer-motion";
 import { motion } from "framer-motion";
 
@@ -11,12 +11,7 @@ export type FlipCardProps = {
   className?: string;
 };
 
-const transition: MotionProps["transition"] = {
-  duration: 0.6,
-  ease: [0.45, 0, 0.15, 1],
-};
-
-const baseCardClass = "wbui-flip-card";
+const baseCardClass = "wbui-flip-card wbui-focus-ring";
 const faceClass = "wbui-flip-card__face";
 
 function mergeClassName(extra?: string) {
@@ -53,8 +48,46 @@ export default function FlipCard({
   className,
 }: FlipCardProps) {
   const [internalFlipped, setInternalFlipped] = useState(false);
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
 
   const resolvedFlipped = isFlipped ?? internalFlipped;
+
+  useEffect(() => {
+    if (typeof window === "undefined" || typeof window.matchMedia !== "function") {
+      return;
+    }
+
+    const mediaQueryList = window.matchMedia("(prefers-reduced-motion: reduce)");
+    setPrefersReducedMotion(mediaQueryList.matches);
+
+    const listener = (event: MediaQueryListEvent) => {
+      setPrefersReducedMotion(event.matches);
+    };
+
+    if (typeof mediaQueryList.addEventListener === "function") {
+      mediaQueryList.addEventListener("change", listener);
+    } else if (typeof mediaQueryList.addListener === "function") {
+      mediaQueryList.addListener(listener);
+    }
+
+    return () => {
+      if (typeof mediaQueryList.removeEventListener === "function") {
+        mediaQueryList.removeEventListener("change", listener);
+      } else if (typeof mediaQueryList.removeListener === "function") {
+        mediaQueryList.removeListener(listener);
+      }
+    };
+  }, []);
+
+  const motionDuration = prefersReducedMotion ? 0 : 0.25;
+
+  const transition: MotionProps["transition"] = useMemo(
+    () => ({
+      duration: motionDuration,
+      ease: [0.45, 0, 0.15, 1],
+    }),
+    [motionDuration],
+  );
 
   const toggle = useCallback(() => {
     if (isFlipped === undefined) {
@@ -66,7 +99,7 @@ export default function FlipCard({
 
   const handleKeyDown = useCallback(
     (event: KeyboardEvent<HTMLDivElement>) => {
-      if (event.key === "Enter" || event.key === " ") {
+      if (event.key === "Enter" || event.key === " " || event.key === "Space" || event.key === "Spacebar") {
         event.preventDefault();
         toggle();
       }
@@ -84,7 +117,12 @@ export default function FlipCard({
         aria-pressed={resolvedFlipped}
         data-flipped={resolvedFlipped}
         className={cardClassName}
-        style={baseCardStyle}
+        style={{
+          ...baseCardStyle,
+          transition: prefersReducedMotion
+            ? "none"
+            : `transform ${motionDuration}s ease`,
+        }}
         animate={{ rotateY: resolvedFlipped ? 180 : 0 }}
         initial={false}
         transition={transition}

@@ -9,6 +9,12 @@ Shared UI components for Workbuoy applications.
 - Pull request preview: every PR touching `packages/ui/**` runs the **ui-storybook** workflow in GitHub Actions and uploads a `storybook-preview` artifact containing the static build.
 - Production deploy: merges to `main` trigger the **deploy-ui-storybook** workflow, which publishes the latest static build to GitHub Pages.
 
+## Accessibility
+
+- All interactive components ship with a shared `.wbui-focus-ring` style (imported via `@workbuoy/ui/index.css`) so keyboard users get a consistent, high-contrast outline via `:focus-visible`.
+- `FlipCard` behaves like a toggle button (`role="button"`, `aria-pressed`) and reacts to <kbd>Enter</kbd> and <kbd>Space</kbd>. If users request reduced motion, the flip completes instantly.
+- `ProactivitySwitch` maps to `role="switch"` with `aria-checked` and an optional `aria-label`/`aria-labelledby`. Pressing <kbd>Enter</kbd> or <kbd>Space</kbd> toggles the mode, and a polite `aria-live` announcement confirms the current state for assistive tech users.
+
 ## ProactivitySwitch
 
 ### Controlled toggle
