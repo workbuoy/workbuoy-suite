@@ -1,146 +1,78 @@
-import { toPrismaJson } from '../lib/prismaJson.js';
+import type { PrismaClient, Prisma, FeatureUsageAction } from '@prisma/client';
 import type { TelemetryEvent, TelemetryStorage } from '../types.js';
-
-type PrismaFeatureUsageAction = 'open' | 'complete' | 'dismiss';
-
-type FeatureUsageRow = {
-  featureId: string;
-  _count?: { _all?: number } | number | null | undefined;
-};
-
-type FeatureUsageCreateArgs = {
-  data: {
-    userId: string;
-    tenantId: string;
-    featureId: string;
-    action: PrismaFeatureUsageAction;
-    ts: Date;
-    metadata?: unknown;
-  };
-};
-
-type FeatureUsageGroupByArgs = {
-  by: ['featureId'];
-  where: { userId: string; tenantId?: string };
-  _count: { _all: true };
-};
-
-type PrismaClientLike = {
-  featureUsage: {
-    create(args: FeatureUsageCreateArgs): Promise<unknown>;
-    groupBy(args: FeatureUsageGroupByArgs | unknown): Promise<FeatureUsageRow[]>;
-  };
-};
-
-type PrismaClientModule = {
-  PrismaClient?: new () => PrismaClientLike;
-  default?: { PrismaClient?: new () => PrismaClientLike };
-};
 
 type PrismaTelemetryStorage = TelemetryStorage & {
   aggregateFeatureUseCount: (userId: string, tenantId?: string) => Promise<Record<string, number>>;
 };
 
-let cachedClient: Promise<PrismaClientLike> | null = null;
+let sharedClient: PrismaClient | undefined;
 
-async function loadDefaultClient(): Promise<PrismaClientLike> {
-  if (!cachedClient) {
-    cachedClient = import('@prisma/client')
-      .then((mod: PrismaClientModule) => {
-        const prismaCtor =
-          typeof mod?.PrismaClient === 'function'
-            ? mod.PrismaClient
-            : typeof mod?.default?.PrismaClient === 'function'
-              ? mod.default.PrismaClient
-              : null;
-        if (!prismaCtor) {
-          throw new Error('PrismaClient is not available. Install @prisma/client to use Prisma storage.');
-        }
-        return new prismaCtor();
-      })
-      .catch((error) => {
-        cachedClient = null;
-        throw error;
-      });
+async function getClient(): Promise<PrismaClient> {
+  if (sharedClient) {
+    return sharedClient;
   }
-  return cachedClient;
+  const { PrismaClient } = await import('@prisma/client');
+  sharedClient = new PrismaClient();
+  return sharedClient;
 }
 
-function buildStore(client: PrismaClientLike): PrismaTelemetryStorage {
+const toAction = (input: string): FeatureUsageAction => {
+  const value = input?.toLowerCase?.() ?? '';
+  if (value === 'open' || value === 'view' || value === 'start') {
+    return 'open';
+  }
+  if (value === 'complete' || value === 'finish') {
+    return 'complete';
+  }
+  if (value === 'dismiss' || value === 'error' || value === 'cancel') {
+    return 'dismiss';
+  }
+  return 'open';
+};
+
+export function createPrismaTelemetryStorage(existingClient?: PrismaClient): PrismaTelemetryStorage {
+  const resolveClient = async () => {
+    if (existingClient) {
+      return existingClient;
+    }
+    return getClient();
+  };
+
   const storage: PrismaTelemetryStorage = {
-    async record(ev: TelemetryEvent): Promise<void> {
-      await client.featureUsage.create({
+    async record(event: TelemetryEvent): Promise<void> {
+      const prisma = await resolveClient();
+      await prisma.featureUsage.create({
         data: {
-          userId: ev.userId,
-          tenantId: ev.tenantId,
-          featureId: ev.featureId,
-          action: toAction(ev.action),
-          ts: new Date(),
-          metadata: toPrismaJson(ev.metadata),
+          userId: event.userId,
+          tenantId: event.tenantId,
+          featureId: event.featureId,
+          action: toAction(event.action),
+          ts: new Date(event.ts),
+          metadata: event.metadata as
+            | Prisma.InputJsonValue
+            | Prisma.NullableJsonNullValueInput
+            | undefined,
         },
       });
     },
     async aggregateFeatureUseCount(userId: string, tenantId?: string) {
-      const groupByArgs: FeatureUsageGroupByArgs = {
+      const prisma = await resolveClient();
+      const rows = await prisma.featureUsage.groupBy({
         by: ['featureId'],
         where: {
           userId,
           ...(tenantId ? { tenantId } : {}),
         },
         _count: { _all: true },
-      };
+      });
 
-      const rows = (await client.featureUsage.groupBy(groupByArgs)) as FeatureUsageRow[];
+      const totals: Record<string, number> = {};
+      for (const row of rows) {
+        const total = row._count?._all ?? 0;
+        totals[row.featureId] = total;
+      }
 
-      const result = rows.reduce<Record<string, number>>((acc, row) => {
-        const count = row._count;
-        const total =
-          typeof count === 'object' && count
-            ? count._all ?? 0
-            : typeof count === 'number'
-              ? count
-              : 0;
-        acc[row.featureId] = total;
-        return acc;
-      }, {});
-
-      return result;
-    },
-  };
-
-  return storage;
-}
-
-const toAction = (input: string): PrismaFeatureUsageAction => {
-  const value = input?.toLowerCase?.() ?? '';
-  if (value === 'open' || value === 'view' || value === 'start') return 'open';
-  if (value === 'complete' || value === 'finish') return 'complete';
-  if (value === 'dismiss' || value === 'error' || value === 'cancel') return 'dismiss';
-  return 'open';
-};
-
-export function createPrismaTelemetryStorage(client?: PrismaClientLike): PrismaTelemetryStorage {
-  if (client) {
-    return buildStore(client);
-  }
-
-  let storePromise: Promise<PrismaTelemetryStorage> | null = null;
-
-  const ensureStore = async () => {
-    if (!storePromise) {
-      storePromise = loadDefaultClient().then((resolved) => buildStore(resolved));
-    }
-    return storePromise;
-  };
-
-  const storage: PrismaTelemetryStorage = {
-    async record(ev: TelemetryEvent): Promise<void> {
-      const store = await ensureStore();
-      await store.record(ev);
-    },
-    async aggregateFeatureUseCount(userId: string, tenantId?: string) {
-      const store = await ensureStore();
-      return store.aggregateFeatureUseCount(userId, tenantId);
+      return totals;
     },
   };
 
