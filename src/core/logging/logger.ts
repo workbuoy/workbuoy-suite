@@ -1,17 +1,17 @@
-
 import fs from 'fs';
-import path from 'path';
 import { maskPII } from './maskPII';
 
 export type Level = 'debug'|'info'|'warn'|'error';
 export type LogFields = Record<string, any> & { correlationId?: string };
 
-const LOG_FILE = process.env.WB_LOG_FILE || path.join(process.cwd(), 'workbuoy.log');
+const LOG_FILE = process.env.WB_LOG_FILE;
 
 function write(fields: Record<string, any>) {
   const rec = { ts: new Date().toISOString(), ...fields };
   const line = JSON.stringify(rec);
-  try { fs.appendFileSync(LOG_FILE, line + '\n', 'utf8'); } catch {}
+  if (LOG_FILE) {
+    try { fs.appendFileSync(LOG_FILE, line + '\n', 'utf8'); } catch {}
+  }
   // dev stdout
   console.log(line);
 }

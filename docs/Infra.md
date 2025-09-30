@@ -57,8 +57,9 @@ Denne siden beskriver hvor Workbuoy-suite lagrer data (“WB-ting”), hvilke ek
    - Legg inn Prometheus scrape-jobb mot backend `/metrics`.  
    - Opprett Grafana dashboards/alerts.
 
-4. **Logging**  
-   - Send stdout til sentralt logg-lager.  
+4. **Logging**
+   - Send stdout til sentralt logg-lager.
+   - JSON-strukturerte logger sendes alltid til stdout; sett `WB_LOG_FILE=/path/til/loggfil.log` for å i tillegg skrive til fil.
    - Lag bevarings- og tilgangspolicyer.
 
 5. **Secrets**  
