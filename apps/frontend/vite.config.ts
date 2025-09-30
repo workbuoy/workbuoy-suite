@@ -13,6 +13,7 @@ export default defineConfig({
       "@testing-library/react": path.resolve(__dirname, "src/test-utils/testing-library.ts"),
       "@testing-library/jest-dom": path.resolve(__dirname, "src/test-utils/jest-dom.ts"),
       "@": path.resolve(__dirname, "src"),
+      "@workbuoy/ui": path.resolve(__dirname, "../../packages/ui/src"),
     },
   },
   test: {
@@ -38,6 +39,7 @@ export default defineConfig({
       "src/features/dock/__tests__/DockPersistence.test.tsx",
       "src/features/core/__tests__/DockStatus.test.tsx",
       "src/components/FlipCard/FlipCardFastFlip.test.tsx",
+      "src/routes/demo/controls-demo.test.tsx",
     ],
     exclude: ["e2e/**"],
   },

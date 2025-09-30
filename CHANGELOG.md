@@ -1,3 +1,8 @@
+## PR16 – Frontend demo-app (FlipCard + ProactivitySwitch)
+
+### Added
+- apps/frontend: La til `/demo`-rute som viser FlipCard og ProactivitySwitch med tastaturnavigasjon og live-status.
+
 ## PR15 – Observability-tester (telemetry & logging, backend/Jest)
 
 ### Added – observability-testdekning.
