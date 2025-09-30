@@ -4,11 +4,15 @@ import DashboardRoute from "./index";
 import { vi } from "vitest";
 
 describe("Dashboard route accessibility", () => {
+  let randomSpy: ReturnType<typeof vi.spyOn>;
+
   beforeEach(() => {
     vi.useFakeTimers();
+    randomSpy = vi.spyOn(Math, "random").mockReturnValue(0.95);
   });
 
   afterEach(() => {
+    randomSpy.mockRestore();
     vi.useRealTimers();
   });
 

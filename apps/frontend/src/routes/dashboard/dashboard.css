@@ -91,6 +91,12 @@
   gap: 6px;
 }
 
+.dashboard__section-heading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .dashboard__section-header h2 {
   margin: 0;
   font-size: clamp(1.25rem, 1.6vw, 1.5rem);
@@ -105,6 +111,99 @@
   display: grid;
   gap: 16px;
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
+
+.dashboard__state {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  border-radius: 16px;
+  padding: 16px 20px;
+  border: 1px solid rgba(148, 163, 184, 0.45);
+}
+
+.dashboard__state-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.dashboard__state-content h3 {
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.dashboard__state-content p {
+  margin: 0;
+  font-size: 0.95rem;
+  color: var(--muted-foreground, rgba(71, 85, 105, 0.96));
+}
+
+.dashboard__state--empty {
+  background: rgba(226, 232, 240, 0.35);
+}
+
+.dashboard__state--error {
+  border-color: rgba(248, 113, 113, 0.6);
+  background: rgba(254, 226, 226, 0.6);
+}
+
+.dashboard__retry-button {
+  border-radius: 999px;
+  border: 1px solid rgba(248, 113, 113, 0.8);
+  background: rgba(248, 113, 113, 0.14);
+  color: #b91c1c;
+  font-weight: 600;
+  padding: 8px 18px;
+  cursor: pointer;
+}
+
+.dashboard__retry-button:hover,
+.dashboard__retry-button:focus-visible {
+  background: rgba(248, 113, 113, 0.24);
+}
+
+.dashboard__link-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  padding: 8px 18px;
+  border: 1px solid rgba(37, 99, 235, 0.45);
+  background: rgba(37, 99, 235, 0.14);
+  color: rgba(37, 99, 235, 0.95);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.dashboard__link-button:hover,
+.dashboard__link-button:focus-visible {
+  background: rgba(37, 99, 235, 0.24);
+}
+
+.dashboard__state-description {
+  margin: 0;
+  font-size: 0.95rem;
+  color: var(--muted-foreground, rgba(71, 85, 105, 0.96));
+}
+
+.dashboard__chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border-radius: 999px;
+  padding: 4px 12px;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-weight: 600;
+}
+
+.dashboard__chip--partial {
+  background: rgba(250, 204, 21, 0.25);
+  color: #92400e;
+  border: 1px solid rgba(250, 204, 21, 0.4);
 }
 
 .dashboard__tile {

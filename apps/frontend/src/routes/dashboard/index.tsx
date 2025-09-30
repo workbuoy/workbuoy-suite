@@ -78,6 +78,30 @@ const WEEK_ITEMS = [
 const SKELETON_TILES = 4;
 const SKELETON_DELAY = 900;
 const PRIORITY_LOADING_MESSAGE_ID = "dashboard-priority-loading";
+const PRIORITY_PARTIAL_MESSAGE_ID = "dashboard-priority-partial";
+const DASHBOARD_LIVE_REGION_ID = "dashboard-live";
+
+type DataState = "idle" | "loading" | "partial" | "ready" | "error" | "empty";
+
+const PARTIAL_TILE_RATIO = 0.6;
+
+function chooseOutcome(): Exclude<DataState, "idle" | "loading"> {
+  const value = Math.random();
+
+  if (value < 0.2) {
+    return "empty";
+  }
+
+  if (value < 0.4) {
+    return "error";
+  }
+
+  if (value < 0.7) {
+    return "partial";
+  }
+
+  return "ready";
+}
 
 function usePrefersReducedMotion() {
   const [prefersReducedMotion, setPrefersReducedMotion] = React.useState(false);
@@ -174,17 +198,17 @@ export default function DashboardRoute() {
   const mainRef = React.useRef<HTMLElement>(null);
   const [mode, setMode] = React.useState<Mode>("proactive");
   const [status, setStatus] = React.useState("Proactive view enabled");
-  const [loading, setLoading] = React.useState(true);
+  const [dataState, setDataState] = React.useState<DataState>("idle");
+  const [liveMessage, setLiveMessage] = React.useState("Initialiserer dashboard…");
+  const [loadedCount, setLoadedCount] = React.useState(0);
   const [activeTiles, setActiveTiles] = React.useState<Set<string>>(() => new Set());
+  const loadTimeoutRef = React.useRef<number | null>(null);
+  const retryButtonRef = React.useRef<HTMLButtonElement | null>(null);
+  const shouldRestoreFocusRef = React.useRef(false);
   const prefersReducedMotion = usePrefersReducedMotion();
 
   React.useEffect(() => {
     mainRef.current?.focus({ preventScroll: true });
-  }, []);
-
-  React.useEffect(() => {
-    const timer = setTimeout(() => setLoading(false), SKELETON_DELAY);
-    return () => clearTimeout(timer);
   }, []);
 
   React.useEffect(() => {
@@ -196,6 +220,88 @@ export default function DashboardRoute() {
       ? [...PROACTIVE_TILES, ...REACTIVE_TILES]
       : [...REACTIVE_TILES, ...PROACTIVE_TILES];
   }, [mode]);
+
+  const orderedTilesRef = React.useRef(orderedTiles);
+
+  React.useEffect(() => {
+    orderedTilesRef.current = orderedTiles;
+  }, [orderedTiles]);
+
+  const beginLoad = React.useCallback(() => {
+    if (loadTimeoutRef.current !== null) {
+      clearTimeout(loadTimeoutRef.current);
+    }
+
+    setDataState("loading");
+    setLiveMessage("Laster inn dashboard-paneler…");
+    setLoadedCount(0);
+    setActiveTiles(new Set());
+
+    loadTimeoutRef.current = window.setTimeout(() => {
+      const outcome = chooseOutcome();
+      const totalTiles = orderedTilesRef.current.length;
+      const partialCount = Math.min(
+        Math.max(1, Math.ceil(totalTiles * PARTIAL_TILE_RATIO)),
+        Math.max(totalTiles - 1, 1),
+      );
+
+      if (outcome === "partial") {
+        setLoadedCount(partialCount);
+      } else if (outcome === "ready") {
+        setLoadedCount(totalTiles);
+      } else {
+        setLoadedCount(0);
+      }
+
+      setDataState(outcome);
+    }, SKELETON_DELAY);
+  }, []);
+
+  const reload = React.useCallback(() => {
+    shouldRestoreFocusRef.current = true;
+    beginLoad();
+  }, [beginLoad]);
+
+  React.useEffect(() => {
+    beginLoad();
+
+    return () => {
+      if (loadTimeoutRef.current !== null) {
+        clearTimeout(loadTimeoutRef.current);
+      }
+    };
+  }, [beginLoad]);
+
+  React.useEffect(() => {
+    switch (dataState) {
+      case "loading":
+        setLiveMessage("Laster inn dashboard-paneler…");
+        break;
+      case "error":
+        setLiveMessage("Feil ved lasting – prøv igjen");
+        break;
+      case "empty":
+        setLiveMessage("Tomt dashboard – legg til paneler");
+        break;
+      case "partial": {
+        const totalTiles = orderedTilesRef.current.length;
+        setLiveMessage(`${loadedCount} av ${totalTiles} paneler klare`);
+        break;
+      }
+      case "ready":
+        setLiveMessage("Alle dashboard-paneler klare");
+        break;
+      default:
+        break;
+    }
+  }, [dataState, loadedCount]);
+
+  React.useEffect(() => {
+    if (dataState === "error" && shouldRestoreFocusRef.current) {
+      retryButtonRef.current?.focus({ preventScroll: true });
+      shouldRestoreFocusRef.current = false;
+    }
+  }, [dataState]);
 
   const flipCardProps = React.useMemo<Partial<FlipCardProps>>(
     () => ({
@@ -218,9 +324,58 @@ export default function DashboardRoute() {
     });
   }, []);
 
+  const handleRetryKeyDown = React.useCallback(
+    (event: React.KeyboardEvent<HTMLButtonElement>) => {
+      if (event.key === "Enter" || event.key === " " || event.key === "Spacebar") {
+        event.preventDefault();
+        reload();
+      }
+    },
+    [reload],
+  );
+
+  const handleAddPanelsKeyDown = React.useCallback((event: React.KeyboardEvent<HTMLDivElement>) => {
+    if (event.key === "Enter" || event.key === " " || event.key === "Spacebar") {
+      event.preventDefault();
+    }
+  }, []);
+
+  const isLoading = dataState === "loading";
+  const totalTiles = orderedTiles.length;
+  const visibleTiles = React.useMemo(() => {
+    if (dataState === "ready") {
+      return orderedTiles;
+    }
+
+    if (dataState === "partial") {
+      const tileCount = orderedTiles.length;
+      return orderedTiles.slice(0, Math.min(loadedCount, tileCount));
+    }
+
+    return [];
+  }, [dataState, loadedCount, orderedTiles]);
+
+  const sectionDescriptionIds = [] as string[];
+  if (isLoading) {
+    sectionDescriptionIds.push(PRIORITY_LOADING_MESSAGE_ID);
+  }
+  if (dataState === "partial") {
+    sectionDescriptionIds.push(PRIORITY_PARTIAL_MESSAGE_ID);
+  }
+  const sectionDescribedBy = sectionDescriptionIds.length > 0 ? sectionDescriptionIds.join(" ") : undefined;
+
   return (
     <main ref={mainRef} tabIndex={-1} className="dashboard" aria-labelledby="dashboard-heading">
       <div className="dashboard__layout">
+        <div
+          id={DASHBOARD_LIVE_REGION_ID}
+          aria-live="polite"
+          aria-atomic="true"
+          className="dashboard__sr-only"
+          data-testid="dash-live"
+        >
+          {liveMessage}
+        </div>
         <header className="dashboard__header">
           <div className="dashboard__heading">
             <h1 id="dashboard-heading">Dashboard</h1>
@@ -257,20 +412,65 @@ export default function DashboardRoute() {
         <section
           className="dashboard__section"
           aria-labelledby="dashboard-priority-heading"
-          aria-busy={loading}
-          aria-describedby={loading ? PRIORITY_LOADING_MESSAGE_ID : undefined}
+          aria-busy={isLoading}
+          aria-describedby={sectionDescribedBy}
           role="region"
         >
           <div className="dashboard__section-header">
-            <h2 id="dashboard-priority-heading">Priority overview</h2>
+            <div className="dashboard__section-heading">
+              <h2 id="dashboard-priority-heading">Priority overview</h2>
+              {dataState === "partial" && (
+                <span className="dashboard__chip dashboard__chip--partial" aria-label="Delvis lastet">
+                  Delvis
+                </span>
+              )}
+            </div>
             <p>Tiles reorder based on the selected mode so the right work stays first.</p>
           </div>
-          {loading && (
+          {isLoading && (
             <p id={PRIORITY_LOADING_MESSAGE_ID} className="dashboard__sr-only">
               Loading priority overview…
             </p>
           )}
-          {loading ? (
+          {dataState === "empty" && (
+            <div className="dashboard__state dashboard__state--empty" role="status">
+              <div className="dashboard__state-content">
+                <h3>Ingen paneler ennå</h3>
+                <p>Legg til paneler for å fylle ut oversikten din.</p>
+              </div>
+              <div
+                role="button"
+                tabIndex={0}
+                className="dashboard__link-button wbui-focus-ring"
+                onKeyDown={handleAddPanelsKeyDown}
+              >
+                Legg til paneler
+              </div>
+            </div>
+          )}
+          {dataState === "error" && (
+            <div className="dashboard__state dashboard__state--error" role="status">
+              <div className="dashboard__state-content">
+                <h3>Kunne ikke laste panelene</h3>
+                <p>Det oppstod en feil. Prøv igjen om et øyeblikk.</p>
+              </div>
+              <button
+                ref={retryButtonRef}
+                type="button"
+                className="dashboard__retry-button wbui-focus-ring"
+                onClick={reload}
+                onKeyDown={handleRetryKeyDown}
+              >
+                Prøv igjen
+              </button>
+            </div>
+          )}
+          {dataState === "partial" && (
+            <p id={PRIORITY_PARTIAL_MESSAGE_ID} className="dashboard__state-description">
+              {loadedCount} av {totalTiles} paneler klare
+            </p>
+          )}
+          {isLoading ? (
             <div className="dashboard__skeleton-grid" aria-hidden="true">
               {Array.from({ length: SKELETON_TILES }).map((_, index) => (
                 <div key={index} className="dashboard__skeleton-tile" />
@@ -278,7 +478,7 @@ export default function DashboardRoute() {
             </div>
           ) : (
             <div className="dashboard__grid">
-              {orderedTiles.map((tile) => (
+              {visibleTiles.map((tile) => (
                 <DashboardTile
                   key={tile.id}
                   tile={tile}

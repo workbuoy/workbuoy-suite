@@ -1,3 +1,13 @@
+## PR20 – Dashboard state views (empty/error/partial)
+
+### Added
+- apps/frontend: `/dashboard` har nye tom-, feil- og delvis-lastede visninger med aria-live-status, aria-busy og fokusbevaring på "Prøv igjen".
+- apps/frontend: Partial-visning viser N av M paneler med tydelig chip og beskrivelser som kobles via `aria-describedby`.
+- apps/frontend: Nye Vitest-tester dekker empty/error/partial/ready, tastaturretry og live-region-oppdateringer.
+
+### Docs
+- README/CHANGELOG oppdatert med "State views".
+
 ## PR19 – Dashboard UI-polish (a11y, fokus, semantikk)
 
 ### Improved

@@ -8,7 +8,7 @@ What’s here
 
 - apps/backend — API & services
 - apps/frontend — Web app
-  - `/dashboard` har semantiske landmarks, tydelige fokusringer og tastaturnavigasjon.
+  - `/dashboard` har semantiske landmarks, tydelige fokusringer, tastaturnavigasjon og state views (tom/delvis/feil) med live-status.
 - types/ — shared ambient types
 - tools/ — repo guards, scripts
 - deploy/ — Helm charts & k8s manifests
@@ -64,6 +64,7 @@ Dashboard accessibility
 -----------------------
 
 - `/dashboard` fokuserer hovedinnholdet ved rute-aktivering, har live-status for proaktiv/reaktiv visning og skjermleservennlig skjelettlasting.
+- Nye state views for tom, feil og delvis-lastet innhold annonseres via egen aria-live-region og støtter tastaturdrevet retry.
 
 Governance
 ----------
