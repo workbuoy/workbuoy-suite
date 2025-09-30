@@ -41,12 +41,12 @@ curl http://localhost:3000/metrics
 
 ### Runtime configuration
 
-- `METRICS_ENABLED` &mdash; set to `true`, `1`, or `yes` to expose `/metrics`. When unset or falsy the route responds with `204 No Content` while keeping the endpoint available.
+- `METRICS_ENABLED` &mdash; set to `true`, `1`, or `yes` to expose `/metrics`. When unset or falsy the route still responds with `200 OK` and an empty payload so scraping logic stays happy.
 - `METRICS_PREFIX` &mdash; optional prefix prepended to every exported metric name.
 - `METRICS_DEFAULT_LABELS` &mdash; comma-separated `key=value` pairs applied as default labels (for example `service=backend,env=dev`).
 - `METRICS_BUCKETS` &mdash; comma-separated list of histogram bucket boundaries shared by backend histograms.
 
-When `METRICS_ENABLED` is true, hitting `/metrics` returns a `200` response with Prometheus text and registers default Node.js/HTTP metrics against a shared registry. The registry, default labels, and prefix are all resolved at request time so you can toggle the feature between test runs.
+When `METRICS_ENABLED` is true, hitting `/metrics` returns a `200` response with Prometheus text and registers default Node.js/HTTP metrics against a shared registry. The registry always emits the Prometheus text media-type (`text/plain; version=0.0.4; charset=utf-8`) and applies default labels `service="backend"` and `version="<package.json version>"` alongside any additional runtime labels. The registry, default labels, and prefix are all resolved at request time so you can toggle the feature between test runs.
 
 ## CRM smoke-tester
 
@@ -67,9 +67,9 @@ CRM_ENABLED=true METRICS_ENABLED=true npm run -w @workbuoy/backend test:smoke
 Følgende feature-flagg styrer hvilke observability-endepunkt som monteres i appen:
 
 - `TELEMETRY_ENABLED` &mdash; eksponerer `POST /observability/telemetry/export` som forventer et `resourceSpans`-array og svarer med `{ accepted }`.
-- `LOGGING_ENABLED` &mdash; eksponerer `POST /observability/logs/ingest` som validerer loggnivå og melding og svarer med `{ id, receivedAt }`.
+- `LOGGING_ENABLED` &mdash; eksponerer `POST /observability/logs/ingest` som validerer loggnivå og melding og svarer med `{ id, receivedAt }` og skriver structured log-linjer `{ level, message, ts, reqId }` til stdout.
 
-Traceparent-headere i W3C-format (`00-<traceId>-<spanId>-<flags>`) blir plukket opp av `trace`-middlewaret og reflekteres som `trace-id` i responsen når endepunktene er aktivert.
+Traceparent-headere i W3C-format (`00-<traceId>-<spanId>-<flags>`) blir plukket opp av `trace`-middlewaret og reflekteres som `trace-id` i responsen når endepunktene er aktivert. Dersom et kall mangler `traceparent` genererer middlewaret et `reqId` (UUID v4) som også brukes i structured log-linjene.
 
 Kjør Jest-suiten lokalt med begge flagg påslått for å verifisere statuskoder, input-validering og header-propagasjon:
 

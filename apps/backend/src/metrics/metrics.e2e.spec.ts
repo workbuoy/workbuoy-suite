@@ -11,7 +11,7 @@ describe('metrics exposure', () => {
     delete process.env.METRICS_BUCKETS;
   });
 
-  it('responds with 204 when metrics are disabled', async () => {
+  it('responds with 200 and an empty body when metrics are disabled', async () => {
     const app = express();
     const { resetRegistryForTests } = await import('./registry.js');
     resetRegistryForTests();
@@ -21,7 +21,10 @@ describe('metrics exposure', () => {
 
     const response = await request(app).get('/metrics');
 
-    expect(response.status).toBe(204);
+    expect(response.status).toBe(200);
+    expect(response.headers['content-type']).toContain('text/plain');
+    expect(response.headers['content-type']).toContain('version=0.0.4');
+    expect(response.headers['content-type']).toContain('charset=utf-8');
     expect(response.text).toBe('');
 
     const promClient = await import('prom-client');

@@ -15,7 +15,7 @@ describe('metrics router toggle', () => {
     process.env = ORIGINAL_ENV;
   });
 
-  it('responds with 204 when metrics are disabled', async () => {
+  it('responds with 200 and empty body when metrics are disabled', async () => {
     process.env.METRICS_ENABLED = 'false';
 
     const { resetRegistryForTests } = await import('./registry.js');
@@ -27,7 +27,10 @@ describe('metrics router toggle', () => {
 
     const response = await request(app).get('/metrics');
 
-    expect(response.status).toBe(204);
+    expect(response.status).toBe(200);
+    expect(response.headers['content-type']).toContain('text/plain');
+    expect(response.headers['content-type']).toContain('version=0.0.4');
+    expect(response.headers['content-type']).toContain('charset=utf-8');
     expect(response.text).toBe('');
   });
 

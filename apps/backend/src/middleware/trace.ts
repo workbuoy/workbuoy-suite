@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto';
 import type { NextFunction, Request, Response } from 'express';
 
 const TRACE_RE = /^00-([0-9a-f]{32})-([0-9a-f]{16})-[0-9a-f]{2}$/i;
@@ -23,7 +24,12 @@ export function trace(req: RequestWithContext, res: Response, next: NextFunction
 
   if (traceId) {
     context.traceId = traceId;
+    if (typeof context.reqId !== 'string' || context.reqId.length === 0) {
+      context.reqId = traceId;
+    }
     res.setHeader('trace-id', traceId);
+  } else if (typeof context.reqId !== 'string' || context.reqId.length === 0) {
+    context.reqId = randomUUID();
   }
 
   next();

@@ -10,8 +10,10 @@ export function createMetricsRouter(options: MetricsRouterOptions = {}) {
   const router = Router();
 
   router.get('/', async (_req, res) => {
+    res.setHeader('content-type', 'text/plain; version=0.0.4; charset=utf-8');
+
     if (!isMetricsEnabled()) {
-      return res.status(204).send();
+      return res.status(200).send('');
     }
 
     if (options.beforeCollect) {
@@ -21,8 +23,10 @@ export function createMetricsRouter(options: MetricsRouterOptions = {}) {
     ensureDefaultNodeMetrics();
 
     const registry = getRegistry();
-    res.set('Content-Type', registry.contentType);
-    res.send(await registry.metrics());
+    const snapshot = await registry.metrics();
+    const payload = snapshot.trim().length > 0 ? snapshot : '';
+
+    res.status(200).send(payload);
   });
 
   return router;
