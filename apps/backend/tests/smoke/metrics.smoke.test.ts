@@ -45,7 +45,10 @@ test(
     const body = await response.text();
     expect(body).toMatch(/# HELP/);
     expect(body).toMatch(/process_(cpu_seconds_total|start_time_seconds)/);
-    expect(body).toMatch(/service_name="workbuoy-backend"/);
+    // Back-compat: accept both new and old label names for the service
+    // New label: service="backend"
+    // Old label: service_name="workbuoy-backend"
+    expect(body).toMatch(/(service_name="workbuoy-backend"|service="backend")/);
     expect(body).toMatch(new RegExp(`version="${escapeRegExp(expectedVersion)}"`));
   },
   10_000,
