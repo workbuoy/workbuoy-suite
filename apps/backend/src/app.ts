@@ -2,12 +2,17 @@ import express from 'express';
 import { randomUUID } from 'crypto';
 import { readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
+import { LOGGING_ENABLED, TELEMETRY_ENABLED } from './config/flags.js';
 import { canAccess, EntityType, RecordMeta } from './rbac/policies.js';
 import { clearAudit, getAudit, pushAudit } from './rbac/audit.js';
 import { createEvolutionRouter } from './meta-evolution/routes/evolution.routes.js';
+import { trace } from './middleware/trace.js';
+import { createTelemetryRouter } from './observability/telemetry/router.js';
+import { createLogsRouter } from './observability/logs/router.js';
 
 export function buildApp() {
   const app = express();
+  app.use(trace);
   app.use(express.json());
   app.use('/api/meta-evolution', createEvolutionRouter());
 
@@ -116,6 +121,14 @@ export function buildApp() {
     aud('delete', a.user_id, a.role, type, id, true, undefined, rec, undefined);
     res.status(204).end();
   });
+
+  if (TELEMETRY_ENABLED) {
+    app.use('/observability/telemetry', createTelemetryRouter());
+  }
+
+  if (LOGGING_ENABLED) {
+    app.use('/observability/logs', createLogsRouter());
+  }
 
   return app;
 }

@@ -62,13 +62,19 @@ To run the metrics validation alongside the CRM flow:
 CRM_ENABLED=true METRICS_ENABLED=true npm run -w @workbuoy/backend test:smoke
 ```
 
-## Observability tester – hvordan kjøre lokalt
+## Observability endpoints & tester
 
-Aktiver både telemetri- og logging-endepunktene og kjør Jest-suiten for observability:
+Følgende feature-flagg styrer hvilke observability-endepunkt som monteres i appen:
+
+- `TELEMETRY_ENABLED` &mdash; eksponerer `POST /observability/telemetry/export` som forventer et `resourceSpans`-array og svarer med `{ accepted }`.
+- `LOGGING_ENABLED` &mdash; eksponerer `POST /observability/logs/ingest` som validerer loggnivå og melding og svarer med `{ id, receivedAt }`.
+
+Traceparent-headere i W3C-format (`00-<traceId>-<spanId>-<flags>`) blir plukket opp av `trace`-middlewaret og reflekteres som `trace-id` i responsen når endepunktene er aktivert.
+
+Kjør Jest-suiten lokalt med begge flagg påslått for å verifisere statuskoder, input-validering og header-propagasjon:
 
 ```bash
 TELEMETRY_ENABLED=true LOGGING_ENABLED=true npm run -w @workbuoy/backend test:observability
 ```
 
-Testene validerer `traceparent`-propagasjon, svarformater for `/observability/telemetry/export` og `/observability/logs/ingest`,
-og at eksport-hookene blir trigget.
+Sett flaggene til `false` for å bekrefte at endepunktene ikke er montert og dermed gir `404`.
