@@ -1,3 +1,19 @@
+## 1.1.0 (2025-09-30)
+
+### Added
+- BuoyDock widget for docked dashboard workflows.
+- Dashboard state views with empty/error/partial semantics.
+- Accessibility QA harness and automated contract tests in CI.
+
+### Improved
+- Metrics headers and default labels for consistent observability.
+- FlipCard accessibility polish and keyboard ergonomics.
+- ProactivitySwitch clarity for proactive/reactive states.
+
+### Fixed
+- Focus return when collapsing the dock UI.
+- Type checking stability via tsconfig test file exclusions.
+
 ## PR23 – QA a11y & kontrakt (frontend + backend)
 
 ### Added – QA a11y & contract checks.

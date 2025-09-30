@@ -13,12 +13,19 @@ npm run dev
 - Chat-panelet viser mikro-visualiseringer og "Vis hvorfor"-skuff.
 - Navi viser add-ons som diskrete tiles basert på mock-data.
 
+## BuoyDock-widgeten
+
+- Frontpanelet (Buoy) viser chatten og "Vis hvorfor"-konteksten, mens baksiden (Navi) inneholder handlingslisten og nav-ruter.
+- Space/Enter åpner/lukker docken og flipper kortet; Escape kollapser docken og returnerer fokus til trigger-knappen.
+- Når docken er utvidet holdes fokus inne i komponenten med Tab/Shift+Tab, og `aria-live` oppdaterer status når siden skifter.
+- `prefers-reduced-motion` fanges opp via `matchMedia` slik at animasjoner tones ned for brukere som ber om redusert bevegelse.
+
 ## Demo routes
 
 Tilgjengelige demovyer er tilgjengelige direkte i Vite-devserveren:
 
 - `/demo` – viser `FlipCard` og `ProactivitySwitch` sammen. Bruk Tab for fokus, Enter/Space for å endre modus og flippe kortet. Live-statusen annonserer "Proactive mode enabled" / "Reactive mode enabled".
-- `/dock-demo` – demonstrerer DockHost-komponenten med fokusfelle og tastaturnavigasjon.
+- `/dock-demo` – demonstrerer `BuoyDock` med Buoy-chatten på forsiden og Navi-backloggen på baksiden, komplett med fokusfelle, Escape for kollaps og redusert bevegelse når `prefers-reduced-motion` er aktiv.
 
 ## Dashboard route
 

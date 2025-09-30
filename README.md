@@ -1,6 +1,10 @@
 Workbuoy Suite
 ===============
 
+[![CI](https://github.com/workbuoy/workbuoy-suite/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/workbuoy/workbuoy-suite/actions/workflows/ci.yml)
+[![Storybook](https://img.shields.io/badge/storybook-live-ff4785?logo=storybook&logoColor=white)](https://workbuoy.github.io/workbuoy-suite/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+
 Monorepo for the Workbuoy platform.
 
 What’s here
@@ -17,21 +21,24 @@ What’s here
 Quickstart
 ----------
 
-- Install dependencies: `npm ci`
-- Run backend smoke tests to verify core routes: `npm run -w @workbuoy/backend test:smoke`
-- Persistence workflow:
-  1. `npm run db:prepare -w @workbuoy/backend` (generate Prisma client → deploy migrations)
-  2. `npm run db:seed -w @workbuoy/backend` to load baseline data
-- Run the backend locally with optional routes disabled:
+1. Install dependencies: `npm ci`
+2. Backend:
+   - Prepare persistence: `npm run db:prepare -w @workbuoy/backend`
+   - Seed baseline data: `npm run db:seed -w @workbuoy/backend`
+   - Run smoke tests: `npm run -w @workbuoy/backend test:smoke`
+   - Start the API locally with optional routes disabled:
 
-```bash
-WB_SKIP_OPTIONAL_ROUTES=1 node --import tsx apps/backend/src/index.ts
-```
+     ```bash
+     WB_SKIP_OPTIONAL_ROUTES=1 node --import tsx apps/backend/src/index.ts
+     ```
 
-### Backend metrics
+3. Feature flags (backend):
+   - `CRM_ENABLED=true` aktiverer CRM-ruter for lokale integrasjonstester.
+   - `METRICS_ENABLED=true` eksponerer Prometheus `/metrics` med headers `text/plain; version=0.0.4; charset=utf-8`.
 
-- Set `METRICS_ENABLED=true` to enable Prometheus HTTP metrics in `apps/backend`.
-- Override the endpoint path with `METRICS_ROUTE` (default `/metrics`).
+4. Frontend:
+   - Start Vite dev-server: `npm run dev -w @workbuoy/frontend`
+   - QA a11y-sjekk lokalt: `npm run qa:a11y -w @workbuoy/frontend`
 
 CI at a glance
 --------------
@@ -48,6 +55,8 @@ Docs
 
 - [Structure](docs/STRUCTURE.md)
 - [Developer Quickstart](docs/DEV_QUICKSTART.md)
+- [QA playbook](docs/qa.md)
+- [Observability guide](docs/observability.md)
 - [Asset Policy](docs/ASSET_POLICY.md)
 - [ADR Template](docs/adr/README.md)
 - [CI Notes](docs/CI_NOTES.md)
