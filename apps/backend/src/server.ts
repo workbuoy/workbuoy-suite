@@ -245,7 +245,7 @@ const isLoggingEnabled = pickRequiredExport<() => boolean>(
 const {
   isTelemetryPersistenceEnabled,
   telemetryRouter,
-} = (await import('./telemetryContext.js')) as typeof import('./telemetryContext.js');
+} = (await import('./telemetry/context.js')) as typeof import('./telemetry/context.js');
 
 if (isTelemetryPersistenceEnabled()) {
   console.log('[telemetry] Feature usage persistence enabled via Prisma storage');

@@ -5,27 +5,29 @@
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
     "target": "ES2022",
-    "lib": ["ES2022"],
+    "lib": [
+      "ES2022"
+    ],
     "noEmit": true,
-    "types": ["node", "jest"],
+    "types": [
+      "node",
+      "jest"
+    ],
     "resolveJsonModule": true,
     "allowArbitraryExtensions": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "baseUrl": ".",
-    "rootDirs": [
-      "./",
-      "../../packages/backend-rbac/src",
-      "../../packages/backend-telemetry/src",
-      "../../packages/backend-metrics/src"
-    ],
     "paths": {
-      "@backend/*": ["src/*"],
-      "@backend-tests/*": ["tests/*"],
-      "@backend-meta/*": ["meta/*"],
-      "@workbuoy/backend-rbac": ["../../packages/backend-rbac/src/index"],
-      "@workbuoy/backend-telemetry": ["../../packages/backend-telemetry/src/index"],
-      "@workbuoy/backend-metrics": ["../../packages/backend-metrics/src/index"]
+      "@backend/*": [
+        "src/*"
+      ],
+      "@backend-tests/*": [
+        "tests/*"
+      ],
+      "@backend-meta/*": [
+        "meta/*"
+      ]
     }
   },
   "include": [

@@ -7,20 +7,20 @@ const owners = new Map<string, string>(); // id -> owner_id
 
 export const crmDummy = Router();
 
-function requireParam(req: Request, key: string): string {
-  const params = req.params as Record<string, string | undefined>;
-  const value = params[key]?.trim() ?? '';
-  if (value) {
-    return value;
+function required(paramName: string, value: unknown): string {
+  if (typeof value !== 'string') {
+    throw Object.assign(new Error(`${paramName} is required`), { status: 400 });
   }
-  const error = new Error(`Missing ${key}`) as Error & { status?: number };
-  error.status = 400;
-  throw error;
+  const trimmed = value.trim();
+  if (trimmed.length === 0) {
+    throw Object.assign(new Error(`${paramName} is required`), { status: 400 });
+  }
+  return trimmed;
 }
 
 crmDummy.get(
   '/contacts/:id',
-  createPolicyEnforcer('read', 'record', (req: Request) => ({ id: req.params.id })),
+  createPolicyEnforcer('read', 'record', (req: Request) => ({ id: required('id', req.params?.id) })),
   (req: Request, res: Response) => {
     getDummyProposal(req, res);
   }
@@ -37,7 +37,7 @@ crmDummy.post(
 crmDummy.patch(
   '/contacts/:id',
   createPolicyEnforcer('update', 'record', (req: Request) => ({
-    id: req.params.id,
+    id: required('id', req.params?.id),
     owner_id: String(req.header('x-owner-id') || 'u1'),
   })),
   (req: Request, res: Response) => {
@@ -47,7 +47,7 @@ crmDummy.patch(
 
 crmDummy.delete(
   '/contacts/:id',
-  createPolicyEnforcer('delete', 'record', (req: Request) => ({ id: req.params.id })),
+  createPolicyEnforcer('delete', 'record', (req: Request) => ({ id: required('id', req.params?.id) })),
   (_req: Request, res: Response) => {
     res.status(204).end();
   }
@@ -70,14 +70,14 @@ export function createDummyProposal(req: Request, _res?: Response): DummyProposa
 }
 
 export function updateDummyProposal(req: Request, _res?: Response): DummyProposal {
-  const id = requireParam(req, 'id');
+  const id = required('id', req.params?.id);
   const payload: DummyProposal = { id, patched: true };
   _res?.json(payload);
   return payload;
 }
 
 export function getDummyProposal(req: Request, _res?: Response): DummyProposal {
-  const id = requireParam(req, 'id');
+  const id = required('id', req.params?.id);
   const payload: DummyProposal = { id, ok: true };
   _res?.json(payload);
   return payload;

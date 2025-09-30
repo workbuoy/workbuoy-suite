@@ -50,6 +50,11 @@ jobs:
         run: npm run prisma:generate
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/wb?schema=public
+      - name: Build backend workspaces
+        run: |
+          npm run -w @workbuoy/backend-rbac build
+          npm run -w @workbuoy/backend-telemetry build
+          npm run -w @workbuoy/backend-metrics build
       - run: npm run typecheck -w @workbuoy/backend
       - name: Run backend tests (coverage + junit)
         env:

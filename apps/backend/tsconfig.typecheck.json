@@ -4,14 +4,15 @@
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
     "noEmit": true,
-    "types": ["node", "express"],
-    "typeRoots": ["../../types", "../../node_modules/@types"],
-    "baseUrl": ".",
-    "paths": {
-      "@workbuoy/backend-telemetry": ["../../packages/backend-telemetry/src/index"],
-      "@workbuoy/backend-rbac": ["../../packages/backend-rbac/src/index"],
-      "@workbuoy/backend-metrics": ["../../packages/backend-metrics/src/index"]
-    }
+    "types": [
+      "node",
+      "express"
+    ],
+    "typeRoots": [
+      "../../types",
+      "../../node_modules/@types"
+    ],
+    "baseUrl": "."
   },
   "include": [
     "src/**/*.ts",
