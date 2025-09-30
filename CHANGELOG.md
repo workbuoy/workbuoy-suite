@@ -1,3 +1,10 @@
+## PR23 – QA a11y & kontrakt (frontend + backend)
+
+### Added – QA a11y & contract checks.
+- apps/frontend: Lettvekts axe-sjekk for `/dashboard` og `/dock-demo` via Vitest (`npm run qa:a11y -w @workbuoy/frontend`).
+- apps/backend: Vitest-kontrakter for `GET /api/version` og `GET /metrics` validerer headers, semver og Prometheus-labels.
+- CI: Ikke-blokkerende QA-steg som rapporterer feil i `$GITHUB_STEP_SUMMARY` og dokumentasjon for lokale kjørsler.
+
 ## PR22 – Observability polish (metrics + logs)
 
 ### Improved

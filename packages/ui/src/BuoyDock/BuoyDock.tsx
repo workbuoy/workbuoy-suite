@@ -348,6 +348,7 @@ export function BuoyDock({
         front={front}
         back={back}
         onFlip={handleFlip}
+        interactive={false}
         className="wbui-buoydock__card"
       />
       <div

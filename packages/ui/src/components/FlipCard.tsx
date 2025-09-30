@@ -9,6 +9,7 @@ export type FlipCardProps = {
   isFlipped?: boolean;
   onFlip?: () => void;
   className?: string;
+  interactive?: boolean;
 };
 
 const baseCardClass = "wbui-flip-card wbui-focus-ring";
@@ -46,6 +47,7 @@ export default function FlipCard({
   isFlipped,
   onFlip,
   className,
+  interactive = true,
 }: FlipCardProps) {
   const [internalFlipped, setInternalFlipped] = useState(false);
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
@@ -112,9 +114,9 @@ export default function FlipCard({
   return (
     <div style={wrapperStyle}>
       <motion.div
-        role="button"
-        tabIndex={0}
-        aria-pressed={resolvedFlipped}
+        role={interactive ? "button" : undefined}
+        tabIndex={interactive ? 0 : -1}
+        aria-pressed={interactive ? resolvedFlipped : undefined}
         data-flipped={resolvedFlipped}
         className={cardClassName}
         style={{
@@ -127,7 +129,7 @@ export default function FlipCard({
         initial={false}
         transition={transition}
         onClick={toggle}
-        onKeyDown={handleKeyDown}
+        onKeyDown={interactive ? handleKeyDown : undefined}
       >
         <div
           className={`${faceClass} ${faceClass}--front`}

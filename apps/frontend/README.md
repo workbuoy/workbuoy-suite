@@ -28,3 +28,13 @@ Tilgjengelige demovyer er tilgjengelige direkte i Vite-devserveren:
 - Skjelettlasting indikeres via `aria-busy` på seksjonen frem til innholdet er klart.
 
 Alle demoer er tilgjengelige uten ekstra avhengigheter og deler byggeoppsettet til hovedappen.
+
+## QA a11y
+
+Kjør den lettvekts axe-sjekken for `/dashboard` og `/dock-demo` med Vitest:
+
+```bash
+npm run qa:a11y -w @workbuoy/frontend
+```
+
+Kommandoen starter Vitest med jsdom-miljø og rapporterer eventuelle brudd i `$GITHUB_STEP_SUMMARY` når den kjøres i CI.
