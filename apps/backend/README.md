@@ -33,10 +33,10 @@ Enable metrics locally by starting the backend with `METRICS_ENABLED=true`:
 METRICS_ENABLED=true npm run dev -w @workbuoy/backend
 ```
 
-Then fetch the Prometheus snapshot:
+Then fetch the Prometheus snapshot (the response headers include `content-type: text/plain; version=0.0.4; charset=utf-8` and the payload labels every metric with `service="backend"` and `version="<package version>"`):
 
 ```
-curl http://localhost:3000/metrics
+curl -sD - http://localhost:3000/metrics | head
 ```
 
 ### Runtime configuration

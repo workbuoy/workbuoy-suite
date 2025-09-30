@@ -2,8 +2,10 @@ name: release
 
 on:
   push:
+    branches:
+      - main
     tags:
-      - "v*.*.*"
+      - "v*"
 
 jobs:
   release:
@@ -30,5 +32,38 @@ jobs:
         run: npx tsc -p packages/ui/tsconfig.json
       - name: Build backend container
         run: docker build -f apps/backend/Dockerfile -t workbuoy/backend:ci .
+      - name: Generate release notes
+        run: |
+          npm run release:notes | tee notes.md || {
+            if [ -n "${GITHUB_STEP_SUMMARY:-}" ]; then
+              echo 'Release notes failed' >> "$GITHUB_STEP_SUMMARY"
+            fi
+            exit 1
+          }
+      - name: Create GitHub Release (notes)
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref_name }}
+          release_name: ${{ github.ref_name }}
+          body_path: notes.md
+      - name: Storybook summary badge
+        if: always()
+        run: |
+          if [ -z "${GITHUB_STEP_SUMMARY:-}" ]; then
+            exit 0
+          fi
+          VERSION=$(node -p "require('./package.json').version")
+          OWNER="${GITHUB_REPOSITORY%%/*}"
+          REPO="${GITHUB_REPOSITORY#*/}"
+          STORYBOOK_URL="https://${OWNER}.github.io/${REPO}/"
+          BADGE_URL="https://img.shields.io/badge/storybook-${VERSION}-ff4785?logo=storybook&logoColor=white"
+          {
+            echo '### Storybook'
+            echo
+            echo "[![Storybook ${VERSION}](${BADGE_URL})](${STORYBOOK_URL})"
+          } >> "${GITHUB_STEP_SUMMARY}"
       - name: Publish (dry run)
         run: echo "publish step"
