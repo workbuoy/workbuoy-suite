@@ -75,7 +75,7 @@ const DEV_LOGIN_ACTOR = { sub: 'user-dev', email: 'dev@example.com', name: 'Dev 
 function resolveOptions(options: AuthRouterOptions = {}): ResolvedOptions {
   return {
     ssoEnabled: options.ssoEnabled ?? (process.env.SSO_ENABLED ?? 'true') === 'true',
-    devMock: options.devMock ?? (process.env.OIDC_DEV_MOCK ?? '1') === '1',
+    devMock: options.devMock ?? (process.env.OIDC_DEV_MOCK ?? '0') === '1',
     jwtSecret: options.jwtSecret ?? process.env.SESSION_SECRET ?? 'dev-secret',
     cookieName: options.cookieName ?? process.env.SESSION_COOKIE ?? DEFAULT_COOKIE_NAME,
     defaultTenantId: options.defaultTenantId ?? process.env.DEFAULT_TENANT_ID ?? 'demo-tenant',
@@ -121,6 +121,8 @@ function createRouter(options: ResolvedOptions) {
 
   const getConfiguration = createConfigurationResolver(options);
   let sessionStore: AuthorizationSession | null = null;
+  const secure = process.env.NODE_ENV === 'production';
+  const cookieOptions = { httpOnly: true, sameSite: 'lax' as const, secure };
 
   router.get('/auth/login', async (req: AuthenticatedRequest, res: Response) => {
     const tenant_id = String(req.query.tenant || req.header('x-tenant-id') || options.defaultTenantId);
@@ -130,7 +132,7 @@ function createRouter(options: ResolvedOptions) {
     }
     if (options.devMock) {
       const token = signSession({ ...DEV_LOGIN_ACTOR, tenant_id }, options.jwtSecret, '1h');
-      res.cookie(options.cookieName, token, { httpOnly: true, sameSite: 'lax' });
+      res.cookie(options.cookieName, token, cookieOptions);
       options.audit?.({ type: 'user.login', tenant_id, actor_id: DEV_LOGIN_ACTOR.sub, details: { method: 'mock' } });
       res.redirect('/');
       return;
@@ -186,7 +188,7 @@ function createRouter(options: ResolvedOptions) {
         options.jwtSecret,
         '8h',
       );
-      res.cookie(options.cookieName, token, { httpOnly: true, sameSite: 'lax', secure: false });
+      res.cookie(options.cookieName, token, cookieOptions);
       options.audit?.({
         type: 'user.login',
         tenant_id,
@@ -201,7 +203,7 @@ function createRouter(options: ResolvedOptions) {
   });
 
   router.post('/auth/logout', (req: AuthenticatedRequest, res: Response) => {
-    res.clearCookie(options.cookieName);
+    res.clearCookie(options.cookieName, cookieOptions);
     res.json({ ok: true });
   });
 
