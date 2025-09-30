@@ -13,10 +13,18 @@
       "@workbuoy/backend-metrics": ["../../packages/backend-metrics/src/index"]
     }
   },
-  "include": ["src", "tests", "typings"],
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "typings/**/*.d.ts"
+  ],
   "exclude": [
-    "routes/**",
-    "tests-smoke/**",
-    "dist/**"
+    "src/**/*.spec.ts",
+    "src/**/*.spec.tsx",
+    "src/**/*.test.ts",
+    "src/**/*.test.tsx",
+    "tests",
+    "tests-smoke",
+    "dist"
   ]
 }

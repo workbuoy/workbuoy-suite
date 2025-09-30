@@ -11,7 +11,7 @@ crmDummy.get(
   '/contacts/:id',
   createPolicyEnforcer('read', 'record', (req: Request) => ({ id: req.params.id })),
   (req: Request, res: Response) => {
-    res.json({ id: req.params.id, ok: true });
+    getDummyProposal(req, res);
   }
 );
 
@@ -19,10 +19,7 @@ crmDummy.post(
   '/contacts',
   createPolicyEnforcer('create', 'record'),
   (req: Request, res: Response) => {
-    const id = 'c_' + Math.random().toString(36).slice(2);
-    const owner = (req as unknown as { actor_user_id?: string }).actor_user_id || 'u1';
-    owners.set(id, owner);
-    res.status(201).json({ id, owner_id: owner });
+    createDummyProposal(req, res);
   }
 );
 
@@ -33,7 +30,7 @@ crmDummy.patch(
     owner_id: String(req.header('x-owner-id') || 'u1'),
   })),
   (req: Request, res: Response) => {
-    res.json({ id: req.params.id, patched: true });
+    updateDummyProposal(req, res);
   }
 );
 
@@ -44,3 +41,31 @@ crmDummy.delete(
     res.status(204).end();
   }
 );
+
+export interface DummyProposal {
+  id: string;
+  owner_id?: string;
+  ok?: boolean;
+  patched?: boolean;
+}
+
+export function createDummyProposal(req: Request, _res?: Response): DummyProposal {
+  const id = 'c_' + Math.random().toString(36).slice(2);
+  const owner = (req as unknown as { actor_user_id?: string }).actor_user_id || 'u1';
+  owners.set(id, owner);
+  const payload: DummyProposal = { id, owner_id: owner };
+  _res?.status(201).json(payload);
+  return payload;
+}
+
+export function updateDummyProposal(req: Request, _res?: Response): DummyProposal {
+  const payload: DummyProposal = { id: req.params.id, patched: true };
+  _res?.json(payload);
+  return payload;
+}
+
+export function getDummyProposal(req: Request, _res?: Response): DummyProposal {
+  const payload: DummyProposal = { id: req.params.id, ok: true };
+  _res?.json(payload);
+  return payload;
+}
