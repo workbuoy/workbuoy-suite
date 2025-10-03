@@ -1,5 +1,5 @@
 import Redis from 'ioredis';
-import { mkdirSync, writeFileSync } from 'fs';
+import { mkdirSync, rmSync, writeFileSync } from 'fs';
 import { join } from 'path';
 
 const N = parseInt(process.env.WB_REDIS_N || '5000', 10);
@@ -14,8 +14,18 @@ function percentile(arr:number[], p:number) {
 }
 
 (async () => {
-  const pub = new Redis(url);
-  const sub = new Redis(url);
+  const pub = new Redis(url, { lazyConnect: true });
+  const sub = new Redis(url, { lazyConnect: true });
+
+  try {
+    await Promise.all([pub.connect(), sub.connect()]);
+  } catch (error) {
+    console.warn('[redis-blast] Redis unavailable, skipping load test.', error);
+    await pub.quit();
+    await sub.quit();
+    process.exit(0);
+    return;
+  }
 
   // Worker measures processing latency
   let processed = 0;
@@ -35,7 +45,7 @@ function percentile(arr:number[], p:number) {
   })();
 
   const t0 = Date.now();
-  for (let i=0;i<N;i++) {
+  for (let i = 0; i < N; i++) {
     await pub.lpush(q, JSON.stringify({ id: i, ts: Date.now() }));
   }
   const timeoutAt = Date.now()+120000;
@@ -51,10 +61,14 @@ function percentile(arr:number[], p:number) {
     p99_ms: percentile(durations, 99),
     errors: processed < N ? (N-processed) : 0
   };
-  mkdirSync('reports', { recursive: true });
-  writeFileSync(join('reports','sync_load.json'), JSON.stringify(report, null, 2));
+  const outputDir = process.env.WB_REPORT_DIR || 'reports';
+  mkdirSync(outputDir, { recursive: true });
+  writeFileSync(join(outputDir,'sync_load.json'), JSON.stringify(report, null, 2));
 
   await pub.quit(); await sub.quit();
+  if (process.env.WB_KEEP_REPORTS !== '1') {
+    try { rmSync(outputDir, { recursive: true, force: true }); } catch {}
+  }
   if (report.errors > 0) { console.error('REDIS BLAST partial', report); process.exit(1); }
   console.log('REDIS BLAST PASS', report);
   process.exit(0);

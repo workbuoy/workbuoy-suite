@@ -1,6 +1,7 @@
 import express from 'express';
-import { mkdirSync, rmSync } from 'fs';
-import path from 'path';
+import { mkdtempSync, rmSync } from 'fs';
+import { join } from 'path';
+import { tmpdir } from 'os';
 import { SecureDb } from '../src/storage/secureDb.js';
 import { SyncEngine } from '../src/sync/syncEngine.js';
 
@@ -38,9 +39,7 @@ function startMockCRM(port:number) {
   const port = 45711;
   const { server, db } = await startMockCRM(port);
 
-  const dir = path.join(process.cwd(), '.wb_conflict');
-  try { rmSync(dir, { recursive: true, force: true }); } catch {}
-  mkdirSync(dir, { recursive: true });
+  const dir = mkdtempSync(join(tmpdir(), 'wb-conflict-'));
 
   const sdb = new SecureDb(dir);
   const engineLWW = new SyncEngine(sdb, { baseUrl: `http://127.0.0.1:${port}`, apiKey: 'dev', tenantId: 't1', conflict: 'lww' });
@@ -61,7 +60,8 @@ function startMockCRM(port:number) {
     console.error('Merge should preserve server email and set local name', db['c1']); process.exit(1);
   }
 
-  await new Promise<void>((resolve,reject)=>server.close(e=>e?reject(e):resolve()));
+  await new Promise<void>((resolve, reject) => server.close((e: Error | null) => (e ? reject(e) : resolve())));
+  try { rmSync(dir, { recursive: true, force: true }); } catch {}
   console.log('Conflict PASS', db['c1']);
   process.exit(0);
 })();

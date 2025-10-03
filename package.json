@@ -20,8 +20,8 @@
     "bootstrap:light": "npm ci --workspaces --include-workspace-root --omit=optional",
     "build": "npm run build -w @workbuoy/backend && npm run build -w @workbuoy/frontend",
     "typecheck": "npm run typecheck -w @workbuoy/backend && npm run typecheck -w @workbuoy/frontend && npm run typecheck -w @workbuoy/ui",
-    "test": "npm run -w @workbuoy/backend test && npm run -w @workbuoy/frontend test --if-present",
-    "test:ci": "npm test --workspaces --if-present",
+    "test": "cross-env CI=true PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 PRISMA_CLI_QUERY_ENGINE_TYPE=wasm PRISMA_ENGINES_CHECKSUM_IGNORE_MISSING=1 npm run --workspaces --if-present test -- --coverage",
+    "test:ci": "npm run test",
     "prisma:generate": "npm -w @workbuoy/backend run prisma:generate",
     "seed:roles": "npm run seed:roles -w @workbuoy/backend",
     "check:roles": "tsx scripts/check-roles-json.ts",
@@ -38,10 +38,12 @@
     "openapi:diff": "bash -lc 'SPECS=$(git ls-files | grep -E \"(^|/)(openapi\\\\.(ya?ml|json)|openapi/.+\\\\.(ya?ml|json))$\" || true); if [ -z \"$SPECS\" ]; then echo \"No OpenAPI specs found\"; exit 0; fi; git fetch origin main:refs/remotes/origin/main >/dev/null 2>&1 || true; echo \"$SPECS\" | while read -r spec; do echo \"=== Diff: $spec ===\"; if git show origin/main:\"$spec\" >/dev/null 2>&1; then TMP=$(mktemp); git show origin/main:\"$spec\" > \"$TMP\"; npx openapi-diff@3.0.1 --fail-on-changed false --fail-on-incompatible false -f text \"$TMP\" \"$spec\" || true; rm -f \"$TMP\"; else echo \"[new] $spec\"; fi; echo; done'",
     "size:report": "node scripts/size-report.mjs --output size-report.json",
     "test:smoke": "npm run -w @workbuoy/backend test:smoke",
-    "release:notes": "node scripts/release-notes.js"
+    "release:notes": "node scripts/release-notes.js",
+    "prisma:validate": "node scripts/prisma/validate-offline.mjs"
   },
   "devDependencies": {
     "@eslint/js": "^9.36.0",
+    "@prisma/prisma-schema-wasm": "^6.17.0-12.c93d14b2da5fb8aabcb60751cd0e29de11bea73c",
     "@swc/core": "^1.7.0",
     "@swc/jest": "^0.2.36",
     "@types/express": "^4.17.21",
@@ -51,6 +53,7 @@
     "@types/supertest": "^2.0.16",
     "@typescript-eslint/eslint-plugin": "^8.14.0",
     "@typescript-eslint/parser": "^8.14.0",
+    "cross-env": "^7.0.3",
     "eslint": "^9.36.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-import-resolver-typescript": "^3.6.3",

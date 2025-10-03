@@ -127,8 +127,8 @@ export function BuoyDock({
       });
     } else {
       queueMicrotask(() => {
-        if (isBack && isElementVisible(expandButtonRef.current)) {
-          expandButtonRef.current?.focus();
+        if (isBack && expandButtonRef.current) {
+          expandButtonRef.current.focus();
           return;
         }
 

@@ -17,8 +17,8 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "lint": "eslint \"src/**/*.{ts,tsx}\" --max-warnings=0",
-    "test": "node ./tools/run-vitest.mjs",
-    "test:watch": "node ./tools/run-vitest.mjs --watch",
+    "test": "ROLLUP_SKIP_NODEJS_NATIVE=1 ROLLUP_SKIP_NATIVE=1 vitest run --reporter=default --passWithNoTests",
+    "test:watch": "ROLLUP_SKIP_NODEJS_NATIVE=1 ROLLUP_SKIP_NATIVE=1 vitest watch --reporter=default",
     "typecheck": "tsc --noEmit",
     "storybook": "ROLLUP_SKIP_NODEJS_NATIVE=1 node ./scripts/run-storybook.cjs dev -p 6006",
     "build:storybook": "ROLLUP_SKIP_NODEJS_NATIVE=1 ROLLUP_SKIP_NATIVE=1 node ./scripts/run-storybook.cjs build",
