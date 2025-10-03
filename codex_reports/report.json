@@ -1,0 +1,156 @@
+{
+  "repo": "workbuoy-suite",
+  "branch": "work",
+  "detected": {
+    "node": true,
+    "workspaces": true,
+    "typescript": true,
+    "python": true,
+    "go": false,
+    "openapi": true,
+    "helm": true,
+    "k8s": true,
+    "grafana": true,
+    "alertmanager": true,
+    "prisma": true,
+    "storybook": false,
+    "desktop": true
+  },
+  "quality": {
+    "prettier": {
+      "status": "fail",
+      "notes": "70 filer krever formatering – se logs/prettier.txt"
+    },
+    "eslint": {
+      "status": "ok",
+      "issues": 0
+    },
+    "tsc": {
+      "status": "fail",
+      "errors": 5,
+      "notes": "Frontend tests og FlipCard komponent feiler kompilering"
+    },
+    "python": {
+      "ruff": "not_run",
+      "mypy": "not_run"
+    },
+    "go": {
+      "vet": "not_run"
+    }
+  },
+  "tests": {
+    "runner": "npm workspaces (jest/vitest/tsx)",
+    "passed": 0,
+    "failed": 5,
+    "skipped": 0,
+    "coverage": {
+      "lines": 0,
+      "statements": 0,
+      "branches": 0,
+      "functions": 0
+    },
+    "notes": "Backend, frontend, enterprise, CRM og desktop test/build pipelines feilet (dekning 0% pga terskler)"
+  },
+  "openapi": {
+    "spectral": {
+      "errors": 1,
+      "warnings": 200
+    },
+    "diff": {
+      "changedFiles": 0,
+      "summary": "Remote origin/main unavailable"
+    }
+  },
+  "security": {
+    "secrets": {
+      "findings": 0,
+      "files": []
+    },
+    "npm_audit": {
+      "critical": 2,
+      "high": 0,
+      "moderate": 4,
+      "low": 0
+    },
+    "pip_audit": {
+      "vulns": null
+    },
+    "trivy": {
+      "images": [
+        {
+          "name": "filesystem",
+          "critical": 2,
+          "high": 2,
+          "notes": "Next.js og xmldom CVE-er; Docker/Helm misconfig funn"
+        }
+      ]
+    },
+    "sbom": [
+      "_codex_out/sbom/repo.spdx.json"
+    ],
+    "semgrep": {
+      "status": "error",
+      "issues": null,
+      "notes": "Proxy 403 til semgrep.dev p/ci konfig"
+    },
+    "licenses": {
+      "unknown": 0,
+      "restricted": 1,
+      "byLicense": {
+        "MIT": 1097,
+        "Apache-2.0": 361,
+        "MIT-0": 1,
+        "ISC": 107,
+        "Custom: https://github.com/tmcw/jsonlint": 1,
+        "BSD-3-Clause": 43,
+        "BSD-2-Clause": 27,
+        "Apache-2.0 AND MIT": 2,
+        "UNLICENSED": 15,
+        "Python-2.0": 1,
+        "MPL-2.0": 2,
+        "MIT*": 3,
+        "CC-BY-4.0": 1,
+        "Custom: https://github.com/ethan7g/cookieLite/issues/3": 1,
+        "(MPL-2.0 OR Apache-2.0)": 1,
+        "(MIT OR WTFPL)": 1,
+        "(Apache-2.0 OR MPL-1.1)": 1,
+        "CC0-1.0": 2,
+        "BlueOak-1.0.0": 3,
+        "AGPL-3.0": 1,
+        "(BSD-2-Clause OR MIT OR Apache-2.0)": 1,
+        "(MIT AND BSD-3-Clause)": 1,
+        "0BSD": 1,
+        "(MIT OR CC0-1.0)": 2,
+        "Unlicense": 1
+      }
+    }
+  },
+  "helm_k8s": {
+    "ct_lint": "not_run",
+    "ct_install": "not_run",
+    "kubectl_summary": "Helm/kind nedlasting blokkert av 403 – ingen kubevalidering"
+  },
+  "observability": {
+    "grafana_json": "ok",
+    "alertmanager_yaml": "ok"
+  },
+  "artifacts": {
+    "logs": "_codex_out/logs/",
+    "coverage": "_codex_out/coverage/",
+    "sbom": "_codex_out/sbom/",
+    "reports": "_codex_out/reports/",
+    "sarif": "_codex_out/sarif/"
+  },
+  "recommendations": [
+    "Kjør `npx prettier --write` og oppdater 70 filer som bryter formatreglene for å stabilisere CI.",
+    "Fiks TypeScript-feil i frontend testfiler (FlipCard, useProactivity) og konverter JSX `.js` filer til `.tsx` eller juster Vite-konfig.",
+    "Justér jest-dekningsterskler eller legg til flere tester i apps/backend for å unngå 0%-dekning og build-feil.",
+    "Konfigurer Vitest til å akseptere JSX i `.js` filer eller migrer filene – nå feiler parseren i frontend tests.",
+    "Rydd opp i enterprise/jest-konfig (kun én kilde) slik at `npm test` ikke stopper på konfigurasjonskollisjon.",
+    "Oppdater CRM testoppsett til å håndtere ESM (Playwright) i Jest eller flytt E2E til Playwright-runner.",
+    "Rydd opp i desktop SecureDb-API (putCache/getCache osv.) slik at TypeScript-builden fullfører.",
+    "Oppgrader Next.js og xmldom for å eliminere kritiske CVE-er, og regenerer lockfiles.",
+    "Legg til `USER`-instruksjon i Dockerfiler og sett strengere securityContext i Helm chart for å lukke Trivy-funn.",
+    "Berik OpenAPI-metadata (servers, contact, tags/description) for alle specs for å bestå Spectral lint."
+  ]
+}

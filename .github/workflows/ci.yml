@@ -61,6 +61,7 @@ jobs:
         run: npm run prisma:generate
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/wb?schema=public
+          PRISMA_CLI_QUERY_ENGINE_TYPE: wasm
       - run: npm run typecheck
       - run: npm run typecheck:meta --if-present
 
@@ -70,6 +71,10 @@ jobs:
     permissions:
       contents: read
       actions: write
+    env:
+      CI: "true"
+      PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: "1"
+      PRISMA_CLI_QUERY_ENGINE_TYPE: wasm
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v5
@@ -90,9 +95,10 @@ jobs:
         run: npm run prisma:generate
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/wb?schema=public
-      - run: npm test -- --ci --reporters=default --reporters=jest-junit
-        env:
-          CI: "true"
+          PRISMA_CLI_QUERY_ENGINE_TYPE: wasm
+      - name: Prisma schema validate
+        run: npm run prisma:validate
+      - run: npm run test -- --ci --reporters=default --reporters=jest-junit
       - name: QA a11y (frontend)
         run: npm run -w @workbuoy/frontend qa:a11y || echo "QA a11y failed" >> "$GITHUB_STEP_SUMMARY"
       - name: Contract tests (backend)

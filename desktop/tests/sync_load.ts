@@ -1,6 +1,7 @@
 import express from 'express';
-import { mkdirSync, rmSync, writeFileSync } from 'fs';
-import path from 'path';
+import { mkdtempSync, rmSync, writeFileSync } from 'fs';
+import { join } from 'path';
+import { tmpdir } from 'os';
 import { SecureDb } from '../src/storage/secureDb.js';
 import { SyncEngine } from '../src/sync/syncEngine.js';
 
@@ -17,10 +18,7 @@ async function startMock(port:number) {
 }
 
 (async () => {
-  const dir = path.join(process.cwd(), '.wb_load');
-  try { rmSync(dir, { recursive: true, force: true }); } catch {}
-  mkdirSync(dir, { recursive: true });
-  mkdirSync(path.join(process.cwd(), 'reports'), { recursive: true });
+  const dir = mkdtempSync(join(tmpdir(), 'wb-load-'));
 
   const db = new SecureDb(dir, 'pass');
   const engine = new SyncEngine(db, { baseUrl: 'http://127.0.0.1:45702', apiKey: 'dev', tenantId: 't1' });
@@ -39,8 +37,18 @@ async function startMock(port:number) {
   const throughput = N / (ms/1000);
 
   const report = { total_ops: N, duration_ms: ms, throughput_ops_per_s: throughput.toFixed(2), errors: 0 };
-  writeFileSync(path.join(process.cwd(), 'reports', 'sync_load.json'), JSON.stringify(report, null, 2));
-  await new Promise<void>((resolve,reject)=>server.close(e=>e?reject(e):resolve()));
+  const reportsDir = process.env.WB_REPORT_DIR ?? mkdtempSync(join(tmpdir(), 'wb-reports-'));
+  const shouldCleanupReports = !process.env.WB_REPORT_DIR;
+  try {
+    writeFileSync(join(reportsDir, 'sync_load.json'), JSON.stringify(report, null, 2));
+  } catch {
+    // ignore if not writable
+  }
+  await new Promise<void>((resolve, reject) => server.close((e: Error | null) => (e ? reject(e) : resolve())));
+  try { rmSync(dir, { recursive: true, force: true }); } catch {}
+  if (shouldCleanupReports) {
+    try { rmSync(reportsDir, { recursive: true, force: true }); } catch {}
+  }
   console.log('LOAD PASS', JSON.stringify(report));
   process.exit(0);
 })();

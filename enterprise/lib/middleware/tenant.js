@@ -5,7 +5,7 @@ import { verifyToken } from '../auth.js';
 import { WB_BASE_DOMAIN } from '../config/flags.js';
 
 const DB_PATH = process.env.DB_PATH || path.join(process.cwd(),'db','workbuoy.db');
-const ALLOW_HEADER = (process.env.WB_ALLOW_TENANT_HEADER || 'false').toLowerCase() === 'true';
+const allowHeaderEnv = () => (process.env.WB_ALLOW_TENANT_HEADER || 'false').toLowerCase() === 'true';
 
 /** sanitize tenant id: [a-z0-9-], lowercase, max 64 */
 export function sanitizeTenantId(id) {
@@ -48,7 +48,7 @@ export function resolveTenantId(req) {
   if (subTenant) return subTenant;
 
   // 3) Header (only if explicitly allowed)
-  if (ALLOW_HEADER) {
+  if (allowHeaderEnv()) {
     const h = req.headers['x-tenant'] || req.headers['x-tenant-id'];
     const t = sanitizeTenantId(h);
     if (t) return t;

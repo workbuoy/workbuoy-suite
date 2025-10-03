@@ -4,7 +4,7 @@
   "type": "module",
   "scripts": {
     "start:examples": "node examples/server.js",
-    "test": "NODE_OPTIONS=--experimental-vm-modules jest --runInBand",
+    "test": "NODE_OPTIONS=--experimental-vm-modules PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 jest --config jest.config.ts --runInBand",
     "test:e2e": "playwright test",
     "retention:purge": "node scripts/cron/purge-retention.js",
     "db:migrate:pg": "node -e \"require('fs').readdirSync('db/pg/migrations').filter(f=>f.endsWith('.sql')).sort().forEach(f=>{console.log('apply',f);require('child_process').execSync('psql \\\"$DATABASE_URL\\\" -f db/pg/migrations/'+f,{stdio:'inherit'});});\"",
@@ -75,17 +75,5 @@
     "openapi-schema-validator": "^12.1.2",
     "pactum": "^3.6.8",
     "k6": "^0.0.0"
-  },
-  "jest": {
-    "testEnvironment": "node",
-    "coverageThreshold": {
-      "global": {
-        "branches": 80,
-        "functions": 80,
-        "lines": 80,
-        "statements": 80
-      }
-    },
-    "collectCoverage": true
   }
 }

@@ -1,6 +1,7 @@
 import express from 'express';
-import { mkdirSync, rmSync, writeFileSync } from 'fs';
-import path from 'path';
+import { mkdtempSync, rmSync, writeFileSync } from 'fs';
+import { join } from 'path';
+import { tmpdir } from 'os';
 import { SecureDb } from '../src/storage/secureDb.js';
 import { SyncEngine } from '../src/sync/syncEngine.js';
 
@@ -19,9 +20,7 @@ async function startMock(port:number) {
 }
 
 (async () => {
-  const dir = path.join(process.cwd(), '.wb_e2e');
-  try { rmSync(dir, { recursive: true, force: true }); } catch {}
-  mkdirSync(dir, { recursive: true });
+  const dir = mkdtempSync(join(tmpdir(), 'wb-e2e-'));
 
   const db = new SecureDb(dir, 'pass');
   const engine = new SyncEngine(db, { baseUrl: 'http://127.0.0.1:45701', apiKey: 'dev', tenantId: 't1' });
@@ -43,8 +42,18 @@ async function startMock(port:number) {
   }
 
   const out = { created: stat().created, pending: engine.countPending() };
-  writeFileSync(path.join(process.cwd(), 'reports', 'e2e_offline_sync.json'), JSON.stringify(out, null, 2));
-  await new Promise<void>((resolve,reject)=>server.close(e=>e?reject(e):resolve()));
+  const reportsDir = process.env.WB_REPORT_DIR ?? mkdtempSync(join(tmpdir(), 'wb-reports-'));
+  const shouldCleanupReports = !process.env.WB_REPORT_DIR;
+  try {
+    writeFileSync(join(reportsDir, 'e2e_offline_sync.json'), JSON.stringify(out, null, 2));
+  } catch {
+    // ignore if directory not writable
+  }
+  await new Promise<void>((resolve, reject) => server.close((e: Error | null) => (e ? reject(e) : resolve())));
+  try { rmSync(dir, { recursive: true, force: true }); } catch {}
+  if (shouldCleanupReports) {
+    try { rmSync(reportsDir, { recursive: true, force: true }); } catch {}
+  }
 
   if (out.created !== 1 || out.pending !== 0) { console.error('E2E assertions failed', out); process.exit(1); }
   console.log('E2E PASS', JSON.stringify(out));
