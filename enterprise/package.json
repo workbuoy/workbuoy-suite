@@ -68,7 +68,7 @@
     "@playwright/test": "^1.46.0",
     "jest": "^30.2.0",
     "supertest": "^7.0.0",
-    "typescript": "^5.9.2",
+    "typescript": "^5.9.3",
     "@aws-sdk/client-kms": "^3.645.0",
     "cross-env": "^7.0.3",
     "openapi-typescript-codegen": "^0.29.0",
