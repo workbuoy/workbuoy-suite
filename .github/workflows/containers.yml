@@ -83,7 +83,7 @@ jobs:
           trivy image --format cyclonedx --output frontend.sbom.json workbuoy/frontend:pr || true
 
       - name: Upload SBOM artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: container-sboms
           path: |
