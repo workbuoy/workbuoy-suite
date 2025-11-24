@@ -14,7 +14,7 @@ jobs:
   ban-tracked-deps:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Enforce no tracked node_modules
         run: npm run guard:ban-tracked-deps
       - name: Enforce large file policy (>5MB)
@@ -23,7 +23,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: ban-tracked-deps
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Enforce orphan workspaces guard
         shell: bash
         run: |
@@ -42,8 +42,8 @@ jobs:
     continue-on-error: true
     needs: ban-tracked-deps
     steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-node@v5
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
         with:
           node-version: 20
           cache: 'npm'
@@ -62,7 +62,7 @@ jobs:
       - name: Evaluate size thresholds
         run: node --import tsx tools/size-thresholds.ts size-report.json
       - name: Upload size report artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: repo-size-report
           path: size-report.json

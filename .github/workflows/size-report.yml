@@ -22,9 +22,9 @@ jobs:
       pull-requests: write
       issues: write
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
-      - uses: actions/setup-node@v5
+      - uses: actions/setup-node@v6
         with:
           node-version: 20
           cache: 'npm'
@@ -49,7 +49,7 @@ jobs:
         run: node --import tsx tools/size-thresholds.ts size-report.json
 
       - name: Upload size report artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: repo-size-report
           path: size-report.json
