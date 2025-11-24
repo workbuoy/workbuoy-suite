@@ -20,7 +20,7 @@ jobs:
       contents: read
       security-events: write
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - name: Set up QEMU (for cross-platform builds, optional)
         uses: docker/setup-qemu-action@v3
@@ -83,7 +83,7 @@ jobs:
           trivy image --format cyclonedx --output frontend.sbom.json workbuoy/frontend:pr || true
 
       - name: Upload SBOM artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: container-sboms
           path: |

@@ -28,8 +28,8 @@ jobs:
           --health-timeout=5s
           --health-retries=5
     steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-node@v5
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
         with:
           node-version: 20
           cache: 'npm'
@@ -60,11 +60,11 @@ jobs:
           ROLES_PATH: apps/backend/scripts/fixtures/minimal-roles.json
           FEATURES_PATH: apps/backend/scripts/fixtures/minimal-features.json
         run: npm run test -w @workbuoy/backend
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         with:
           name: backend-coverage
           path: apps/backend/coverage/lcov.info
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         with:
           name: backend-junit
           path: apps/backend/junit.xml

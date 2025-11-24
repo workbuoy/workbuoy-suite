@@ -16,10 +16,10 @@ jobs:
       ROLLUP_SKIP_NATIVE: '1'
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Setup Node 20
-        uses: actions/setup-node@v5
+        uses: actions/setup-node@v6
         with:
           node-version: '20'
           cache: 'npm'
@@ -41,7 +41,7 @@ jobs:
         run: npm run storybook:check -w @workbuoy/ui
 
       - name: Upload Storybook artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: storybook-preview
           path: packages/ui/storybook-static
