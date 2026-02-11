@@ -1,0 +1,105 @@
+{
+  "generatedAt": "2026-02-11T10:06:31.607Z",
+  "suggestions": [
+    {
+      "itemId": "todo-META_RUNBOOK-md-8",
+      "instruction": "Inspect Resolve high-risk marker in META_RUNBOOK.md:8 and submit a minimal safe patch with tests.",
+      "mode": "manual-approval-required"
+    },
+    {
+      "itemId": "todo-apps-backend-src-meta-evolution-consciousness-self-analysis-ts-152",
+      "instruction": "Inspect Resolve high-risk marker in apps/backend/src/meta-evolution/consciousness/self-analysis.ts:152 and submit a minimal safe patch with tests.",
+      "mode": "manual-approval-required"
+    },
+    {
+      "itemId": "todo-apps-backend-tests-rbac_record_level-test-ts-35",
+      "instruction": "Inspect Resolve high-risk marker in apps/backend/tests/rbac_record_level.test.ts:35 and submit a minimal safe patch with tests.",
+      "mode": "manual-approval-required"
+    },
+    {
+      "itemId": "todo-enterprise-README_HUBSPOT_CXM_PATCH-md-27",
+      "instruction": "Inspect Resolve high-risk marker in enterprise/README_HUBSPOT_CXM_PATCH.md:27 and submit a minimal safe patch with tests.",
+      "mode": "manual-approval-required"
+    },
+    {
+      "itemId": "todo-enterprise-docs-META-md-6",
+      "instruction": "Inspect Resolve high-risk marker in enterprise/docs/META.md:6 and submit a minimal safe patch with tests.",
+      "mode": "manual-approval-required"
+    },
+    {
+      "itemId": "todo-enterprise-infra-helm-values-slo-alerts-yaml-14",
+      "instruction": "Inspect Resolve high-risk marker in enterprise/infra/helm/values-slo-alerts.yaml:14 and submit a minimal safe patch with tests.",
+      "mode": "manual-approval-required"
+    },
+    {
+      "itemId": "todo-enterprise-lib-meta-analyzer-js-33",
+      "instruction": "Inspect Resolve high-risk marker in enterprise/lib/meta/analyzer.js:33 and submit a minimal safe patch with tests.",
+      "mode": "manual-approval-required"
+    },
+    {
+      "itemId": "todo-enterprise-meta-analyzer-js-33",
+      "instruction": "Inspect Resolve high-risk marker in enterprise/meta/analyzer.js:33 and submit a minimal safe patch with tests.",
+      "mode": "manual-approval-required"
+    },
+    {
+      "itemId": "todo-scripts-meta-mjs-33",
+      "instruction": "Inspect Resolve high-risk marker in scripts/meta.mjs:33 and submit a minimal safe patch with tests.",
+      "mode": "manual-approval-required"
+    },
+    {
+      "itemId": "todo-scripts-meta-mjs-57",
+      "instruction": "Inspect Resolve high-risk marker in scripts/meta.mjs:57 and submit a minimal safe patch with tests.",
+      "mode": "manual-approval-required"
+    },
+    {
+      "itemId": "todo-scripts-meta-mjs-67",
+      "instruction": "Inspect Resolve high-risk marker in scripts/meta.mjs:67 and submit a minimal safe patch with tests.",
+      "mode": "manual-approval-required"
+    },
+    {
+      "itemId": "todo-scripts-meta-mjs-68",
+      "instruction": "Inspect Resolve high-risk marker in scripts/meta.mjs:68 and submit a minimal safe patch with tests.",
+      "mode": "manual-approval-required"
+    },
+    {
+      "itemId": "dup-package.json",
+      "instruction": "Inspect Review duplicate config pattern: package.json and submit a minimal safe patch with tests.",
+      "mode": "manual-approval-required"
+    },
+    {
+      "itemId": "dup-tsconfig.eslint.json",
+      "instruction": "Inspect Review duplicate config pattern: tsconfig.eslint.json and submit a minimal safe patch with tests.",
+      "mode": "manual-approval-required"
+    },
+    {
+      "itemId": "dup-tsconfig.json",
+      "instruction": "Inspect Review duplicate config pattern: tsconfig.json and submit a minimal safe patch with tests.",
+      "mode": "manual-approval-required"
+    },
+    {
+      "itemId": "dup-tsconfig.meta.json",
+      "instruction": "Inspect Review duplicate config pattern: tsconfig.meta.json and submit a minimal safe patch with tests.",
+      "mode": "manual-approval-required"
+    },
+    {
+      "itemId": "dup-docker-compose.yml",
+      "instruction": "Inspect Review duplicate config pattern: docker-compose.yml and submit a minimal safe patch with tests.",
+      "mode": "manual-approval-required"
+    },
+    {
+      "itemId": "todo-PR_BODY-feature-persistence-roles-usage-caps-md-25",
+      "instruction": "Inspect Resolve todo in PR_BODY/feature-persistence-roles-usage-caps.md:25 and submit a minimal safe patch with tests.",
+      "mode": "manual-approval-required"
+    },
+    {
+      "itemId": "todo-apps-backend-src-meta-evolution-consciousness-self-analysis-ts-153",
+      "instruction": "Inspect Resolve todo in apps/backend/src/meta-evolution/consciousness/self-analysis.ts:153 and submit a minimal safe patch with tests.",
+      "mode": "manual-approval-required"
+    },
+    {
+      "itemId": "todo-apps-frontend-PR_BODY-md-18",
+      "instruction": "Inspect Resolve todo in apps/frontend/PR_BODY.md:18 and submit a minimal safe patch with tests.",
+      "mode": "manual-approval-required"
+    }
+  ]
+}
