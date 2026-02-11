@@ -1,0 +1,647 @@
+{
+  "generatedAt": "2026-02-11T10:06:31.602Z",
+  "items": [
+    {
+      "id": "todo-META_RUNBOOK-md-8",
+      "type": "fixme",
+      "title": "Resolve high-risk marker in META_RUNBOOK.md:8",
+      "evidence": {
+        "file": "META_RUNBOOK.md",
+        "line": 8,
+        "text": "- Skanner etter TODO/FIXME/HACK/XXX-markører."
+      },
+      "priority": "P1"
+    },
+    {
+      "id": "todo-apps-backend-src-meta-evolution-consciousness-self-analysis-ts-152",
+      "type": "fixme",
+      "title": "Resolve high-risk marker in apps/backend/src/meta-evolution/consciousness/self-analysis.ts:152",
+      "evidence": {
+        "file": "apps/backend/src/meta-evolution/consciousness/self-analysis.ts",
+        "line": 152,
+        "text": "if (content.includes('TODO') || content.includes('FIXME')) {"
+      },
+      "priority": "P1"
+    },
+    {
+      "id": "todo-apps-backend-tests-rbac_record_level-test-ts-35",
+      "type": "fixme",
+      "title": "Resolve high-risk marker in apps/backend/tests/rbac_record_level.test.ts:35",
+      "evidence": {
+        "file": "apps/backend/tests/rbac_record_level.test.ts",
+        "line": 35,
+        "text": "const udeny = await request(app).patch(`/api/v1/crm/contacts/c1`).set('x-user-role','contributor').set('x-user-id','u_other').send({ name:'Hack' });"
+      },
+      "priority": "P1"
+    },
+    {
+      "id": "todo-enterprise-README_HUBSPOT_CXM_PATCH-md-27",
+      "type": "fixme",
+      "title": "Resolve high-risk marker in enterprise/README_HUBSPOT_CXM_PATCH.md:27",
+      "evidence": {
+        "file": "enterprise/README_HUBSPOT_CXM_PATCH.md",
+        "line": 27,
+        "text": "export HUBSPOT_PRIVATE_APP_TOKEN=pat-xxx"
+      },
+      "priority": "P1"
+    },
+    {
+      "id": "todo-enterprise-docs-META-md-6",
+      "type": "fixme",
+      "title": "Resolve high-risk marker in enterprise/docs/META.md:6",
+      "evidence": {
+        "file": "enterprise/docs/META.md",
+        "line": 6,
+        "text": "- `lib/meta/analyzer.js` — scans the project tree and returns code stats and simple heuristics (TODO/FIXME counts, large files)."
+      },
+      "priority": "P1"
+    },
+    {
+      "id": "todo-enterprise-infra-helm-values-slo-alerts-yaml-14",
+      "type": "fixme",
+      "title": "Resolve high-risk marker in enterprise/infra/helm/values-slo-alerts.yaml:14",
+      "evidence": {
+        "file": "enterprise/infra/helm/values-slo-alerts.yaml",
+        "line": 14,
+        "text": "api_url: https://hooks.slack.com/services/T000/B000/XXX"
+      },
+      "priority": "P1"
+    },
+    {
+      "id": "todo-enterprise-lib-meta-analyzer-js-33",
+      "type": "fixme",
+      "title": "Resolve high-risk marker in enterprise/lib/meta/analyzer.js:33",
+      "evidence": {
+        "file": "enterprise/lib/meta/analyzer.js",
+        "line": 33,
+        "text": "stats.fixmes += (txt.match(/FIXME/gi)||[]).length;"
+      },
+      "priority": "P1"
+    },
+    {
+      "id": "todo-enterprise-meta-analyzer-js-33",
+      "type": "fixme",
+      "title": "Resolve high-risk marker in enterprise/meta/analyzer.js:33",
+      "evidence": {
+        "file": "enterprise/meta/analyzer.js",
+        "line": 33,
+        "text": "stats.fixmes += (txt.match(/FIXME/gi)||[]).length;"
+      },
+      "priority": "P1"
+    },
+    {
+      "id": "todo-scripts-meta-mjs-33",
+      "type": "fixme",
+      "title": "Resolve high-risk marker in scripts/meta.mjs:33",
+      "evidence": {
+        "file": "scripts/meta.mjs",
+        "line": 33,
+        "text": "if (/\\b(TODO|FIXME|HACK|XXX)\\b/i.test(line)) {"
+      },
+      "priority": "P1"
+    },
+    {
+      "id": "todo-scripts-meta-mjs-57",
+      "type": "fixme",
+      "title": "Resolve high-risk marker in scripts/meta.mjs:57",
+      "evidence": {
+        "file": "scripts/meta.mjs",
+        "line": 57,
+        "text": "if (item.type === 'fixme' || item.type === 'security') return 'P1';"
+      },
+      "priority": "P1"
+    },
+    {
+      "id": "todo-scripts-meta-mjs-67",
+      "type": "fixme",
+      "title": "Resolve high-risk marker in scripts/meta.mjs:67",
+      "evidence": {
+        "file": "scripts/meta.mjs",
+        "line": 67,
+        "text": "type: /FIXME|HACK|XXX/i.test(t.text) ? 'fixme' : 'todo',"
+      },
+      "priority": "P1"
+    },
+    {
+      "id": "todo-scripts-meta-mjs-68",
+      "type": "fixme",
+      "title": "Resolve high-risk marker in scripts/meta.mjs:68",
+      "evidence": {
+        "file": "scripts/meta.mjs",
+        "line": 68,
+        "text": "title: `Resolve ${/FIXME|HACK|XXX/i.test(t.text) ? 'high-risk marker' : 'todo'} in ${t.file}:${t.line}`,"
+      },
+      "priority": "P1"
+    },
+    {
+      "id": "dup-package.json",
+      "type": "duplicate-config",
+      "title": "Review duplicate config pattern: package.json",
+      "evidence": {
+        "name": "package.json",
+        "matches": [
+          "apps/backend/package.json",
+          "apps/backend/tests-smoke/package.json",
+          "apps/frontend/navi-mvp/package.json",
+          "apps/frontend/package.json",
+          "connectors/dynamics/package.json",
+          "connectors/salesforce/package.json",
+          "crm/package.json",
+          "desktop/package.json",
+          "desktop/ui/package.json",
+          "docs/package.json",
+          "enterprise/package.json",
+          "examples/js/package.json",
+          "package.json",
+          "packages/backend-auth/package.json",
+          "packages/backend-metrics/package.json",
+          "packages/backend-rbac/package.json",
+          "packages/backend-telemetry/package.json",
+          "packages/roles-data/package.json",
+          "packages/ui/package.json",
+          "sdk/gen/typescript/package.json",
+          "sdk/js/package.json",
+          "sdk/ts/package.json",
+          "telemetry/package.json"
+        ]
+      },
+      "priority": "P2"
+    },
+    {
+      "id": "dup-tsconfig.eslint.json",
+      "type": "duplicate-config",
+      "title": "Review duplicate config pattern: tsconfig.eslint.json",
+      "evidence": {
+        "name": "tsconfig.eslint.json",
+        "matches": [
+          "apps/backend/tsconfig.eslint.json",
+          "apps/frontend/tsconfig.eslint.json",
+          "packages/backend-auth/tsconfig.eslint.json",
+          "packages/backend-metrics/tsconfig.eslint.json",
+          "packages/backend-rbac/tsconfig.eslint.json",
+          "packages/backend-telemetry/tsconfig.eslint.json",
+          "packages/roles-data/tsconfig.eslint.json",
+          "packages/ui/tsconfig.eslint.json"
+        ]
+      },
+      "priority": "P2"
+    },
+    {
+      "id": "dup-tsconfig.json",
+      "type": "duplicate-config",
+      "title": "Review duplicate config pattern: tsconfig.json",
+      "evidence": {
+        "name": "tsconfig.json",
+        "matches": [
+          "apps/backend/tsconfig.json",
+          "apps/frontend/navi-mvp/tsconfig.json",
+          "apps/frontend/tsconfig.json",
+          "desktop/tsconfig.json",
+          "packages/backend-auth/tsconfig.json",
+          "packages/backend-metrics/tsconfig.json",
+          "packages/backend-rbac/tsconfig.json",
+          "packages/backend-telemetry/tsconfig.json",
+          "packages/ui/tsconfig.json",
+          "sdk/js/tsconfig.json",
+          "tsconfig.json"
+        ]
+      },
+      "priority": "P2"
+    },
+    {
+      "id": "dup-tsconfig.meta.json",
+      "type": "duplicate-config",
+      "title": "Review duplicate config pattern: tsconfig.meta.json",
+      "evidence": {
+        "name": "tsconfig.meta.json",
+        "matches": [
+          "apps/backend/tsconfig.meta.json",
+          "tsconfig.meta.json"
+        ]
+      },
+      "priority": "P2"
+    },
+    {
+      "id": "dup-docker-compose.yml",
+      "type": "duplicate-config",
+      "title": "Review duplicate config pattern: docker-compose.yml",
+      "evidence": {
+        "name": "docker-compose.yml",
+        "matches": [
+          "crm/docker-compose.yml",
+          "docker-compose.yml",
+          "enterprise/docker/docker-compose.yml",
+          "enterprise/docker-compose.yml"
+        ]
+      },
+      "priority": "P2"
+    },
+    {
+      "id": "todo-PR_BODY-feature-persistence-roles-usage-caps-md-25",
+      "type": "todo",
+      "title": "Resolve todo in PR_BODY/feature-persistence-roles-usage-caps.md:25",
+      "evidence": {
+        "file": "PR_BODY/feature-persistence-roles-usage-caps.md",
+        "line": 25,
+        "text": "## TODO"
+      },
+      "priority": "P3"
+    },
+    {
+      "id": "todo-apps-backend-src-meta-evolution-consciousness-self-analysis-ts-153",
+      "type": "todo",
+      "title": "Resolve todo in apps/backend/src/meta-evolution/consciousness/self-analysis.ts:153",
+      "evidence": {
+        "file": "apps/backend/src/meta-evolution/consciousness/self-analysis.ts",
+        "line": 153,
+        "text": "opportunities.add(`review:${relativePath}:todo-present`);"
+      },
+      "priority": "P3"
+    },
+    {
+      "id": "todo-apps-frontend-PR_BODY-md-18",
+      "type": "todo",
+      "title": "Resolve todo in apps/frontend/PR_BODY.md:18",
+      "evidence": {
+        "file": "apps/frontend/PR_BODY.md",
+        "line": 18,
+        "text": "**TODO (@dev)**"
+      },
+      "priority": "P3"
+    },
+    {
+      "id": "todo-crm-lib-crm-ingest-adapters-gmail-ts-17",
+      "type": "todo",
+      "title": "Resolve todo in crm/lib/crm/ingest/adapters/gmail.ts:17",
+      "evidence": {
+        "file": "crm/lib/crm/ingest/adapters/gmail.ts",
+        "line": 17,
+        "text": "// TODO: fetch real gmail, parse → events"
+      },
+      "priority": "P3"
+    },
+    {
+      "id": "todo-crm-pages-api-auth-saml-acs-ts-8",
+      "type": "todo",
+      "title": "Resolve todo in crm/pages/api/auth/saml/acs.ts:8",
+      "evidence": {
+        "file": "crm/pages/api/auth/saml/acs.ts",
+        "line": 8,
+        "text": "// TODO: Parse & validate SAMLResponse, create/find user, establish session."
+      },
+      "priority": "P3"
+    },
+    {
+      "id": "todo-docs-CRM_MVP_QUICKSTART-md-39",
+      "type": "todo",
+      "title": "Resolve todo in docs/CRM_MVP_QUICKSTART.md:39",
+      "evidence": {
+        "file": "docs/CRM_MVP_QUICKSTART.md",
+        "line": 39,
+        "text": "-d '{\"title\":\"Try Workbuoy\",\"status\":\"todo\"}'"
+      },
+      "priority": "P3"
+    },
+    {
+      "id": "todo-docs-SECURITY-md-7",
+      "type": "todo",
+      "title": "Resolve todo in docs/SECURITY.md:7",
+      "evidence": {
+        "file": "docs/SECURITY.md",
+        "line": 7,
+        "text": "- Add CI check to block accidental PII fields (todo)."
+      },
+      "priority": "P3"
+    },
+    {
+      "id": "todo-docs-context-headers-md-25",
+      "type": "todo",
+      "title": "Resolve todo in docs/context-headers.md:25",
+      "evidence": {
+        "file": "docs/context-headers.md",
+        "line": 25,
+        "text": "## TODO (Dev)"
+      },
+      "priority": "P3"
+    },
+    {
+      "id": "todo-docs-integration-plan-md-19",
+      "type": "todo",
+      "title": "Resolve todo in docs/integration-plan.md:19",
+      "evidence": {
+        "file": "docs/integration-plan.md",
+        "line": 19,
+        "text": "## TODO (@dev)"
+      },
+      "priority": "P3"
+    },
+    {
+      "id": "todo-docs-ops-ci-md-29",
+      "type": "todo",
+      "title": "Resolve todo in docs/ops/ci.md:29",
+      "evidence": {
+        "file": "docs/ops/ci.md",
+        "line": 29,
+        "text": "## CI (TODO for Dev)"
+      },
+      "priority": "P3"
+    },
+    {
+      "id": "todo-docs-tasks-md-4",
+      "type": "todo",
+      "title": "Resolve todo in docs/tasks.md:4",
+      "evidence": {
+        "file": "docs/tasks.md",
+        "line": 4,
+        "text": "`GET /api/tasks?status=todo|doing|done`"
+      },
+      "priority": "P3"
+    },
+    {
+      "id": "todo-docs-tasks-md-9",
+      "type": "todo",
+      "title": "Resolve todo in docs/tasks.md:9",
+      "evidence": {
+        "file": "docs/tasks.md",
+        "line": 9,
+        "text": "{ \"title\": \"Do X\", \"status\": \"todo\", \"dueAt\": \"2025-09-11T12:00:00Z\", \"assignee\": \"user1\" }"
+      },
+      "priority": "P3"
+    },
+    {
+      "id": "todo-docs-triggers-md-17",
+      "type": "todo",
+      "title": "Resolve todo in docs/triggers.md:17",
+      "evidence": {
+        "file": "docs/triggers.md",
+        "line": 17,
+        "text": "## TODO (Dev)"
+      },
+      "priority": "P3"
+    },
+    {
+      "id": "todo-docs-ux-predictive-md-23",
+      "type": "todo",
+      "title": "Resolve todo in docs/ux.predictive.md:23",
+      "evidence": {
+        "file": "docs/ux.predictive.md",
+        "line": 23,
+        "text": "## TODO (Dev)"
+      },
+      "priority": "P3"
+    },
+    {
+      "id": "todo-enterprise-cron-retry-queue-js-9",
+      "type": "todo",
+      "title": "Resolve todo in enterprise/cron/retry-queue.js:9",
+      "evidence": {
+        "file": "enterprise/cron/retry-queue.js",
+        "line": 9,
+        "text": "// TODO: actually attempt connector write based on job.connector/op_type"
+      },
+      "priority": "P3"
+    },
+    {
+      "id": "todo-enterprise-cxm-crm-js-10",
+      "type": "todo",
+      "title": "Resolve todo in enterprise/cxm/crm.js:10",
+      "evidence": {
+        "file": "enterprise/cxm/crm.js",
+        "line": 10,
+        "text": "// TODO: wire to your persistence. For now, read from env (dev only)."
+      },
+      "priority": "P3"
+    },
+    {
+      "id": "todo-enterprise-lib-meta-analyzer-js-32",
+      "type": "todo",
+      "title": "Resolve todo in enterprise/lib/meta/analyzer.js:32",
+      "evidence": {
+        "file": "enterprise/lib/meta/analyzer.js",
+        "line": 32,
+        "text": "stats.todos += (txt.match(/TODO/gi)||[]).length;"
+      },
+      "priority": "P3"
+    },
+    {
+      "id": "todo-enterprise-lib-middleware-tenant-js-105",
+      "type": "todo",
+      "title": "Resolve todo in enterprise/lib/middleware/tenant.js:105",
+      "evidence": {
+        "file": "enterprise/lib/middleware/tenant.js",
+        "line": 105,
+        "text": "// TODO: increment wb_rbac_denied_total{tenant,route} metric on deny"
+      },
+      "priority": "P3"
+    },
+    {
+      "id": "todo-enterprise-lib-secrets-index-js-12",
+      "type": "todo",
+      "title": "Resolve todo in enterprise/lib/secrets/index.js:12",
+      "evidence": {
+        "file": "enterprise/lib/secrets/index.js",
+        "line": 12,
+        "text": "// TODO: integrate cloud SDKs; fallback to env for now."
+      },
+      "priority": "P3"
+    },
+    {
+      "id": "todo-enterprise-meta-analyzer-js-32",
+      "type": "todo",
+      "title": "Resolve todo in enterprise/meta/analyzer.js:32",
+      "evidence": {
+        "file": "enterprise/meta/analyzer.js",
+        "line": 32,
+        "text": "stats.todos += (txt.match(/TODO/gi)||[]).length;"
+      },
+      "priority": "P3"
+    },
+    {
+      "id": "todo-enterprise-pages-api-cxm-crm-js-10",
+      "type": "todo",
+      "title": "Resolve todo in enterprise/pages/api/cxm/crm.js:10",
+      "evidence": {
+        "file": "enterprise/pages/api/cxm/crm.js",
+        "line": 10,
+        "text": "// TODO: wire to your persistence. For now, read from env (dev only)."
+      },
+      "priority": "P3"
+    },
+    {
+      "id": "todo-enterprise-scripts-cron-retry-queue-js-9",
+      "type": "todo",
+      "title": "Resolve todo in enterprise/scripts/cron/retry-queue.js:9",
+      "evidence": {
+        "file": "enterprise/scripts/cron/retry-queue.js",
+        "line": 9,
+        "text": "// TODO: actually attempt connector write based on job.connector/op_type"
+      },
+      "priority": "P3"
+    },
+    {
+      "id": "todo-openapi-PATCH_openapi_tasks_log-yaml-9",
+      "type": "todo",
+      "title": "Resolve todo in openapi/PATCH_openapi_tasks_log.yaml:9",
+      "evidence": {
+        "file": "openapi/PATCH_openapi_tasks_log.yaml",
+        "line": 9,
+        "text": "schema: { type: string, enum: [todo, doing, done] }"
+      },
+      "priority": "P3"
+    },
+    {
+      "id": "todo-openapi-PATCH_openapi_tasks_log-yaml-22",
+      "type": "todo",
+      "title": "Resolve todo in openapi/PATCH_openapi_tasks_log.yaml:22",
+      "evidence": {
+        "file": "openapi/PATCH_openapi_tasks_log.yaml",
+        "line": 22,
+        "text": "status:  { type: string, enum: [todo, doing, done] }"
+      },
+      "priority": "P3"
+    },
+    {
+      "id": "todo-openapi-openapi-yaml-142",
+      "type": "todo",
+      "title": "Resolve todo in openapi/openapi.yaml:142",
+      "evidence": {
+        "file": "openapi/openapi.yaml",
+        "line": 142,
+        "text": "schema: { type: string, enum: [todo, doing, done] }"
+      },
+      "priority": "P3"
+    },
+    {
+      "id": "todo-openapi-openapi-yaml-478",
+      "type": "todo",
+      "title": "Resolve todo in openapi/openapi.yaml:478",
+      "evidence": {
+        "file": "openapi/openapi.yaml",
+        "line": 478,
+        "text": "status: { type: string, enum: [todo, doing, done], default: todo }"
+      },
+      "priority": "P3"
+    },
+    {
+      "id": "todo-openapi-openapi-yaml-487",
+      "type": "todo",
+      "title": "Resolve todo in openapi/openapi.yaml:487",
+      "evidence": {
+        "file": "openapi/openapi.yaml",
+        "line": 487,
+        "text": "status: { type: string, enum: [todo, doing, done] }"
+      },
+      "priority": "P3"
+    },
+    {
+      "id": "todo-openapi-openapi-yaml-495",
+      "type": "todo",
+      "title": "Resolve todo in openapi/openapi.yaml:495",
+      "evidence": {
+        "file": "openapi/openapi.yaml",
+        "line": 495,
+        "text": "status: { type: string, enum: [todo, doing, done] }"
+      },
+      "priority": "P3"
+    },
+    {
+      "id": "todo-scripts-meta-mjs-66",
+      "type": "todo",
+      "title": "Resolve todo in scripts/meta.mjs:66",
+      "evidence": {
+        "file": "scripts/meta.mjs",
+        "line": 66,
+        "text": "id: `todo-${t.file}-${t.line}`.replace(/[^a-zA-Z0-9-_]/g, '-'),"
+      },
+      "priority": "P3"
+    },
+    {
+      "id": "todo-src-core-roles-roleRegistry-ts-8",
+      "type": "todo",
+      "title": "Resolve todo in src/core/roles/roleRegistry.ts:8",
+      "evidence": {
+        "file": "src/core/roles/roleRegistry.ts",
+        "line": 8,
+        "text": "// TODO: fetch role details from roles.json or database"
+      },
+      "priority": "P3"
+    },
+    {
+      "id": "todo-src-features-tasks-repo-ts-7",
+      "type": "todo",
+      "title": "Resolve todo in src/features/tasks/repo.ts:7",
+      "evidence": {
+        "file": "src/features/tasks/repo.ts",
+        "line": 7,
+        "text": "status: 'todo'|'doing'|'done';"
+      },
+      "priority": "P3"
+    },
+    {
+      "id": "todo-src-features-tasks-routes-ts-10",
+      "type": "todo",
+      "title": "Resolve todo in src/features/tasks/routes.ts:10",
+      "evidence": {
+        "file": "src/features/tasks/routes.ts",
+        "line": 10,
+        "text": "const { id, title, status='todo', assignee, dueDate } = req.body || {};"
+      },
+      "priority": "P3"
+    },
+    {
+      "id": "todo-src-features-tasks-tasks-repo-ts-13",
+      "type": "todo",
+      "title": "Resolve todo in src/features/tasks/tasks.repo.ts:13",
+      "evidence": {
+        "file": "src/features/tasks/tasks.repo.ts",
+        "line": 13,
+        "text": "status: data.status ?? \"todo\","
+      },
+      "priority": "P3"
+    },
+    {
+      "id": "todo-src-features-tasks-tasks-route-ts-11",
+      "type": "todo",
+      "title": "Resolve todo in src/features/tasks/tasks.route.ts:11",
+      "evidence": {
+        "file": "src/features/tasks/tasks.route.ts",
+        "line": 11,
+        "text": "status: z.enum([\"todo\", \"doing\", \"done\"]).default(\"todo\"),"
+      },
+      "priority": "P3"
+    },
+    {
+      "id": "todo-src-features-tasks-tasks-route-ts-34",
+      "type": "todo",
+      "title": "Resolve todo in src/features/tasks/tasks.route.ts:34",
+      "evidence": {
+        "file": "src/features/tasks/tasks.route.ts",
+        "line": 34,
+        "text": "const task: Task = { id, title: parsed.data.title, status: parsed.data.status ?? \"todo\", dueAt: parsed.data.dueAt, assignee: parsed.data.assignee };"
+      },
+      "priority": "P3"
+    },
+    {
+      "id": "todo-src-features-tasks-tasks-types-ts-1",
+      "type": "todo",
+      "title": "Resolve todo in src/features/tasks/tasks.types.ts:1",
+      "evidence": {
+        "file": "src/features/tasks/tasks.types.ts",
+        "line": 1,
+        "text": "export type TaskStatus = 'todo'|'doing'|'done';"
+      },
+      "priority": "P3"
+    },
+    {
+      "id": "todo-tests-security-policyV2-e2e-test-ts-15",
+      "type": "todo",
+      "title": "Resolve todo in tests/security/policyV2.e2e.test.ts:15",
+      "evidence": {
+        "file": "tests/security/policyV2.e2e.test.ts",
+        "line": 15,
+        "text": ".send({ title: 'Test', status: 'todo' });"
+      },
+      "priority": "P3"
+    }
+  ]
+}

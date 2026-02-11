@@ -4,6 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "dev": "node --import tsx src/index.ts",
     "build": "tsc -p tsconfig.json",
     "build:prisma": "npm run db:generate",
     "build:container": "npm run build:prisma && tsc -p tsconfig.container.json && node -e \"const fs=require('fs');const path=require('path');const source=path.join('dist','apps','backend','src','index.js');const target=path.join('dist','index.js');if(!fs.existsSync(source)){throw new Error('missing '+source);}fs.mkdirSync(path.dirname(target),{recursive:true});fs.copyFileSync(source,target);fs.copyFileSync('package.json', path.join('dist','package.json'));\"",

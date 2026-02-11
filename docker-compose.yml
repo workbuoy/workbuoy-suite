@@ -11,24 +11,46 @@ services:
     volumes:
       - db_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U workbuoy"]
+      test: ["CMD-SHELL", "pg_isready -U workbuoy -d workbuoy"]
       interval: 5s
       timeout: 3s
-      retries: 10
-  app:
+      retries: 20
+
+  backend:
     image: node:20
     working_dir: /workspace/workbuoy-suite
     command: >-
-      sh -c "npm run bootstrap && NODE_PATH=apps/backend/node_modules node -r ts-node/register src/bin/www.ts"
+      sh -c "npm ci && npm run -w @workbuoy/backend db:prepare && npm run -w @workbuoy/backend db:seed && npm run -w @workbuoy/backend dev"
     environment:
+      NODE_ENV: development
       PORT: 3000
-      PERSIST_MODE: file
-      NODE_PATH: apps/backend/node_modules
+      DATABASE_URL: postgresql://workbuoy:workbuoy@db:5432/workbuoy?schema=public
+      CORS_ORIGINS: http://localhost:5173
+      WB_SKIP_OPTIONAL_ROUTES: "1"
+      CRM_ENABLED: "true"
+      METRICS_ENABLED: "true"
     ports:
       - "3000:3000"
     volumes:
       - .:/workspace/workbuoy-suite
     depends_on:
-      - db
+      db:
+        condition: service_healthy
+
+  frontend:
+    image: node:20
+    working_dir: /workspace/workbuoy-suite
+    command: >-
+      sh -c "npm ci && npm run -w @workbuoy/frontend dev -- --host 0.0.0.0 --port 5173"
+    environment:
+      NODE_ENV: development
+      VITE_API_PROXY_TARGET: http://backend:3000
+    ports:
+      - "5173:5173"
+    volumes:
+      - .:/workspace/workbuoy-suite
+    depends_on:
+      - backend
+
 volumes:
   db_data:
